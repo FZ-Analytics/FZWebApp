@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="/fz">
+  <Resource name="jdbc/fz" auth="Container" type="javax.sql.DataSource"
+               maxActive="50" maxIdle="30" maxWait="10000"
+               username="root" password="admin"
+               driverClassName="com.mysql.jdbc.Driver"
+               url="jdbc:mysql://localhost:3306/fz?zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true&amp;autoReconnect=true"/>
+  <Resource name="sap/tms" auth="Container" type="javax.sql.DataSource"
+               maxActive="50" maxIdle="30" maxWait="10000"
+               username="TMS" password="Tm$1212"
+               driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+               url="jdbc:sqlserver://10.16.1.110:1433;databaseName=BOSNET1;"/>
+  <Resource name="prd/tms" auth="Container" type="javax.sql.DataSource"
+               maxActive="50" maxIdle="30" maxWait="10000"
+               username="sfa" password="sfa2016"
+               driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+               url="jdbc:sqlserver://10.16.1.16:1433;databaseName=BOSNET1;"/>
+</Context>

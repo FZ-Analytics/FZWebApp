@@ -1,0 +1,33 @@
+.table2-editable {
+  position: relative;
+}
+.table2-editable .glyphicon {
+  font-size: 20px;
+}
+
+.table2-remove {
+  color: #700;
+  cursor: pointer;
+}
+.table2-remove:hover {
+  color: #f00;
+}
+
+.table2-up, .table2-down {
+  color: #007;
+  cursor: pointer;
+}
+.table2-up:hover, .table2-down:hover {
+  color: #00f;
+}
+
+.table2-add {
+  color: #070;
+  cursor: pointer;
+  positionOLD: absolute;
+  topOLD: 8px;
+  rightOLD: 0;
+}
+.table2-add:hover {
+  color: #0b0;
+}
