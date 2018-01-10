@@ -2,9 +2,9 @@
 <Context path="/fz">
   <Resource name="jdbc/fz" auth="Container" type="javax.sql.DataSource"
                maxActive="50" maxIdle="30" maxWait="10000"
-               username="root" password="admin"
+               username="root" password=""
                driverClassName="com.mysql.jdbc.Driver"
-               url="jdbc:mysql://localhost:3306/fz?zeroDateTimeBehavior=convertToNull&amp;allowMultiQueries=true&amp;autoReconnect=true"/>
+               url="jdbc:mysql://localhost:3306/fz"/>
   <Resource name="sap/tms" auth="Container" type="javax.sql.DataSource"
                maxActive="50" maxIdle="30" maxWait="10000"
                username="TMS" password="Tm$1212"
