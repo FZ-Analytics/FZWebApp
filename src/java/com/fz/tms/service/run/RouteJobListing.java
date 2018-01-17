@@ -50,6 +50,7 @@ public class RouteJobListing implements BusinessLogic {
         List<RouteJob> js = new ArrayList<RouteJob>();
         request.setAttribute("JobList", js);
         request.setAttribute("OriRunID", OriRunID);
+        request.setAttribute("nextRunId", getTimeID());
         
         String sql = "SELECT\n" +
                 "	j.customer_ID,\n" +
@@ -82,7 +83,11 @@ public class RouteJobListing implements BusinessLogic {
                 "	j.vehicle_code,\n" +
                 "	j.branch,\n" +
                 "	j.shift,\n" +
-                "	d.name1,\n" +
+                "	CASE\n" +
+                "		WHEN d.name1 IS NULL\n" +
+                "		AND Request_Delivery_Date IS NOT NULL THEN 'UNKNOWN'\n" +
+                "		ELSE d.name1\n" +
+                "	END name1,\n" +
                 "	d.customer_priority,\n" +
                 "	d.distribution_channel,\n" +
                 "	d.street,\n" +
@@ -103,7 +108,7 @@ public class RouteJobListing implements BusinessLogic {
                 "			(\n" +
                 "				CAST(\n" +
                 "					j.volume AS FLOAT\n" +
-                "				)/ 1000000\n" +
+                "				)\n" +
                 "			) AS NUMERIC(\n" +
                 "				9,\n" +
                 "				1\n" +
@@ -275,12 +280,16 @@ public class RouteJobListing implements BusinessLogic {
             pl.put("ID", runID);
             pl.put("fileNmethod", "RouteJobListing&run Exc");
             pl.put("datas", "");
-            pl.put("msg", e.getStackTrace().toString());
+            pl.put("msg", e.getMessage());
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
             Date date = new Date();
             pl.put("dates", dateFormat.format(date).toString());
             Other.insertLog(pl);
         }
     }
-
+    public static String getTimeID() {
+        String id = (new SimpleDateFormat("yyyyMMdd_HHmmssSSS").format(
+                        new java.util.Date()));
+        return id;
+    }
 }

@@ -7,10 +7,14 @@ package com.fz.tms.params.model;
 
 /**
  *
- * @author dwi.rangga
+ * @author Administrator
  */
-public class Vehicle {
-    public String vehicle_code;
+public class PreRouteVehicleLog {
+    public String runId;
+    public String vehicleCode;
+    public String weight;
+    public String volume;
+    public String vehicleType;
     public String branch;
     public String startLon;
     public String startLat;
@@ -19,10 +23,11 @@ public class Vehicle {
     public String startTime;
     public String endTime;
     public String source1;
-    public String vehicle_type;
-    public String weight;
-    public String volume;
-    public String included;
-    public String flag;
-    
+    public String updatevDate;
+    public String createDate;
+    public String isActive;
+    public double fixedCost;
+    public double costPerM;
+    public double costPerminService;
+    public double costPerTravelMin;
 }
