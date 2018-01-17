@@ -93,6 +93,67 @@
                 });
                 */
             });
+            
+            function openEditRoutePage() {            
+                var table = document.getElementById("table");
+                
+                var tableArr = [];
+                for (var i = 1; i < table.rows.length; i++ ) {
+                    var no = table.rows[i].cells[0].innerHTML; //no
+                    var truck = table.rows[i].cells[1].innerHTML; //truck
+                    var custId = "";
+                     if((table.rows[i].cells[1].innerHTML !== "") && (table.rows[i].cells[2].innerHTML === "") && (table.rows[i].cells[4].innerHTML !== "")) {
+                            custId = "start" + "split";
+                        }
+                        else {
+                            custId = table.rows[i].cells[2].innerHTML + "split"; //custId
+                        }
+                    tableArr.push(
+                        no,
+                        truck,
+                        custId
+                    );
+                }
+                
+                 var win = window.open('runResultEdit.jsp?&OriRunID='+$('#RunIdClick').text()+'&runId='+$('#nextRunId').text()+'&channel='+$('#channel').text()+
+                        '&branch='+$('#branch').text()+'&shift='+$('#shift').text()+'&vehicles='+$('#vehicles').text()+'&tableArr='+tableArr);
+                 
+                if (win) {
+                    //Browser has allowed it to be opened
+                    win.focus();
+                }
+            }
+            
+//            function openEditRoutePage() {
+//                var table = document.getElementById( "table" );
+//                
+//                var tableArr = [];
+//                for (var i = 1; i < table.rows.length; i++ ) {
+//                    tableArr.push(
+//                        table.rows[i].cells[0].innerHTML, //no
+//                        table.rows[i].cells[1].innerHTML, //truck
+//                        table.rows[i].cells[2].innerHTML + "split"//custId 
+//                        table.rows[i].cells[3].innerHTML, //arrive
+//                        table.rows[i].cells[4].innerHTML, //depart
+//                        table.rows[i].cells[5].innerHTML, //do count
+//                        table.rows[i].cells[6].innerHTML, //service time
+//                        table.rows[i].cells[8].innerHTML, //priority
+//                        table.rows[i].cells[9].innerHTML, //dist channel
+//                        table.rows[i].cells[11].innerHTML, //weight
+//                        table.rows[i].cells[12].innerHTML, //volume
+//                        table.rows[i].cells[13].innerHTML, //rdd
+//                        table.rows[i].cells[14].innerHTML, //transport cost
+//                        table.rows[i].cells[15].innerHTML + "split" // dist
+//                    );
+//                }
+
+//                var win = window.open('runResultEdit.jsp?&OriRunID='+$('#RunIdClick').text()+'&runId='+$('#nextRunId').text()+'&channel='+$('#channel').text()+
+//                        '&branch='+$('#branch').text()+'&shift='+$('#shift').text()+'&vehicles='+$('#vehicles').text()+'&tableArr='+tableArr);
+//                if (win) {
+//                    //Browser has allowed it to be opened
+//                    win.focus();
+//                }
+//            }
 
             function klik(kode) {
                 //alert('tes : ' + kode);
@@ -101,6 +162,8 @@
             }
         </script>
         <h3>Runs</h3>
+        
+        <label class="fzInput" id="nextRunId" hidden="true"><%=get("nextRunId")%></label>
 
         <input class="fzInput" id="OriRunID" 
                name="OriRunID" value="<%=get("OriRunID")%>" hidden="true"/>
@@ -111,7 +174,7 @@
 
         <br>
         <label class="fzLabel">Shift:</label> 
-        <label class="fzLabel"><%=get("shift")%></label>
+        <label class="fzLabel" id="shift"><%=get("shift")%></label>
         
         <br>
         <label class="fzLabel">Channel:</label> 
@@ -119,7 +182,7 @@
 
         <br>
         <label class="fzLabel">Vehicles:</label> 
-        <label class="fzLabel"><%=get("vehicleCount")%></label>
+        <label class="fzLabel" id="vehicles"><%=get("vehicleCount")%></label>
 
         <br>
         <label class="fzLabel">RunID:</label> 
@@ -128,6 +191,8 @@
         <br>
         <label class="fzLabel" id="mapAll" style="color: blue;">Map</label> 
         <label class="fzLabel" id="reRun" style="color: blue;">Re-Routing</label> 
+        
+        <input id="clickMe" class="btn fzButton" type="button" value="Edit Route Manually" onclick="openEditRoutePage();" />
 
         <br><br>
         <table id="table" border1="1" style="border-color: lightgray;">
