@@ -59,6 +59,8 @@
             var rowIdx = 0;
             var vNoTop = "";
             var vNoBottom = "";
+            var custIdTop = "";
+            var custIdBottom = "";
             var arrOfRow = [];
             var boolCanCut = 1;
             var vehicleCode = "";
@@ -125,6 +127,8 @@
                     rowIdx = this.rowIndex;
                     vNoTop = document.getElementById('table').rows[rowIdx-1].cells[1].innerHTML;
                     vNoBottom = document.getElementById('table').rows[rowIdx+1].cells[1].innerHTML;
+                    custIdTop = document.getElementById('table').rows[rowIdx-1].cells[2].innerHTML;
+                    custIdBottom = document.getElementById('table').rows[rowIdx+1].cells[2].innerHTML;
 
                     var menu = $(".menu"); 
                     
@@ -217,14 +221,14 @@
                                     }
                                 }
                                 //row move at the same vehicle no, but near break time
-                                else if(vNoBottom === "" && vNoTop === arrOfRow[i]) {
-                                    cell.innerHTML = vNoTop;
-                                    vehicleCode = vNoTop;
+                                else if(vNoBottom === "" && vNoTop === arrOfRow[i] && custIdTop !== "") {
+                                    cell.innerHTML = arrOfRow[i];
+                                    vehicleCode = arrOfRow[i];
                                 }
                                 //row move at the same vehicle no, but near break time
-                                else if(vNoTop === "" && vNoBottom === arrOfRow[i]) {
-                                    cell.innerHTML = vNoBottom;
-                                    vehicleCode = vNoBottom;
+                                else if(vNoTop === "" && vNoBottom === arrOfRow[i] && custIdBottom !== "") {
+                                    cell.innerHTML = arrOfRow[i];
+                                    vehicleCode = arrOfRow[i];
                                 }
                                 //row move between two different vehicle no
                                 else if(vNoBottom !== vNoTop) {
@@ -250,17 +254,17 @@
                                             cell.innerHTML = vNoTop;
                                             vehicleCode = vNoTop;
                                             if(vNoTop === "") {
-                                                cell.innerHTML = vNoBottom;
-                                                vehicleCode = vNoBottom;
+                                                cell.innerHTML = document.getElementById('table').rows[rowIdx+1].cells[1].innerHTML;
+                                                vehicleCode = document.getElementById('table').rows[rowIdx+1].cells[1].innerHTML;
                                             }
                                         }
                                         //row move between two different vehicle no and put at bottom
-                                        if(s === "bottom") {
+                                        else if(s === "bottom") {
                                             cell.innerHTML = vNoBottom;
                                             vehicleCode = vNoBottom;
                                             if(vNoBottom === "") {
-                                                cell.innerHTML = vNoTop;
-                                                vehicleCode = vNoTop;
+                                                cell.innerHTML = document.getElementById('table').rows[rowIdx].cells[1].innerHTML;
+                                                    vehicleCode = document.getElementById('table').rows[rowIdx].cells[1].innerHTML;
                                             }
                                         }
                                     }
@@ -270,8 +274,8 @@
                                             vehicleCode = "NA";
                                         }
                                         else {
-                                            cell.innerHTML = vNoBottom;
-                                            vehicleCode = vNoBottom;
+                                            cell.innerHTML = document.getElementById('table').rows[rowIdx].cells[1].innerHTML;
+                                            vehicleCode = document.getElementById('table').rows[rowIdx].cells[1].innerHTML;
                                         }
                                     }
                                     else {

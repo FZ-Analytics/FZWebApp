@@ -160,6 +160,42 @@
                 window.open("../Params/PopUp/popupEditCust.jsp?runId=" + $("#RunIdClick").text() + "&custId=" + kode, null,
                         "scrollbars=1,resizable=1,height=500,width=750");
             }
+            
+            function fnExcelReport()
+            {
+                //var t = document.getElementById('btnHi');
+                //t.hidden = true;
+                var tab_text="<table border='2px'><tr bgcolor='#87AFC6'>";
+                var textRange; var j=0;
+                tab = document.getElementById('t_table'); // id of table
+
+                for(j = 0 ; j < tab.rows.length ; j++) 
+                {     
+                    tab_text=tab_text+tab.rows[j].innerHTML+"</tr>";
+                    //tab_text=tab_text+"</tr>";
+                }
+
+                tab_text=tab_text+"</table>";
+                tab_text= tab_text.replace(/<A[^>]*>|<\/A>/g, "");//remove if u want links in your table
+                tab_text= tab_text.replace(/<img[^>]*>/gi,""); // remove if u want images in your table
+                tab_text= tab_text.replace(/<input[^>]*>|<\/input>/gi, ""); // reomves input params
+
+                var ua = window.navigator.userAgent;
+                var msie = ua.indexOf("MSIE "); 
+
+                if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))      // If Internet Explorer
+                {
+                    txtArea1.document.open("txt/html","replace");
+                    txtArea1.document.write(tab_text);
+                    txtArea1.document.close();
+                    txtArea1.focus(); 
+                    sa=txtArea1.document.execCommand("SaveAs",true,"Say Thanks to Sumit.xls");
+                }  
+                else                 //other browser not tested on IE 11
+                    sa = window.open('data:application/vnd.ms-excel,' + encodeURIComponent(tab_text));  
+
+                return (sa);
+            }
         </script>
         <h3>Runs</h3>
         
@@ -190,7 +226,8 @@
 
         <br>
         <label class="fzLabel" id="mapAll" style="color: blue;">Map</label> 
-        <label class="fzLabel" id="reRun" style="color: blue;">Re-Routing</label> 
+        <label class="fzLabel" id="reRun" style="color: blue;">Re-Routing</label>
+        <label class="fzLabel" id="test" style="color: blue;" onclick="fnExcelReport()">Convert Excel</label>
         
         <input id="clickMe" class="btn fzButton" type="button" value="Edit Route Manually" onclick="openEditRoutePage();" />
 
@@ -252,7 +289,72 @@
                 <%} // for ProgressRecord %>
             </tbody>
         </table>
+            
+        <br><br>
+        <iframe id="txtArea1" style="display:none"></iframe>
+        <table id="t_table" border1="1" style="border-color: lightgray;" hidden="true">
+            <tr>
+                <td>Branch : <%=get("branch")%></td>
+            </tr>
+            <tr>
+                <td>Channel : <%=get("channel")%></td>
+            </tr>
+            <tr>
+                <td>Truck : <%=get("vehicleCount")%></td>
+            </tr>
+            <tr>
+                <td>Run Id : <%=get("runID")%></td>
+            </tr>
+            <tr>
+                <td>
+                    <table id="d_table" border1="1" style="border-color: lightgray;">
+                        <thead>
+                            <tr style="background-color:orange">
+                                <th width="100px" class="fzCol">No.</th>
+                                <th width="100px" class="fzCol">Truck</th>
+                                <th width="100px" class="fzCol">CustID</th>
+                                <th width="100px" class="fzCol">Arrv</th>
+                                <th width="100px" class="fzCol">Depart</th>
+                                <th width="100px" class="fzCol">DO Count</th>
+                                <th width="100px" class="fzCol">Srvc Time</th>
+                                <th width="100px" class="fzCol">Name</th>
+                                <th width="100px" class="fzCol">Priority</th>
+                                <th width="100px" class="fzCol">Dist Chl</th>
+                                <th width="100px" class="fzCol">Street</th>
+                                <th width="100px" class="fzCol">Weight</th>
+                                <th width="100px" class="fzCol">Volume</th>
+                                <th width="100px" class="fzCol">RDD</th>
+                                <th width="100px" class="fzCol">Transport Cost</th>
+                                <th width="100px" class="fzCol">Dist</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <%for (RouteJob j : (List<RouteJob>) getList("JobList")) { %> 
+                            <tr>
+                                <td class="fzCell"><%=j.no%></td>
+                                <td class="vCodeClick" style="color: blue;"><%=j.vehicleCode%></td>
+                                <td class="custIDClick" style="color: blue;"><%=j.custID%></td>
+                                <td class="fzCell"><%=j.arrive%></td>
+                                <td class="fzCell"><%=j.depart%></td>                    
+                                <td class="fzCell"><%=j.DONum%></td>
+                                <td class="fzCell"><%=j.getServiceTime()%></td>
+                                <td class="fzCell"><%=j.name1%></td>
+                                <td class="fzCell"><%=j.custPriority%></td>
+                                <td class="fzCell"><%=j.distrChn%></td>
+                                <td class="fzCell"><%=j.street%></td>
+                                <td class="fzCell"><%=j.weight%></td>
+                                <td class="fzCell"><%=j.volume%></td>
+                                <td class="fzCell"><%=j.rdd%></td>
+                                <td class="fzCell"><%=j.transportCost%></td>
+                                <td class="fzCell"><%=j.dist%></td>
+                            </tr>
 
+                            <%} // for ProgressRecord %>
+                        </tbody>
+                    </table>                    
+                </td>
+            </tr>
+        </table>
         <%@include file="../appGlobal/bodyBottom.jsp"%>
     </body>
 </html>
