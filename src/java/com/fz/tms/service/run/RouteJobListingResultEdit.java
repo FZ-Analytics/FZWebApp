@@ -11,8 +11,6 @@ import com.fz.tms.params.model.Delivery;
 import com.fz.tms.params.model.PreRouteJobLog;
 import com.fz.tms.params.model.PreRouteVehicleLog;
 import com.fz.tms.params.model.RouteJobLog;
-import static com.fz.tms.service.run.LoadDelivery.calcMeterDist;
-import static com.fz.tms.service.run.LoadDelivery.calcTripMinutes;
 import com.fz.util.FZUtil;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,9 +31,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.PageContext;
 
-/**
- *
- */
 public class RouteJobListingResultEdit implements BusinessLogic {
 
     List<Delivery> ld = new ArrayList<>();
@@ -53,6 +48,10 @@ public class RouteJobListingResultEdit implements BusinessLogic {
     
     String oriRunId, runId, branch, shift;
     
+    boolean hasBreak = false;
+    
+    double speedTruck, trafficFactor;
+    
     @Override
     public void run(HttpServletRequest request, HttpServletResponse response, PageContext pc) throws Exception {
         oriRunId = FZUtil.getHttpParam(request, "OriRunID");
@@ -64,7 +63,9 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         String tableArr = FZUtil.getHttpParam(request, "tableArr");
 
         String[] tableArrSplit = tableArr.split("split");
-
+        
+        speedTruck = getTruckSpeed();
+        trafficFactor = getTrafficFactor();
         for (int i = 0; i < tableArrSplit.length; i++) {
             String str = tableArrSplit[i];
             String data = str;
@@ -89,6 +90,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                     break;
             }
         }
+
         insertToRouteJob(arlistR, runId);
         insertToPreRouteJob(getListPreRouteJob(oriRunId, runId), runId);
         insertPreRouteVehicle(getListPreRouteVehicle(oriRunId, runId), runId);
@@ -108,6 +110,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         //not a break-time row
         if (!vNo.equals("")) {
             Delivery d = new Delivery();
+            Delivery dl = new Delivery();
             if (!vNo.equals("NA")) {
                 d.no = no;
             }
@@ -119,7 +122,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
             d.priority = aSplit[1];
             d.distChannel = aSplit[7];
             d.street = aSplit[6];
-            d.weight = aSplit[9];
+            d.weight = "" + Math.round(Double.parseDouble(aSplit[9]) * 10) / 10.0;
             d.volume = getVolumePerMillion(custId, oriRunId);
             d.rdd = aSplit[8];
             if (!custId.equals("") || depart.equals("")) {
@@ -167,13 +170,44 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                 }
                 //set arrive, depart, distance using lon lat of store
                 if (!custId.equals("") || depart.equals("")) {
-                    double distance = Math.round(calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat1),
-                            Double.parseDouble(d.lon2), Double.parseDouble(d.lat2)) * 100.0) / 100.0;
-                    d.arrive = addTime(prevDepart, calcTripMinutes(distance, 20.0));
-                    d.dist = "" + Math.round((calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat1),
-                            Double.parseDouble(d.lon2), Double.parseDouble(d.lat2)) / 1000) * 10) / 10.0;
-                    d.transportCost = (int) Math.round((780 * (calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat1), 
-                            Double.parseDouble(d.lon2), Double.parseDouble(d.lat2)) / 1000) * 10) / 10.0);
+                    //Manhattan
+                    if(getTripCalc(oriRunId).equals("M")) {
+                        double distance1 = calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat1), Double.parseDouble(d.lon1), Double.parseDouble(d.lat2));
+                        double distance2 = calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat2), Double.parseDouble(d.lon2), Double.parseDouble(d.lat2));
+                        d.arrive = "" + addTime(prevDepart, Math.round(trafficFactor * calcTripMinutes(distance1+distance2, speedTruck)));
+                        d.dist = "" + Math.round(((distance1+distance2) / 1000) * 10) / 10.0;
+                        d.transportCost = (int) Math.round(getCostPerM(d.vehicleCode, oriRunId) * (distance1+distance2));
+                    }
+                    //Google
+                    else {
+                        double distance = getDistByGoogle(d.lon1, d.lat1, d.lon2, d.lat2);
+                        d.arrive = addTime(prevDepart, getDurByGoogle(d.lon1, d.lat1, d.lon2, d.lat2));
+                        d.dist = "" + Math.round((distance / 1000) * 10) / 10.0;
+                        d.transportCost = (int) ((int) Math.round((getCostPerM(d.vehicleCode, oriRunId) * distance / 1000) * 10) / 10.0);
+                    }
+                    
+                    //break if depart + 60 minutes is more than 11:30
+                    if(hasBreak == false && !d.depart.equals("") && timeMoreThan(addTime(addTime(d.arrive, Integer.parseInt(d.serviceTime)), 60), "11:30")) {
+                        dl.no = "";
+                        dl.vehicleCode = "";
+                        dl.custId = "";
+                        dl.doNum = "";
+                        dl.serviceTime = "0";
+                        dl.storeName = "";
+                        dl.priority = "";
+                        dl.distChannel = "";
+                        dl.street = "";
+                        dl.weight = "";
+                        dl.volume = "";
+                        dl.rdd = "null";
+                        dl.transportCost = 0;
+                        dl.dist = "null";
+                        
+                        hasBreak = true;
+                    }
+                    else if (d.depart.equals("")) {
+                        hasBreak = false;
+                    }
                 }
                 if (d.custId.equals("")) {
                     d.depart = depart;
@@ -183,6 +217,11 @@ public class RouteJobListingResultEdit implements BusinessLogic {
             }
             prevDepart = d.depart;
             ld.add(d);
+            //Delivery object for break
+            if(dl.dist.equals("null")) {
+                ld.add(dl);
+                prevDepart = addTime(prevDepart, 60);
+            }
 
             /********************************************
              * Data object Route_Job to be pushed to db *
@@ -243,16 +282,14 @@ public class RouteJobListingResultEdit implements BusinessLogic {
 
                     }
                 }
-                r.weight = d.weight;
+                r.weight = aSplit[9];
                 r.volume = getVolume(d.custId, oriRunId);
+                r.transportCost = d.transportCost;
+                
                 try {
-                    r.transportCost = d.transportCost;
-                } catch (Exception e) {
-                    r.transportCost = 0;
-                }
-                try {
-                    r.dist = Math.round(calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat1),
-                            Double.parseDouble(d.lon2), Double.parseDouble(d.lat2)) * 100.0) / 100.0;
+                    double distance1 = Math.round(calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat1), Double.parseDouble(d.lon1), Double.parseDouble(d.lat2)) * 100.0) / 100.0;
+                    double distance2 = Math.round(calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat2), Double.parseDouble(d.lon2), Double.parseDouble(d.lat2)) * 100.0) / 100.0;
+                    r.dist = distance1+distance2;
                 } catch (Exception e) {
                     r.dist = 0.00;
                 }
@@ -263,23 +300,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
             }
         } //break-time row
         else {
-            Delivery d = new Delivery();
-            d.no = "";
-            d.vehicleCode = "";
-            d.custId = "";
-            d.doNum = "";
-            d.serviceTime = "0";
-            d.storeName = "";
-            d.priority = "";
-            d.distChannel = "";
-            d.street = "";
-            d.weight = "";
-            d.volume = "";
-            d.rdd = "null";
-            d.transportCost = 0;
-            d.dist = "null";
-            ld.add(d);
-            prevDepart = "13:00";
+            
         }
     }
     
@@ -300,6 +321,59 @@ public class RouteJobListingResultEdit implements BusinessLogic {
             throw new Exception(e.getMessage());
         }
         return startTime;
+    }
+    
+     public double getDistByGoogle(String lon1, String lat1, String lon2, String lat2) throws Exception {
+        double distance = 0;
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql = "SELECT TOP 1 dist FROM BOSNET1.dbo.TMS_CostDist where lon1 = '" + lon1 + "' and lat1 = '" + lat1 + "' and lon2 = '" + lon2 + "' and lat2 = '" + lat2 + "';";
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    while (rs.next()) {
+                        distance = rs.getDouble("dist");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return distance;
+    }
+     
+    public int getDurByGoogle(String lon1, String lat1, String lon2, String lat2) throws Exception {
+        double duration = 0;
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql = "SELECT TOP 1 dur FROM BOSNET1.dbo.TMS_CostDist where lon1 = '" + lon1 + "' and lat1 = '" + lat1 + "' and lon2 = '" + lon2 + "' and lat2 = '" + lat2 + "';";
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    while (rs.next()) {
+                        duration = rs.getDouble("dur");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return (int) Math.round(duration);
+    }
+    
+    public String getTripCalc(String oriRunId) throws Exception {
+        String tripcalc = "";
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql;
+                sql = "SELECT TOP 1 tripcalc FROM BOSNET1.dbo.TMS_Progress where runID = '" + oriRunId + "';";
+                // query
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    while (rs.next()) {
+                        tripcalc = rs.getString("tripcalc");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return tripcalc;
     }
     
     public ArrayList<String> getRouteData(String custId) throws Exception {
@@ -333,7 +407,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                         storeStreet = rs.getString("Street");
                         distChannel = rs.getString("Distribution_Channel");
                         rdd = rs.getString("Request_Delivery_Date");
-                        weight += rs.getInt("total_kg");
+                        weight += rs.getDouble("total_kg");
                     }
                     if (doNumber.length() > 0) {
                         doNumber = doNumber.substring(0, doNumber.length() - 2);
@@ -402,16 +476,38 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         return storeStreet;
     }
     
-    public String addTime(String currentTime, int minToAdd) {
+    public String addTime(String currentTime, double minToAdd) {
         String newTime = "";
         try {
             DateTimeFormatter df = DateTimeFormatter.ofPattern("HH:mm");
             LocalTime lt = LocalTime.parse(currentTime);
-            newTime = df.format(lt.plusMinutes(minToAdd));
+            newTime = df.format(lt.plusMinutes((int) minToAdd));
         } catch (Exception e) {
 
         }
         return newTime;
+    }
+    
+    public boolean timeMoreThan(String currentTime, String comparedTime) {
+        boolean moreThan = false;
+        try {
+            String[] currentTimeSplit = currentTime.split(":");
+            String[] comparedTimeSplit = comparedTime.split(":");
+            //Compare hour
+            if(Integer.parseInt(currentTimeSplit[0]) > Integer.parseInt(comparedTimeSplit[0])) {
+                moreThan = true;
+            }
+            //If hour is same than compare minutes
+            else if(Integer.parseInt(currentTimeSplit[0]) == Integer.parseInt(comparedTimeSplit[0])){
+                if(Integer.parseInt(currentTimeSplit[1]) > Integer.parseInt(comparedTimeSplit[1])) {
+                    moreThan = true;
+                }
+            }
+            
+        } catch (Exception e) {
+
+        }
+        return moreThan;
     }
     
     public String getVolumePerMillion(String custId, String runId) throws Exception {
@@ -545,14 +641,9 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         return Math.sqrt(distance);
     }
 
-    public static int calcTripMinutes(double distanceMtr, double speedKmPHr) {
-        // convert speed into meter / minutes
-        double speedMtrPMin = speedKmPHr * 1000 / 60; // mt / min
-
-        // calc the time the vehicle need to reach the demand
-        int durationMin = (int) Math.ceil(distanceMtr / speedMtrPMin);
-
-        return durationMin;
+    public static double calcTripMinutes(double distanceMtr, double speedKmPHr) {
+        double dur = ((distanceMtr / 1000) / speedKmPHr * 60);
+        return dur;
     }
     
     public ArrayList<PreRouteJobLog> getListPreRouteJob(String oriRunId, String runId) throws Exception {
@@ -596,6 +687,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                         p.distChannel = rs.getString("Distribution_Channel");
                         p.custOrderBlockAll = rs.getString("Customer_Order_Block_all");
                         p.custOrderBlock = rs.getString("Customer_Order_Block");
+                        p.rdd = rs.getString("Request_delivery_date");
                         p.marketId = rs.getString("MarketId");
                         arlistPrj.add(p);
                     }
@@ -605,6 +697,23 @@ public class RouteJobListingResultEdit implements BusinessLogic {
             throw new Exception(e.getMessage());
         }
         return arlistPrj;
+    }
+    
+    public double getCostPerM(String vehicleCode, String runId) throws Exception {
+        double costPerM = 0;
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql = "SELECT TOP 1 costPerM FROM BOSNET1.dbo.TMS_PreRouteVehicle where vehicle_code = '" + vehicleCode + "' and RunId = '" + runId + "';";
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    while (rs.next()) {
+                        costPerM = rs.getDouble("costPerM");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return costPerM;
     }
     
     public ArrayList<PreRouteVehicleLog> getListPreRouteVehicle(String oriRunId, String runId) throws Exception {
@@ -664,6 +773,40 @@ public class RouteJobListingResultEdit implements BusinessLogic {
             throw new Exception(e.getMessage());
         }
         return volume;
+    }
+    
+    private double getTruckSpeed() throws Exception {
+        double speed = 0;
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql = "SELECT value FROM BOSNET1.dbo.TMS_Params where param = 'SpeedKmPHour'";
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    while (rs.next()) {
+                        speed = (rs.getDouble("value"));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return speed;
+    }
+    
+    private double getTrafficFactor() throws Exception {
+        double tFactor = 0;
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql = "SELECT value FROM BOSNET1.dbo.TMS_Params where param = 'TrafficFactor'";
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    while (rs.next()) {
+                        tFactor = (rs.getDouble("value"));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return tFactor;
     }
     
     public void insertPreRouteVehicle(ArrayList<PreRouteVehicleLog> arlist, String runId) throws Exception {

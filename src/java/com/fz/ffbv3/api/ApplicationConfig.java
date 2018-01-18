@@ -11,7 +11,8 @@ import javax.ws.rs.core.Application;
 /**
  *
  */
-@javax.ws.rs.ApplicationPath("api/v1")
+//api/v1
+@javax.ws.rs.ApplicationPath("api")
 public class ApplicationConfig extends Application {
 
     @Override
@@ -35,15 +36,15 @@ public class ApplicationConfig extends Application {
         resources.add(com.fz.ffbv3.api.TMS.CustomerAttrViewAPI.class);
         resources.add(com.fz.ffbv3.api.TMS.PopupEditCustAPI.class);
         resources.add(com.fz.ffbv3.api.TMS.VehicleAttrViewAPI.class);
-		resources.add(com.fz.ffbv3.api.TaskApi.class);
-		resources.add(com.fz.ffbv3.api.TrackApi.class);
-		resources.add(com.fz.ffbv3.api.UsersApi.class);
-		resources.add(com.fz.ffbv3.api.dashProdAPI.dashProdAPI01.class);
-		resources.add(com.fz.ffbv3.api.division.APIMill.class);
-		resources.add(com.fz.ffbv3.api.exampleAPI.APISample.class);
-		resources.add(com.fz.ffbv3.api.hvsEstmAPI.HvsEstmSaveAPI.class);
-		resources.add(com.fz.ffbv3.api.params.PramsAPI.class);
-		resources.add(com.fz.ffbv3.api.progresstack.ProgressTrack.class);
+        resources.add(com.fz.ffbv3.api.TaskApi.class);
+        resources.add(com.fz.ffbv3.api.TrackApi.class);
+        resources.add(com.fz.ffbv3.api.UsersApi.class);
+        resources.add(com.fz.ffbv3.api.dashProdAPI.dashProdAPI01.class);
+        resources.add(com.fz.ffbv3.api.division.APIMill.class);
+        resources.add(com.fz.ffbv3.api.exampleAPI.APISample.class);
+        resources.add(com.fz.ffbv3.api.hvsEstmAPI.HvsEstmSaveAPI.class);
+        resources.add(com.fz.ffbv3.api.params.PramsAPI.class);
+        resources.add(com.fz.ffbv3.api.progresstack.ProgressTrack.class);
     }
     
 }
