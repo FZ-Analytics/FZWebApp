@@ -33,8 +33,7 @@
             
             <br><br>
             <label class="fzLabel">Estate + Division</label>
-            <input class="fzInput" type="text" id="divID" name="divID" 
-                   value="BINE">
+            <input class="fzInput" type="text" id="divID" name="divID" >
             
             <br>
             <label class="fzLabel"></label>
