@@ -37,7 +37,8 @@ public class PreRouteJobDB {
                         + " where\n"
                         + "	a.RunId = '" + runId + "'\n"
                         + "	and a.Customer_ID = '" + custId + "'\n"
-                        + "	and Is_Edit = 'ori'";
+                        + "	and Is_Edit = 'edit'"
+                        ;
 
                 // query
                 try (ResultSet rs = stm.executeQuery(sql)) {

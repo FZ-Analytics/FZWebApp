@@ -10,12 +10,11 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  *
- * @author dwi.rangga
+ * @author Administrator
  */
-public class Branch {
-    @SerializedName("branchId")
+public class runManualRouteGetVehicleNo {
+    @SerializedName("RunId")
     @Expose
-    public String branchId;
+    public String RunId;
     
-    public String name;
 }

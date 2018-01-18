@@ -7,9 +7,8 @@ package com.fz.tms.params.model;
 
 /**
  *
- * @author dwi.rangga
+ * @author Administrator
  */
-public class OptionModel {
-    public String Display;
-    public String Value;
+public class VehicleNo {
+    public String vehicleNo;
 }
