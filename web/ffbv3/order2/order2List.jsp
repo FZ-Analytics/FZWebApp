@@ -76,6 +76,8 @@
                 <th class="fzCol">Bin Avail</th>
                 <th class="fzCol">Job ID</th>
                 <th class="fzCol"></th>
+                <th class="fzCol"></th>
+                <th class="fzCol"></th>
             </tr>
            
         <%
@@ -90,11 +92,11 @@
 
             // determine reorder code & color
             String reorderRef = 
-                    "&nbsp;|&nbsp;<a href='../order2/order2Reorder.jsp?jobID=" 
+                    "<a href='../order2/order2Reorder.jsp?jobID=" 
                     + r.jobID + "&divID=" + r.divID
-                    + "'>ReOrd</a>";
+                    + "'>Re-Order</a>";
             String cancelRef = 
-                    "&nbsp;|&nbsp;<a href='../order2/order2Cancel.jsp?jobID=" 
+                    "<a href='../order2/order2Cancel.jsp?jobID=" 
                     + r.jobID + "&divID=" + r.divID
                     + "'>Cancel</a>";
             String reorderCode = ""; 
@@ -181,6 +183,8 @@
                     <td class="fzCell"></td>
                     <td class="fzCell"></td>
                     <td class="fzCell"></td>
+                    <td class="fzCell"></td>
+                    <td class="fzCell"></td>
                 </tr>
                 
             <%  
@@ -201,8 +205,8 @@
                 <td class="fzCell"><%=r.jobID%></td>
                 <td class="fzCell">
                     <a href="javascript:shw('<%=r.jobID%>','<%=r.runID%>','<%=r.hvsDate%>','<%=FZUtil.escapeText(r.remark)%>','<%=r.vehicleRemark%>','<%=r.createSource%>','<%=r.Task2ReasonName%>','<%=r.size%>','<%=r.planStart%>','<%=r.planEnd%>','<%=r.actualStart%>','<%=r.actualEnd%>','<%=r.getBlocks()%>','<%=r.isLastOrder%>','<%=r.isLast2Order%>','<%=r.assignedDate%>','<%=r.takenDate%>','<%=r.doneDate%>','<%=r.createDate%>','<%=r.dirLoc%>','<%=r.estmFfb%>');"
-                       >More</a>
-                <%=reorderCode%><%=cancelCode%></td>
+                       >More</a></td>
+                <td class="fzCell" align="center"><%=reorderCode%></td><td class="fzCell" align="center"><%=cancelCode%></td>
             </tr>
             
         <%} // for Order2Record %>
