@@ -268,6 +268,13 @@ public class RouteJobListing implements BusinessLogic {
                         j.prevJob = prevJ;
                     }
                     
+                    //5 =-> 7 
+                    if(js.get(js.size() - 1).prevJob == null && js.get(js.size() - 1).vehicleCode.length() > 2 && js.size() >= 3){
+                        RouteJob pJ = new RouteJob();
+                        pJ = (RouteJob) js.get(js.size() - 1);
+                        pJ.prevJob = (RouteJob) js.get(js.size() - 3);
+                    }
+                    
                     // for next round
                     prevJ = j;
                 }

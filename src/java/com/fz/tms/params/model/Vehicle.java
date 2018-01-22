@@ -10,6 +10,7 @@ package com.fz.tms.params.model;
  * @author dwi.rangga
  */
 public class Vehicle {
+    public String RunId;
     public String vehicle_code;
     public String branch;
     public String startLon;
@@ -24,5 +25,9 @@ public class Vehicle {
     public String volume;
     public String included;
     public String flag;
-    
+    public String costPerM;
+    public String isActive;
+    public String solar;
+    public String persentase;
+    public String fixedCost;
 }
