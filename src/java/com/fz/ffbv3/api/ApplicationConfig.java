@@ -11,7 +11,7 @@ import javax.ws.rs.core.Application;
 /**
  *
  */
-@javax.ws.rs.ApplicationPath("api/v1")
+@javax.ws.rs.ApplicationPath("api")
 public class ApplicationConfig extends Application {
 
     @Override
@@ -29,7 +29,6 @@ public class ApplicationConfig extends Application {
      */
     private void addRestResourceClasses(Set<Class<?>> resources) {
         resources.add(com.fz.ffbv3.api.DivisionApi.class);
-        resources.add(com.fz.ffbv3.api.EntryApi.class);
         resources.add(com.fz.ffbv3.api.GMapsApi.class);
         resources.add(com.fz.ffbv3.api.ReasonApi.class);
         resources.add(com.fz.ffbv3.api.TMS.CustomerAttrViewAPI.class);

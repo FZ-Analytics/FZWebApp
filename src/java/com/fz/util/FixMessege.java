@@ -47,4 +47,13 @@ public class FixMessege
 
 	public static final String strDuplicateIDFailed = "Duplikat ID ";
 	public static final String strBlockEmptyFailed = "Data block tidak ada";
+
+	public static final String strMobileJobStateSuccess = "Mobile job entry sukses";
+	public static final String strMobileJobStateFailed = "Mobile job entry gagal";
+
+	public static final String strMobileHistoryStateEmpty = "History job kosong";
+	public static final String strMobileHistoryStateSuccess = "History job sukses";
+	public static final String strMobileHistoryStateFailed = "History job gagal";
+
+	public static final String strStatusUploadDataSuccess = "DONE";
 }

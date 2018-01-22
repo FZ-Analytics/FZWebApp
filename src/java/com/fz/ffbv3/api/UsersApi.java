@@ -53,12 +53,12 @@ import javax.ejb.Stateless;
 
 @Stateless
 @Api(value = "/users", description = "Api yang berhubungan dengan user, role dan menu")
-@Path("users")
+@Path("v1/users")
 public class UsersApi 
 {
   private final Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
-  FileHandler fh = null;
-  final String DATE_FORMAT = "yyyyMMdd";
+//  FileHandler fh = null;
+//  final String DATE_FORMAT = "yyyyMMdd";
 
   @Context
   private UriInfo context;
@@ -68,7 +68,8 @@ public class UsersApi
    */
   public UsersApi()
   {
-    try 
+/*
+		try 
     {
       DateTimeFormatter dateTimeformatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
       LocalDateTime localDateTime = LocalDateTime.now();
@@ -86,6 +87,7 @@ public class UsersApi
 
     fh.setFormatter(new SimpleFormatter());
     logger.addHandler(fh);
+*/		
   }
 
   /**
@@ -146,7 +148,7 @@ public class UsersApi
     dBConnector.CloseDatabase(conn);    
     logger.severe("[Close] -> Close database done");
     logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
-    fh.close();
+//    fh.close();
     return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build();
   }
 
@@ -183,38 +185,7 @@ public class UsersApi
     dBConnector.CloseDatabase(conn);
     logger.severe("[Close] -> Close database done");
     logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
-    fh.close();
-    return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build();
-  }
-
-  @GET
-  @Path("menu/{lnkRoleID}")
-  @Consumes(MediaType.APPLICATION_JSON)
-  public Response getMobileMenu(@PathParam("lnkRoleID") Integer RoleID)
-  {
-    logger.severe("[Path] -> /users/" + RoleID);
-    
-    DBConnector dBConnector = new DBConnector();
-    Connection conn = dBConnector.ConnectToDatabase();
-    logger.severe("[Open] -> Open database done");
-
-    StatusHolder statusHolder = new StatusHolder();
-    
-    if(conn != null)
-    {
-      UserLogic userLogic = new UserLogic(conn, logger); 
-      statusHolder = userLogic.MobileMenuDivisi(RoleID);
-    }
-    else
-    {
-      statusHolder.setCode(FixValue.intResponError);
-      statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strLogoutFailed));
-    }
-    
-    dBConnector.CloseDatabase(conn);
-    logger.severe("[Close] -> Close database done");
-    logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
-    fh.close();
+//    fh.close();
     return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build();
   }
 }

@@ -20,6 +20,7 @@ public class UserModule
   private Integer VehicleID;
   private String VehicleName;
   private long TimeTrackLocation;
+  private String DoneStatus;
 
   public Integer getUserID()
   {
@@ -111,4 +112,11 @@ public class UserModule
     this.TimeTrackLocation = TimeTrackLocation;
   }
 
+	public String getDoneStatus() {
+		return DoneStatus;
+	}
+
+	public void setDoneStatus(String DoneStatus) {
+		this.DoneStatus = DoneStatus;
+	}	
 }

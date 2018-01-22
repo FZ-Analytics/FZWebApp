@@ -35,7 +35,7 @@ import javax.ws.rs.core.Response;
  * Agustinus
  * Ignat
  */
-@Path("google")
+@Path("v1/google")
 public
 	class GMapsApi
 {

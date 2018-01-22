@@ -5,10 +5,10 @@
  */
 package com.fz.generic;
 
-import com.fz.ffbv3.service.entrymgt.EntryHolder;
-import com.fz.ffbv3.service.entrymgt.EntryModule;
 import com.fz.ffbv3.service.reasonmgt.ReasonHolder;
 import com.fz.ffbv3.service.reasonmgt.ReasonModule;
+import com.fz.ffbv3.service.taskmgt.JobStateHolder;
+import com.fz.ffbv3.service.taskmgt.JobStateModule;
 import com.fz.ffbv3.service.taskmgt.TaskPlanHolder;
 import com.fz.ffbv3.service.taskmgt.TaskPlanModule;
 import com.fz.ffbv3.service.usermgt.DivisiModule;
@@ -29,8 +29,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONStringer;
 
 /**
  *
@@ -56,9 +62,9 @@ public class ResponseMessege
 
   DivisiModule divisiModule;
 	
-	EntryModule entryModule;
-	EntryHolder entryHolder;
-		
+	JobStateModule jobStateModule;
+	JobStateHolder jobStateHolder;
+	
 	Gson gson;
 
   public String CoreMsgResponse(Integer Code, String Msg)
@@ -88,7 +94,7 @@ public class ResponseMessege
     }
   }
   
-  public String LoginMsgResponse(Integer Code, String Msg, ResultSet res, Integer rows, Integer VehicleID) throws SQLException
+  public String LoginMsgResponse(Integer Code, String Msg, ResultSet res, Integer rows) throws SQLException
   {
     coreRsp = new CoreModule();    
     coreRsp.setCode(Code);
@@ -106,9 +112,7 @@ public class ResponseMessege
       userRsp.setType(res.getString("Type"));
       userRsp.setTimeTrackLocation(FixValue.intTrackingTimeout);
       userRsp.setVehicleID(res.getInt("VehicleID"));
-			
-			if(VehicleID != 0)
-		    userRsp.setVehicleName(res.getString("VehicleName"));
+		  userRsp.setVehicleName(res.getString("VehicleName"));
     }
     
     userHolder = new UserHolder(coreRsp, userRsp);
@@ -245,33 +249,40 @@ public class ResponseMessege
   	return gson.toJson(menuHolder);
   }
 	
-  public String DataEntryResponse(Integer Code, String Msg, ResultSet res, Integer rows, Integer intEntry) throws SQLException
+  public String MobileJobStateMsgResponse(Connection conn, Integer Code, String Msg, ResultSet res, Integer rows) throws SQLException
   {
     coreRsp = new CoreModule();    
     coreRsp.setCode(Code);
     coreRsp.setMsg(Msg);
 
-    List<EntryModule> entryModules = new ArrayList<>();
+    jobStateModule = new JobStateModule();
     res.first();
-    
+
     for(int i=0; i<rows; i++)
-    {      
-      entryModule = new EntryModule();
-			
-			if(intEntry == 1)
-	      entryModule.setEstimation(res.getString("estimation"));
-			else
-			if(intEntry == 2)
-	      entryModule.setDirection(res.getString("direction"));
-      
-      entryModules.add(entryModule);
+    {
+      jobStateModule.setDoneStatus(res.getString("DoneStatus"));
       res.next();
-    }
+		}
     
-    entryHolder = new EntryHolder(coreRsp, entryModules);
+    jobStateHolder = new JobStateHolder(coreRsp, jobStateModule, null);
     
     res.close();
     gson = new GsonBuilder().setPrettyPrinting().create(); 
-  	return gson.toJson(entryHolder);
+  	return gson.toJson(jobStateHolder);
+  }
+
+  public String MobileJobHistoryMsgResponse(Connection conn, Integer Code, String Msg, ResultSet res, Integer rows) throws SQLException
+  {
+    coreRsp = new CoreModule();    
+    coreRsp.setCode(Code);
+    coreRsp.setMsg(Msg);
+
+    res.first();
+
+    jobStateHolder = new JobStateHolder(coreRsp, null, res.getString("History"));
+		res.close();
+    gson = new GsonBuilder().setPrettyPrinting().create(); 
+  	return gson.toJson(jobStateHolder).replaceAll("\\\\", "").replaceAll("\"\\{\"", "\\{\"").
+					 replaceAll("\"\\}\"", "\"\\}").replaceAll("\"\\[", "[").replaceAll("\\]\"", "]");
   }
 }

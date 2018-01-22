@@ -41,12 +41,12 @@ import javax.ws.rs.core.Response;
  *
  * @author Agustinus Ignat
  */
-@Path("track")
+@Path("v1/track")
 public class TrackApi 
 {
   private final Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
-  FileHandler fh = null;
-  final String DATE_FORMAT = "yyyyMMdd";
+//  FileHandler fh = null;
+//  final String DATE_FORMAT = "yyyyMMdd";
 
   @Context
   private UriInfo context;
@@ -56,7 +56,8 @@ public class TrackApi
      */
     public TrackApi() 
     {
-      try 
+/*
+			try 
       {
         DateTimeFormatter dateTimeformatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
         LocalDateTime localDateTime = LocalDateTime.now();
@@ -74,7 +75,8 @@ public class TrackApi
 
       fh.setFormatter(new SimpleFormatter());
       logger.addHandler(fh);
-    }
+*/
+			}
 
     /**
      * Retrieves representation of an instance of com.fz.ffbv3.api.TrackApi
@@ -129,7 +131,7 @@ public class TrackApi
     dBConnector.CloseDatabase(conn);
     logger.severe("[Close] -> Close database done");
     logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
-    fh.close();
+//    fh.close();
     return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build();
   }
 
@@ -166,7 +168,7 @@ public class TrackApi
     dBConnector.CloseDatabase(conn);
     logger.severe("[Close] -> Close database done");
     logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
-    fh.close();
+//    fh.close();
     return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build();
   }
 }

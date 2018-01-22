@@ -8,6 +8,7 @@ package com.fz.ffbv3.api;
 import com.fz.ffbv3.service.taskmgt.TaskLogic;
 import com.fz.ffbv3.service.taskmgt.TaskPlanModel;
 import com.fz.ffbv3.service.taskmgt.UploadModel;
+import com.fz.ffbv3.service.taskmgt.UploadPlanData;
 import com.fz.ffbv3.service.usermgt.UserLogic;
 import com.fz.ffbv3.service.usermgt.UserModel;
 import com.fz.generic.DBConnector;
@@ -41,12 +42,12 @@ import javax.ws.rs.core.Response;
  *
  * @author Ignat
  */
-@Path("tasks")
+@Path("v1/tasks")
 public class TaskApi
 {
   private final Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
-  FileHandler fh = null;
-  final String DATE_FORMAT = "yyyyMMdd";
+//  FileHandler fh = null;
+//  final String DATE_FORMAT = "yyyyMMdd";
 
   @Context
   private UriInfo context;
@@ -56,6 +57,7 @@ public class TaskApi
    */
   public TaskApi()
   {
+/*		
     try 
     {
       DateTimeFormatter dateTimeformatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
@@ -74,7 +76,8 @@ public class TaskApi
 
    fh.setFormatter(new SimpleFormatter());
    logger.addHandler(fh);
-  }
+*/
+	}
 
   /**
    * Retrieves representation of an instance of com.fz.ffbv3.api.TaskApi
@@ -145,7 +148,7 @@ public class TaskApi
     dBConnector.CloseDatabase(conn);
     logger.severe("[Close] -> Close database done");
     logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
-    fh.close();
+//    fh.close();
     return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build(); 
   }
 
@@ -181,7 +184,79 @@ public class TaskApi
     dBConnector.CloseDatabase(conn);    
     logger.severe("[Close] -> Close database done");
     logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
-    fh.close();
+//    fh.close();
+    return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build(); 
+  }
+
+  @POST
+  @Path("jobstate")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response postJobState(String content)
+  {
+    logger.severe("[Path] -> /tasks/jobstate");
+    
+    // Get Gson object and parse json string to object
+    logger.severe("[JSON] -> " + content);
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    TaskPlanModel taskPlanModel = gson.fromJson(content, TaskPlanModel.class);
+
+    DBConnector dBConnector = new DBConnector();
+    Connection conn = dBConnector.ConnectToDatabase();
+    logger.severe("[Open] -> Open database done");
+
+    StatusHolder statusHolder = new StatusHolder();
+    
+    if(conn != null)
+    {
+      TaskLogic taskLogic = new TaskLogic(conn, 0, logger);
+      statusHolder = taskLogic.MobileJobState(taskPlanModel);
+    }
+    else
+    {
+      statusHolder.setCode(FixValue.intResponError);
+      statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strMobileJobStateFailed));
+    }   
+    
+    dBConnector.CloseDatabase(conn);    
+    logger.severe("[Close] -> Close database done");
+    logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
+//    fh.close();
+    return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build(); 
+  }
+
+  @POST
+  @Path("jobhistory")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response postJobHistory(String content)
+  {
+    logger.severe("[Path] -> /tasks/jobhistory");
+    
+    // Get Gson object and parse json string to object
+    logger.severe("[JSON] -> " + content);
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    TaskPlanModel taskPlanModel = gson.fromJson(content, TaskPlanModel.class);
+
+    DBConnector dBConnector = new DBConnector();
+    Connection conn = dBConnector.ConnectToDatabase();
+    logger.severe("[Open] -> Open database done");
+
+    StatusHolder statusHolder = new StatusHolder();
+    
+    if(conn != null)
+    {
+      TaskLogic taskLogic = new TaskLogic(conn, 0, logger);
+      statusHolder = taskLogic.MobileHistoryState(taskPlanModel);
+    }
+    else
+    {
+      statusHolder.setCode(FixValue.intResponError);
+      statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strMobileHistoryStateFailed));
+    }   
+    
+    dBConnector.CloseDatabase(conn);    
+    logger.severe("[Close] -> Close database done");
+    logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
+//    fh.close();
     return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build(); 
   }
 }

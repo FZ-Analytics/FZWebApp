@@ -121,7 +121,5 @@ public class UploadPlanData
 	void setVehicleID(Integer vehicleID)
 	{
 		this.vehicleID = vehicleID;
-	}
-  
-  
+	} 
 }

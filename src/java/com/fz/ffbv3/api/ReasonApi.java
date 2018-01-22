@@ -39,12 +39,12 @@ import javax.ws.rs.core.Response;
  *
  * @author Ignat
  */
-@Path("reasons")
+@Path("v1/reasons")
 public class ReasonApi
 {
   private final Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
-  FileHandler fh = null;
-  final String DATE_FORMAT = "yyyyMMdd";
+//  FileHandler fh = null;
+//  final String DATE_FORMAT = "yyyyMMdd";
 
   @Context
   private UriInfo context;
@@ -54,7 +54,8 @@ public class ReasonApi
    */
   public ReasonApi()
   {
-    try 
+/*
+		try 
     {
       DateTimeFormatter dateTimeformatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
       LocalDateTime localDateTime = LocalDateTime.now();
@@ -72,6 +73,7 @@ public class ReasonApi
 
     fh.setFormatter(new SimpleFormatter());
     logger.addHandler(fh);
+*/		
   }
 
   /**
@@ -129,7 +131,7 @@ public class ReasonApi
     dBConnector.CloseDatabase(conn);    
     logger.severe("[Close] -> Close database done");
     logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
-    fh.close();
+//    fh.close();
     return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build(); 
   }
 }

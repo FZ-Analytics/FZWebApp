@@ -33,7 +33,7 @@ import javax.ws.rs.core.Response;
  *
  * @author ignat
  */
-@Path("division")
+@Path("v1/division")
 public class DivisionApi {
 
   @Context
