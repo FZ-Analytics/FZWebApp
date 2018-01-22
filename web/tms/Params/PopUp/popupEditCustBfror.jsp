@@ -47,6 +47,7 @@
         
         <br>
         <label class="fzLabel" id="re_Run" style="color: blue;">Routing</label>
+        <label class="fzLabel" id="Vvehicle" style="color: blue;" onclick="Vklik();">Vehicle</label>
         <input id="clickMe" class="btn fzButton" type="button" value="Manual Route" onclick="openManualRoutePage();" />
 
         <br><br>
@@ -88,7 +89,9 @@
 
                 <%} // for ProgressRecord %>
             </tbody>
+            <tfoot></tfoot>
         </table>
+        
         <script src="../appGlobal/jquery.dataTables.min.js"></script>
         <script src="../appGlobal/datatables.js"></script>
         <script >
@@ -124,6 +127,12 @@
             function klik(kode) {
                 window.open('popupEditCust.jsp?runId=' + $('#runId').text() + '&custId=' + kode, null,
                         'scrollbars=1,resizable=1,height=500,width=750');
+
+            }
+            
+            function Vklik() {
+                window.open('ShowPreRouteVehicle.jsp?runId=' + $('#runId').text(), null,
+                        'scrollbars=1,resizable=1,height=500,width=950');
 
             }
             

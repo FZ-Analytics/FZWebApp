@@ -117,47 +117,49 @@ public class AlgoRunner implements BusinessLogic {
             url.append(dateDeliv);
 
             String resp = "";
-            if (success) {
-                prepareCustTable(branchCode);
-                resp = insertPreRouteVehicle(runID, branchCode, dateDeliv, chn);
-                if (resp.equalsIgnoreCase("OK")) {
-                    if (reRun.equals("A")) {
-                        resp = updatePrevPreRouteJob(runID, runId);
+            if (success) {     
+                if (reRun.equals("A")) {
+                    resp = updatePrevPreRouteJob(runID, runId);
+                    if (resp.equalsIgnoreCase("OK"))    
                         resp = insertPreRouteJobCopy(runID, runId, branchCode, dateDeliv, "ori");
-                        if (resp.equalsIgnoreCase("OK")) {
-                            resp = insertPreRouteJobCopy(runID, runId, branchCode, dateDeliv, "edit");
-                            if (resp.equalsIgnoreCase("OK") && reRun.equals("A")) {
-                                resp = UrlResponseGetter.getURLResponse(url.toString());
-                                if (resp.equals("OK")) {
-                                    response.sendRedirect("runProgress.jsp?runId=" + runID + "&dateDeliv=" + dateDeliv + "&oriRunID=" + oriRunID + "&channel=" + channel);
-                                } else {
-                                    HashMap<String, String> pl = new HashMap<String, String>();
-                                    pl.put("ID", runId);
-                                    pl.put("fileNmethod", "AlgoRunner&run");
-                                    pl.put("datas", "");
-                                    pl.put("msg", resp);
-                                    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-                                    Date date = new Date();
-                                    pl.put("dates", dateFormat.format(date).toString());
-                                    Other.insertLog(pl);
-                                    response.sendRedirect("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
-                                            + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel + "&error=N");
-                                }
-                            }
-                        }
-                    } else if (reRun.equals("N")) {
-                        resp = QueryCust(runID, branchCode, channel, dateDeliv, "ori");
-                        //resp = insertPreRouteJob(runID, branchCode, dateDeliv, "ori", chn);
-                        if (resp.equalsIgnoreCase("OK")) {
-                            resp = QueryCust(runID, branchCode, channel, dateDeliv, "edit");
-                            //resp = insertPreRouteJob(runID, branchCode, dateDeliv, "edit", chn);
-                            if (resp.equalsIgnoreCase("OK")) {
-                                response.sendRedirect("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
-                                        + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel + "&error=N");
-                            }
+                    if (resp.equalsIgnoreCase("OK"))    
+                        resp = insertPreRouteJobCopy(runID, runId, branchCode, dateDeliv, "edit");
+                    if (resp.equalsIgnoreCase("OK"))    
+                        resp = insertPreVehicleCopy(runID, runId, branchCode, dateDeliv, "ori");
+                    if (resp.equalsIgnoreCase("OK") && reRun.equals("A")) {
+                        resp = UrlResponseGetter.getURLResponse(url.toString());
+                        if (resp.equals("OK")) {
+                            response.sendRedirect("runProgress.jsp?runId=" + runID + "&dateDeliv=" + dateDeliv + "&oriRunID=" + oriRunID + "&channel=" + channel);
+                        } else {
+                            HashMap<String, String> pl = new HashMap<String, String>();
+                            pl.put("ID", runId);
+                            pl.put("fileNmethod", "AlgoRunner&run");
+                            pl.put("datas", "");
+                            pl.put("msg", resp);
+                            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                            Date date = new Date();
+                            pl.put("dates", dateFormat.format(date).toString());
+                            Other.insertLog(pl);
+                            response.sendRedirect("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
+                                    + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel + "&error=N");
                         }
                     }
+
+                } else if (reRun.equals("N")) {
+                    prepareCustTable(branchCode);
+                    resp = insertPreRouteVehicle(runID, branchCode, dateDeliv, chn);
+                    if (resp.equalsIgnoreCase("OK"))    
+                        resp = QueryCust(runID, branchCode, channel, dateDeliv, "ori");
+                    //resp = insertPreRouteJob(runID, branchCode, dateDeliv, "ori", chn);
+                    if (resp.equalsIgnoreCase("OK"))    
+                        resp = QueryCust(runID, branchCode, channel, dateDeliv, "edit");
+                    //resp = insertPreRouteJob(runID, branchCode, dateDeliv, "edit", chn);
+                    if (resp.equalsIgnoreCase("OK"))    
+                        response.sendRedirect("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
+                            + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel + "&error=N");
+
                 }
+                
             }
         } catch (Exception e) {
             HashMap<String, String> pl = new HashMap<String, String>();
@@ -769,6 +771,64 @@ public class AlgoRunner implements BusinessLogic {
 
         return cds;
     }
+    
+    public String insertPreVehicleCopy(String runID, String prevRunID, String branchCode,
+            String dateDeliv, String str)
+            throws Exception {
+
+        String cds = "ERROR insertPreRouteVehicle";
+
+        String sql = "INSERT\n" +
+                "	INTO\n" +
+                "		BOSNET1.dbo.TMS_PreRouteVehicle SELECT distinct\n" +
+                "			'"+runID+"' AS RunId,\n" +
+                "			vehicle_code,\n" +
+                "			weight,\n" +
+                "			volume,\n" +
+                "			vehicle_type,\n" +
+                "			branch,\n" +
+                "			startLon,\n" +
+                "			startLat,\n" +
+                "			endLon,\n" +
+                "			endLat,\n" +
+                "			startTime,\n" +
+                "			endTime,\n" +
+                "			source1,\n" +
+                "			UpdatevDate,\n" +
+                "			CreateDate,\n" +
+                "			isActive,\n" +
+                "			fixedCost,\n" +
+                "			costPerM,\n" +
+                "			costPerServiceMin,\n" +
+                "			costPerTravelMin\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_PreRouteVehicle\n" +
+                "		WHERE\n" +
+                "			RunId = '"+prevRunID+"' and isActive = 1";
+
+        try (Connection con = (new Db()).getConnection("jdbc/fztms");
+                PreparedStatement ps = con.prepareStatement(sql)) {
+
+            con.setAutoCommit(false);
+            ps.executeUpdate();
+            con.setAutoCommit(true);
+
+            cds = "OK";
+        }catch (Exception e) {
+            HashMap<String, String> pl = new HashMap<String, String>();
+            pl.put("ID", runID);
+            pl.put("fileNmethod", "AlgoRunner&insertPreRouteJobCopy Exc");
+            pl.put("datas", "");
+            pl.put("msg", e.getMessage());
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+            Date date = new Date();
+            pl.put("dates", dateFormat.format(date).toString());
+            Other.insertLog(pl);
+            throw e;
+        }
+
+        return cds;
+    }
 
     public String insertPreRouteVehicle(String runID, String branchCode,
             String dateDeliv, String shn)
@@ -844,10 +904,7 @@ public class AlgoRunner implements BusinessLogic {
                 "			'1' AS isActive,\n" +
                 "			va.fixedCost,\n" +
                 "			pr.value /(\n" +
-                "				CASE\n" +
-                "					WHEN va.vehicle_code IS NULL THEN pr.value\n" +
-                "					ELSE va.costPerM\n" +
-                "				END * 1000\n" +
+                "				va.costPerM * 1000\n" +
                 "			) AS costPerM,\n" +
                 "			0 AS costPerServiceMin,\n" +
                 "			0 AS costPerTravelMin\n" +
@@ -1396,15 +1453,18 @@ public class AlgoRunner implements BusinessLogic {
             if(pl.get("Distribution_Channel").equalsIgnoreCase("MT")){
                 //System.out.println(pl.get("Distribution_Channel"));DeliveryDeadline
                 if(pl.get("DeliveryDeadline").equalsIgnoreCase("ONDL")){
-                    if(str == 0)            pl.replace("Customer_priority", String.valueOf(1));
-                    else                    pl.replace("Customer_priority", String.valueOf(10));
+                    if(str == 0)                    pl.replace("Customer_priority", String.valueOf(1));
+                    else                            pl.replace("Customer_priority", String.valueOf(10));
                 }else if(pl.get("DeliveryDeadline").equalsIgnoreCase("BFOR")){
-                    if(str == 1)            pl.replace("Customer_priority", String.valueOf(2));
-                    else if(str >= 1)       pl.replace("Customer_priority", String.valueOf(3));
-                    else                    pl.replace("Customer_priority", String.valueOf(10));
+                    if(str == 0)                    pl.replace("Customer_priority", String.valueOf(1));
+                    else if(str == 1)               pl.replace("Customer_priority", String.valueOf(2));
+                    else if(str >= 2)               pl.replace("Customer_priority", String.valueOf(3));
+                    else if(str < 0)                pl.replace("Customer_priority", String.valueOf(10));
                 }else if(pl.get("DeliveryDeadline").equalsIgnoreCase("AFTR")){
-                    if(str == -3)           pl.replace("Customer_priority", String.valueOf(1));
-                    else                    pl.replace("Customer_priority", String.valueOf(10));
+                    if(str == 0)                    pl.replace("Customer_priority", String.valueOf(1));
+                    else if(str > -3 && str < 0)    pl.replace("Customer_priority", String.valueOf(2));
+                    else if(str > 0)                pl.replace("Customer_priority", String.valueOf(3));
+                    else                            pl.replace("Customer_priority", String.valueOf(10));
                 }
             }else{
                 //System.out.println(pl.get("Distribution_Channel"));
