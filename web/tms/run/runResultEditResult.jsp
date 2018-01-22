@@ -20,6 +20,8 @@
         <style>
             tr { 
                 border-bottom: 2px solid lightgray;
+                padding-top: 3px;
+                padding-bottom: 3px;
             }
             
         </style>
@@ -58,17 +60,22 @@
                         return true;
                     }
                 });
-
-                $('#reRun').click(function () {
-                    setTimeout(function () {
-                        var dateNow = $.datepicker.formatDate('yy-mm-dd', new Date());//currentDate.getFullYear()+"-"+(currentDate.getMonth()+1)+"-"+currentDate.getDate();
-
-                        var win = window.open('runProcess.jsp?tripCalc=M&shift=1&dateDeliv=' + dateNow + '&branch=' + $('#branch').text() + '&runId=' + $("#RunIdClick").text() + '&oriRunID=' + $("#OriRunID").val()  + '&reRun=A' + '&channel=' + $('#channel').text(), '_blank');
-                        if (win) {
-                            //Browser has allowed it to be opened
-                            win.focus();
+                $("button").click(function() {
+                    var vNo = $(this).val();
+                    var runId = $("#RunIdClick").text();
+                    
+                    var $apiAddress = '../../api/submitToSap/submitToSap';
+                    
+                    var jsonForServer = '{\"RunId\": \"' + runId + '\",\"vehicle_no\":\"' + vNo+ '\"}';
+                    
+                    $.post($apiAddress, {json: jsonForServer}).done(function (data) {
+                        if(data == 'OK'){
+                            alert( 'sukses' );
+                            location.reload()
+                        } else{
+                            alert( 'submit error' ); 
                         }
-                    }, 3000);
+                    });
                 });
             });
             
@@ -85,12 +92,16 @@
                     win.focus();
                 }
             }
+            
+            function submitToSap() {
+                
+            }
 
             function klik(kode) {
-                //alert('tes : ' + kode);
                 window.open("../Params/PopUp/popupEditCust.jsp?runId=" + $("#RunIdClick").text() + "&custId=" + kode, null,
                         "scrollbars=1,resizable=1,height=500,width=750");
             }
+            
         </script>
         <h3>Runs</h3>
 
@@ -141,6 +152,8 @@
                     <th width="100px" class="fzCol">RDD</th>
                     <th width="100px" class="fzCol">Transport Cost</th>
                     <th width="100px" class="fzCol">Dist</th>
+                    <th width="100px" class="fzCol">Cust. Feas.</th>
+                    <th width="100px" class="fzCol">Truck Feas.</th>
                     <th width="100px" class="fzCol">Edit</th>
                 </tr>
             </thead>
@@ -179,10 +192,17 @@
                     <td class="fzCell"><%=j.transportCost%></td>
                     <%}%>
                     <td class="fzCell"><%=j.dist%></td>
-                    <td class="editCust" onclick="klik(<%=j.custId%>)" style="color: blue;">
-                        <%if(j.doNum.length() > 0 && !j.vehicleCode.equals("NA")) {%>
+                    <td class="fzCell"><%=j.feasibleCustomer%></td>
+                    <td class="fzCell"><%=j.feasibleTruck%></td>
+                    <%if(j.doNum.length() > 0 && !j.vehicleCode.equals("NA")) {%>
+                        <td class="editCust" onclick="klik(<%=j.custId%>)" style="color: blue;">
                             edit
-                        <%}%>
+                        </td>
+                    <%} else {%>
+                        <td class="editCust" onclick="" style="color: blue;">
+                            
+                        </td>
+                    <%}%>
                     </td>
                 </tr>
 
