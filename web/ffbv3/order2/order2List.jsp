@@ -1,3 +1,4 @@
+<%@page import="java.text.DecimalFormat"%>
 <%@page import="com.fz.util.FZUtil"%>
 <%@page import="com.fz.ffbv3.service.order2.Order2Record"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -58,7 +59,10 @@
                     + '\nTaken = ' + takenDt
                     + '\nDone = ' + doneDt
             ;
-            alert(s);
+            //alert(s);
+            var x = document.getElementById("more"+jobID);
+            x.hidden = !x.hidden;
+            document.getElementById("tgl"+jobID).innerHTML=(x.hidden)?"More":"Less";
         }
     </script>
         <h3>Job / Order</h3>
@@ -75,8 +79,6 @@
                 <th class="fzCol">Block</th>
                 <th class="fzCol">Bin Avail</th>
                 <th class="fzCol">Job ID</th>
-                <th class="fzCol"></th>
-                <th class="fzCol"></th>
                 <th class="fzCol"></th>
             </tr>
            
@@ -183,8 +185,6 @@
                     <td class="fzCell"></td>
                     <td class="fzCell"></td>
                     <td class="fzCell"></td>
-                    <td class="fzCell"></td>
-                    <td class="fzCell"></td>
                 </tr>
                 
             <%  
@@ -205,10 +205,70 @@
                 <td class="fzCell"><%=r.jobID%></td>
                 <td class="fzCell">
                     <a href="javascript:shw('<%=r.jobID%>','<%=r.runID%>','<%=r.hvsDate%>','<%=FZUtil.escapeText(r.remark)%>','<%=r.vehicleRemark%>','<%=r.createSource%>','<%=r.Task2ReasonName%>','<%=r.size%>','<%=r.planStart%>','<%=r.planEnd%>','<%=r.actualStart%>','<%=r.actualEnd%>','<%=r.getBlocks()%>','<%=r.isLastOrder%>','<%=r.isLast2Order%>','<%=r.assignedDate%>','<%=r.takenDate%>','<%=r.doneDate%>','<%=r.createDate%>','<%=r.dirLoc%>','<%=r.estmFfb%>');"
-                       >More</a></td>
-                <td class="fzCell" align="center"><%=reorderCode%></td><td class="fzCell" align="center"><%=cancelCode%></td>
+                      id="tgl<%=r.jobID%>">More</a></td>
             </tr>
-            
+            <div>
+            <tr id="more<%=r.jobID%>" name="more<%=r.jobID%>" hidden>
+                <td></td>
+                <td colspan="100%" >
+                    <%
+                        DecimalFormat df = new DecimalFormat("#,###,###");
+                    %>
+                    <table frame="box" style="border: lightgray inset medium;">
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px; ">Harvest Date</td><td style="padding: 2px;">:</td><td><%=r.hvsDate%></td>
+                            <td></td><td></td><td style="padding: 2px; width: 50px;"></td>
+                            <td style="border-left: solid lightgray 1px; border-right: solid lightgray 1px;">&nbsp;</td>
+                            <td>Is Last To Order</td><td style="padding: 2px;">:</td><td width="50px"><%=r.isLast2Order%></td>
+                            <td style="border-left: solid lightgray 1px; border-right: solid lightgray 1px;">&nbsp;</td>
+                            <td style="padding: 2px;">RunID</td><td style="padding: 2px;">:</td><td><%=r.runID%></td>
+                            <td width="100px"></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px;">Plan Start</td><td style="padding: 2px;">:</td><td><%=r.planStart%></td>
+                            <td>Actual Start</td><td style="padding: 2px;">:</td><td style="padding: 2px; width: 50px;"><%=r.actualStart%></td>
+                            <td style="border-left: solid lightgray 1px; border-right: solid lightgray 1px;">&nbsp;</td>
+                            <td>Ordered</td><td style="padding: 2px;">:</td><td><%=r.createDate%></td>
+                            <td style="border-left: solid lightgray 1px; border-right: solid lightgray 1px;">&nbsp;</td>
+                            <td style="padding: 2px;">Create Source</td><td style="padding: 2px;">:</td><td><%=r.createSource%></td>
+                            <td><%=reorderCode%></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px;">Plan End</td><td style="padding: 2px;">:</td><td><%=r.planEnd%></td>
+                            <td>Actual End</td><td style="padding: 2px;">:</td><td style="padding: 2px;"><%=r.actualEnd%></td>
+                            <td style="border-left: solid lightgray 1px; border-right: solid lightgray 1px;">&nbsp;</td>
+                            <td>Asigned</td><td style="padding: 2px;">:</td><td><%=r.assignedDate%></td>
+                            <td style="border-left: solid lightgray 1px; border-right: solid lightgray 1px;">&nbsp;</td>
+                            <td style="padding: 2px;">DirLoc</td><td style="padding: 2px;">:</td><td><%=r.dirLoc%></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px;">Estm Kg</td><td style="padding: 2px;">:</td><td><%=df.format(r.size)%></td>
+                            <td>Actual Kg</td><td style="padding: 2px;">:</td><td style="padding: 2px;"><%=df.format(r.ActualKg)%></td>
+                            <td style="border-left: solid lightgray 1px; border-right: solid lightgray 1px;">&nbsp;</td>
+                            <td>Taken</td><td style="padding: 2px;">:</td><td><%=r.takenDate%></td>
+                            <td style="border-left: solid lightgray 1px; border-right: solid lightgray 1px;">&nbsp;</td>
+                            <td style="padding: 2px;">Job Remark</td><td style="padding: 2px;">:</td><td><%=r.remark%></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px;">Reason</td><td style="padding: 2px;">:</td><td colspan="2"><%=r.Task2ReasonName%></td>
+                            <td style="padding: 2px;"></td><td></td>
+                            <td style="border-left: solid lightgray 1px; border-right: solid lightgray 1px;">&nbsp;</td>
+                            <td>Done</td><td style="padding: 2px;">:</td><td><%=r.doneDate%></td>
+                            <td style="border-left: solid lightgray 1px; border-right: solid lightgray 1px;">&nbsp;</td>
+                            <td style="padding: 2px;">Vehicle Remark</td><td style="padding: 2px;">:</td><td><%=r.vehicleRemark%></td>
+                            <td><%=cancelCode%></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            </div>
         <%} // for Order2Record %>
         
         </table>
