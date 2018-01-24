@@ -78,6 +78,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                     if (!dataSplit[2].equals("start")) {
                         setObjectValue(dataSplit[0], dataSplit[1], dataSplit[2], "");
                     } else {
+                        
                         setObjectValue(dataSplit[0], dataSplit[1], "", getVehiStart(dataSplit[1]));
                         prevCustId = dataSplit[1];
                     }
@@ -123,7 +124,8 @@ public class RouteJobListingResultEdit implements BusinessLogic {
             d.distChannel = aSplit[7];
             d.street = aSplit[6];
             d.weight = "" + Math.round(Double.parseDouble(aSplit[9]) * 10) / 10.0;
-            d.volume = getVolumePerMillion(custId, oriRunId);
+            try { d.volume = "" + Math.round(Double.parseDouble(getVolume(custId, oriRunId)) * 10) / 10.0; }
+            catch(Exception e) {}
             d.rdd = aSplit[8];
             if (!custId.equals("") || depart.equals("")) {
                 d.arrive = prevDepart;
@@ -302,6 +304,25 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         else {
             
         }
+    }
+    
+    public String getIsFix(String vehiNo) throws Exception {
+        String startTime = "";
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql;
+                sql = "SELECT TOP 1 startTime FROM BOSNET1.dbo.TMS_VehicleAtr where vehicle_code = '" + vehiNo + "';";
+                // query
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    while (rs.next()) {
+                        startTime = rs.getString("startTime");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return startTime;
     }
     
     public String getVehiStart(String vehiNo) throws Exception {
@@ -508,25 +529,6 @@ public class RouteJobListingResultEdit implements BusinessLogic {
 
         }
         return moreThan;
-    }
-    
-    public String getVolumePerMillion(String custId, String runId) throws Exception {
-        String vol = "";
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql = "SELECT volume FROM BOSNET1.dbo.TMS_RouteJob WHERE customer_id = '" + custId + "' and runID = '" + runId + "';";
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        vol = rs.getString("volume");
-                        try { vol = "" + Math.round((Double.parseDouble(vol) / 1000) / 100.0) * 100.0 / 1000; }
-                        catch(Exception e) { }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return vol;
     }
     
     public static Timestamp getTimeStamp() throws ParseException {

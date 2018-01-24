@@ -71,12 +71,13 @@
                     $.post($apiAddress, {json: jsonForServer}).done(function (data) {
                         if(data == 'OK'){
                             alert( 'sukses' );
-                            location.reload()
                         } else{
                             alert( 'submit error' ); 
                         }
                     });
                 });
+                
+                $("#success-alert").hide();
             });
             
             function jumpToResult() {
@@ -92,10 +93,6 @@
                     win.focus();
                 }
             }
-            
-            function submitToSap() {
-                
-            }
 
             function klik(kode) {
                 window.open("../Params/PopUp/popupEditCust.jsp?runId=" + $("#RunIdClick").text() + "&custId=" + kode, null,
@@ -104,9 +101,8 @@
             
         </script>
         <h3>Runs</h3>
-
-        <input class="fzInput" id="OriRunID" 
-               name="OriRunID" value="<%=get("OriRunID")%>" hidden="true"/>
+        
+        <input class="fzInput" id="OriRunID" name="OriRunID" value="<%=get("OriRunID")%>" hidden="true"/>
         
         <br>
         <label class="fzLabel">Branch:</label> 
@@ -152,6 +148,7 @@
                     <th width="100px" class="fzCol">RDD</th>
                     <th width="100px" class="fzCol">Transport Cost</th>
                     <th width="100px" class="fzCol">Dist</th>
+                    <th width="100px" class="fzCol">Access Feas.</th>
                     <th width="100px" class="fzCol">Cust. Feas.</th>
                     <th width="100px" class="fzCol">Truck Feas.</th>
                     <th width="100px" class="fzCol">Edit</th>
@@ -173,7 +170,13 @@
                     <td class="fzCell"><%=j.arrive%></td>
                     <td class="fzCell"><%=j.depart%></td>                    
                     <td class="fzCell"><%=j.doNum%></td>
-                    <td class="fzCell"><%=j.serviceTime%></td>
+                    <td class="fzCell">
+                        <%if(!j.vehicleCode.equals("NA")) {%>
+                            <%=j.serviceTime%>
+                        <%} else {
+                            out.print("0");
+                        }%>  
+                    </td>
                     <td class="fzCell">
                         <%if (!j.vehicleCode.equals("NA")) {%>
                         <a href="<%=j.getMapLink()%>" target="_blank"><%=j.storeName%></a>
@@ -192,12 +195,17 @@
                     <td class="fzCell"><%=j.transportCost%></td>
                     <%}%>
                     <td class="fzCell"><%=j.dist%></td>
+                    <td class="fzCell"><%=j.feasibleAccess%></td>
                     <td class="fzCell"><%=j.feasibleCustomer%></td>
                     <td class="fzCell"><%=j.feasibleTruck%></td>
                     <%if(j.doNum.length() > 0 && !j.vehicleCode.equals("NA")) {%>
                         <td class="editCust" onclick="klik(<%=j.custId%>)" style="color: blue;">
                             edit
                         </td>
+                    <%} else if(j.arrive.length() > 0) {%>
+<!--                        <td class="" onclick="" style="">
+                            <button class="btn btn-success btn-xs" type="submit" onclick="submitToSap()" value="<%=j.vehicleCode%>">Submit</button>
+                        </td>-->
                     <%} else {%>
                         <td class="editCust" onclick="" style="color: blue;">
                             

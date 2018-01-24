@@ -20,6 +20,7 @@ import java.sql.Timestamp;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -118,7 +119,8 @@ public class LoadDelivery implements BusinessLogic {
             d.distChannel = aSplit[7];
             d.street = aSplit[6];
             d.weight = "" + Math.round(Double.parseDouble(aSplit[9]) * 10) / 10.0;
-            d.volume = getVolumePerMillion(custId, oriRunId);
+            try { d.volume = "" + Math.round(Double.parseDouble(getVolume(custId, oriRunId)) * 10) / 10.0; }
+            catch(Exception e) {}
             d.rdd = aSplit[8];
             if (!custId.equals("") || depart.equals("")) {
                 d.arrive = prevDepart;
@@ -215,8 +217,35 @@ public class LoadDelivery implements BusinessLogic {
                 if(d.no.equals("1")) {
                     
                 }
-                d.feasibleTruck = isTimeinRange(d.arrive, getTruckTime(runId, d.vehicleCode));
-                d.feasibleCustomer = isTimeinRange(d.arrive, getCustomerTime(runId, d.custId));
+                if(hasBreak) {
+                    d.feasibleTruck = isTimeinRange(d.arrive, getTruckTime(runId, d.vehicleCode));
+                    ArrayList<String> al = getCustomerTime(runId, d.custId);
+                    String custEndTime = addTime(al.get(1), 60);
+                    al.set(1, custEndTime);
+                    d.feasibleCustomer = isTimeinRange(d.arrive, al);
+                    
+                    String vehicleType = getVehicleType(runId, d.vehicleCode);
+                    String vehicleTypeList = getAccessList(d.custId, runId);
+                    if(vehicleTypeList.toLowerCase().contains(vehicleType.toLowerCase())) {
+                        d.feasibleAccess = "Yes";
+                    }
+                    else {
+                        d.feasibleAccess = "No";
+                    }
+                }
+                else {
+                    d.feasibleTruck = isTimeinRange(d.arrive, getTruckTime(runId, d.vehicleCode));
+                    d.feasibleCustomer = isTimeinRange(d.arrive, getCustomerTime(runId, d.custId));
+                    
+                    String vehicleType = getVehicleType(runId, d.vehicleCode);
+                    String vehicleTypeList = getAccessList(d.custId, runId);
+                    if(vehicleTypeList.toLowerCase().contains(vehicleType.toLowerCase())) {
+                        d.feasibleAccess = "Yes";
+                    }
+                    else {
+                        d.feasibleAccess = "No";
+                    }
+                }
             }
             catch(Exception e) { }
             
@@ -362,6 +391,40 @@ public class LoadDelivery implements BusinessLogic {
 
         }
         return moreThan;
+    }
+    
+    private String getVehicleType(String runId, String vehicleCode) throws Exception {
+        String vehicle_type = "";
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql = "SELECT vehicle_type FROM BOSNET1.dbo.TMS_PreRouteVehicle where RunId = '" + runId + "' and vehicle_code = '" + vehicleCode + "';";
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    while (rs.next()) {
+                        vehicle_type = rs.getString("vehicle_type");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return vehicle_type;
+    }
+    
+    private String getAccessList(String custId, String runId) throws Exception {
+        String vehicleTypeList = "";
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql = "SELECT vehicle_type_list FROM BOSNET1.dbo.TMS_PreRouteJob where Customer_ID = '" + custId + "' and RunId = '" + runId + "';";
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    while (rs.next()) {
+                        vehicleTypeList = rs.getString("vehicle_type_list");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return vehicleTypeList;
     }
     
     private double getTruckSpeed() throws Exception {

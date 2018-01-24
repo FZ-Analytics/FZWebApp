@@ -40,6 +40,7 @@
 
 					<label class="fzLabel">Division</label>
           <select name='selectedBy' class='fzInput'>
+						<option value='Semua' selected>SEMUA</option>
 						<option value='LWSM' selected>LWSM</option>
             <option value='TESM'>TESM</option>
             <option value='BPRM'>BPRM</option>
