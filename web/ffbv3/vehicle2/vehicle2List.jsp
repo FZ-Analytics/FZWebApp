@@ -35,6 +35,18 @@
             }
         } // for Vehicle2Record runIDs 
         %>
+				
+				<!-- Awal, Dropdown untuk pilihan divisi dari vehicle, by ignat 23012018-->
+
+					<label class="fzLabel">Division</label>
+          <select name='selectedBy' class='fzInput'>
+						<option value='LWSM' selected>LWSM</option>
+            <option value='TESM'>TESM</option>
+            <option value='BPRM'>BPRM</option>
+          </select>
+          <br>
+				<!-- Akhir, Dropdown untuk pilihan divisi dari vehicle, by ignat 23012018-->
+
         <div id='dvChgScheBtn' class='fzTextButton'>Add / remove vehicle in scheduling ></div>
         <div id='dvChgSchePane' style='display:none'>
             <form action='vehicle2AddRmvRunID.jsp' method='post'>
@@ -63,9 +75,7 @@
                 <br><br>
                 <button type='submit' name='submitBtn' value="update" 
                         class='btn fzButton'>Go</button>
-
                 <br><br>
-
             </form>
         </div>
         <script>

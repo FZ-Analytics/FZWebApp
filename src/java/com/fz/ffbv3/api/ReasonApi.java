@@ -8,6 +8,7 @@ package com.fz.ffbv3.api;
 import com.fz.ffbv3.service.reasonmgt.ReasonLogic;
 import com.fz.ffbv3.service.reasonmgt.ReasonModel;
 import com.fz.generic.DBConnector;
+import com.fz.generic.Db;
 import com.fz.generic.ResponseMessege;
 import com.fz.generic.StatusHolder;
 import com.fz.util.FixMessege;
@@ -43,8 +44,8 @@ import javax.ws.rs.core.Response;
 public class ReasonApi
 {
   private final Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
-//  FileHandler fh = null;
-//  final String DATE_FORMAT = "yyyyMMdd";
+  FileHandler fh = null;
+  final String DATE_FORMAT = "yyyyMMdd";
 
   @Context
   private UriInfo context;
@@ -54,7 +55,6 @@ public class ReasonApi
    */
   public ReasonApi()
   {
-/*
 		try 
     {
       DateTimeFormatter dateTimeformatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
@@ -73,7 +73,6 @@ public class ReasonApi
 
     fh.setFormatter(new SimpleFormatter());
     logger.addHandler(fh);
-*/		
   }
 
   /**
@@ -111,27 +110,23 @@ public class ReasonApi
     ReasonModel taskModel = gson.fromJson(content, ReasonModel.class);
     logger.severe("[Parsing] -> Parsing request with GSON done");
 
-    DBConnector dBConnector = new DBConnector();
-    Connection conn = dBConnector.ConnectToDatabase();
-    logger.severe("[Open] -> Open database done");
-
     StatusHolder statusHolder = new StatusHolder();
     
-    if(conn != null)
-    {
+		try(Connection conn = (new Db()).getConnection("jdbc/fz"))
+		{
+	    logger.severe("[Open] -> Open database done");
       ReasonLogic reasonLogic = new ReasonLogic(conn, logger);
       statusHolder = reasonLogic.ReasonList(taskModel.getReasonListData().getReasonID());
-    }
-    else
-    {
+		}
+		catch (Exception ex)
+		{
       statusHolder.setCode(FixValue.intResponError);
       statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strReasonFailed));
-    }   
-   
-    dBConnector.CloseDatabase(conn);    
+		}
+
     logger.severe("[Close] -> Close database done");
     logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
-//    fh.close();
+    fh.close();
     return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build(); 
   }
 }

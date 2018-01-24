@@ -9,6 +9,7 @@ import com.fz.ffbv3.service.usermgt.MenuModel;
 import com.fz.ffbv3.service.usermgt.UserLogic;
 import com.fz.ffbv3.service.usermgt.UserModel;
 import com.fz.generic.DBConnector;
+import com.fz.generic.Db;
 import com.fz.generic.ResponseMessege;
 import com.fz.generic.StatusHolder;
 import com.fz.util.FZUtil;
@@ -57,8 +58,8 @@ import javax.ejb.Stateless;
 public class UsersApi 
 {
   private final Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
-//  FileHandler fh = null;
-//  final String DATE_FORMAT = "yyyyMMdd";
+  FileHandler fh = null;
+  final String DATE_FORMAT = "yyyyMMdd";
 
   @Context
   private UriInfo context;
@@ -68,7 +69,6 @@ public class UsersApi
    */
   public UsersApi()
   {
-/*
 		try 
     {
       DateTimeFormatter dateTimeformatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
@@ -87,7 +87,6 @@ public class UsersApi
 
     fh.setFormatter(new SimpleFormatter());
     logger.addHandler(fh);
-*/		
   }
 
   /**
@@ -128,27 +127,22 @@ public class UsersApi
 		UserModel userModel = gson.fromJson(content, UserModel.class);
     logger.severe("[Parsing] -> Parsing request with GSON done");
 
-    DBConnector dBConnector = new DBConnector();
-    Connection conn = dBConnector.ConnectToDatabase();
-    logger.severe("[Open] -> Open database done");
-
     StatusHolder statusHolder = new StatusHolder();    
-    
-    if(conn != null)
-    {
+
+		try(Connection conn = (new Db()).getConnection("jdbc/fz"))
+		{
       UserLogic userLogic = new UserLogic(conn, logger); 
       statusHolder = userLogic.Login(userModel.getUserData().getUsername(), userModel.getUserData().getPassword());
-    }
-    else
-    {
+		}
+		catch (Exception ex)
+		{
       statusHolder.setCode(FixValue.intResponError);
       statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strLoginFailed));
-    }
+		}
     
-    dBConnector.CloseDatabase(conn);    
     logger.severe("[Close] -> Close database done");
     logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
-//    fh.close();
+    fh.close();
     return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build();
   }
 
@@ -165,27 +159,23 @@ public class UsersApi
 		UserModel userModel = gson.fromJson(content, UserModel.class);
     logger.severe("[Parsing] -> Parsing request with GSON done");
 
-    DBConnector dBConnector = new DBConnector();
-    Connection conn = dBConnector.ConnectToDatabase();
-    logger.severe("[Open] -> Open database done");
-
     StatusHolder statusHolder = new StatusHolder();
-    
-    if(conn != null)
-    {
+
+		try(Connection conn = (new Db()).getConnection("jdbc/fz"))
+		{
+	    logger.severe("[Open] -> Open database done");
       UserLogic userLogic = new UserLogic(conn, logger); 
       statusHolder = userLogic.logout(userModel);
-    }
-    else
-    {
+		}
+		catch (Exception ex)
+		{
       statusHolder.setCode(FixValue.intResponError);
       statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strLogoutFailed));
-    }
+		}
     
-    dBConnector.CloseDatabase(conn);
     logger.severe("[Close] -> Close database done");
     logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
-//    fh.close();
+    fh.close();
     return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build();
   }
 }
