@@ -440,7 +440,13 @@
                     <td class="fzCell"><%=j.arrive%></td>
                     <td class="fzCell"><%=j.depart%></td>                    
                     <td class="fzCell"><%=j.doNum%></td>
-                    <td class="fzCell"><%=j.serviceTime%></td>
+                    <td class="fzCell">
+                        <%if(!j.vehicleCode.equals("NA")) {%>
+                            <%=j.serviceTime%>
+                        <%} else {
+                            out.print("0");
+                        }%>  
+                    </td>
                     <td class="fzCell">
                         <%if (j.arrive.length() > 0) {%>
                         <a href="<%=j.getMapLink()%>" target="_blank"><%=j.storeName%></a>
@@ -456,7 +462,7 @@
                     <td class="fzCell"><%=j.dist%></td>
                     
                     <td class="editCust" onclick="klik(<%=j.custId%>)" style="color: blue;">
-                        <%if(j.doNum.length() > 0 && !j.vehicleCode.equals("NA")) {%>
+                        <%if(j.doNum.length() > 0) {%>
                             edit
                         <%}%>
                     </td>
