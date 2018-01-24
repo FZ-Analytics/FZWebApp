@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.fz.tms.params.Vehicle;
+package com.fz.tms.params.model;
 
 /**
  *
- * @author dwi.rangga
+ * @author Administrator
  */
-public class ParamVehicle {
-    
+public class VehicleNo {
+    public String vehicleNo;
 }

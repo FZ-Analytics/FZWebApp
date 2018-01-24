@@ -117,47 +117,49 @@ public class AlgoRunner implements BusinessLogic {
             url.append(dateDeliv);
 
             String resp = "";
-            if (success) {
-                prepareCustTable(branchCode);
-                resp = insertPreRouteVehicle(runID, branchCode, dateDeliv, channel);
-                if (resp.equalsIgnoreCase("OK")) {
-                    if (reRun.equals("A")) {
-                        resp = updatePrevPreRouteJob(runID, runId);
+            if (success) {     
+                if (reRun.equals("A")) {
+                    resp = updatePrevPreRouteJob(runID, runId);
+                    if (resp.equalsIgnoreCase("OK"))    
                         resp = insertPreRouteJobCopy(runID, runId, branchCode, dateDeliv, "ori");
-                        if (resp.equalsIgnoreCase("OK")) {
-                            resp = insertPreRouteJobCopy(runID, runId, branchCode, dateDeliv, "edit");
-                            if (resp.equalsIgnoreCase("OK") && reRun.equals("A")) {
-                                resp = UrlResponseGetter.getURLResponse(url.toString());
-                                if (resp.equals("OK")) {
-                                    response.sendRedirect("runProgress.jsp?runId=" + runID + "&dateDeliv=" + dateDeliv + "&oriRunID=" + oriRunID + "&channel=" + channel);
-                                } else {
-                                    HashMap<String, String> pl = new HashMap<String, String>();
-                                    pl.put("ID", runId);
-                                    pl.put("fileNmethod", "AlgoRunner&run");
-                                    pl.put("datas", "");
-                                    pl.put("msg", resp);
-                                    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-                                    Date date = new Date();
-                                    pl.put("dates", dateFormat.format(date).toString());
-                                    Other.insertLog(pl);
-                                    response.sendRedirect("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
-                                            + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel + "&error=N");
-                                }
-                            }
-                        }
-                    } else if (reRun.equals("N")) {
-                        resp = QueryCust(runID, branchCode, channel, dateDeliv, "ori");
-                        //resp = insertPreRouteJob(runID, branchCode, dateDeliv, "ori", chn);
-                        if (resp.equalsIgnoreCase("OK")) {
-                            resp = QueryCust(runID, branchCode, channel, dateDeliv, "edit");
-                            //resp = insertPreRouteJob(runID, branchCode, dateDeliv, "edit", chn);
-                            if (resp.equalsIgnoreCase("OK")) {
-                                response.sendRedirect("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
-                                        + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel + "&error=N");
-                            }
+                    if (resp.equalsIgnoreCase("OK"))    
+                        resp = insertPreRouteJobCopy(runID, runId, branchCode, dateDeliv, "edit");
+                    if (resp.equalsIgnoreCase("OK"))    
+                        resp = insertPreVehicleCopy(runID, runId, branchCode, dateDeliv, "ori");
+                    if (resp.equalsIgnoreCase("OK") && reRun.equals("A")) {
+                        resp = UrlResponseGetter.getURLResponse(url.toString());
+                        if (resp.equals("OK")) {
+                            response.sendRedirect("runProgress.jsp?runId=" + runID + "&dateDeliv=" + dateDeliv + "&oriRunID=" + oriRunID + "&channel=" + channel);
+                        } else {
+                            HashMap<String, String> pl = new HashMap<String, String>();
+                            pl.put("ID", runId);
+                            pl.put("fileNmethod", "AlgoRunner&run");
+                            pl.put("datas", "");
+                            pl.put("msg", resp);
+                            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+                            Date date = new Date();
+                            pl.put("dates", dateFormat.format(date).toString());
+                            Other.insertLog(pl);
+                            response.sendRedirect("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
+                                    + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel + "&error=N");
                         }
                     }
+
+                } else if (reRun.equals("N")) {
+                    prepareCustTable(branchCode);
+                    resp = insertPreRouteVehicle(runID, branchCode, dateDeliv, chn);
+                    if (resp.equalsIgnoreCase("OK"))    
+                        resp = QueryCust(runID, branchCode, channel, dateDeliv, "ori");
+                    //resp = insertPreRouteJob(runID, branchCode, dateDeliv, "ori", chn);
+                    if (resp.equalsIgnoreCase("OK"))    
+                        resp = QueryCust(runID, branchCode, channel, dateDeliv, "edit");
+                    //resp = insertPreRouteJob(runID, branchCode, dateDeliv, "edit", chn);
+                    if (resp.equalsIgnoreCase("OK"))    
+                        response.sendRedirect("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
+                            + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel + "&error=N");
+
                 }
+                
             }
         } catch (Exception e) {
             HashMap<String, String> pl = new HashMap<String, String>();
@@ -165,6 +167,7 @@ public class AlgoRunner implements BusinessLogic {
             pl.put("fileNmethod", "AlgoRunner&run Exc");
             pl.put("datas", "");
             pl.put("msg", e.getMessage());
+            System.out.println("e.getMessage() " + e.getMessage());
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
             Date date = new Date();
             pl.put("dates", dateFormat.format(date).toString());
@@ -768,6 +771,64 @@ public class AlgoRunner implements BusinessLogic {
 
         return cds;
     }
+    
+    public String insertPreVehicleCopy(String runID, String prevRunID, String branchCode,
+            String dateDeliv, String str)
+            throws Exception {
+
+        String cds = "ERROR insertPreRouteVehicle";
+
+        String sql = "INSERT\n" +
+                "	INTO\n" +
+                "		BOSNET1.dbo.TMS_PreRouteVehicle SELECT distinct\n" +
+                "			'"+runID+"' AS RunId,\n" +
+                "			vehicle_code,\n" +
+                "			weight,\n" +
+                "			volume,\n" +
+                "			vehicle_type,\n" +
+                "			branch,\n" +
+                "			startLon,\n" +
+                "			startLat,\n" +
+                "			endLon,\n" +
+                "			endLat,\n" +
+                "			startTime,\n" +
+                "			endTime,\n" +
+                "			source1,\n" +
+                "			UpdatevDate,\n" +
+                "			CreateDate,\n" +
+                "			isActive,\n" +
+                "			fixedCost,\n" +
+                "			costPerM,\n" +
+                "			costPerServiceMin,\n" +
+                "			costPerTravelMin\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_PreRouteVehicle\n" +
+                "		WHERE\n" +
+                "			RunId = '"+prevRunID+"' and isActive = 1";
+
+        try (Connection con = (new Db()).getConnection("jdbc/fztms");
+                PreparedStatement ps = con.prepareStatement(sql)) {
+
+            con.setAutoCommit(false);
+            ps.executeUpdate();
+            con.setAutoCommit(true);
+
+            cds = "OK";
+        }catch (Exception e) {
+            HashMap<String, String> pl = new HashMap<String, String>();
+            pl.put("ID", runID);
+            pl.put("fileNmethod", "AlgoRunner&insertPreRouteJobCopy Exc");
+            pl.put("datas", "");
+            pl.put("msg", e.getMessage());
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+            Date date = new Date();
+            pl.put("dates", dateFormat.format(date).toString());
+            Other.insertLog(pl);
+            throw e;
+        }
+
+        return cds;
+    }
 
     public String insertPreRouteVehicle(String runID, String branchCode,
             String dateDeliv, String shn)
@@ -805,10 +866,15 @@ public class AlgoRunner implements BusinessLogic {
                 "				WHEN vh.vehicle_code IS NULL THEN va.weight\n" +
                 "				ELSE vh.weight\n" +
                 "			END AS weight,\n" +
-                "			CASE\n" +
-                "				WHEN vh.vehicle_code IS NULL THEN va.volume\n" +
-                "				ELSE vh.volume\n" +
-                "			END AS volume,\n" +
+                "			CAST(\n" +
+                "				CASE\n" +
+                "					WHEN vh.vehicle_code IS NULL THEN va.volume\n" +
+                "					ELSE vh.volume\n" +
+                "				END AS NUMERIC(\n" +
+                "					18,\n" +
+                "					3\n" +
+                "				)\n" +
+                "			)* 1000000 AS volume," +
                 "			CASE\n" +
                 "				WHEN vh.vehicle_code IS NULL THEN va.vehicle_type\n" +
                 "				ELSE vh.vehicle_type\n" +
@@ -838,10 +904,7 @@ public class AlgoRunner implements BusinessLogic {
                 "			'1' AS isActive,\n" +
                 "			va.fixedCost,\n" +
                 "			pr.value /(\n" +
-                "				CASE\n" +
-                "					WHEN va.vehicle_code IS NULL THEN pr.value\n" +
-                "					ELSE va.costPerM\n" +
-                "				END * 1000\n" +
+                "				va.costPerM * 1000\n" +
                 "			) AS costPerM,\n" +
                 "			0 AS costPerServiceMin,\n" +
                 "			0 AS costPerTravelMin\n" +
@@ -876,7 +939,7 @@ public class AlgoRunner implements BusinessLogic {
                 "			bm.param = 'DefaultKonsumsiBBm'\n" +
                 "		WHERE\n" +
                 "			va.included = 1\n" +
-                "			and va.Channel in ('" + (shn.equalsIgnoreCase("MT") ? shn : "GT','MT','FS','IT") + "');";
+                "			and va.Channel in (" + shn + ");";
 
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
                 PreparedStatement ps = con.prepareStatement(sql)) {
@@ -988,6 +1051,7 @@ public class AlgoRunner implements BusinessLogic {
         
         String sql = "SELECT\n" +
                 "	sp.Customer_ID,\n" +
+                "	cl.MarketId,\n" +
                 "	sp.DO_Number,\n" +
                 "	CASE\n" +
                 "		WHEN cl.Long IS NULL\n" +
@@ -1023,7 +1087,7 @@ public class AlgoRunner implements BusinessLogic {
                 "	sp.total_cubication,\n" +
                 "	CASE\n" +
                 "		WHEN ca.DeliveryDeadline IS NULL THEN CASE\n" +
-                "			WHEN cs.Distribution_Channel = 'MT' THEN 'BFOR'\n" +
+                "			WHEN cs.Distribution_Channel = 'MT' THEN dy.value\n" +
                 "			ELSE dd.value\n" +
                 "		END\n" +
                 "		ELSE ca.DeliveryDeadline\n" +
@@ -1047,18 +1111,27 @@ public class AlgoRunner implements BusinessLogic {
                 "			getdate(),\n" +
                 "			'yyyy-MM-dd hh-mm'\n" +
                 "		) AS VARCHAR\n" +
-                "	) AS CreateDate," +
+                "	) AS CreateDate,\n" +
                 "	sp.Request_Delivery_Date,\n" +
                 "	sp.Product_Description,\n" +
                 "	sp.Gross_Amount,\n" +
                 "	sp.DOQty,\n" +
                 "	sp.DOQtyUOM,\n" +
-                "	cs.Name1,\n" +
-                "	cs.Street,\n" +
+                "	CASE\n" +
+                "		WHEN cs.Name1 IS NULL THEN 'UNKNOWN'\n" +
+                "		ELSE cs.Name1\n" +
+                "	END AS Name1,\n" +
+                "	CASE\n" +
+                "		WHEN cs.Street IS NULL THEN 'UNKNOWN'\n" +
+                "		ELSE cs.Street\n" +
+                "	END AS Street,\n" +
                 "	cs.Distribution_Channel,\n" +
                 "	cs.Customer_Order_Block_all,\n" +
                 "	cs.Customer_Order_Block,\n" +
-                "	df.value as Priority_value\n" +
+                "	df.value AS Priority_value,\n" +
+                "	dn.value AS BufferEndDefault,\n" +
+                "	dj.value AS SatDelivDefault,\n" +
+                "	du.value AS ChannelNullDefault\n" +
                 "FROM\n" +
                 "	bosnet1.dbo.TMS_ShipmentPlan sp\n" +
                 "LEFT OUTER JOIN(\n" +
@@ -1126,6 +1199,14 @@ public class AlgoRunner implements BusinessLogic {
                 "	dt.param = 'DefaultCustEndTime'\n" +
                 "LEFT OUTER JOIN bosnet1.dbo.TMS_Params dh ON\n" +
                 "	dh.param = 'DefaultCustVehicleTypes'\n" +
+                "LEFT OUTER JOIN bosnet1.dbo.TMS_Params dy ON\n" +
+                "	dy.param = 'MTDefault'\n" +
+                "LEFT OUTER JOIN bosnet1.dbo.TMS_Params dn ON\n" +
+                "	dn.param = 'BufferEndDefault'\n" +
+                "LEFT OUTER JOIN bosnet1.dbo.TMS_Params dj ON\n" +
+                "	dj.param = 'SatDelivDefault'\n" +
+                "LEFT OUTER JOIN bosnet1.dbo.TMS_Params du ON\n" +
+                "	du.param = 'ChannelNullDefault'\n" +
                 "WHERE\n" +
                 "	sp.plant = '"+branchCode+"'\n" +
                 "	AND sp.already_shipment = 'N'\n" +
@@ -1139,8 +1220,10 @@ public class AlgoRunner implements BusinessLogic {
                 "		DAY,\n" +
                 "		- 7,\n" +
                 "		GETDATE()\n" +
-                "	)\n" + 
-                query;
+                "	)\n" +
+                query + "\n" +
+                "ORDER BY\n" +
+                "	sp.Customer_ID ASC\n";
         
         //select
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
@@ -1173,6 +1256,11 @@ public class AlgoRunner implements BusinessLogic {
                     pl.put("Customer_Order_Block_all", rs.getString("Customer_Order_Block_all"));
                     pl.put("Customer_Order_Block", rs.getString("Customer_Order_Block"));
                     pl.put("Priority_value", rs.getString("Priority_value"));
+                    pl.put("BufferEndDefault", rs.getString("BufferEndDefault"));
+                    pl.put("SatDelivDefault", rs.getString("SatDelivDefault"));
+                    pl.put("ChannelNullDefault", rs.getString("ChannelNullDefault"));
+                    pl.put("marketId", rs.getString("marketId"));
+                    //pl.put("DOCreationDate", rs.getString("DOCreationDate"));
                     asd.add(pl);
                     str = "OK";
                 }
@@ -1213,32 +1301,40 @@ public class AlgoRunner implements BusinessLogic {
                 "			Distribution_Channel,\n" +
                 "			Customer_Order_Block_all,\n" +
                 "			Customer_Order_Block,\n" +
-                "			Request_Delivery_Date\n" +
-                "		) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                "			Request_Delivery_Date,\n" +
+                "			MarketId\n" +
+                "		) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         
             List<HashMap<String, String>> ins = new ArrayList<HashMap<String, String>>();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");            
             Calendar c = Calendar.getInstance();
             Date dDeliv = sdf.parse(dateDeliv);
+            System.out.println("QueryCust()");
             for(int a = 0;a<asd.size();a++){ 
+                c = Calendar.getInstance();
                 pl = new HashMap<String, String>();
                 Date rdd = sdf.parse(asd.get(a).get("Request_Delivery_Date"));
                 pl = asd.get(a);                
                 
                 //cek hari buka
                 int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
+                //System.out.println(dayOfWeek);
+                if(pl.get("Customer_ID").equals("5820002148")){
+                    //System.out.println(edt);
+                    //System.out.println(dayOfWeek + "()" + Integer.parseInt(asd.get(a).get("DayWinStart")));
+                    //System.out.println(pl.get("5820002148"));
+                }
                 if(dayOfWeek >= Integer.parseInt(asd.get(a).get("DayWinStart"))
                         && dayOfWeek <= Integer.parseInt(asd.get(a).get("DayWinEnd"))){
                     //System.out.println(asd.get(a).get("DayWinStart") + "()" + asd.get(a).get("DayWinEnd"));
                     //System.out.println(asd.get(a).get("DeliveryDeadline") + " " + asd.get(a).get("Request_Delivery_Date"));
                     
-                    if(pl.get("Customer_ID").equals("5810003015")){
-                        //System.out.println(pl.get("Customer_ID"));
-                    }
+                    
                     //cek rule
+                    /*
                     if(!asd.get(a).get("DeliveryDeadline").equals("AFTR")){
                         if(dDeliv.compareTo(rdd) <= 0){
-                            pl = tree(asd.get(a), rdd, dDeliv, asd.get(a).get("DeliveryDeadline"));
+                            pl = tree(asd.get(a), rdd, dDeliv, asd.get(a).get("DeliveryDeadline"), chn);
                         }else{
                             pl = new HashMap<String, String>();
                         }
@@ -1247,10 +1343,16 @@ public class AlgoRunner implements BusinessLogic {
                         c.add(Calendar.DATE, 7);
                         rdd = sdf.parse(sdf.format(c.getTime()));
                         if(dDeliv.compareTo(rdd) <= 0){
-                            pl = tree(asd.get(a), rdd, dDeliv, asd.get(a).get("DeliveryDeadline"));
+                            pl = tree(asd.get(a), rdd, dDeliv, asd.get(a).get("DeliveryDeadline"), chn);
                         }else{
                             pl = new HashMap<String, String>();
                         }
+                    }*/
+                    
+                    if(dDeliv.compareTo(rdd) <= 7){
+                        pl = tree(asd.get(a), dDeliv, asd.get(a).get("DeliveryDeadline"), chn);
+                    }else{
+                        pl = new HashMap<String, String>();
                     }
                     
                     if(pl != null){
@@ -1266,7 +1368,7 @@ public class AlgoRunner implements BusinessLogic {
                 try (PreparedStatement ps = con.prepareStatement(sql) ){
                     ps.clearParameters();                    
                     for(int a = 0;a<ins.size();a++){ 
-                        if(ins.get(a).size() > 0){
+                        if(ins.get(a).size() > 0 && Integer.valueOf(ins.get(a).get("Customer_priority")) < 10){
                             int i = 1;
                             ps.setString(i++, runId);
                             ps.setString(i++, ins.get(a).get("Customer_ID"));
@@ -1297,7 +1399,8 @@ public class AlgoRunner implements BusinessLogic {
                             ps.setString(i++, ins.get(a).get("Distribution_Channel"));
                             ps.setString(i++, ins.get(a).get("Customer_Order_Block_all"));
                             ps.setString(i++, ins.get(a).get("Customer_Order_Block"));   
-                            ps.setString(i++, ins.get(a).get("Request_Delivery_Date"));  
+                            ps.setString(i++, ins.get(a).get("Request_Delivery_Date")); 
+                            ps.setString(i++, ins.get(a).get("marketId")); 
 
                             ps.addBatch();
                         }
@@ -1309,56 +1412,89 @@ public class AlgoRunner implements BusinessLogic {
         
         return str;
     }
-    public HashMap<String, String> tree(HashMap<String, String> pl, Date rdd, Date dateDeliv, String DDl) throws ParseException {
+    public HashMap<String, String> tree(HashMap<String, String> pl, Date dateDeliv, String DDl, String chn) throws Exception {
         pl = time(pl, dateDeliv);
-        pl = priority(pl, rdd, dateDeliv, DDl);
+        pl = priority(pl, dateDeliv, DDl, chn);
         return pl;
     }
 
-    public HashMap<String, String> priority(HashMap<String, String> pl, Date rdd, Date dateDeliv, String DDl) throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date date1 = sdf.parse(pl.get("Request_Delivery_Date"));
-
-        //
-        //if(dateDeliv.compareTo(rdd) < -3){        
-        //int str = dateDeliv.compareTo(rdd);
-        Calendar cal1 = new GregorianCalendar();
-        Calendar cal2 = new GregorianCalendar();
-
-        //SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyyy");
-
-        cal1.setTime(dateDeliv);
-        cal2.setTime(rdd);
-        int str = daysBetween(cal1.getTime(),cal2.getTime());
-        
-        //System.out.println(pl.toString());
-        //System.out.println(dateDeliv + " " + rdd + " = " + str);
-        //System.out.println(str);
-        if(pl.get("Customer_ID").equals("5810003015")){
-            //System.out.println(pl.get("Customer_ID"));
-        }
-        if (str < 4) {
-            if(pl.get("Distribution_Channel").equals("MT")){
-                pl.replace("Customer_priority", String.valueOf(str+1));
-            }else if(!pl.get("Distribution_Channel").equals("MT")){
-                pl.replace("Customer_priority", String.valueOf(str+2));
+    //int a = 0;
+    public HashMap<String, String> priority(HashMap<String, String> pl, Date dateDeliv, String DDl, String chn) throws ParseException, Exception {
+        try{
+            if(pl.get("Customer_ID").equals("5820002166")){
+                System.out.println();
             }
-            /*
-            if (str == 0 || str == 1) {
-                pl.replace("Customer_priority", String.valueOf(1));
-            }else if (str == 2 || str == 3) {
-                if(pl.get("Distribution_Channel").equals("MT")){
-                    pl.replace("Customer_priority", String.valueOf(str + 1));
-                }else if(!pl.get("Distribution_Channel").equals("MT")){
-                    pl.replace("Customer_priority", String.valueOf(str + 2));
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date date1 = sdf.parse(pl.get("Request_Delivery_Date"));
+
+            //
+            //if(dateDeliv.compareTo(rdd) < -3){        
+            //int str = dateDeliv.compareTo(rdd);
+            Calendar cal1 = new GregorianCalendar();
+            Calendar cal2 = new GregorianCalendar();
+
+            //SimpleDateFormat sdf = new SimpleDateFormat("ddMMyyyy");
+
+            cal1.setTime(dateDeliv);
+            cal2.setTime(date1);
+            int str = daysBetween(cal1.getTime(),cal2.getTime());
+
+            //System.out.println(pl.toString());
+            //System.out.println(dateDeliv + " " + rdd + " = " + str);
+            //System.out.println(str);
+            //5820000348        
+
+            if(pl.get("Distribution_Channel") == null){
+                //System.out.println(a++);
+                pl.replace("Distribution_Channel", pl.get("ChannelNullDefault"));
+            }
+            
+            //delivdate to RDD
+            if(pl.get("Distribution_Channel").equalsIgnoreCase("MT")){
+                //System.out.println(pl.get("Distribution_Channel"));DeliveryDeadline
+                if(pl.get("DeliveryDeadline").equalsIgnoreCase("ONDL")){
+                    if(str == 0)                    pl.replace("Customer_priority", String.valueOf(1));
+                    else                            pl.replace("Customer_priority", String.valueOf(10));
+                }else if(pl.get("DeliveryDeadline").equalsIgnoreCase("BFOR")){
+                    if(str == 0)                    pl.replace("Customer_priority", String.valueOf(1));
+                    else if(str == 1)               pl.replace("Customer_priority", String.valueOf(2));
+                    else if(str >= 2)               pl.replace("Customer_priority", String.valueOf(3));
+                    else if(str < 0)                pl.replace("Customer_priority", String.valueOf(10));
+                }else if(pl.get("DeliveryDeadline").equalsIgnoreCase("AFTR")){
+                    if(str == 0)                    pl.replace("Customer_priority", String.valueOf(1));
+                    else if(str > -3 && str < 0)    pl.replace("Customer_priority", String.valueOf(2));
+                    else if(str > 0)                pl.replace("Customer_priority", String.valueOf(3));
+                    else                            pl.replace("Customer_priority", String.valueOf(10));
                 }
             }else{
-                pl.replace("Customer_priority", String.valueOf(3));
+                //System.out.println(pl.get("Distribution_Channel"));
+                pl.replace("Distribution_Channel", "GT");
+                if(pl.get("DeliveryDeadline").equalsIgnoreCase("BFOR")){
+                    if(str == 0)            pl.replace("Customer_priority", String.valueOf(1));
+                    else if(str == 1)       pl.replace("Customer_priority", String.valueOf(3));
+                    else if(str >= 2)       pl.replace("Customer_priority", String.valueOf(4));
+                }else if(pl.get("DeliveryDeadline").equalsIgnoreCase("AFTR")){
+                    if(str < 0 && str > -7) pl.replace("Customer_priority", String.valueOf(2));
+                    else                    pl.replace("Customer_priority", String.valueOf(10));
+                }else if(pl.get("DeliveryDeadline").equalsIgnoreCase("ONDL")){
+                    if(str == 0)            pl.replace("Customer_priority", String.valueOf(1));
+                    else                    pl.replace("Customer_priority", String.valueOf(10));
+                }
+            }//System.out.println(pl.get("Customer_ID"));
+
+            if(pl.get("Customer_ID").equals("5820001001") || pl.get("Customer_ID").equals("5820000348")){
+                System.out.println(pl.get("Customer_ID"));
+                System.out.println("DeliveryDeadline " + pl.get("DeliveryDeadline"));
+                System.out.println("Distribution_Channel "+pl.get("Distribution_Channel"));
+                System.out.println("dateDeliv "+dateDeliv);
+                System.out.println("Request_Delivery_Date "+pl.get("Request_Delivery_Date"));
+                System.out.println("Customer_priority :" + pl.get("Customer_priority"));
+                System.out.println("str :" + str);
             }
-            */
-        }else{
-            pl.replace("Customer_priority", pl.get("Priority_value"));
+        }catch(Exception e){
+            throw new Exception(pl.toString() + ";" + e);
         }
+        
         return pl;
     }
     
@@ -1370,14 +1506,19 @@ public class AlgoRunner implements BusinessLogic {
         Calendar c = Calendar.getInstance();
         SimpleDateFormat shf = new SimpleDateFormat("HH:mm");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String reference = "12:00";
+        String reference = pl.get("SatDelivDefault");
         
         //saturday 12:00
         Calendar deliv = Calendar.getInstance();
         deliv.setTime(dateDeliv);
         int day = deliv.get(Calendar.DAY_OF_WEEK);
+        
         if(day == 7){
-             pl.replace("deliv_end", reference);
+            c.setTime(shf.parse(pl.get("deliv_end")));
+            deliv.setTime(shf.parse(reference));
+            if(c.after(deliv)){
+                pl.replace("deliv_end", reference);
+            }           
         }
         
         Calendar date2 = Calendar.getInstance();
@@ -1388,8 +1529,9 @@ public class AlgoRunner implements BusinessLogic {
             System.out.println("bfr" + pl.toString());
             c.add(Calendar.HOUR, -1);
             pl.replace("deliv_start", shf.format(c.getTime()).toString());
-            System.out.println("afr" + pl.toString());
+            //System.out.println("afr" + pl.toString());
         }
+        
         c.setTime(shf.parse(pl.get("deliv_end")));
         //-1 > 12:00 deliv_end
         if (c.after(date2)) {
@@ -1400,7 +1542,8 @@ public class AlgoRunner implements BusinessLogic {
         }
         
         //buffer-end time
-        c.add(Calendar.MINUTE, -30);
+        int end = Integer.parseInt(pl.get("BufferEndDefault"));
+        c.add(Calendar.MINUTE, - end);
         pl.replace("deliv_end", shf.format(c.getTime()).toString());       
         
         return pl;
