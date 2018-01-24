@@ -64,6 +64,16 @@
             x.hidden = !x.hidden;
             document.getElementById("tgl"+jobID).innerHTML=(x.hidden)?"More":"Less";
         }
+        
+        function batal(jobID,divID) { 
+            var x = confirm("Cancel Job " + jobID + " ? ");
+            if (x == true) {
+                var f = document.getElementById("frm_batal");
+                document.getElementById("jobID").value = jobID;
+                document.getElementById("divID").value = divID;
+                f.submit();
+            }
+        }
     </script>
         <h3>Job / Order</h3>
         
@@ -98,9 +108,13 @@
                     + r.jobID + "&divID=" + r.divID
                     + "'>Re-Order</a>";
             String cancelRef = 
+                    "<button type='button' onclick=\"batal(" + r.jobID 
+                    + ",'" + r.divID + "')\">Cancel</button>";
+            /*
                     "<a href='../order2/order2Cancel.jsp?jobID=" 
                     + r.jobID + "&divID=" + r.divID
                     + "'>Cancel</a>";
+            */
             String reorderCode = ""; 
             String cancelCode = ""; 
             String statusColor = "";
@@ -113,8 +127,8 @@
             }
             else if (r.jobStatus.equals("ASGN")){
                 statusColor = "blue";
-                reorderCode = "";
-                cancelCode = "";
+                reorderCode = reorderRef;
+                cancelCode = cancelRef;
             }
             else if (r.jobStatus.equals("NEW")){
                 statusColor = "black";
@@ -209,7 +223,13 @@
             </tr>
             <div>
             <tr id="more<%=r.jobID%>" name="more<%=r.jobID%>" hidden>
-                <td></td>
+                <td>
+                    <form id="frm_batal" name="frm_batal" action="order2Cancel.jsp" method="get">
+                        <input type="hidden" id="jobID" name="jobID" value="<%=r.jobID%>">
+                        <input type="hidden" id="divID" name="divID" value="<%=r.divID%>">
+                    </form>
+
+                </td>
                 <td colspan="100%" >
                     <%
                         DecimalFormat df = new DecimalFormat("#,###,###");
