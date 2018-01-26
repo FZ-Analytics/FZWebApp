@@ -243,15 +243,17 @@ public class popupDetilRunId implements BusinessLogic {
                     tcust = tcust.add(BigDecimal.valueOf(Long.valueOf(sq.DOcount)));                    
                     branch = FZUtil.getRsString(rs, i++, "");
                     String time = FZUtil.getRsString(rs, i++, "");
-                    System.out.println("ttravel " + time + " " +df.format(BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128)));
-                    System.out.println("tservice "+BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128));
-                    ttravel = ttravel.add(BigDecimal.valueOf(Long.valueOf(time)));
+                    //System.out.println("ttravel " + time + " " +df.format(BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128)));
+                    //System.out.println("tservice "+BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128));
                     sq.time = df.format(BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128));
+                    BigDecimal bd = new BigDecimal(sq.time);
+                    ttravel = ttravel.add(bd);
                     time = FZUtil.getRsString(rs, i++, "");
-                    System.out.println("ttravel " + time + " " +df.format(BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128)));
-                    System.out.println("tservice "+BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128));
-                    tservice = tservice.add(BigDecimal.valueOf(Long.valueOf(time)));
-                    sq.sctime =df.format(BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128));
+                    //System.out.println("ttravel " + time + " " +df.format(BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128)));
+                    //System.out.println("tservice "+BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128));
+                    sq.sctime = df.format(BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128));
+                    bd = new BigDecimal(sq.sctime);
+                    tservice = tservice.add(bd);
                     String transportCost = FZUtil.getRsString(rs, i++, "");
                     ttransportCost = ttransportCost.add(BigDecimal.valueOf(Long.valueOf(transportCost)));
                     sq.transportCost = mn.format(BigDecimal.valueOf(Long.valueOf(transportCost))).toString();
@@ -262,10 +264,10 @@ public class popupDetilRunId implements BusinessLogic {
                 }
                 tcap = tcap.divide(BigDecimal.valueOf(asd.size()), MathContext.DECIMAL128);
                 tkub = tkub.divide(BigDecimal.valueOf(asd.size()), MathContext.DECIMAL128);
-                String numb = (ttravel.intValue() / asd.size() / 60) + "." + (ttravel.intValue() / asd.size() % 60);
-                ttravel = BigDecimal.valueOf(Double.valueOf(numb));
-                numb = (tservice.intValue() / asd.size() / 60) + "." + (tservice.intValue() / asd.size() % 60);
-                tservice = BigDecimal.valueOf(Double.valueOf(numb));
+                //String numb = (ttravel.intValue() / asd.size() / 60) + "." + (ttravel.intValue() / asd.size() % 60);
+                ttravel = ttravel.divide(BigDecimal.valueOf(asd.size()), MathContext.DECIMAL128);
+                //numb = (tservice.intValue() / asd.size() / 60) + "." + (tservice.intValue() / asd.size() % 60);
+                tservice = tservice.divide(BigDecimal.valueOf(asd.size()), MathContext.DECIMAL128);
                 tkm = tkm.divide(BigDecimal.valueOf(asd.size()), MathContext.DECIMAL128);
                 //tcust = tcust.divide(BigDecimal.valueOf(asd.size()));
             }
