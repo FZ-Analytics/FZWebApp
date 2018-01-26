@@ -104,7 +104,7 @@ public class popupDetilRunId implements BusinessLogic {
                 "	),\n" +
                 "	CAST(\n" +
                 "		CAST(\n" +
-                "			a.avolume / 1000000 AS NUMERIC(\n" +
+                "			a.avolume AS NUMERIC(\n" +
                 "				9,\n" +
                 "				1\n" +
                 "			)\n" +
@@ -116,7 +116,7 @@ public class popupDetilRunId implements BusinessLogic {
                 "		CAST(\n" +
                 "			(\n" +
                 "				(\n" +
-                "					a.avolume / 1000000\n" +
+                "					a.avolume \n" +
                 "				)/(\n" +
                 "					a.volume / 100\n" +
                 "				)\n" +
