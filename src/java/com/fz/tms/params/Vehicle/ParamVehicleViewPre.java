@@ -43,6 +43,9 @@ public class ParamVehicleViewPre   implements BusinessLogic {
         request.setAttribute("weight", (String) ar.get(0).weight);
         request.setAttribute("volume", (String) ar.get(0).volume);
         request.setAttribute("included", (String) ar.get(0).included);
+        request.setAttribute("costPerM", (String) ar.get(0).costPerM);
+        request.setAttribute("fixedCost", (String) ar.get(0).fixedCost);
+        request.setAttribute("Channel", (String) ar.get(0).Channel);
         request.setAttribute("flag", dao.isInsert(vehiId).equals("OK") ? "update" : "insert");
         request.setAttribute("extVe", "false");
     }

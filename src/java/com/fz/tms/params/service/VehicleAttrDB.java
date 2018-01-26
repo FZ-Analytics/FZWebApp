@@ -96,11 +96,11 @@ public class VehicleAttrDB {
         
         if(flag.equalsIgnoreCase("insert")){
             sql = "INSERT INTO bosnet1.dbo.TMS_VehicleAtr "
-                + "(vehicle_code, branch, startLon, startLat, endLon, endLat, startTime, endTime, source1, vehicle_type, weight, volume, included) "
-                + " values(?,?,?,?,?,?,?,?,?,?,?,?,?);";            
+                + "(vehicle_code, branch, startLon, startLat, endLon, endLat, startTime, endTime, source1, vehicle_type, weight, volume, included, costPerM, fixedCost, Channel) "
+                + " values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";            
         }else if(flag.equalsIgnoreCase("update")){
             sql = "update bosnet1.dbo.TMS_VehicleAtr "
-                + " set branch = ?, startLon = ?, startLat = ?, endLon = ?, endLat = ?, startTime = ?, endTime = ?, source1 = ?, vehicle_type = ?, weight = ?, volume = ?, included = ?"
+                + " set branch = ?, startLon = ?, startLat = ?, endLon = ?, endLat = ?, startTime = ?, endTime = ?, source1 = ?, vehicle_type = ?, weight = ?, volume = ?, included = ?, costPerM = ?, fixedCost = ?, Channel = ?"
                 + " where vehicle_code = ?;";
         }
         
@@ -127,6 +127,9 @@ public class VehicleAttrDB {
                 psHdr.setString(11, c.weight);
                 psHdr.setString(12, c.volume);
                 psHdr.setString(13, c.included);
+                psHdr.setString(14, c.costPerM);
+                psHdr.setString(15, c.fixedCost);
+                psHdr.setString(16, c.Channel);
             }else if(flag.equalsIgnoreCase("update")){
                 psHdr.setString(1, c.branch);
                 psHdr.setString(2, c.startLon);
@@ -139,9 +142,11 @@ public class VehicleAttrDB {
                 psHdr.setString(9, c.vehicle_type);    
                 psHdr.setString(10, c.weight);
                 psHdr.setString(11, c.volume);
-                psHdr.setString(12, c.included);
-                psHdr.setString(13, c.vehicle_code);
-                
+                psHdr.setString(12, c.included);                
+                psHdr.setString(13, c.costPerM);
+                psHdr.setString(14, c.fixedCost);
+                psHdr.setString(15, c.Channel);
+                psHdr.setString(16, c.vehicle_code);
             }
             
             
@@ -245,10 +250,41 @@ public class VehicleAttrDB {
             try (Statement stm = con.createStatement()){            
                 // create sql
                 String sql ;
-                sql = "SELECT vh.vehicle_code, va.startLon, va.startLat, va.endLon, va.endLat, va.startTime, va.endTime, va.source1,"
-                        + " case when vh.vehicle_code is null then va.weight else vh.weight end as weight, case when vh.vehicle_code is null then va.volume else vh.volume end as volume,"
-                        + " case when vh.vehicle_code is null then va.branch else vh.plant end as plant, case when vh.vehicle_code is null then va.vehicle_type else vh.vehicle_type end as vehicle_type, va.included"
-                        + " FROM BOSNET1.dbo.Vehicle vh left join BOSNET1.dbo.TMS_VehicleAtr va on vh.Vehicle_Code = va.vehicle_code where vh.vehicle_code = '"+vCode+"';";
+                sql = "SELECT\n" +
+                    "	vh.vehicle_code,\n" +
+                    "	va.startLon,\n" +
+                    "	va.startLat,\n" +
+                    "	va.endLon,\n" +
+                    "	va.endLat,\n" +
+                    "	va.startTime,\n" +
+                    "	va.endTime,\n" +
+                    "	va.source1,\n" +
+                    "	CASE\n" +
+                    "		WHEN vh.vehicle_code IS NULL THEN va.weight\n" +
+                    "		ELSE vh.weight\n" +
+                    "	END AS weight,\n" +
+                    "	CASE\n" +
+                    "		WHEN vh.vehicle_code IS NULL THEN va.volume\n" +
+                    "		ELSE vh.volume\n" +
+                    "	END AS volume,\n" +
+                    "	CASE\n" +
+                    "		WHEN vh.vehicle_code IS NULL THEN va.branch\n" +
+                    "		ELSE vh.plant\n" +
+                    "	END AS plant,\n" +
+                    "	CASE\n" +
+                    "		WHEN vh.vehicle_code IS NULL THEN va.vehicle_type\n" +
+                    "		ELSE vh.vehicle_type\n" +
+                    "	END AS vehicle_type,\n" +
+                    "	va.included,\n" +
+                    "	va.costPerM,\n" +
+                    "	va.fixedCost,\n" +
+                    "	va.Channel\n" +
+                    "FROM\n" +
+                    "	BOSNET1.dbo.Vehicle vh\n" +
+                    "LEFT JOIN BOSNET1.dbo.TMS_VehicleAtr va ON\n" +
+                    "	vh.Vehicle_Code = va.vehicle_code\n" +
+                    "WHERE\n" +
+                    "	vh.vehicle_code = '"+vCode+"';";
                 
                 // query
                 try (ResultSet rs = stm.executeQuery(sql)){
@@ -267,6 +303,9 @@ public class VehicleAttrDB {
                         c.weight = rs.getString("weight");
                         c.volume = rs.getString("volume");
                         c.included = rs.getString("included");
+                        c.costPerM = rs.getString("costPerM");
+                        c.fixedCost = rs.getString("fixedCost");
+                        c.Channel = rs.getString("Channel");
                         ar.add(c);
                     }
                 }

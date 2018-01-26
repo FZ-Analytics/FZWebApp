@@ -30,4 +30,5 @@ public class Vehicle {
     public String solar;
     public String persentase;
     public String fixedCost;
+    public String Channel;
 }

@@ -30,12 +30,13 @@ public class ApplicationConfig extends Application {
      */
     private void addRestResourceClasses(Set<Class<?>> resources) {
         resources.add(com.fz.ffbv3.api.DivisionApi.class);
-        resources.add(com.fz.ffbv3.api.EntryApi.class);
         resources.add(com.fz.ffbv3.api.GMapsApi.class);
         resources.add(com.fz.ffbv3.api.ReasonApi.class);
         resources.add(com.fz.ffbv3.api.TMS.CustomerAttrViewAPI.class);
+        resources.add(com.fz.ffbv3.api.TMS.ForwadingAgentAPI.class);
         resources.add(com.fz.ffbv3.api.TMS.PopupEditCustAPI.class);
         resources.add(com.fz.ffbv3.api.TMS.PopupEditPreRouteVehicleApi.class);
+        resources.add(com.fz.ffbv3.api.TMS.RunResultAPI.class);
         resources.add(com.fz.ffbv3.api.TMS.SubmitToSapAPI.class);
         resources.add(com.fz.ffbv3.api.TMS.VehicleAttrViewAPI.class);
         resources.add(com.fz.ffbv3.api.TaskApi.class);

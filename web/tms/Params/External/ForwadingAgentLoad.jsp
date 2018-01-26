@@ -1,21 +1,21 @@
 <%-- 
-    Document   : LoadBranchCust
-    Created on : Oct 16, 2017, 2:35:33 PM
-    Author     : dwi.rangga
+    Document   : ForwadingAgentLoad
+    Created on : Jan 25, 2018, 4:14:37 PM
+    Author     : dwi.oktaviandi
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@include file="../../appGlobal/pageTop.jsp"%>
-<%@page import="com.fz.tms.params.model.Customer"%>
-<%run(new com.fz.tms.params.Customer.LoadBranchCust());%>
+<%@page import="com.fz.tms.params.model.ForwadingAgent"%>
+<%run(new com.fz.tms.params.External.Driver.ForwadingAgentLoad());%>
 <!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
+        <title>Forwading Agent Load</title>
     </head>
     <body>
-        <%@include file="../../appGlobal/bodyTop.jsp"%>        
+        <%@include file="../../appGlobal/bodyTop.jsp"%>
         <div class="fzErrMsg">
             <%=get("errMsg")%>
         </div>
@@ -26,17 +26,19 @@
                 <table cellpadding="0" cellspacing="0" border="0" class="datatable table table-striped table-bordered">
                     <thead>
                         <tr>
-                            <th>Customer Id</th>
+                            <th>Id</th>
                             <th>Nama</th>
-                            <th>Street</th>
+                            <th>Branch</th>
+                            <th>inc</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <%for (Customer j : (List<Customer>) getList("ListCustomer")) {%> 
+                        <%for (ForwadingAgent j : (List<ForwadingAgent>) getList("ListForwadingAgent")) {%> 
                         <tr>
-                            <th class="fzCellClikck"><%=j.customer_id%></th>
-                            <th><%=j.Name1%></th>
-                            <th><%=j.Street%></th>
+                            <th class="fzCellClikck"><%=j.Service_agent_id%></th>
+                            <th><%=j.Driver_Name%></th>
+                            <th><%=j.Branch%></th>
+                            <th><%=j.inc%></th>
                         </tr>
                         <%} // for ProgressRecord %>
                     </tbody>
@@ -53,7 +55,7 @@
                     //Some code
                     //alert( $(this).text() ); 
                     if ($(this).text().length > 0) {
-                        window.open("../Customer/CustomerAttrView.jsp?custId=" + $(this).text(), null,
+                        window.open("../External/ForwadingAgentView.jsp?flag=update&agentId=" + $(this).text(), null,
                                 "scrollbars=1,resizable=1,height=500,width=750");
                         return true;
                     }

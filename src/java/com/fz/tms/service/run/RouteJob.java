@@ -47,6 +47,7 @@ public class RouteJob {
     public String transportCost;
     public String dist;
     public String rdd;
+    public String send;
     
     public String getMapLink() {
         

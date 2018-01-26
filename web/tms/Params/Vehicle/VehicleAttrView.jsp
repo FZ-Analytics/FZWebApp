@@ -26,7 +26,8 @@
                             '\",\"startLat\":\"' + $("#startLat").val() + '\",\"endLon\":\"' + $("#endLon").val() + 
                             '\",\"endLat\":\"' + $("#endLat").val() + '\",\"startTime\":\"' + $("#startTime").val() + 
                             '\",\"endTime\":\"' + $("#endTime").val() + '\",\"source1\":\"' + $("#source1").val() +
-                            '\",\"included\":\"' + $("#included").val() + '\"}';
+                            '\",\"included\":\"' + $("#included").val() + '\",\"costPerM\":\"' + $("#costPerM").val() +
+                            '\",\"fixedCost\":\"' + $("#fixedCost").val() + '\",\"Channel\":\"' + $("#Channel").val() + '\"}';
                     var data = [];
                     //alert(jsonForServer);
                     $.post($apiAddress, {json: jsonForServer}).done(function (data) {
@@ -108,6 +109,24 @@
             <br>
             <label class="fzLabel">included:</label> 
             <input class="fzInput" type="text" id="included" name="included" value="<%=get("included")%>">
+            
+            <br>
+            <label class="fzLabel">costPerM:</label> 
+            <input class="fzInput" type="text" id="costPerM" name="costPerM" value="<%=get("costPerM")%>" maxlength="5">
+            <span class="fzLabelBottom">e.g. "9.50"</span>
+            
+            <br>
+            <label class="fzLabel">fixedCost:</label> 
+            <input class="fzInput" type="text" id="fixedCost" name="fixedCost" value="<%=get("fixedCost")%>" maxlength="5">
+            <span class="fzLabelBottom">e.g. "1.00"</span>
+            
+            <br>
+            <label class="fzLabel">Channel:</label> 
+            <select id="Channel" name="Channel" >
+                <option value="GT" <%if (get("Channel").equals("GT")) {%> selected="true" <%}%>>GT</option>
+                <option value="MT" <%if (get("Channel").equals("MT")) {%> selected="true" <%}%>>MT</option>
+            </select>
+            
             <br><br>
             <button class="btn fzButton" type="submit" id="btn"><%=get("flag")%></button>
         

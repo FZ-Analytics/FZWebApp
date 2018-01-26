@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.fz.tms.params.Customer;
+package com.fz.tms.params;
 
 import com.fz.generic.BusinessLogic;
 import com.fz.util.FZUtil;
@@ -13,9 +13,9 @@ import javax.servlet.jsp.PageContext;
 
 /**
  *
- * @author dwi.rangga
+ * @author dwi.oktaviandi
  */
-public class CustError implements BusinessLogic {
+public class Error implements BusinessLogic {
 
     @Override
     public void run(HttpServletRequest request, HttpServletResponse response
@@ -25,4 +25,5 @@ public class CustError implements BusinessLogic {
         request.getSession().setAttribute("errMsg"
                         , err);
     }    
+    
 }

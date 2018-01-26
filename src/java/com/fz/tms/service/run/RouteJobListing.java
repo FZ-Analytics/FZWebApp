@@ -10,6 +10,7 @@ import com.fz.generic.BusinessLogic;
 import com.fz.generic.Db;
 import com.fz.tms.params.model.DODetil;
 import com.fz.tms.params.model.SummaryVehicle;
+import com.fz.tms.params.model.Vehicle;
 import com.fz.tms.params.service.Other;
 import com.fz.tms.params.service.VehicleAttrDB;
 import com.fz.util.FZUtil;
@@ -18,6 +19,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -125,7 +127,14 @@ public class RouteJobListing implements BusinessLogic {
                 "		) AS VARCHAR\n" +
                 "	) AS transportCost,\n" +
                 "	cast(Dist / 1000 as Numeric(9,1)) as Dist,\n" +
-                "	Request_Delivery_Date\n" +
+                "	Request_Delivery_Date,\n" +
+                "	CASE\n" +
+                "		WHEN j.isFix IS NULL\n" +
+                "		AND len(j.customer_ID)> 3\n" +
+                "		AND j.vehicle_code <> 'NA' THEN 'OK'\n" +
+                "		WHEN j.vehicle_code = 'NA' THEN ''\n" +
+                "		ELSE 'NO'\n" +
+                "	END\n" +
                 "FROM\n" +
                 "	bosnet1.dbo.tms_RouteJob j\n" +
                 "LEFT OUTER JOIN(\n" +
@@ -226,18 +235,26 @@ public class RouteJobListing implements BusinessLogic {
                     j.transportCost = FZUtil.getRsString(rs, i++, "");
                     j.dist = FZUtil.getRsString(rs, i++, "");
                     j.rdd = FZUtil.getRsString(rs, i++, "");
+                    j.send = FZUtil.getRsString(rs, i++, "");
                     
                     js.add(j);
                     
+                    if(j.custID.equalsIgnoreCase("5820001166")){
+                        //System.out.println("com.fz.tms.service.run.RouteJobListing.run()");
+                    }
+                    
                     //System.out.println(j.toString());
+                    //add break row
                     if(j.arrive != ""){
                         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
                         Date arv12 = sdf.parse("12:00");
                         Date arvA = sdf.parse(j.arrive);
+                        RouteJob temp = null;
                         if(js.get((js.size()-2)).arrive != ""){
                             Date arvB = sdf.parse(js.get((js.size()-2)).arrive);
                             if(arvA.after(arv12) && arvB.before(arv12)){
                                 //System.out.println(arvA + " " + arvB);
+                                temp = j;
                                 j = new RouteJob();
                                 j.name1 = "";
                                 j.custPriority = "";
@@ -245,8 +262,13 @@ public class RouteJobListing implements BusinessLogic {
                                 j.street = "";
                                 j.weight = "";
                                 j.volume = "";
-                                j.edit = "";                                
+                                j.edit = "";     
+                                j.rdd = "";
+                                j.transportCost = "";
+                                j.dist = "";
+                                j.send = "";  
                                 js.add((js.size()-1), j);
+                                j = temp;
                             }
                         }
                     }
@@ -261,7 +283,6 @@ public class RouteJobListing implements BusinessLogic {
                         request.setAttribute("shift", j.shift);
                         request.setAttribute("OriRunID", OriRunID);
                     }
-                    
                     // else if has prev job within same route
                     else if (prevJ.routeNb == j.routeNb){
                         
@@ -269,6 +290,7 @@ public class RouteJobListing implements BusinessLogic {
                     }
                     
                     //5 =-> 7 
+                    //link google map setelah break
                     if(js.get(js.size() - 1).prevJob == null && js.get(js.size() - 1).vehicleCode.length() > 2 && js.size() >= 3){
                         RouteJob pJ = new RouteJob();
                         pJ = (RouteJob) js.get(js.size() - 1);
@@ -298,5 +320,31 @@ public class RouteJobListing implements BusinessLogic {
         String id = (new SimpleDateFormat("yyyyMMdd_HHmmssSSS").format(
                         new java.util.Date()));
         return id;
+    }
+
+    public String sendSAP(Vehicle he) throws Exception{
+        String str = "ERROR";
+        
+        String sql = "update\n"
+                + "	bosnet1.dbo.TMS_RouteJob\n"
+                + " set\n"
+                + "	isFix = '1'\n"
+                + " where\n"
+                + "	runID = '" + he.RunId + "'\n"
+                + "	and vehicle_code = '" + he.vehicle_code + "'\n"
+                + "	and isFix is null";
+        try (
+            Connection con = (new Db()).getConnection("jdbc/fztms");
+            PreparedStatement psHdr = con.prepareStatement(sql
+                    , Statement.RETURN_GENERATED_KEYS);
+            )  {
+            con.setAutoCommit(false);
+
+            psHdr.executeUpdate();
+            
+             con.setAutoCommit(true);
+             str = "OK";
+        }
+        return str;
     }
 }

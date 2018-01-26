@@ -161,6 +161,22 @@
                         "scrollbars=1,resizable=1,height=500,width=750");
             }
             
+            function sendSAP(kode) {                
+                var $apiAddress = '../../api/runResult/SubmitShipmentPlan';                
+                var jsonForServer = '{\"RunId\": \"' + $("#RunIdClick").text() + '\",\"vehicle_code\":\"' + kode + '\"}';
+                var data = [];
+
+                //alert('tes : ' + $apiAddress + ' ' + jsonForServer);
+                $.post($apiAddress, {json: jsonForServer}).done(function (data) {
+                    if(data == 'OK'){
+                        alert( 'sukses' );
+                        location.reload()
+                    }else{
+                        alert( 'submit error' ); 
+                    }
+                });
+            }
+            
             function fnExcelReport()
             {
                 //var t = document.getElementById('btnHi');
@@ -251,6 +267,9 @@
                     <th width="100px" class="fzCol">RDD</th>
                     <th width="100px" class="fzCol">Transport Cost</th>
                     <th width="100px" class="fzCol">Dist</th>
+                    <%--
+                    <th width="100px" class="fzCol">Send</th>
+                    --%>
                     <th width="100px" class="fzCol">Edit</th>
                 </tr>
             </thead>
@@ -283,6 +302,12 @@
                     <td class="fzCell"><%=j.rdd%></td>
                     <td class="fzCell"><%=j.transportCost%></td>
                     <td class="fzCell"><%=j.dist%></td>
+                    <%--
+                    <td class="fzCell" 
+                        <%if (j.send != null && j.send.equalsIgnoreCase("OK")) {%>
+                        onclick="sendSAP('<%=j.vehicleCode%>')" style="color: green;"
+                        <%}%> ><%=j.send%></td>
+                    --%>
                     <td class="editCust" onclick="klik(<%=j.custID%>)" style="color: blue;"><%=j.edit%></td>
                 </tr>
 
