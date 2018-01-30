@@ -30,6 +30,8 @@ public class ParamVehicleViewPre   implements BusinessLogic {
         VehicleAttrDB dao = new VehicleAttrDB();
         List<Vehicle> ar = dao.getVehi(vehiId);
         
+        List<Vehicle> st = dao.getDriver(ar.get(0).branch, "");
+        
         request.setAttribute("vehicle_code", ar.get(0).vehicle_code);
         request.setAttribute("branch", ar.get(0).branch);
         request.setAttribute("startLon", ar.get(0).startLat);
@@ -46,6 +48,10 @@ public class ParamVehicleViewPre   implements BusinessLogic {
         request.setAttribute("costPerM", (String) ar.get(0).costPerM);
         request.setAttribute("fixedCost", (String) ar.get(0).fixedCost);
         request.setAttribute("Channel", (String) ar.get(0).Channel);
+        request.setAttribute("ListDriver", st);
+        //System.out.println(ar.get(0).IdDriver.length());
+        request.setAttribute("IdDriver", ar.get(0).IdDriver.length() > 0 ? ar.get(0).IdDriver : st.get(st.size()-1).IdDriver);
+        request.setAttribute("NamaDriver", ar.get(0).IdDriver.length() > 0 ? ar.get(0).NamaDriver : st.get(st.size()-1).NamaDriver);
         request.setAttribute("flag", dao.isInsert(vehiId).equals("OK") ? "update" : "insert");
         request.setAttribute("extVe", "false");
     }

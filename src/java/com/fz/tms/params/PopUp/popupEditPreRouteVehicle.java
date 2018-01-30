@@ -8,11 +8,13 @@ package com.fz.tms.params.PopUp;
 import com.fz.generic.BusinessLogic;
 import com.fz.generic.Db;
 import com.fz.tms.params.model.Vehicle;
+import com.fz.tms.params.service.VehicleAttrDB;
 import com.fz.util.FZUtil;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.PageContext;
@@ -29,6 +31,8 @@ public class popupEditPreRouteVehicle  implements BusinessLogic {
             , PageContext pc) throws Exception {
         String runId = FZUtil.getHttpParam(request, "runId");
         String vCode = FZUtil.getHttpParam(request, "vCode");
+        
+        VehicleAttrDB dao = new VehicleAttrDB();        
         
         String sql = "SELECT\n" +
                 "	re.vehicle_code,\n" +
@@ -47,7 +51,9 @@ public class popupEditPreRouteVehicle  implements BusinessLogic {
                 "	re.fixedCost,\n" +
                 "	re.isActive,\n" +
                 "	pr.value,\n" +
-                "	va.costPerM\n" +
+                "	va.costPerM,\n" +
+                "	re.IdDriver,\n" +
+                "	re.NamaDriver\n" +
                 "FROM\n" +
                 "	BOSNET1.dbo.TMS_PreRouteVehicle re\n" +
                 "LEFT OUTER JOIN bosnet1.dbo.TMS_Params pr ON\n" +
@@ -83,10 +89,16 @@ public class popupEditPreRouteVehicle  implements BusinessLogic {
                     ve.isActive = FZUtil.getRsString(rs, i++, "");
                     ve.solar = FZUtil.getRsString(rs, i++, "");
                     ve.persentase = FZUtil.getRsString(rs, i++, "");
+                    ve.IdDriver = FZUtil.getRsString(rs, i++, "");
+                    ve.NamaDriver = FZUtil.getRsString(rs, i++, "");
                 }
                 ve.RunId = runId;
                 
+                List<Vehicle> st = dao.getDriver(ve.branch, "");
+                
+                request.setAttribute("ListDriver", st);
                 request.setAttribute("runId", runId);
+                request.setAttribute("branch", ve.branch);
                 request.setAttribute("vehicle_code", ve.vehicle_code);
                 request.setAttribute("weight", ve.weight);
                 request.setAttribute("volume", ve.volume);
@@ -104,6 +116,8 @@ public class popupEditPreRouteVehicle  implements BusinessLogic {
                 request.setAttribute("isActive", ve.isActive);
                 request.setAttribute("solar", ve.solar);
                 request.setAttribute("persentase", ve.persentase);
+                request.setAttribute("IdDriver", ve.IdDriver);
+                request.setAttribute("NamaDriver", ve.NamaDriver);
                 
             }
          }
@@ -127,6 +141,8 @@ public class popupEditPreRouteVehicle  implements BusinessLogic {
                 "	source1 = '"+ve.source1+"',\n" +
                 "	costPerM = '"+ve.costPerM+"',\n" +
                 "	fixedCost = '"+ve.fixedCost+"',\n" +
+                "	IdDriver = '"+ve.IdDriver+"',\n" +
+                "	NamaDriver = '"+ve.NamaDriver+"',\n" +
                 "	isActive = '"+ve.isActive+"'\n" +
                 "WHERE\n" +
                 "	RunId = '"+ve.RunId+"'\n" +

@@ -31,4 +31,8 @@ public class Vehicle {
     public String persentase;
     public String fixedCost;
     public String Channel;
+    
+    public String IdDriver;
+    public String NamaDriver;
+    public String DriverDates;
 }

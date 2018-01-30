@@ -7,12 +7,15 @@ package com.fz.ffbv3.api.TMS;
 
 import static com.fz.ffbv3.api.TMS.PopupEditCustAPI.decodeContent;
 import com.fz.tms.params.model.Customer;
+import com.fz.tms.params.model.OptionModel;
 import com.fz.tms.params.model.Vehicle;
 import com.fz.tms.params.service.CustomerAttrDB;
 import com.fz.tms.params.service.VehicleAttrDB;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Consumes;
@@ -77,10 +80,42 @@ public class VehicleAttrViewAPI {
                       
         }catch(Exception e){
             str = "ERROR";
+            System.out.println(e.getMessage());
         }
         //TODO return proper representation object
         //throw new UnsupportedOperationException();
         String jsonOutput = gson.toJson(str);
+        return jsonOutput;
+    }
+    
+    @POST
+    @Path("getNamaDriver")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getNamaDriver(String content) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String str = "ERROR";
+        List<OptionModel> ay = new ArrayList<OptionModel>();
+        try{
+            VehicleAttrDB db = new VehicleAttrDB();
+            Vehicle he = gson.fromJson(content.contains("json") ? 
+                    decodeContent(content) : content, Vehicle.class);
+            
+            List<Vehicle> st = db.getDriver(he.branch, he.IdDriver);
+            
+            if(st.size() > 0){
+                OptionModel om = new OptionModel();
+                om.Display = st.get(0).NamaDriver;
+                om.Value = st.get(0).IdDriver;
+                ay.add(om);
+                //str = st.get(0).NamaDriver;
+            }
+                      
+        }catch(Exception e){
+            str = "ERROR";
+        }
+        //TODO return proper representation object
+        //throw new UnsupportedOperationException();
+        String jsonOutput = gson.toJson(ay);
         return jsonOutput;
     }
     
@@ -91,7 +126,8 @@ public class VehicleAttrViewAPI {
                 c.startLat.length() == 0 || c.endLon.length() == 0 || c.endLat.length() == 0 || 
                 c.startTime.length() == 0 || c.endTime.length() == 0 || c.source1.length() == 0 ||
                 c.vehicle_type.length() == 0 || c.weight.length() == 0 || c.volume.length() == 0 ||
-                c.included.length() == 0){
+                c.included.length() == 0 || c.costPerM.length() == 0 || c.fixedCost.length() == 0 ||
+                c.Channel.length() == 0 || c.IdDriver.length() == 0 || c.NamaDriver.length() == 0){
             str = "Lengkapi parameter";
         }
         
