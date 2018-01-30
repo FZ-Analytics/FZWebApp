@@ -800,7 +800,9 @@ public class AlgoRunner implements BusinessLogic {
                 "			fixedCost,\n" +
                 "			costPerM,\n" +
                 "			costPerServiceMin,\n" +
-                "			costPerTravelMin\n" +
+                "			costPerTravelMin,\n" +
+                "			IdDriver,\n" +
+                "			NamaDriver\n" +
                 "		FROM\n" +
                 "			BOSNET1.dbo.TMS_PreRouteVehicle\n" +
                 "		WHERE\n" +
@@ -858,7 +860,9 @@ public class AlgoRunner implements BusinessLogic {
                 "			fixedCost,\n" +
                 "			costPerM,\n" +
                 "			costPerServiceMin,\n" +
-                "			costPerTravelMin\n" +
+                "			costPerTravelMin,\n" +
+                "			IdDriver,\n" +
+                "			NamaDriver\n" +
                 "		) SELECT\n" +
                 "			'"+runID+"' AS RunId,\n" +
                 "			v.vehicle_code,\n" +
@@ -907,7 +911,9 @@ public class AlgoRunner implements BusinessLogic {
                 "				va.costPerM * 1000\n" +
                 "			) AS costPerM,\n" +
                 "			0 AS costPerServiceMin,\n" +
-                "			0 AS costPerTravelMin\n" +
+                "			0 AS costPerTravelMin,\n" +
+                "			va.IdDriver,\n" +
+                "			va.NamaDriver\n" +
                 "		FROM\n" +
                 "			(\n" +
                 "				SELECT\n" +

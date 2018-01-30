@@ -48,7 +48,7 @@
             <label class="fzLabel">Branch Id</label>
             <select id="branchId" name="branchId">
                 <%for (Branch hd : (List<Branch>) getList("ListBranch")) { %>
-                <%= makeOption(hd.branchId, hd.branchId, hd.name)%>
+                    <%= makeOption(hd.branchId, hd.branchId, hd.name)%>
                 <% } /* end for Branch Id */ %>
             </select> 
             <br>

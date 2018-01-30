@@ -9,11 +9,15 @@ import com.fz.generic.Db;
 import com.fz.tms.params.model.Branch;
 import com.fz.tms.params.model.OptionModel;
 import com.fz.tms.params.model.Vehicle;
+import com.fz.util.FZUtil;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -96,13 +100,17 @@ public class VehicleAttrDB {
         
         if(flag.equalsIgnoreCase("insert")){
             sql = "INSERT INTO bosnet1.dbo.TMS_VehicleAtr "
-                + "(vehicle_code, branch, startLon, startLat, endLon, endLat, startTime, endTime, source1, vehicle_type, weight, volume, included, costPerM, fixedCost, Channel) "
-                + " values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";            
+                + "(vehicle_code, branch, startLon, startLat, endLon, endLat, startTime, endTime, source1, vehicle_type, weight, volume, included, costPerM, fixedCost, Channel, IdDriver, NamaDriver, DriverDates) "
+                + " values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";            
         }else if(flag.equalsIgnoreCase("update")){
             sql = "update bosnet1.dbo.TMS_VehicleAtr "
-                + " set branch = ?, startLon = ?, startLat = ?, endLon = ?, endLat = ?, startTime = ?, endTime = ?, source1 = ?, vehicle_type = ?, weight = ?, volume = ?, included = ?, costPerM = ?, fixedCost = ?, Channel = ?"
+                + " set branch = ?, startLon = ?, startLat = ?, endLon = ?, endLat = ?, startTime = ?, endTime = ?, source1 = ?, vehicle_type = ?, weight = ?, volume = ?, included = ?, costPerM = ?, fixedCost = ?, Channel = ?, IdDriver = ?, NamaDriver = ?, DriverDates = ?"
                 + " where vehicle_code = ?;";
         }
+        
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        Date date = new Date();
+        c.DriverDates = dateFormat.format(date);
         
         try (
             Connection con = (new Db()).getConnection("jdbc/fztms");
@@ -130,6 +138,9 @@ public class VehicleAttrDB {
                 psHdr.setString(14, c.costPerM);
                 psHdr.setString(15, c.fixedCost);
                 psHdr.setString(16, c.Channel);
+                psHdr.setString(17, c.IdDriver);
+                psHdr.setString(18, c.NamaDriver);
+                psHdr.setString(19, c.DriverDates);
             }else if(flag.equalsIgnoreCase("update")){
                 psHdr.setString(1, c.branch);
                 psHdr.setString(2, c.startLon);
@@ -146,7 +157,10 @@ public class VehicleAttrDB {
                 psHdr.setString(13, c.costPerM);
                 psHdr.setString(14, c.fixedCost);
                 psHdr.setString(15, c.Channel);
-                psHdr.setString(16, c.vehicle_code);
+                psHdr.setString(16, c.IdDriver);
+                psHdr.setString(17, c.NamaDriver);
+                psHdr.setString(18, c.DriverDates);
+                psHdr.setString(19, c.vehicle_code);
             }
             
             
@@ -250,62 +264,67 @@ public class VehicleAttrDB {
             try (Statement stm = con.createStatement()){            
                 // create sql
                 String sql ;
-                sql = "SELECT\n" +
-                    "	vh.vehicle_code,\n" +
-                    "	va.startLon,\n" +
-                    "	va.startLat,\n" +
-                    "	va.endLon,\n" +
-                    "	va.endLat,\n" +
-                    "	va.startTime,\n" +
-                    "	va.endTime,\n" +
-                    "	va.source1,\n" +
-                    "	CASE\n" +
-                    "		WHEN vh.vehicle_code IS NULL THEN va.weight\n" +
-                    "		ELSE vh.weight\n" +
-                    "	END AS weight,\n" +
-                    "	CASE\n" +
-                    "		WHEN vh.vehicle_code IS NULL THEN va.volume\n" +
-                    "		ELSE vh.volume\n" +
-                    "	END AS volume,\n" +
-                    "	CASE\n" +
-                    "		WHEN vh.vehicle_code IS NULL THEN va.branch\n" +
-                    "		ELSE vh.plant\n" +
-                    "	END AS plant,\n" +
-                    "	CASE\n" +
-                    "		WHEN vh.vehicle_code IS NULL THEN va.vehicle_type\n" +
-                    "		ELSE vh.vehicle_type\n" +
-                    "	END AS vehicle_type,\n" +
-                    "	va.included,\n" +
-                    "	va.costPerM,\n" +
-                    "	va.fixedCost,\n" +
-                    "	va.Channel\n" +
-                    "FROM\n" +
-                    "	BOSNET1.dbo.Vehicle vh\n" +
-                    "LEFT JOIN BOSNET1.dbo.TMS_VehicleAtr va ON\n" +
-                    "	vh.Vehicle_Code = va.vehicle_code\n" +
-                    "WHERE\n" +
-                    "	vh.vehicle_code = '"+vCode+"';";
+                sql = "  SELECT\n" +
+                "	vh.vehicle_code,\n" +
+                "	va.startLon,\n" +
+                "	va.startLat,\n" +
+                "	va.endLon,\n" +
+                "	va.endLat,\n" +
+                "	va.startTime,\n" +
+                "	va.endTime,\n" +
+                "	va.source1,\n" +
+                "	CASE\n" +
+                "		WHEN vh.vehicle_code IS NULL THEN va.weight\n" +
+                "		ELSE vh.weight\n" +
+                "	END AS weight,\n" +
+                "	CASE\n" +
+                "		WHEN vh.vehicle_code IS NULL THEN va.volume\n" +
+                "		ELSE vh.volume\n" +
+                "	END AS volume,\n" +
+                "	CASE\n" +
+                "		WHEN vh.vehicle_code IS NULL THEN va.branch\n" +
+                "		ELSE vh.plant\n" +
+                "	END AS plant,\n" +
+                "	CASE\n" +
+                "		WHEN vh.vehicle_code IS NULL THEN va.vehicle_type\n" +
+                "		ELSE vh.vehicle_type\n" +
+                "	END AS vehicle_type,\n" +
+                "	va.included,\n" +
+                "	va.costPerM,\n" +
+                "	va.fixedCost,\n" +
+                "	va.Channel,\n" +
+                "	va.IdDriver,\n" +
+                "	va.NamaDriver\n" +
+                "FROM\n" +
+                "	BOSNET1.dbo.Vehicle vh\n" +
+                "LEFT JOIN BOSNET1.dbo.TMS_VehicleAtr va ON\n" +
+                "	vh.Vehicle_Code = va.vehicle_code\n" +
+                "WHERE\n" +
+                "	vh.vehicle_code = '"+vCode+"';";
                 
                 // query
                 try (ResultSet rs = stm.executeQuery(sql)){
                     if (rs.next()){
                         c = new Vehicle();
-                        c.vehicle_code = rs.getString("Vehicle_Code");
-                        c.branch = rs.getString("plant");
-                        c.startLon = rs.getString("startLon");
-                        c.startLat = rs.getString("startLat");
-                        c.endLon = rs.getString("endLon");
-                        c.endLat = rs.getString("endLat");
-                        c.startTime = rs.getString("startTime");
-                        c.endTime = rs.getString("endTime");
-                        c.source1 = rs.getString("source1");
-                        c.vehicle_type = rs.getString("vehicle_type");
-                        c.weight = rs.getString("weight");
-                        c.volume = rs.getString("volume");
-                        c.included = rs.getString("included");
-                        c.costPerM = rs.getString("costPerM");
-                        c.fixedCost = rs.getString("fixedCost");
-                        c.Channel = rs.getString("Channel");
+                        int i = 1;
+                        c.vehicle_code = FZUtil.getRsString(rs, i++, "");
+                        c.startLon = FZUtil.getRsString(rs, i++, "");
+                        c.startLat = FZUtil.getRsString(rs, i++, "");
+                        c.endLon = FZUtil.getRsString(rs, i++, "");
+                        c.endLat = FZUtil.getRsString(rs, i++, "");
+                        c.startTime = FZUtil.getRsString(rs, i++, "");
+                        c.endTime = FZUtil.getRsString(rs, i++, "");
+                        c.source1 = FZUtil.getRsString(rs, i++, "");
+                        c.weight = FZUtil.getRsString(rs, i++, "");
+                        c.volume = FZUtil.getRsString(rs, i++, "");
+                        c.branch = FZUtil.getRsString(rs, i++, "");
+                        c.vehicle_type = FZUtil.getRsString(rs, i++, "");
+                        c.included = FZUtil.getRsString(rs, i++, "");
+                        c.costPerM = FZUtil.getRsString(rs, i++, "");
+                        c.fixedCost = FZUtil.getRsString(rs, i++, "");
+                        c.Channel = FZUtil.getRsString(rs, i++, "");
+                        c.IdDriver = FZUtil.getRsString(rs, i++, "");
+                        c.NamaDriver = FZUtil.getRsString(rs, i++, "");
                         ar.add(c);
                     }
                 }
@@ -339,5 +358,63 @@ public class VehicleAttrDB {
             throw new Exception(e.getMessage());
         }
         return c;
+    }
+    
+        public List<Vehicle> getDriver(String str, String id) throws Exception{
+        Vehicle c = new Vehicle();
+        List<Vehicle> ar = new ArrayList<Vehicle>();
+        
+        String nt = "";
+        if(id.length() > 0){
+                nt = "WHERE       salesid = '" + id + "'\n";
+        }
+        
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")){            
+            try (Statement stm = con.createStatement()){            
+                // create sql
+                String sql ;
+                sql = "SELECT\n" +
+                "	DISTINCT *\n" +
+                "FROM\n" +
+                "	(\n" +
+                "		SELECT\n" +
+                "			workplaceid,\n" +
+                "			salesid,\n" +
+                "			salesname\n" +
+                "		FROM\n" +
+                "			sysutil.IBACONSOL.dbo.BOSNET_FSR_TYPE\n" +
+                "		WHERE\n" +
+                "			TypeID = 10\n" +
+                "			AND Active = 1\n" +
+                "			AND SFA = 0\n" +
+                "			AND WorkplaceId = '"+str+"'\n" +
+                "	UNION ALL SELECT\n" +
+                "			Branch COLLATE Database_Default AS workplaceid,\n" +
+                "			Service_agent_id COLLATE Database_Default AS salesid,\n" +
+                "			Driver_Name COLLATE Database_Default AS salesname\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_ForwadingAgent\n" +
+                "		WHERE\n" +
+                "			Branch = '"+str+"'\n" +
+                "			AND inc = 1\n" +
+                "	) w\n" +
+                nt;
+                
+                // query
+                try (ResultSet rs = stm.executeQuery(sql)){
+                    while (rs.next()){
+                        c = new Vehicle();
+                        c.IdDriver = rs.getString("salesid");
+                        c.NamaDriver = rs.getString("salesname");
+                        ar.add(c);
+                    }
+                }
+            }
+        }
+        catch (Exception e){
+            ar = new ArrayList<Vehicle>();
+            throw new Exception(e.getMessage());            
+        }
+        return ar;
     }
 }

@@ -5,7 +5,9 @@
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@include file="../appGlobal/pageTop.jsp"%>
+<%@page import="com.fz.tms.params.model.Vehicle"%>
 <%run(new com.fz.tms.params.Vehicle.ParamVehicleViewPre());%>
+<!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -27,7 +29,8 @@
                             '\",\"endLat\":\"' + $("#endLat").val() + '\",\"startTime\":\"' + $("#startTime").val() + 
                             '\",\"endTime\":\"' + $("#endTime").val() + '\",\"source1\":\"' + $("#source1").val() +
                             '\",\"included\":\"' + $("#included").val() + '\",\"costPerM\":\"' + $("#costPerM").val() +
-                            '\",\"fixedCost\":\"' + $("#fixedCost").val() + '\",\"Channel\":\"' + $("#Channel").val() + '\"}';
+                            '\",\"fixedCost\":\"' + $("#fixedCost").val() + '\",\"Channel\":\"' + $("#Channel").val() +
+                            '\",\"IdDriver\":\"' + $("#FixIdDriver").val() + '\",\"NamaDriver\":\"' + $("#NamaDriver").val() +'\"}';
                     var data = [];
                     //alert(jsonForServer);
                     $.post($apiAddress, {json: jsonForServer}).done(function (data) {
@@ -37,6 +40,22 @@
                         }else{
                             alert( data ); 
                         }
+                    });
+                });
+                
+                $('#IdDriver').on('change', function () {
+                    var $apiAddress = '../../../api/vehicleAttrView/getNamaDriver';
+                    var jsonForServer = '{\"branch\":\"' + $("#branch").val()  + 
+                            '\",\"IdDriver\":\"' + $("#IdDriver").val() + '\"}';
+                    var data = [];
+                    //alert(jsonForServer);
+                    $.post($apiAddress, {json: jsonForServer}).done(function (data) {
+                        
+                        $.each(data, function(index, item) {
+                            $('#FixIdDriver').val(item.Value);
+                            $('#NamaDriver').val(item.Display);
+                            //$("#vVehicleId").get(0).options[$("#vVehicleId").get(0).options.length] = new Option(item.Display, item.Value);
+                        });
                     });
                 });
             });
@@ -126,6 +145,19 @@
                 <option value="GT" <%if (get("Channel").equals("GT")) {%> selected="true" <%}%>>GT</option>
                 <option value="MT" <%if (get("Channel").equals("MT")) {%> selected="true" <%}%>>MT</option>
             </select>
+            
+            <br>
+            <label class="fzLabel">Id Driver:</label> 
+            <input class="fzInput" type="text" id="FixIdDriver" name="FixIdDriver" value="<%=get("IdDriver")%>" readonly="true">
+            <select id="IdDriver" name="IdDriver" >
+                <%for (Vehicle hd : (List<Vehicle>) getList("ListDriver")) { %>
+                    <%= makeOption(hd.IdDriver, hd.IdDriver, hd.IdDriver)%>
+                <% } /* end for Branch Id */ %>
+            </select>
+            
+            <br>
+            <label class="fzLabel">Nama Driver:</label> 
+            <input class="fzInput" type="text" id="NamaDriver" name="NamaDriver" value="<%=get("NamaDriver")%>" maxlength="50" readonly="true">
             
             <br><br>
             <button class="btn fzButton" type="submit" id="btn"><%=get("flag")%></button>
