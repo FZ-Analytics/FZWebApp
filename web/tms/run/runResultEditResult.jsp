@@ -23,7 +23,85 @@
                 padding-top: 3px;
                 padding-bottom: 3px;
             }
+            .sk-cube-grid {
+                width: 50px;
+                height: 50px;
+                margin: 50px auto;
+            }
+
+            .sk-cube-grid .sk-cube {
+                width: 33%;
+                height: 33%;
+                background-color: orange;
+                float: left;
+                -webkit-animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out;
+                        animation: sk-cubeGridScaleDelay 1.3s infinite ease-in-out; 
+            }
             
+            .sk-cube-grid .sk-cube1 {
+                -webkit-animation-delay: 0.2s;
+                        animation-delay: 0.2s; 
+            }
+            
+            .sk-cube-grid .sk-cube2 {
+                -webkit-animation-delay: 0.3s;
+                        animation-delay: 0.3s; 
+            }
+            
+            .sk-cube-grid .sk-cube3 {
+                -webkit-animation-delay: 0.4s;
+                        animation-delay: 0.4s; 
+            }
+
+            .sk-cube-grid .sk-cube4 {
+                -webkit-animation-delay: 0.1s;
+                        animation-delay: 0.1s; 
+            }
+            
+            .sk-cube-grid .sk-cube5 {
+                -webkit-animation-delay: 0.2s;
+                        animation-delay: 0.2s; 
+            }
+              
+            .sk-cube-grid .sk-cube6 {
+                -webkit-animation-delay: 0.3s;
+                        animation-delay: 0.3s; 
+            }
+             
+            .sk-cube-grid .sk-cube7 {
+                -webkit-animation-delay: 0s;
+                        animation-delay: 0s; 
+            }
+            
+            .sk-cube-grid .sk-cube8 {
+                -webkit-animation-delay: 0.1s;
+                        animation-delay: 0.1s; 
+            }
+            
+            .sk-cube-grid .sk-cube9 {
+                -webkit-animation-delay: 0.2s;
+                        animation-delay: 0.2s; 
+            }
+
+            @-webkit-keyframes sk-cubeGridScaleDelay {
+                0%, 70%, 100% {
+                  -webkit-transform: scale3D(1, 1, 1);
+                          transform: scale3D(1, 1, 1);
+                } 35% {
+                  -webkit-transform: scale3D(0, 0, 1);
+                          transform: scale3D(0, 0, 1); 
+                }
+            }
+
+            @keyframes sk-cubeGridScaleDelay {
+                0%, 70%, 100% {
+                  -webkit-transform: scale3D(1, 1, 1);
+                          transform: scale3D(1, 1, 1);
+                } 35% {
+                  -webkit-transform: scale3D(0, 0, 1);
+                          transform: scale3D(0, 0, 1);
+                } 
+            }
         </style>
         <%@include file="../appGlobal/bodyTop.jsp"%>
         <link href="../appGlobal/eFreezeTable.css" rel="stylesheet">
@@ -31,6 +109,7 @@
         <script src="jquery.ui.touch-punch.min.js"></script>
         <script>
             $(document).ready(function () {
+                $(".submitToSap").hide();
                 $('#table').eFreezeTableHead();
                 $('.custIDClick').click(function () {
                     if ($(this).text().length > 0) {
@@ -60,7 +139,10 @@
                         return true;
                     }
                 });
-                $("button").click(function() {
+                $(".submitBtn").click(function() {
+                    $("#body").hide();
+                    $(".submitToSap").show();
+                    var elementId = this.id;
                     var vNo = $(this).val();
                     var runId = $("#RunIdClick").text();
                     
@@ -70,8 +152,15 @@
                     
                     $.post($apiAddress, {json: jsonForServer}).done(function (data) {
                         if(data == 'OK'){
+                            $("#body").show();
+                            $(".submitToSap").hide();
                             alert( 'sukses' );
+                            $('#'+elementId).html('Submitted');
+                            $('#'+elementId).addClass('disabled');
+                            $('#'+elementId).off('click');
                         } else{
+                            $("#body").show();
+                            $(".submitToSap").hide();
                             alert( 'submit error' ); 
                         }
                     });
@@ -100,7 +189,8 @@
             }
             
         </script>
-        <h3>Runs</h3>
+        <div id="body">
+            <h3>Runs</h3>
         
         <input class="fzInput" id="OriRunID" name="OriRunID" value="<%=get("OriRunID")%>" hidden="true"/>
         
@@ -203,9 +293,9 @@
                             edit
                         </td>
                     <%} else if(j.arrive.length() > 0) {%>
-<!--                        <td class="" onclick="" style="">
-                            <button class="btn btn-success btn-xs" type="submit" onclick="submitToSap()" value="<%=j.vehicleCode%>">Submit</button>
-                        </td>-->
+                        <td class="" onclick="" style="">
+                            <button id="<%=j.vehicleCode%>" class="btn btn-success btn-xs submitBtn" type="submit" value="<%=j.vehicleCode%>">Submit</button>
+                        </td>
                     <%} else {%>
                         <td class="editCust" onclick="" style="color: blue;">
                             
@@ -222,5 +312,20 @@
         <br>
 
         <%@include file="../appGlobal/bodyBottom.jsp"%>
+        </div>
+        <div class="submitToSap" style="text-align: center;">
+            <div class="sk-cube-grid">
+                <div class="sk-cube sk-cube1"></div>
+                <div class="sk-cube sk-cube2"></div>
+                <div class="sk-cube sk-cube3"></div>
+                <div class="sk-cube sk-cube4"></div>
+                <div class="sk-cube sk-cube5"></div>
+                <div class="sk-cube sk-cube6"></div>
+                <div class="sk-cube sk-cube7"></div>
+                <div class="sk-cube sk-cube8"></div>
+                <div class="sk-cube sk-cube9"></div>
+            </div>
+            <p>Submitting to SAP</p>
+        </div>
     </body>
 </html>

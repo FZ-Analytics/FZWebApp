@@ -86,44 +86,36 @@ public class SubmitToSapAPI {
                 ArrayList<HashMap<String, String>> alSP = getFromShipmentPlan(alCustId.get(i), getRdd(he.RunId, alCustId.get(i)));
                 for(int j = 0; j < alSP.size(); j++) {
                     HashMap<String, String> hmSP = alSP.get(j); //HashMap Shipment Plan
-                    String shipmentType = "";
-                    if (hmPRV.get("source1").equals("INT")) {
-                        shipmentType = "ZDSD";
-                    } else {
-                        shipmentType = "ZDSC";
-                    }
-                    rs.Shipment_Type = shipmentType;
+                    
+                    rs.Shipment_Type = hmPRV.get("source1");
                     rs.Plant = hmSP.get("Plant");
                     rs.Shipping_Type = "";
                     rs.Shipment_Route = hmSP.get("Route");
                     rs.Shipment_Number_Dummy = he.RunId+he.vehicle_no;
-                    if(hmSP.get("Route_Description").length() <= 20) {
-                        rs.Description = hmSP.get("Route_Description");
-                    } else { 
-                        rs.Description = hmSP.get("Route_Description").substring(0, 20);
-                    }
-                    rs.Status_Plan = "";
-                    rs.Status_Check_In = "";
-                    rs.Status_Load_Start = "";
-                    rs.Status_Load_End = "";
-                    rs.Status_Complete = "";
-                    rs.Status_Shipment_Start = parseRunId(he.RunId) + " " + alStartAndEndTime.get(0);
-                    rs.Status_Shipment_End = parseRunId(he.RunId) + " " + alStartAndEndTime.get(1);
+                    rs.Description = null;
+                    rs.Status_Plan = parseRunId(he.RunId, true);
+                    rs.Status_Check_In = null;
+                    rs.Status_Load_Start = parseRunId(he.RunId, false) + " " + getArriveAndDepart(he.RunId, alCustId.get(i)).get("arrive");
+                    rs.Status_Load_End = parseRunId(he.RunId, false) + " " + getArriveAndDepart(he.RunId, alCustId.get(i)).get("depart");
+                    rs.Status_Complete = null;
+                    rs.Status_Shipment_Start = parseRunId(he.RunId, false) + " " + alStartAndEndTime.get(0);
+                    rs.Status_Shipment_End = parseRunId(he.RunId, false) + " " + alStartAndEndTime.get(1);
                     rs.Service_Agent_Id = "";
                     rs.No_Pol = he.vehicle_no;
                     rs.Driver_Name = "";
-                    rs.Delivery_Number = "";
+                    rs.Delivery_Number = getDoNum(he.RunId, alCustId.get(i));
                     rs.Delivery_Item = "";
-                    rs.Delivery_Quantity_Split = 0;
+                    rs.Delivery_Quantity_Split = null;
                     rs.Delivery_Quantity = Double.parseDouble(hmSP.get("DOQty"));
-                    rs.Delivery_Flag_Split = "";
-                    rs.Material = "";
+                    rs.Delivery_Flag_Split = null;
+                    rs.Material = hmSP.get("DOQtyUOM");
                     rs.Vehicle_Number = he.vehicle_no;
-                    rs.Vehicle_Type = hmPRV.get("vehicle_type");
+                    rs.Vehicle_Type = hmSP.get("vehicle_type");
+                    rs.Batch = hmSP.get("Batch");
                     rs.Time_Stamp = getTimeID();
-                    rs.Shipment_Number_SAP = "";
-                    rs.I_Status = "";
-                    rs.Shipment_Flag = "";
+                    rs.Shipment_Number_SAP = null;
+                    rs.I_Status = "0";
+                    rs.Shipment_Flag = null;
                     insertResultShipment(rs);
                 }
             }
@@ -150,12 +142,11 @@ public class SubmitToSapAPI {
         return ts;
     }
     
-    public String parseRunId(String runId) {
+    public String parseRunId(String runId, boolean fullRunId) {
         String[] runIdSplit = runId.split("_");
         String date = runIdSplit[0];
-        String y = "";
-        String m = "";
-        String d = "";
+        String time = runIdSplit[1];
+        String y = "", m = "", d = "", h = "", min = "", s = "", ms = "";
         for(int i = 0; i < date.length(); i++) {
             if(i <= 3) {
                 y += date.charAt(i);
@@ -165,7 +156,22 @@ public class SubmitToSapAPI {
                 d += date.charAt(i);
             }
         }
-        return y+"-"+m+"-"+d;
+        if(fullRunId) {
+            for(int i = 0; i < time.length(); i++) {
+                if(i <= 1) {
+                    h += time.charAt(i);
+                } else if (i >= 2 && i <= 3) {
+                    min += time.charAt(i);
+                } else if(i >= 4 && i <= 5) {
+                    s += time.charAt(i);
+                } else if(i >= 6) {
+                    ms += time.charAt(i);
+                }
+            }
+            return y+"-"+m+"-"+d + " " + h + ":" + min + ":" + s + ":" + ms;
+        } else {
+            return y+"-"+m+"-"+d;
+        }
     }
 
     public HashMap<String, String> getFromPreRouteVehicle(String runId, String vehicleNo) throws Exception {
@@ -173,7 +179,15 @@ public class SubmitToSapAPI {
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
                 String sql;
-                sql = "SELECT TOP 1 vehicle_type, source1 FROM BOSNET1.dbo.TMS_PreRouteVehicle where runID = '" + runId + "' and vehicle_code = '" + vehicleNo + "';";
+                sql = "SELECT " +
+                        "vehicle_type, " +
+                        "CASE " + 
+                            "WHEN source1 = 'INT' THEN 'ZDSD' " +
+                            "ELSE 'ZDSC' " +
+                        "END as source1 " +
+                        "FROM BOSNET1.dbo.TMS_PreRouteVehicle " +
+                        "WHERE runID = '" + runId + "' and vehicle_code = '" + vehicleNo + "';";
+
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
                         hm.put("source1", rs.getString("source1"));
@@ -193,14 +207,14 @@ public class SubmitToSapAPI {
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
                 String sql;
-                sql = "SELECT Route, Plant, Route_Description, DOQty, Batch FROM BOSNET1.dbo.TMS_ShipmentPlan "
-                        + "WHERE Customer_ID = '" + custId + "' and Batch != 'Null' and Request_Delivery_Date = '" + rdd + "';";
+                sql = "SELECT Route, Plant, DOQty, DOQtyUOM, Batch FROM BOSNET1.dbo.TMS_ShipmentPlan "
+                        + "WHERE Customer_ID = '" + custId + "' and Batch <> 'NULL' and Request_Delivery_Date = '" + rdd + "';";
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
                         hm.put("Route", rs.getString("Route"));
                         hm.put("Plant", rs.getString("Plant"));
-                        hm.put("Route_Description", rs.getString("Route_Description"));
                         hm.put("DOQty", rs.getString("DOQty"));
+                        hm.put("DOQtyUOM", rs.getString("DOQtyUOM"));
                         hm.put("Batch", rs.getString("Batch"));
                         
                         al.add(hm);
@@ -212,6 +226,26 @@ public class SubmitToSapAPI {
         }
         return al;
     }
+    
+    public HashMap<String, String> getArriveAndDepart(String runId, String custId) throws Exception {
+        HashMap<String, String> hm = new HashMap<>();
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql;
+                sql = "SELECT arrive, depart FROM BOSNET1.dbo.TMS_RouteJob where runID = '" + runId + "' and customer_id = '" + custId + "';";
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    while (rs.next()) {
+                        hm.put("arrive", rs.getString("arrive"));
+                        hm.put("depart", rs.getString("depart"));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return hm;
+    }
+
 
     public ArrayList<String> getCustomerId(String runId, String vehicleCode) throws Exception {
         ArrayList<String> al = new ArrayList<>();
@@ -229,6 +263,24 @@ public class SubmitToSapAPI {
             throw new Exception(e.getMessage());
         }
         return al;
+    }
+    
+    public String getDoNum(String runId, String custId) throws Exception {
+        String doNum = "";
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql;
+                sql = "SELECT TOP 1 DO_Number FROM BOSNET1.dbo.TMS_PreRouteJob where runID = '" + runId + "' and customer_id = '" + custId + "';";
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    while (rs.next()) {
+                        doNum = rs.getString("DO_Number");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return doNum;
     }
     
      public ArrayList<String> getStartAndEndTime(String runId, String vehicleCode) throws Exception {
@@ -299,7 +351,7 @@ public class SubmitToSapAPI {
             psHdr.setString(16, rs.Driver_Name);
             psHdr.setString(17, rs.Delivery_Number);
             psHdr.setString(18, rs.Delivery_Item);
-            psHdr.setDouble(19, rs.Delivery_Quantity_Split);
+            psHdr.setString(19, rs.Delivery_Quantity_Split);
             psHdr.setDouble(20, rs.Delivery_Quantity);
             psHdr.setString(21, rs.Delivery_Flag_Split);
             psHdr.setString(22, rs.Material);
