@@ -935,9 +935,9 @@ public class AlgoRunner implements BusinessLogic {
                 "							AND included = 1\n" +
                 "					) vi\n" +
                 "			) v\n" +
-                "		INNER JOIN bosnet1.dbo.vehicle vh ON\n" +
+                "		LEFT OUTER JOIN bosnet1.dbo.vehicle vh ON\n" +
                 "			v.vehicle_code = vh.vehicle_code\n" +
-                "		INNER JOIN bosnet1.dbo.TMS_vehicleAtr va ON\n" +
+                "		LEFT OUTER JOIN bosnet1.dbo.TMS_vehicleAtr va ON\n" +
                 "			v.vehicle_code = va.vehicle_code\n" +
                 "		LEFT OUTER JOIN bosnet1.dbo.TMS_Params pr ON\n" +
                 "			pr.param = 'HargaSolar'\n" +
@@ -1118,7 +1118,12 @@ public class AlgoRunner implements BusinessLogic {
                 "			'yyyy-MM-dd hh-mm'\n" +
                 "		) AS VARCHAR\n" +
                 "	) AS CreateDate,\n" +
-                "	sp.Request_Delivery_Date,\n" +
+                "	CAST(\n" +
+                "		FORMAT(\n" +
+                "			sp.Request_Delivery_Date,\n" +
+                "			'yyyy-MM-dd'\n" +
+                "		) AS VARCHAR\n" +
+                "	) AS Request_Delivery_Date,\n" +
                 "	sp.Product_Description,\n" +
                 "	sp.Gross_Amount,\n" +
                 "	sp.DOQty,\n" +
@@ -1234,6 +1239,7 @@ public class AlgoRunner implements BusinessLogic {
         //select
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
                 PreparedStatement ps = con.prepareStatement(sql)) {
+            System.out.println(sql);
             try (ResultSet rs = ps.executeQuery()){
                 while (rs.next()) {
                     pl = new HashMap<String, String>();
@@ -1266,8 +1272,14 @@ public class AlgoRunner implements BusinessLogic {
                     pl.put("SatDelivDefault", rs.getString("SatDelivDefault"));
                     pl.put("ChannelNullDefault", rs.getString("ChannelNullDefault"));
                     pl.put("marketId", rs.getString("marketId"));
-                    //pl.put("DOCreationDate", rs.getString("DOCreationDate"));
+                    //pl.put("DOCreationDate", rs.getString("DOCreationDate"));                    
                     asd.add(pl);
+                    if(pl.get("DO_Number").equals("8020089252")){
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); 
+                        Date rdd = sdf.parse(rs.getString("Request_Delivery_Date"));
+                        System.out.println(rdd.toString());
+                        System.out.println(pl.toString());
+                    }
                     str = "OK";
                 }
             }
@@ -1325,8 +1337,9 @@ public class AlgoRunner implements BusinessLogic {
                 //cek hari buka
                 int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
                 //System.out.println(dayOfWeek);
-                if(pl.get("Customer_ID").equals("5820002148")){
-                    //System.out.println(edt);
+                if(pl.get("DO_Number").equals("8020089252")){
+                    System.out.println(rdd);
+                    String g = edt;
                     //System.out.println(dayOfWeek + "()" + Integer.parseInt(asd.get(a).get("DayWinStart")));
                     //System.out.println(pl.get("5820002148"));
                 }
