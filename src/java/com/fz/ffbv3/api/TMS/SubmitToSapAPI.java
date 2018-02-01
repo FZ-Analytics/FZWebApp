@@ -91,8 +91,8 @@ public class SubmitToSapAPI {
                     rs.Plant = hmSP.get("Plant");
                     rs.Shipping_Type = "";
                     rs.Shipment_Route = hmSP.get("Route");
-                    rs.Shipment_Number_Dummy = he.RunId+he.vehicle_no;
-                    rs.Description = null;
+                    rs.Shipment_Number_Dummy = he.RunId.replace("_", "")+he.vehicle_no;
+                    rs.Description = "";
                     rs.Status_Plan = parseRunId(he.RunId, true);
                     rs.Status_Check_In = null;
                     rs.Status_Load_Start = parseRunId(he.RunId, false) + " " + getArriveAndDepart(he.RunId, alCustId.get(i)).get("arrive");
@@ -100,29 +100,29 @@ public class SubmitToSapAPI {
                     rs.Status_Complete = null;
                     rs.Status_Shipment_Start = parseRunId(he.RunId, false) + " " + alStartAndEndTime.get(0);
                     rs.Status_Shipment_End = parseRunId(he.RunId, false) + " " + alStartAndEndTime.get(1);
-                    rs.Service_Agent_Id = "";
+                    rs.Service_Agent_Id = hmPRV.get("IdDriver");
                     rs.No_Pol = he.vehicle_no;
-                    rs.Driver_Name = "";
+                    rs.Driver_Name = hmPRV.get("NamaDriver");
                     rs.Delivery_Number = getDoNum(he.RunId, alCustId.get(i));
-                    rs.Delivery_Item = "";
-                    rs.Delivery_Quantity_Split = null;
+                    rs.Delivery_Item = hmSP.get("Item_Number");
+                    rs.Delivery_Quantity_Split = 0.000;
                     rs.Delivery_Quantity = Double.parseDouble(hmSP.get("DOQty"));
-                    rs.Delivery_Flag_Split = null;
+                    rs.Delivery_Flag_Split = "";
                     rs.Material = hmSP.get("DOQtyUOM");
                     rs.Vehicle_Number = he.vehicle_no;
-                    rs.Vehicle_Type = hmSP.get("vehicle_type");
+                    rs.Vehicle_Type = hmPRV.get("vehicle_type");
                     rs.Batch = hmSP.get("Batch");
                     rs.Time_Stamp = getTimeID();
-                    rs.Shipment_Number_SAP = null;
+                    rs.Shipment_Number_SAP = "";
                     rs.I_Status = "0";
-                    rs.Shipment_Flag = null;
+                    rs.Shipment_Flag = "";
                     insertResultShipment(rs);
                 }
             }
 
             ret = "OK";
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("ERROR: " + e.getMessage());
             ret = "ERROR";
         }
         String jsonOutput = gson.toJson(ret);
@@ -181,6 +181,8 @@ public class SubmitToSapAPI {
                 String sql;
                 sql = "SELECT " +
                         "vehicle_type, " +
+                        "IdDriver, " +
+                        "NamaDriver, " +
                         "CASE " + 
                             "WHEN source1 = 'INT' THEN 'ZDSD' " +
                             "ELSE 'ZDSC' " +
@@ -192,6 +194,8 @@ public class SubmitToSapAPI {
                     while (rs.next()) {
                         hm.put("source1", rs.getString("source1"));
                         hm.put("vehicle_type", rs.getString("vehicle_type"));
+                        hm.put("IdDriver", rs.getString("IdDriver"));
+                        hm.put("NamaDriver", rs.getString("NamaDriver"));
                     }
                 }
             }
@@ -207,11 +211,12 @@ public class SubmitToSapAPI {
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
                 String sql;
-                sql = "SELECT Route, Plant, DOQty, DOQtyUOM, Batch FROM BOSNET1.dbo.TMS_ShipmentPlan "
+                sql = "SELECT Route, Item_Number, Plant, DOQty, DOQtyUOM, Batch FROM BOSNET1.dbo.TMS_ShipmentPlan "
                         + "WHERE Customer_ID = '" + custId + "' and Batch <> 'NULL' and Request_Delivery_Date = '" + rdd + "';";
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
                         hm.put("Route", rs.getString("Route"));
+                        hm.put("Item_Number", rs.getString("Item_Number"));
                         hm.put("Plant", rs.getString("Plant"));
                         hm.put("DOQty", rs.getString("DOQty"));
                         hm.put("DOQtyUOM", rs.getString("DOQtyUOM"));
@@ -329,8 +334,8 @@ public class SubmitToSapAPI {
         String sql = "INSERT INTO bosnet1.dbo.TMS_Result_Shipment "
                 + "(Shipment_Type, Plant, Shipping_Type, Shipment_Route, Shipment_Number_Dummy, Description, Status_Plan, Status_Check_In, Status_Load_Start, Status_Load_End, "
                 + "Status_Complete, Status_Shipment_Start, Status_Shipment_End, Service_Agent_Id, No_Pol, Driver_Name, Delivery_Number, Delivery_Item, Delivery_Quantity_Split, "
-                + "Delivery_Quantity, Delivery_Flag_Split, Material, Vehicle_Number, Vehicle_Type, Time_Stamp, Shipment_Number_SAP, I_Status, Shipment_Flag) "
-                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+                + "Delivery_Quantity, Delivery_Flag_Split, Material, Batch, Vehicle_Number, Vehicle_Type, Time_Stamp, Shipment_Number_SAP, I_Status, Shipment_Flag) "
+                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
         try (Connection con = (new Db()).getConnection("jdbc/fztms"); PreparedStatement psHdr = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
             psHdr.setString(1, rs.Shipment_Type);
@@ -351,16 +356,17 @@ public class SubmitToSapAPI {
             psHdr.setString(16, rs.Driver_Name);
             psHdr.setString(17, rs.Delivery_Number);
             psHdr.setString(18, rs.Delivery_Item);
-            psHdr.setString(19, rs.Delivery_Quantity_Split);
+            psHdr.setDouble(19, rs.Delivery_Quantity_Split);
             psHdr.setDouble(20, rs.Delivery_Quantity);
             psHdr.setString(21, rs.Delivery_Flag_Split);
             psHdr.setString(22, rs.Material);
-            psHdr.setString(23, rs.Vehicle_Number);
-            psHdr.setString(24, rs.Vehicle_Type);
-            psHdr.setTimestamp(25, rs.Time_Stamp);
-            psHdr.setString(26, rs.Shipment_Number_SAP);
-            psHdr.setString(27, rs.I_Status);
-            psHdr.setString(28, rs.Shipment_Flag);
+            psHdr.setString(23, rs.Batch);
+            psHdr.setString(24, rs.Vehicle_Number);
+            psHdr.setString(25, rs.Vehicle_Type);
+            psHdr.setTimestamp(26, rs.Time_Stamp);
+            psHdr.setString(27, rs.Shipment_Number_SAP);
+            psHdr.setString(28, rs.I_Status);
+            psHdr.setString(29, rs.Shipment_Flag);
 
             psHdr.executeUpdate();
         }

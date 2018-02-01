@@ -72,13 +72,14 @@ public class RouteJobListingResultEdit implements BusinessLogic {
             if (i != 0) {
                 data = str.substring(0, 0) + str.substring(0 + 1);
             }
+            System.out.println(data);
             String[] dataSplit = data.split(",");
             switch (dataSplit.length) {
                 case 3: //normal row or start
                     if (!dataSplit[2].equals("start")) {
                         setObjectValue(dataSplit[0], dataSplit[1], dataSplit[2], "");
                     } else {
-
+                        System.out.println("PLAT: " + (dataSplit[1]));
                         setObjectValue(dataSplit[0], dataSplit[1], "", getVehiStart(dataSplit[1]));
                         prevCustId = dataSplit[1];
                     }
@@ -721,7 +722,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
                 String sql = "SELECT vehicle_code, weight, volume, vehicle_type, branch, startLon, startLat, endLon, endLat, startTime, endTime, source1, UpdatevDate, "
-                        + "CreateDate, isActive, fixedCost, costPerM, costPerServiceMin, costPerTravelMin "
+                        + "CreateDate, isActive, fixedCost, costPerM, costPerServiceMin, costPerTravelMin, IdDriver, NamaDriver "
                         + "FROM BOSNET1.dbo.TMS_PreRouteVehicle "
                         + "WHERE RunId = '" + oriRunId + "';";
                 try (ResultSet rs = stm.executeQuery(sql)) {
@@ -747,6 +748,8 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                         p.costPerM = rs.getDouble("costPerM");
                         p.costPerminService = rs.getDouble("costPerServiceMin");
                         p.costPerTravelMin = rs.getDouble("costPerTravelMin");
+                        p.IdDriver = rs.getString("IdDriver");
+                        p.NamaDriver = rs.getString("NamaDriver");
 
                         arlistPrv.add(p);
                     }
@@ -827,8 +830,8 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         if (rowNum == 0) {
             String sql = "INSERT INTO bosnet1.dbo.TMS_PreRouteVehicle "
                     + "(RunId, vehicle_code, weight, volume, vehicle_type, branch, startLon, startLat, endLon, endLat, startTime, "
-                    + "endTime, source1, UpdatevDate, CreateDate, isActive, fixedCost, costPerM, costPerServiceMin, costPerTravelMin) "
-                    + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+                    + "endTime, source1, UpdatevDate, CreateDate, isActive, fixedCost, costPerM, costPerServiceMin, costPerTravelMin, IdDriver, NamaDriver) "
+                    + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
             for (int i = 0; i < arlist.size(); i++) {
                 PreRouteVehicleLog p = arlist.get(i);
@@ -853,6 +856,8 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                     psHdr.setDouble(18, p.costPerM);
                     psHdr.setDouble(19, p.costPerminService);
                     psHdr.setDouble(20, p.costPerTravelMin);
+                    psHdr.setString(21, p.IdDriver);
+                    psHdr.setString(22, p.NamaDriver);
 
                     psHdr.executeUpdate();
                 }
