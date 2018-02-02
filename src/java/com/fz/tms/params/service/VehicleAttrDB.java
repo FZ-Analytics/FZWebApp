@@ -58,10 +58,38 @@ public class VehicleAttrDB {
             
                 // create sql
                 String sql ;
-                sql = "SELECT vh.vehicle_code, va.startLon, va.startLat, va.endLon, va.endLat, va.startTime, va.endTime, va.source1,"
-                        + " case when vh.vehicle_code is null then va.weight else vh.weight end as weight, case when vh.vehicle_code is null then va.volume else vh.volume end as volume,"
-                        + " case when vh.vehicle_code is null then va.branch else vh.plant end as plant, case when vh.vehicle_code is null then va.vehicle_type else vh.vehicle_type end as vehicle_type, va.included"
-                        + " FROM BOSNET1.dbo.Vehicle vh left join BOSNET1.dbo.TMS_VehicleAtr va on vh.Vehicle_Code = va.vehicle_code where vh.Plant = '"+str+"';";
+                sql = "SELECT\n" +
+                "	vh.vehicle_code,\n" +
+                "	va.startLon,\n" +
+                "	va.startLat,\n" +
+                "	va.endLon,\n" +
+                "	va.endLat,\n" +
+                "	va.startTime,\n" +
+                "	va.endTime,\n" +
+                "	va.source1,\n" +
+                "	CASE\n" +
+                "		WHEN vh.vehicle_code IS NULL THEN va.weight\n" +
+                "		ELSE vh.weight\n" +
+                "	END AS weight,\n" +
+                "	CASE\n" +
+                "		WHEN vh.vehicle_code IS NULL THEN va.volume\n" +
+                "		ELSE vh.volume\n" +
+                "	END AS volume,\n" +
+                "	CASE\n" +
+                "		WHEN vh.vehicle_code IS NULL THEN va.branch\n" +
+                "		ELSE vh.plant\n" +
+                "	END AS plant,\n" +
+                "	CASE\n" +
+                "		WHEN vh.vehicle_code IS NULL THEN va.vehicle_type\n" +
+                "		ELSE vh.vehicle_type\n" +
+                "	END AS vehicle_type,\n" +
+                "	va.included\n" +
+                "FROM\n" +
+                "	BOSNET1.dbo.Vehicle vh\n" +
+                "LEFT outer JOIN BOSNET1.dbo.TMS_VehicleAtr va ON\n" +
+                "	vh.Vehicle_Code = va.vehicle_code\n" +
+                "WHERE\n" +
+                "	vh.Plant = '"+str+"';";
                 
                 // query
                 try (ResultSet rs = stm.executeQuery(sql)){

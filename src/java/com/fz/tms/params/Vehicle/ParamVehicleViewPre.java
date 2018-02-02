@@ -34,7 +34,7 @@ public class ParamVehicleViewPre   implements BusinessLogic {
         
         request.setAttribute("vehicle_code", ar.get(0).vehicle_code);
         request.setAttribute("branch", ar.get(0).branch);
-        request.setAttribute("startLon", ar.get(0).startLat);
+        request.setAttribute("startLon", ar.get(0).startLon);
         request.setAttribute("startLat", ar.get(0).startLat);
         request.setAttribute("endLon", ar.get(0).endLon);
         request.setAttribute("endLat", ar.get(0).endLat);
