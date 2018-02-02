@@ -1536,7 +1536,7 @@ public class AlgoRunner implements BusinessLogic {
         if(day == 7){
             c.setTime(shf.parse(pl.get("deliv_end")));
             deliv.setTime(shf.parse(reference));
-            if(c.after(deliv)){
+            if(c.after(deliv) && pl.get("Distribution_Channel").equalsIgnoreCase("MT")){
                 pl.replace("deliv_end", reference);
             }           
         }
