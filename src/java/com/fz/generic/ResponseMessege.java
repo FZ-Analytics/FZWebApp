@@ -94,7 +94,7 @@ public class ResponseMessege
     }
   }
   
-  public String LoginMsgResponse(Integer Code, String Msg, ResultSet res, Integer rows) throws SQLException
+  public String LoginMsgResponse(Integer Code, String Msg, ResultSet res, Integer rows, Integer VehicleID) throws SQLException
   {
     coreRsp = new CoreModule();    
     coreRsp.setCode(Code);
@@ -110,9 +110,13 @@ public class ResponseMessege
       userRsp.setLnkRoleID(res.getInt("lnkRoleID"));
       userRsp.setBrand(res.getString("Brand"));
       userRsp.setType(res.getString("Type"));
-      userRsp.setTimeTrackLocation(FixValue.intTrackingTimeout);
-      userRsp.setVehicleID(res.getInt("VehicleID"));
-		  userRsp.setVehicleName(res.getString("VehicleName"));
+      
+      if(VehicleID != 0)
+      {
+        userRsp.setTimeTrackLocation(FixValue.intTrackingTimeout);
+        userRsp.setVehicleID(res.getInt("VehicleID"));
+        userRsp.setVehicleName(res.getString("VehicleName"));
+      }
     }
     
     userHolder = new UserHolder(coreRsp, userRsp);
@@ -260,8 +264,18 @@ public class ResponseMessege
 
     for(int i=0; i<rows; i++)
     {
-      jobStateModule.setDoneStatus(res.getString("DoneStatus"));
-      res.next();
+			Integer intReason = res.getInt("ReasonState");
+
+			if(intReason == 0)
+				jobStateModule.setDoneStatus("DONE");
+			else
+			if(intReason == 1)
+				jobStateModule.setDoneStatus("STOP");
+			else
+			if(intReason == 2)
+				jobStateModule.setDoneStatus("LATE");
+
+			res.next();
 		}
     
     jobStateHolder = new JobStateHolder(coreRsp, jobStateModule, null);

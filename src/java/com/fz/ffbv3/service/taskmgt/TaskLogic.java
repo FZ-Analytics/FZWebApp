@@ -303,8 +303,9 @@ public class TaskLogic
     rspMsg = new ResponseMessege();
     sendRsp = new StatusHolder();
    
-    strQuery = "SELECT DoneStatus FROM fbjob WHERE JobID=" + taskPlanModel.getJobStateData().getJobID() + " AND " +
-               "ActualTruckID=" + taskPlanModel.getJobStateData().getVehicleID();
+    strQuery = "SELECT b.ReasonState FROM fbjob a, fbtask2 b WHERE a.JobID=b.JobID AND TaskSeq=2 AND a.JobID=" +
+							 taskPlanModel.getJobStateData().getJobID() + " AND a.ActualTruckID=" +
+               taskPlanModel.getJobStateData().getVehicleID();
 
     logger.severe("[Query fbjob] -> " + strQuery);
 

@@ -39,8 +39,8 @@
 				<!-- Awal, Dropdown untuk pilihan divisi dari vehicle, by ignat 23012018-->
 
 					<label class="fzLabel">Division</label>
-          <select name='selectedBy' class='fzInput'>
-						<option value='Semua' selected>SEMUA</option>
+          <select name='SelectedDiv' class='fzInput'>
+						<option value='ALL' selected>ALL</option>
 						<option value='LWSM' selected>LWSM</option>
             <option value='TESM'>TESM</option>
             <option value='BPRM'>BPRM</option>

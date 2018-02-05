@@ -138,6 +138,7 @@ public class UsersApi
 		{
       statusHolder.setCode(FixValue.intResponError);
       statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strLoginFailed));
+      FZUtil.toStackTraceText(ex);
 		}
     
     logger.severe("[Close] -> Close database done");
