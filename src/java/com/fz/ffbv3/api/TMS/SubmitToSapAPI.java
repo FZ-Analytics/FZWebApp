@@ -83,7 +83,8 @@ public class SubmitToSapAPI {
             ArrayList<String> alCustId = getCustomerId(he.RunId, he.vehicle_no);
             ArrayList<String> alStartAndEndTime = getStartAndEndTime(he.RunId, he.vehicle_no);
             for (int i = 0; i < alCustId.size(); i++) {
-                ArrayList<HashMap<String, String>> alSP = getFromShipmentPlan(alCustId.get(i), getRdd(he.RunId, alCustId.get(i)));
+                ArrayList<HashMap<String, String>> alSP = getFromShipmentPlan(he.RunId, alCustId.get(i));
+
                 for(int j = 0; j < alSP.size(); j++) {
                     HashMap<String, String> hmSP = alSP.get(j); //HashMap Shipment Plan
                     
@@ -95,15 +96,15 @@ public class SubmitToSapAPI {
                     rs.Description = "";
                     rs.Status_Plan = parseRunId(he.RunId, true);
                     rs.Status_Check_In = null;
-                    rs.Status_Load_Start = parseRunId(he.RunId, false) + " " + getArriveAndDepart(he.RunId, alCustId.get(i)).get("arrive");
-                    rs.Status_Load_End = parseRunId(he.RunId, false) + " " + getArriveAndDepart(he.RunId, alCustId.get(i)).get("depart");
+                    rs.Status_Load_Start = parseRunId(he.RunId, false) + " " + hmSP.get("arrive");
+                    rs.Status_Load_End = parseRunId(he.RunId, false) + " " + hmSP.get("depart");
                     rs.Status_Complete = null;
                     rs.Status_Shipment_Start = parseRunId(he.RunId, false) + " " + alStartAndEndTime.get(0);
                     rs.Status_Shipment_End = parseRunId(he.RunId, false) + " " + alStartAndEndTime.get(1);
                     rs.Service_Agent_Id = hmPRV.get("IdDriver");
                     rs.No_Pol = he.vehicle_no;
                     rs.Driver_Name = hmPRV.get("NamaDriver");
-                    rs.Delivery_Number = getDoNum(he.RunId, alCustId.get(i));
+                    rs.Delivery_Number = hmSP.get("DO_Number");
                     rs.Delivery_Item = hmSP.get("Item_Number");
                     rs.Delivery_Quantity_Split = 0.000;
                     rs.Delivery_Quantity = Double.parseDouble(hmSP.get("DOQty"));
@@ -116,6 +117,7 @@ public class SubmitToSapAPI {
                     rs.Shipment_Number_SAP = "";
                     rs.I_Status = "0";
                     rs.Shipment_Flag = "";
+                    
                     insertResultShipment(rs);
                 }
             }
@@ -205,16 +207,69 @@ public class SubmitToSapAPI {
         return hm;
     }
 
-    public ArrayList<HashMap<String, String>> getFromShipmentPlan(String custId, String rdd) throws Exception {
-        HashMap<String, String> hm = new HashMap<>();
+    public ArrayList<HashMap<String, String>> getFromShipmentPlan(String runId, String custId) throws Exception {
         ArrayList<HashMap<String, String>> al = new ArrayList<>();
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
                 String sql;
-                sql = "SELECT Route, Item_Number, Plant, DOQty, DOQtyUOM, Batch FROM BOSNET1.dbo.TMS_ShipmentPlan "
-                        + "WHERE Customer_ID = '" + custId + "' and Batch <> 'NULL' and Request_Delivery_Date = '" + rdd + "';";
+                sql = "SELECT DISTINCT\n" +
+                  "     sp.DO_Number,\n" +
+                  "     sp.Route,\n" +
+                  "     sp.Item_Number,\n" +
+                  "     sp.Plant,\n" +
+                  "     sp.DOQty,\n" +
+                  "     sp.DOQtyUOM,\n" +
+                  "     sp.Batch,\n" +
+                  "     (SELECT\n" +
+                  "         rj.arrive\n" +
+                  "     FROM\n" +
+                  "         [BOSNET1].[dbo].[TMS_RouteJob] rj\n" +
+                  "     WHERE\n" +
+                  "         rj.RunId = '"+runId+"' AND Customer_ID = '"+custId+"'\n" +
+                  "     ) arrive,\n" +
+                  "     (SELECT\n" +
+                  "         rj.depart\n" +
+                  "     FROM\n" +
+                  "         [BOSNET1].[dbo].[TMS_RouteJob] rj\n" +
+                  "     WHERE\n" +
+                  "         rj.RunId = '"+runId+"' AND Customer_ID = '"+custId+"'\n" +
+                  "     ) depart\n" +
+                  " FROM\n" +
+                  "     [BOSNET1].[dbo].[TMS_ShipmentPlan] sp\n" +
+                  " INNER JOIN (\n" +
+                  "     SELECT\n" +
+                  "         prj.Product_Description\n" +
+                  "     FROM\n" +
+                  "         [BOSNET1].[dbo].[TMS_PreRouteJob] prj\n" +
+                  "     WHERE\n" +
+                  "         prj.RunId = '"+runId+"'\n" +
+                  "         AND prj.Customer_ID = '"+custId+"'\n" +
+                  "         AND prj.Request_Delivery_Date = (SELECT TOP 1\n" +
+                  "                                         prj.Request_Delivery_Date\n" +
+                  "					FROM \n" +
+                  "                                         [BOSNET1].[dbo].[TMS_PreRouteJob] prj\n" +
+                  "					WHERE \n" +
+                  "                                         prj.runId = '"+runId+"' AND prj.Customer_ID = '"+custId+"')\n" + 
+                  "         AND Is_Edit='edit'\n" +
+                  "         ) prj ON sp.Product_Description = prj.Product_Description\n" +
+                  " WHERE\n" +
+                  "         sp.Customer_ID = '"+custId+"'\n" +
+                  "         AND sp.Batch <> 'NULL'\n" + 
+                  "         AND sp.Request_Delivery_Date = (SELECT TOP 1\n" +
+                  "                                             prj.Request_Delivery_Date\n" +
+                  "                                         FROM \n" +
+                  "                                             [BOSNET1].[dbo].[TMS_PreRouteJob] prj\n" +
+                  "                                         WHERE \n" +
+                  "                                             prj.runId = '"+runId+"' AND prj.Customer_ID = '"+custId+"')\n" + 
+                  " ORDER BY\n" +
+                  "         sp.DO_Number";
+
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
+                        HashMap<String, String> hm = new HashMap<>();
+                        hm.put("arrive", rs.getString("arrive"));
+                        hm.put("depart", rs.getString("depart"));
+                        hm.put("DO_Number", rs.getString("DO_Number"));
                         hm.put("Route", rs.getString("Route"));
                         hm.put("Item_Number", rs.getString("Item_Number"));
                         hm.put("Plant", rs.getString("Plant"));
@@ -231,26 +286,6 @@ public class SubmitToSapAPI {
         }
         return al;
     }
-    
-    public HashMap<String, String> getArriveAndDepart(String runId, String custId) throws Exception {
-        HashMap<String, String> hm = new HashMap<>();
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql;
-                sql = "SELECT arrive, depart FROM BOSNET1.dbo.TMS_RouteJob where runID = '" + runId + "' and customer_id = '" + custId + "';";
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        hm.put("arrive", rs.getString("arrive"));
-                        hm.put("depart", rs.getString("depart"));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return hm;
-    }
-
 
     public ArrayList<String> getCustomerId(String runId, String vehicleCode) throws Exception {
         ArrayList<String> al = new ArrayList<>();
@@ -268,24 +303,6 @@ public class SubmitToSapAPI {
             throw new Exception(e.getMessage());
         }
         return al;
-    }
-    
-    public String getDoNum(String runId, String custId) throws Exception {
-        String doNum = "";
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql;
-                sql = "SELECT TOP 1 DO_Number FROM BOSNET1.dbo.TMS_PreRouteJob where runID = '" + runId + "' and customer_id = '" + custId + "';";
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        doNum = rs.getString("DO_Number");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return doNum;
     }
     
      public ArrayList<String> getStartAndEndTime(String runId, String vehicleCode) throws Exception {
@@ -310,24 +327,6 @@ public class SubmitToSapAPI {
             throw new Exception(e.getMessage());
         }
         return al;
-    }
-    
-    public String getRdd(String runId, String custId) throws Exception {
-        String rdd = "";
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql;
-                sql = "SELECT TOP 1 Request_Delivery_Date FROM BOSNET1.dbo.TMS_PreRouteJob where runID = '" + runId + "' and customer_id = '" + custId + "';";
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        rdd = rs.getString("Request_Delivery_Date");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return rdd;
     }
 
     public void insertResultShipment(ResultShipment rs) throws Exception {
