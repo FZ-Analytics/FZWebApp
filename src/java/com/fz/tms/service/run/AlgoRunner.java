@@ -85,6 +85,8 @@ public class AlgoRunner implements BusinessLogic {
                 + "Channel) values(?,?,?,?,?,?,?,?,?,?,?)";
 
         boolean success = false;
+        
+        String errMsg = "";
 
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
                 PreparedStatement ps = con.prepareStatement(sql)) {
@@ -119,44 +121,68 @@ public class AlgoRunner implements BusinessLogic {
             String resp = "";
             if (success) {     
                 if (reRun.equals("A")) {
+                    errMsg = "Update Prev PreRouteJob Error";
                     resp = updatePrevPreRouteJob(runID, runId);
-                    if (resp.equalsIgnoreCase("OK"))    
+                    if (resp.equalsIgnoreCase("OK")){
+                        errMsg = "Insert PreRouteJob Copy ori Error";
                         resp = insertPreRouteJobCopy(runID, runId, branchCode, dateDeliv, "ori");
-                    if (resp.equalsIgnoreCase("OK"))    
+                    }
+                    if (resp.equalsIgnoreCase("OK")){
+                        errMsg = "Insert PreRouteJob Copy edit Error";
                         resp = insertPreRouteJobCopy(runID, runId, branchCode, dateDeliv, "edit");
-                    if (resp.equalsIgnoreCase("OK"))    
+                    }
+                    if (resp.equalsIgnoreCase("OK")){
+                        errMsg = "Insert PreRouteVehicle Copy Error";
                         resp = insertPreVehicleCopy(runID, runId, branchCode, dateDeliv, "ori");
+                    }
                     if (resp.equalsIgnoreCase("OK") && reRun.equals("A")) {
+                        errMsg = "TMSAlgo Error";
                         resp = UrlResponseGetter.getURLResponse(url.toString());
                         if (resp.equals("OK")) {
+                            errMsg = "";
                             response.sendRedirect("runProgress.jsp?runId=" + runID + "&dateDeliv=" + dateDeliv + "&oriRunID=" + oriRunID + "&channel=" + channel);
                         } else {
                             HashMap<String, String> pl = new HashMap<String, String>();
                             pl.put("ID", runId);
                             pl.put("fileNmethod", "AlgoRunner&run");
                             pl.put("datas", "");
-                            pl.put("msg", resp);
+                            pl.put("msg", errMsg +" | "+ resp);
                             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
                             Date date = new Date();
                             pl.put("dates", dateFormat.format(date).toString());
                             Other.insertLog(pl);
+                            /*
+                            request.setAttribute("errMsg", errMsg);
+                            request.getRequestDispatcher("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
+                                + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel + "&error=N")
+                                .forward(pc.getRequest(), pc.getResponse());
+                            */
                             response.sendRedirect("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
-                                    + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel + "&error=N");
+                                    + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel + "&error=N" + "&errMsg=" + errMsg);
                         }
                     }
 
                 } else if (reRun.equals("N")) {
+                    errMsg = "TMS_GetCustLongLat Error";
                     prepareCustTable(branchCode);
+                    errMsg = "Insert PreRouteVehicle Error";
                     resp = insertPreRouteVehicle(runID, branchCode, dateDeliv, chn);
-                    if (resp.equalsIgnoreCase("OK"))    
+                    if (resp.equalsIgnoreCase("OK")){
+                        errMsg = "Insert PreRouteJob Copy ori Error";
                         resp = QueryCust(runID, branchCode, channel, dateDeliv, "ori");
+                    }
                     //resp = insertPreRouteJob(runID, branchCode, dateDeliv, "ori", chn);
-                    if (resp.equalsIgnoreCase("OK"))    
+                    if (resp.equalsIgnoreCase("OK")){
+                        errMsg = "Insert PreRouteJob edit ori Error";
                         resp = QueryCust(runID, branchCode, channel, dateDeliv, "edit");
+                    }
                     //resp = insertPreRouteJob(runID, branchCode, dateDeliv, "edit", chn);
-                    if (resp.equalsIgnoreCase("OK"))    
+                    if (resp.equalsIgnoreCase("OK")){
+                        errMsg = "";
                         response.sendRedirect("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
                             + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel + "&error=N");
+                        
+                    }
 
                 }
                 
@@ -166,14 +192,21 @@ public class AlgoRunner implements BusinessLogic {
             pl.put("ID", runId);
             pl.put("fileNmethod", "AlgoRunner&run Exc");
             pl.put("datas", "");
-            pl.put("msg", e.getMessage());
+            pl.put("msg", errMsg +" | "+ e.getMessage());
             System.out.println("e.getMessage() " + e.getMessage());
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
             Date date = new Date();
             pl.put("dates", dateFormat.format(date).toString());
             Other.insertLog(pl);
+            /*
+            request.setAttribute("errMsg"
+                   , errMsg);
+            request.getRequestDispatcher("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
+                    + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel  + "&error=Y")
+                    .forward(pc.getRequest(), pc.getResponse());
+            */
             response.sendRedirect("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
-                    + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel  + "&error=Y");
+                    + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel  + "&error=Y" + "&errMsg=" + errMsg);
         }
     }
 

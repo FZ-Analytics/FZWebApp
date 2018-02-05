@@ -174,11 +174,11 @@
                                 alert('sukses');
                                 location.reload()
                             } else {
-                                alert('submit error');
+                                alert('submit Status error');
                             }
                         });
                     }else{
-                        alert( 'submit error' ); 
+                        alert( 'submit SAP error' ); 
                     }
                 });                
                 //var data = [];

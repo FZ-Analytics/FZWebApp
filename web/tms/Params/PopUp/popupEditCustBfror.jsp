@@ -14,7 +14,7 @@
     </head>
     <body>
         <%@include file="../appGlobal/bodyTop.jsp"%>
-        <div class="fzErrMsg">
+        <div class="fzErrMsg" id="errMsg">
             <%=get("errMsg")%>
         </div>
         <br>
