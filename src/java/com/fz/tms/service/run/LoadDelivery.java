@@ -63,8 +63,9 @@ public class LoadDelivery implements BusinessLogic {
 
         String[] tableArrSplit = tableArr.split("split");
 
-        speedTruck = getTruckSpeed();
-        trafficFactor = getTrafficFactor();
+        ArrayList<Double> alParam = getParam();
+        speedTruck = alParam.get(0);
+        trafficFactor = alParam.get(1);
         for (int i = 0; i < tableArrSplit.length; i++) {
             String str = tableArrSplit[i];
             String data = str;
@@ -179,10 +180,14 @@ public class LoadDelivery implements BusinessLogic {
                             d.transportCost = (int) Math.round(getCostPerM(d.vehicleCode, oriRunId) * (distance1 + distance2));
                         } //Google
                         else {
-                            double distance = getDistByGoogle(d.lon1, d.lat1, d.lon2, d.lat2);
-                            d.arrive = addTime(prevDepart, getDurByGoogle(d.lon1, d.lat1, d.lon2, d.lat2));
-                            d.dist = "" + Math.round((distance / 1000) * 10) / 10.0;
-                            d.transportCost = (int) ((int) Math.round((750 * distance / 1000) * 10) / 10.0);
+                            try {
+                                ArrayList<Double> alDurDist = getDistDurByGoogle(d.lon1, d.lat1, d.lon2, d.lat2);
+                                double distance = alDurDist.get(0);
+                                d.arrive = addTime(prevDepart, Math.round(alDurDist.get(1)));
+                                d.dist = "" + Math.round((distance / 1000) * 10) / 10.0;
+                                d.transportCost = (int) ((int) Math.round((getCostPerM(d.vehicleCode, oriRunId) * distance) * 10) / 10.0);
+                            }
+                            catch(Exception e) {}
                         }
 
                         //break if depart + 60 minutes is more than 11:30
@@ -214,9 +219,6 @@ public class LoadDelivery implements BusinessLogic {
                     }
                 }
                 try {
-                    if (d.no.equals("1")) {
-
-                    }
                     if (hasBreak) {
                         d.feasibleTruck = isTimeinRange(d.arrive, getTruckTime(runId, d.vehicleCode));
                         ArrayList<String> al = getCustomerTime(runId, d.custId);
@@ -334,6 +336,53 @@ public class LoadDelivery implements BusinessLogic {
             }
         }
     }
+    
+    public String reFormatLongLat(String longlat) {
+        String ret = "";
+        //Sometimes long lat use "," instead of "."
+        if (!longlat.contains(",")) {
+            ret = longlat;
+        } else {
+            ret = longlat.replaceAll(",", ".");
+        }
+        return ret;
+    }
+    
+    public String addTime(String currentTime, long minToAdd) {
+        String newTime = "";
+        try {
+            DateTimeFormatter df = DateTimeFormatter.ofPattern("HH:mm");
+            LocalTime lt = LocalTime.parse(currentTime);
+            newTime = df.format(lt.plusMinutes(minToAdd));
+        } catch (Exception e) {
+
+        }
+        return newTime;
+    }
+
+    public static double calcMeterDist(double lon1, double lat1, double lon2, double lat2) {
+        double el1 = 0; // was in function param
+        double el2 = 0; // was in function param
+        final int R = 6371; // Radius of the earth
+
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = R * c * 1000; // convert to meters
+
+        double height = el1 - el2;
+
+        distance = Math.pow(distance, 2) + Math.pow(height, 2);
+
+        return Math.sqrt(distance);
+    }
+
+    public static double calcTripMinutes(double distanceMtr, double speedKmPHr) {
+        return ((distanceMtr / 1000) / speedKmPHr * 60);
+    }
 
     public String isTimeinRange(String arrive, ArrayList<String> al) {
         String[] truckArriveSplit = arrive.split(":");
@@ -418,38 +467,21 @@ public class LoadDelivery implements BusinessLogic {
         return vehicleTypeList;
     }
 
-    private double getTruckSpeed() throws Exception {
-        double speed = 0;
+    public ArrayList<Double> getParam() throws Exception {
+        ArrayList<Double> alParam = new ArrayList<>();
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
-                String sql = "SELECT value FROM BOSNET1.dbo.TMS_Params where param = 'SpeedKmPHour'";
+                String sql = "SELECT value FROM BOSNET1.dbo.TMS_Params WHERE param = 'SpeedKmPHour' OR param = 'TrafficFactor'";
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
-                        speed = (rs.getDouble("value"));
+                        alParam.add(rs.getDouble("value")); // Index 0 = speed, index 1 = traffic factor
                     }
                 }
             }
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
-        return speed;
-    }
-
-    private double getTrafficFactor() throws Exception {
-        double tFactor = 0;
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql = "SELECT value FROM BOSNET1.dbo.TMS_Params where param = 'TrafficFactor'";
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        tFactor = (rs.getDouble("value"));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return tFactor;
+        return alParam;
     }
 
     public String getTripCalc(String oriRunId) throws Exception {
@@ -529,53 +561,6 @@ public class LoadDelivery implements BusinessLogic {
         return al;
     }
 
-    public String addTime(String currentTime, long minToAdd) {
-        String newTime = "";
-        try {
-            DateTimeFormatter df = DateTimeFormatter.ofPattern("HH:mm");
-            LocalTime lt = LocalTime.parse(currentTime);
-            newTime = df.format(lt.plusMinutes(minToAdd));
-        } catch (Exception e) {
-
-        }
-        return newTime;
-    }
-
-    public String convertTripDuration(String min) {
-        int minuteCeil = 0;
-        try {
-            double minute = Double.parseDouble(min);
-            minuteCeil = (int) Math.ceil(minute);
-        } catch (Exception e) {
-
-        }
-        return "" + minuteCeil;
-    }
-
-    public static double calcMeterDist(double lon1, double lat1, double lon2, double lat2) {
-        double el1 = 0; // was in function param
-        double el2 = 0; // was in function param
-        final int R = 6371; // Radius of the earth
-
-        double latDistance = Math.toRadians(lat2 - lat1);
-        double lonDistance = Math.toRadians(lon2 - lon1);
-        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
-                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        double distance = R * c * 1000; // convert to meters
-
-        double height = el1 - el2;
-
-        distance = Math.pow(distance, 2) + Math.pow(height, 2);
-
-        return Math.sqrt(distance);
-    }
-
-    public static double calcTripMinutes(double distanceMtr, double speedKmPHr) {
-        return ((distanceMtr / 1000) / speedKmPHr * 60);
-    }
-
     public String getLongLatCustomer(String custId) throws Exception {
         String longitude = "";
         String latitude = "";
@@ -595,21 +580,22 @@ public class LoadDelivery implements BusinessLogic {
         return longitude + "split" + latitude;
     }
 
-    public double getDistByGoogle(String lon1, String lat1, String lon2, String lat2) throws Exception {
-        double distance = 0;
+    public ArrayList<Double> getDistDurByGoogle(String lon1, String lat1, String lon2, String lat2) throws Exception {
+        ArrayList<Double> al = new ArrayList<>();
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
-                String sql = "SELECT TOP 1 dist FROM BOSNET1.dbo.TMS_CostDist where lon1 = '" + lon1 + "' and lat1 = '" + lat1 + "' and lon2 = '" + lon2 + "' and lat2 = '" + lat2 + "';";
+                String sql = "SELECT TOP 1 dist, dur FROM BOSNET1.dbo.TMS_CostDist where lon1 = '" + lon1 + "' and lat1 = '" + lat1 + "' and lon2 = '" + lon2 + "' and lat2 = '" + lat2 + "';";
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
-                        distance = rs.getDouble("dist");
+                        al.add(rs.getDouble("dist"));
+                        al.add(rs.getDouble("dur"));
                     }
                 }
             }
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
-        return distance;
+        return al;
     }
 
     public double getCostPerM(String vehicleCode, String runId) throws Exception {
@@ -627,23 +613,6 @@ public class LoadDelivery implements BusinessLogic {
             throw new Exception(e.getMessage());
         }
         return costPerM;
-    }
-
-    public int getDurByGoogle(String lon1, String lat1, String lon2, String lat2) throws Exception {
-        double duration = 0;
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql = "SELECT TOP 1 dur FROM BOSNET1.dbo.TMS_CostDist where lon1 = '" + lon1 + "' and lat1 = '" + lat1 + "' and lon2 = '" + lon2 + "' and lat2 = '" + lat2 + "';";
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        duration = rs.getDouble("dur");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return (int) Math.round(duration);
     }
 
     public String getIsFix(String runId, String custId) throws Exception {
@@ -731,19 +700,8 @@ public class LoadDelivery implements BusinessLogic {
         return d;
     }
 
-    public String reFormatLongLat(String longlat) {
-        String ret = "";
-        //Sometimes long lat use "," instead of "."
-        if (!longlat.contains(",")) {
-            ret = longlat;
-        } else {
-            ret = longlat.replaceAll(",", ".");
-        }
-        return ret;
-    }
-
     public HashMap<String, String> getShipmentPlan(String doNum) throws Exception {
-        HashMap<String, String> hm = new HashMap<String, String>();
+        HashMap<String, String> hm = new HashMap<>();
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
                 String sql = "SELECT Total_KG, Total_Cubication, DOCreationDate, DOCreationTime, DOUpdatedDate, DOUpdatedTime, Product_Description, Gross_Amount, DOQty, DOQtyUOM "
@@ -771,7 +729,7 @@ public class LoadDelivery implements BusinessLogic {
     }
 
     public HashMap<String, String> getCustAttr(String custId) throws Exception {
-        HashMap<String, String> hm = new HashMap<String, String>();
+        HashMap<String, String> hm = new HashMap<>();
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
                 String sql = "SELECT service_time, deliv_start, deliv_end, vehicle_type_list, DayWinStart, DayWinEnd, DeliveryDeadline "
@@ -835,27 +793,6 @@ public class LoadDelivery implements BusinessLogic {
             throw new Exception(e.getMessage());
         }
         return arlistVno;
-    }
-
-    public String getVolumePerMillion(String custId, String runId) throws Exception {
-        String vol = "";
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql = "SELECT volume FROM BOSNET1.dbo.TMS_RouteJob WHERE customer_id = '" + custId + "' and runID = '" + runId + "';";
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        vol = rs.getString("volume");
-                        try {
-                            vol = "" + Math.round((Double.parseDouble(vol) / 1000) / 100.0) * 100.0 / 1000;
-                        } catch (Exception e) {
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return vol;
     }
 
     private String getVolume(String custId, String runId) throws Exception {

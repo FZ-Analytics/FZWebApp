@@ -64,22 +64,22 @@ public class RouteJobListingResultEdit implements BusinessLogic {
 
         String[] tableArrSplit = tableArr.split("split");
 
-        speedTruck = getTruckSpeed();
-        trafficFactor = getTrafficFactor();
+        ArrayList<Double> alParam = getParam();
+        speedTruck = alParam.get(0);
+        trafficFactor = alParam.get(1);
         for (int i = 0; i < tableArrSplit.length; i++) {
             String str = tableArrSplit[i];
             String data = str;
             if (i != 0) {
                 data = str.substring(0, 0) + str.substring(0 + 1);
             }
-            System.out.println(data);
+           
             String[] dataSplit = data.split(",");
             switch (dataSplit.length) {
                 case 3: //normal row or start
                     if (!dataSplit[2].equals("start")) {
                         setObjectValue(dataSplit[0], dataSplit[1], dataSplit[2], "");
                     } else {
-                        System.out.println("PLAT: " + (dataSplit[1]));
                         setObjectValue(dataSplit[0], dataSplit[1], "", getVehiStart(dataSplit[1]));
                         prevCustId = dataSplit[1];
                     }
@@ -185,10 +185,14 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                             d.transportCost = (int) Math.round(getCostPerM(d.vehicleCode, oriRunId) * (distance1 + distance2));
                         } //Google
                         else {
-                            double distance = getDistByGoogle(d.lon1, d.lat1, d.lon2, d.lat2);
-                            d.arrive = addTime(prevDepart, getDurByGoogle(d.lon1, d.lat1, d.lon2, d.lat2));
-                            d.dist = "" + Math.round((distance / 1000) * 10) / 10.0;
-                            d.transportCost = (int) ((int) Math.round((getCostPerM(d.vehicleCode, oriRunId) * distance / 1000) * 10) / 10.0);
+                            try {
+                                ArrayList<Double> alDurDist = getDistDurByGoogle(d.lon1, d.lat1, d.lon2, d.lat2);
+                                double distance = alDurDist.get(0);
+                                d.arrive = addTime(prevDepart, Math.round(alDurDist.get(1)));
+                                d.dist = "" + Math.round((distance / 1000) * 10) / 10.0;
+                                d.transportCost = (int) ((int) Math.round((getCostPerM(d.vehicleCode, oriRunId) * distance) * 10) / 10.0);
+                            }
+                            catch(Exception e) {}
                         }
 
                         //break if depart + 60 minutes is more than 11:30
@@ -343,39 +347,23 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         }
         return startTime;
     }
-
-    public double getDistByGoogle(String lon1, String lat1, String lon2, String lat2) throws Exception {
-        double distance = 0;
+    
+    public ArrayList<Double> getDistDurByGoogle(String lon1, String lat1, String lon2, String lat2) throws Exception {
+        ArrayList<Double> al = new ArrayList<>();
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
-                String sql = "SELECT TOP 1 dist FROM BOSNET1.dbo.TMS_CostDist where lon1 = '" + lon1 + "' and lat1 = '" + lat1 + "' and lon2 = '" + lon2 + "' and lat2 = '" + lat2 + "';";
+                String sql = "SELECT TOP 1 dist, dur FROM BOSNET1.dbo.TMS_CostDist where lon1 = '" + lon1 + "' and lat1 = '" + lat1 + "' and lon2 = '" + lon2 + "' and lat2 = '" + lat2 + "';";
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
-                        distance = rs.getDouble("dist");
+                        al.add(rs.getDouble("dist"));
+                        al.add(rs.getDouble("dur"));
                     }
                 }
             }
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
-        return distance;
-    }
-
-    public int getDurByGoogle(String lon1, String lat1, String lon2, String lat2) throws Exception {
-        double duration = 0;
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql = "SELECT TOP 1 dur FROM BOSNET1.dbo.TMS_CostDist where lon1 = '" + lon1 + "' and lat1 = '" + lat1 + "' and lon2 = '" + lon2 + "' and lat2 = '" + lat2 + "';";
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        duration = rs.getDouble("dur");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return (int) Math.round(duration);
+        return al;
     }
 
     public String getTripCalc(String oriRunId) throws Exception {
@@ -399,28 +387,40 @@ public class RouteJobListingResultEdit implements BusinessLogic {
 
     public ArrayList<String> getRouteData(String custId) throws Exception {
         ArrayList<String> d = new ArrayList<>();
-        String doNumber = "";
-        String priority = "";
-        String storeOpen = "";
-        String storeClose = "";
-        String serviceTime = "";
-        String storeName = "";
-        String storeStreet = "";
-        String distChannel = "";
-        String rdd = "";
+        String doNumber = "", priority = "", storeOpen = "", storeClose = "", serviceTime = "", storeName = "", storeStreet = "", distChannel = "", rdd = "";
         double weight = 0.0;
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
-                String sql = "SELECT DO_Number, Customer_priority, deliv_start, deliv_end, Service_time, Name1, Street, Distribution_Channel, Request_Delivery_Date, SUM(total_kg) as total_kg "
-                        + "FROM BOSNET1.dbo.TMS_PreRouteJob "
-                        + "WHERE RunId = '" + oriRunId + "' and Customer_ID = '" + custId + "' and Is_Edit = 'edit' "
-                        + "GROUP BY DO_Number, Customer_priority, deliv_start, deliv_end, Service_time, Name1, Street, Distribution_Channel, Request_Delivery_Date";
+                String sql = "SELECT "
+                        + "     DO_Number, "
+                        + "     Customer_priority, "
+                        + "     deliv_start, "
+                        + "     deliv_end, "
+                        + "     Service_time, "
+                        + "     Name1, Street, "
+                        + "     Distribution_Channel, "
+                        + "     Request_Delivery_Date, "
+                        + "     SUM(total_kg) as total_kg "
+                        + " FROM "
+                        + "     BOSNET1.dbo.TMS_PreRouteJob "
+                        + " WHERE "
+                        + "     RunId = '" + oriRunId + "' "
+                        + "     AND Customer_ID = '" + custId + "' "
+                        + "     AND Is_Edit = 'edit' "
+                        + " GROUP BY "
+                        + "     DO_Number, "
+                        + "     Customer_priority, "
+                        + "     deliv_start, "
+                        + "     deliv_end, "
+                        + "     Service_time, "
+                        + "     Name1, "
+                        + "     Street, "
+                        + "     Distribution_Channel, "
+                        + "     Request_Delivery_Date";
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
                         doNumber += rs.getString("DO_Number") + ";\n";
-                        if (priority.length() == 0) {
-                            priority = rs.getString("Customer_priority");
-                        }
+                        priority = rs.getString("Customer_priority");
                         storeOpen = rs.getString("deliv_start");
                         storeClose = rs.getString("deliv_end");
                         serviceTime = rs.getString("Service_time");
@@ -431,7 +431,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                         weight += rs.getDouble("total_kg");
                     }
                     if (doNumber.length() > 0) {
-                        doNumber = doNumber.substring(0, doNumber.length() - 2);
+                        doNumber = doNumber.substring(0, doNumber.length() - 2); // Remove last semicolon
                     }
 
                     d.add(doNumber + "split" + priority + "split" + storeOpen + "split" + storeClose + "split" + serviceTime + "split" + storeName + "split"
@@ -778,38 +778,21 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         return volume;
     }
 
-    private double getTruckSpeed() throws Exception {
-        double speed = 0;
+    public ArrayList<Double> getParam() throws Exception {
+        ArrayList<Double> alParam = new ArrayList<>();
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
-                String sql = "SELECT value FROM BOSNET1.dbo.TMS_Params where param = 'SpeedKmPHour'";
+                String sql = "SELECT value FROM BOSNET1.dbo.TMS_Params WHERE param = 'SpeedKmPHour' OR param = 'TrafficFactor'";
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
-                        speed = (rs.getDouble("value"));
+                        alParam.add(rs.getDouble("value")); // Index 0 = speed, index 1 = traffic factor
                     }
                 }
             }
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
-        return speed;
-    }
-
-    private double getTrafficFactor() throws Exception {
-        double tFactor = 0;
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql = "SELECT value FROM BOSNET1.dbo.TMS_Params where param = 'TrafficFactor'";
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        tFactor = (rs.getDouble("value"));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return tFactor;
+        return alParam;
     }
 
     public void insertPreRouteVehicle(ArrayList<PreRouteVehicleLog> arlist, String runId) throws Exception {
