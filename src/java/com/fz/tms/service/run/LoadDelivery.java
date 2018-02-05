@@ -742,23 +742,6 @@ public class LoadDelivery implements BusinessLogic {
         return ret;
     }
 
-    private ArrayList<Double> getParam() throws Exception {
-        ArrayList<Double> d = new ArrayList<>();
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql = "SELECT TOP 2 value FROM BOSNET1.dbo.TMS_Params";
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        d.add(rs.getDouble("value"));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return d;
-    }
-
     public HashMap<String, String> getShipmentPlan(String doNum) throws Exception {
         HashMap<String, String> hm = new HashMap<String, String>();
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
