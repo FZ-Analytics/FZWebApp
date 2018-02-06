@@ -47,7 +47,7 @@
         if (sortBy.equals("div")){
             orderBy = ""
                 + "\n       j.divID"
-                + "\n       , j.readyTime"
+                + "\n       , j.PlanStart"
                     ;
         }
         

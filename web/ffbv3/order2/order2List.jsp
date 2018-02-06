@@ -221,7 +221,6 @@
                     <a href="javascript:shw('<%=r.jobID%>','<%=r.runID%>','<%=r.hvsDate%>','<%=FZUtil.escapeText(r.remark)%>','<%=r.vehicleRemark%>','<%=r.createSource%>','<%=r.Task2ReasonName%>','<%=r.size%>','<%=r.planStart%>','<%=r.planEnd%>','<%=r.actualStart%>','<%=r.actualEnd%>','<%=r.getBlocks()%>','<%=r.isLastOrder%>','<%=r.isLast2Order%>','<%=r.assignedDate%>','<%=r.takenDate%>','<%=r.doneDate%>','<%=r.createDate%>','<%=r.dirLoc%>','<%=r.estmFfb%>');"
                       id="tgl<%=r.jobID%>">More</a>
                 </td>
-                <td><%=reorderCode%></td><td><%=cancelCode%></td>      
             </tr>
             <div>
             <tr id="more<%=r.jobID%>" name="more<%=r.jobID%>" hidden>
@@ -236,63 +235,84 @@
                     <table frame="box" style="border: lightgray inset medium;">
                         <tr>
                             <td>&nbsp;</td>
-                            <td style="padding: 2px; ">Harvest Date</td><td style="padding: 2px;">:</td><td width="80px"><%=r.hvsDate%></td>
-                            <td style="border-left: solid lightgray 1px; border-right: solid lightgray 1px;">&nbsp;</td>
+                            <td colspan='3'><font style='color: brown;'><b>Order Detail</b></font></td>
+                            <td>&nbsp;</td>
+                            <td colspan='3'></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px;">Create Source</td><td style="padding: 2px;">:</td><td><%=r.createSource%></td>
+                            <td>&nbsp;</td>
                             <td style="padding: 2px;">RunID</td><td style="padding: 2px;">:</td><td><%=r.runID%></td>
                         </tr>
                         <tr>
                             <td>&nbsp;</td>
+                            <td>Ordered</td><td style="padding: 2px;">:</td><td><%=r.createDate%></td>
+                            <td>&nbsp;</td>
+                            <td>Asigned</td><td style="padding: 2px;">:</td><td><%=r.assignedDate%></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td>Taken</td><td style="padding: 2px;">:</td><td><%=r.takenDate%></td>
+                            <td>&nbsp;</td>
+                            <td>Done</td><td style="padding: 2px;">:</td><td><%=r.doneDate%></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px;">DirLoc</td><td style="padding: 2px;">:</td><td><%=r.dirLoc%></td>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px;">BinLoc</td><td style="padding: 2px;">:</td><td><%=r.remark%></td>
+                        </tr>
+                        <tr><td colspan='7>'>&nbsp;</td></tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td colspan='3'><font style='color: brown;'><b>Order Status</b></font></td>
+                            <td>&nbsp;</td>
+                            <td colspan='3'></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px;">Driver </td><td>:</td><td><%=r.vehicleRemark%></td>
+                            <td>&nbsp;</td>
+                            <td colspan='3'></td>
+                        </tr>
+                        <!--tr>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px; ">Harvest Date</td><td style="padding: 2px;">:</td><td width="80px"><%=r.hvsDate%></td>
+                            <td>&nbsp;</td>
+                            <td colspan='3'></td>
+                        </tr-->
+                        <tr>
+                            <td>&nbsp;</td>
                             <td style="padding: 2px;">Plan Start</td><td style="padding: 2px;">:</td><td><%=r.planStart%></td>
-                            <td style="border-left: solid lightgray 1px; border-right: solid lightgray 1px;">&nbsp;</td>
-                            <td style="padding: 2px;">Create Source</td><td style="padding: 2px;">:</td><td><%=r.createSource%></td>
+                            <td>&nbsp;</td>
+                            <td>Actual Start</td><td style="padding: 2px;">:</td><td style="padding: 2px; width: 50px;"><%=r.actualStart%></td>
                         </tr>
                         <tr>
                             <td>&nbsp;</td>
                             <td style="padding: 2px;">Plan End</td><td style="padding: 2px;">:</td><td><%=r.planEnd%></td>
-                            <td style="border-left: solid lightgray 1px; border-right: solid lightgray 1px;">&nbsp;</td>
-                            <td style="padding: 2px;">DirLoc</td><td style="padding: 2px;">:</td><td><%=r.dirLoc%></td>
-                        </tr>
-                        <tr>
-                            <td>&nbsp;</td>
-                            <td>Actual Start</td><td style="padding: 2px;">:</td><td style="padding: 2px; width: 50px;"><%=r.actualStart%></td>
-                            <td style="border-left: solid lightgray 1px; border-right: solid lightgray 1px;">&nbsp;</td>
-                            <td style="padding: 2px;">Job Remark</td><td style="padding: 2px;">:</td><td><%=r.remark%></td>
-                        </tr>
-                        <tr>
                             <td>&nbsp;</td>
                             <td>Actual End</td><td style="padding: 2px;">:</td><td style="padding: 2px;"><%=r.actualEnd%></td>
-                            <td style="border-left: solid lightgray 1px; border-right: solid lightgray 1px;">&nbsp;</td>
-                            <td style="padding: 2px;">Vehicle Remark</td><td style="padding: 2px;">:</td><td><%=r.vehicleRemark%></td>
                         </tr>
-						<tr>
+			<tr>
                             <td>&nbsp;</td>
                             <td style="padding: 2px;">Estm Kg</td><td style="padding: 2px;">:</td><td><%=df.format(r.size)%></td>
-                            <td style="border-left: solid lightgray 1px; border-right: solid lightgray 1px;">&nbsp;</td>
-                            <td>Ordered</td><td style="padding: 2px;">:</td><td><%=r.createDate%></td>
-						<tr>
                             <td>&nbsp;</td>
                             <td>Actual Kg</td><td style="padding: 2px;">:</td><td style="padding: 2px;"><%=df.format(r.ActualKg)%></td>
-                            <td style="border-left: solid lightgray 1px; border-right: solid lightgray 1px;">&nbsp;</td>
-                            <td>Asigned</td><td style="padding: 2px;">:</td><td><%=r.assignedDate%></td>
-						</tr>
-						<tr>
-                            <td>&nbsp;</td>
-                            <td style="padding: 2px;">Reason</td><td style="padding: 2px;">:</td><td><%=r.Task2ReasonName%></td>
-                            <td style="border-left: solid lightgray 1px; border-right: solid lightgray 1px;">&nbsp;</td>
-                            <td>Taken</td><td style="padding: 2px;">:</td><td><%=r.takenDate%></td>
-						</tr>
-						<tr>
+                        </tr>
+			<tr>
                             <td>&nbsp;</td>
                             <td>Is Last 2 Order</td><td style="padding: 2px;">:</td><td width="50px"><%=r.isLast2Order%></td>
-                            <td style="border-left: solid lightgray 1px; border-right: solid lightgray 1px;">&nbsp;</td>
-                            <td>Done</td><td style="padding: 2px;">:</td><td><%=r.doneDate%></td>
-						</tr>
-						<tr>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px;">Reason</td><td style="padding: 2px;">:</td><td><%=r.Task2ReasonName%></td>
+                        </tr>
+                        <tr><td colspan='7>'>&nbsp;</td></tr>
+			<tr>
                             <td>&nbsp;</td>
                             <td colspan="3" style='align-items: center;'><%=reorderCode%></td>
 							<td></td>
                             <td colspan="3" style='align-items: center;'><%=cancelCode%></td>
-						</tr>
+                        </tr>
                     </table>
                 </td>
                 </td>
