@@ -75,7 +75,7 @@
                         
                         // forward to login page to display loginResult
                         request
-                                .getRequestDispatcher("../usrMgt/login.jsp")
+                                .getRequestDispatcher("/FZWeb/ffbv3/usrMgt/login.jsp")
                                 .forward(pc.getRequest(), pc.getResponse());
                     }
                 }
