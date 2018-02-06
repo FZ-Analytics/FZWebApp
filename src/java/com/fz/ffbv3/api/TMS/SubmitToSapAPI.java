@@ -117,6 +117,8 @@ public class SubmitToSapAPI {
                     rs.Shipment_Number_SAP = "";
                     rs.I_Status = "0";
                     rs.Shipment_Flag = "";
+                    rs.distance = hmSP.get("distance");
+                    rs.distanceUnit = "M";
                     
                     insertResultShipment(rs);
                 }
@@ -186,8 +188,8 @@ public class SubmitToSapAPI {
                         "IdDriver, " +
                         "NamaDriver, " +
                         "CASE " + 
-                            "WHEN source1 = 'INT' THEN 'ZDSD' " +
-                            "ELSE 'ZDSC' " +
+                            "WHEN source1 = 'INT' THEN 'ZDSI' " +
+                            "ELSE 'ZDSH' " +
                         "END as source1 " +
                         "FROM BOSNET1.dbo.TMS_PreRouteVehicle " +
                         "WHERE runID = '" + runId + "' and vehicle_code = '" + vehicleNo + "';";
@@ -220,38 +222,22 @@ public class SubmitToSapAPI {
                   "     sp.DOQty,\n" +
                   "     sp.DOQtyUOM,\n" +
                   "     sp.Batch,\n" +
-                  "     (SELECT\n" +
-                  "         rj.arrive\n" +
-                  "     FROM\n" +
-                  "         [BOSNET1].[dbo].[TMS_RouteJob] rj\n" +
-                  "     WHERE\n" +
-                  "         rj.RunId = '"+runId+"' AND Customer_ID = '"+custId+"'\n" +
-                  "     ) arrive,\n" +
-                  "     (SELECT\n" +
-                  "         rj.depart\n" +
-                  "     FROM\n" +
-                  "         [BOSNET1].[dbo].[TMS_RouteJob] rj\n" +
-                  "     WHERE\n" +
-                  "         rj.RunId = '"+runId+"' AND Customer_ID = '"+custId+"'\n" +
-                  "     ) depart\n" +
+                  "     rj.arrive,\n" +
+                  "     rj.depart,\n" +
+                  "     rj.distance\n" +
                   " FROM\n" +
                   "     [BOSNET1].[dbo].[TMS_ShipmentPlan] sp\n" +
-                  " INNER JOIN (\n" +
-                  "     SELECT\n" +
-                  "         prj.Product_Description\n" +
-                  "     FROM\n" +
-                  "         [BOSNET1].[dbo].[TMS_PreRouteJob] prj\n" +
-                  "     WHERE\n" +
-                  "         prj.RunId = '"+runId+"'\n" +
-                  "         AND prj.Customer_ID = '"+custId+"'\n" +
-                  "         AND prj.Request_Delivery_Date = (SELECT TOP 1\n" +
-                  "                                         prj.Request_Delivery_Date\n" +
-                  "					FROM \n" +
-                  "                                         [BOSNET1].[dbo].[TMS_PreRouteJob] prj\n" +
-                  "					WHERE \n" +
-                  "                                         prj.runId = '"+runId+"' AND prj.Customer_ID = '"+custId+"')\n" + 
-                  "         AND Is_Edit='edit'\n" +
-                  "         ) prj ON sp.Product_Description = prj.Product_Description\n" +
+                  "INNER JOIN (\n" +
+                  "	SELECT\n" +
+                  "		rj.customer_id,\n" +
+                  "		rj.arrive,\n" +
+                  "		rj.depart,\n" +
+                  "		rj.Dist distance\n" +
+                  "	FROM\n" +
+                  "		[BOSNET1].[dbo].[TMS_RouteJob] rj\n" +
+                  "	WHERE\n" +
+                  "		rj.runId = '"+runId+"'\n" +
+                  "		AND rj.Customer_ID = '"+custId+"') rj ON rj.customer_id = sp.Customer_ID\n" +
                   " WHERE\n" +
                   "         sp.Customer_ID = '"+custId+"'\n" +
                   "         AND sp.Batch <> 'NULL'\n" + 
@@ -269,6 +255,7 @@ public class SubmitToSapAPI {
                         HashMap<String, String> hm = new HashMap<>();
                         hm.put("arrive", rs.getString("arrive"));
                         hm.put("depart", rs.getString("depart"));
+                        hm.put("distance", rs.getString("distance"));
                         hm.put("DO_Number", rs.getString("DO_Number"));
                         hm.put("Route", rs.getString("Route"));
                         hm.put("Item_Number", rs.getString("Item_Number"));
