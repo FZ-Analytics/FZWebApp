@@ -59,37 +59,61 @@ public class VehicleAttrDB {
                 // create sql
                 String sql ;
                 sql = "SELECT\n" +
-                "	vh.vehicle_code,\n" +
-                "	va.startLon,\n" +
-                "	va.startLat,\n" +
-                "	va.endLon,\n" +
-                "	va.endLat,\n" +
-                "	va.startTime,\n" +
-                "	va.endTime,\n" +
-                "	va.source1,\n" +
-                "	CASE\n" +
-                "		WHEN vh.vehicle_code IS NULL THEN va.weight\n" +
-                "		ELSE vh.weight\n" +
-                "	END AS weight,\n" +
-                "	CASE\n" +
-                "		WHEN vh.vehicle_code IS NULL THEN va.volume\n" +
-                "		ELSE vh.volume\n" +
-                "	END AS volume,\n" +
-                "	CASE\n" +
-                "		WHEN vh.vehicle_code IS NULL THEN va.branch\n" +
-                "		ELSE vh.plant\n" +
-                "	END AS plant,\n" +
-                "	CASE\n" +
-                "		WHEN vh.vehicle_code IS NULL THEN va.vehicle_type\n" +
-                "		ELSE vh.vehicle_type\n" +
-                "	END AS vehicle_type,\n" +
-                "	va.included\n" +
-                "FROM\n" +
-                "	BOSNET1.dbo.Vehicle vh\n" +
-                "LEFT outer JOIN BOSNET1.dbo.TMS_VehicleAtr va ON\n" +
-                "	vh.Vehicle_Code = va.vehicle_code\n" +
-                "WHERE\n" +
-                "	vh.Plant = '"+str+"';";
+                    "	DISTINCT *\n" +
+                    "FROM\n" +
+                    "	(\n" +
+                    "		SELECT\n" +
+                    "			vh.vehicle_code,\n" +
+                    "			va.startLon,\n" +
+                    "			va.startLat,\n" +
+                    "			va.endLon,\n" +
+                    "			va.endLat,\n" +
+                    "			va.startTime,\n" +
+                    "			va.endTime,\n" +
+                    "			va.source1,\n" +
+                    "			CASE\n" +
+                    "				WHEN vh.vehicle_code IS NULL THEN va.weight\n" +
+                    "				ELSE vh.weight\n" +
+                    "			END AS weight,\n" +
+                    "			CASE\n" +
+                    "				WHEN vh.vehicle_code IS NULL THEN va.volume\n" +
+                    "				ELSE vh.volume\n" +
+                    "			END AS volume,\n" +
+                    "			CASE\n" +
+                    "				WHEN vh.vehicle_code IS NULL THEN va.branch\n" +
+                    "				ELSE vh.plant\n" +
+                    "			END AS plant,\n" +
+                    "			CASE\n" +
+                    "				WHEN vh.vehicle_code IS NULL THEN va.vehicle_type\n" +
+                    "				ELSE vh.vehicle_type\n" +
+                    "			END AS vehicle_type,\n" +
+                    "			va.included\n" +
+                    "		FROM\n" +
+                    "			BOSNET1.dbo.Vehicle vh\n" +
+                    "		LEFT OUTER JOIN BOSNET1.dbo.TMS_VehicleAtr va ON\n" +
+                    "			vh.Vehicle_Code = va.vehicle_code\n" +
+                    "		WHERE\n" +
+                    "			vh.Plant = '"+str+"'\n" +
+                    "	UNION ALL SELECT\n" +
+                    "			va.vehicle_code,\n" +
+                    "			va.startLon,\n" +
+                    "			va.startLat,\n" +
+                    "			va.endLon,\n" +
+                    "			va.endLat,\n" +
+                    "			va.startTime,\n" +
+                    "			va.endTime,\n" +
+                    "			va.source1,\n" +
+                    "			va.weight,\n" +
+                    "			va.volume,\n" +
+                    "			va.branch AS plant,\n" +
+                    "			va.vehicle_type,\n" +
+                    "			va.included\n" +
+                    "		FROM\n" +
+                    "			BOSNET1.dbo.TMS_VehicleAtr va\n" +
+                    "		WHERE\n" +
+                    "			va.branch = '"+str+"'\n" +
+                    "			AND source1 = 'EXT'\n" +
+                    "	) ve";
                 
                 // query
                 try (ResultSet rs = stm.executeQuery(sql)){
@@ -125,6 +149,8 @@ public class VehicleAttrDB {
         String insert = "ERROR";
         // open db connection and 1 statement to insert header
         String sql = "";
+        
+        flag = isInsert(c.vehicle_code).equals("OK") ? "update" : "insert";
         
         if(flag.equalsIgnoreCase("insert")){
             sql = "INSERT INTO bosnet1.dbo.TMS_VehicleAtr "
@@ -292,43 +318,66 @@ public class VehicleAttrDB {
             try (Statement stm = con.createStatement()){            
                 // create sql
                 String sql ;
-                sql = "  SELECT\n" +
-                "	vh.vehicle_code,\n" +
-                "	va.startLon,\n" +
-                "	va.startLat,\n" +
-                "	va.endLon,\n" +
-                "	va.endLat,\n" +
-                "	va.startTime,\n" +
-                "	va.endTime,\n" +
-                "	va.source1,\n" +
-                "	CASE\n" +
-                "		WHEN vh.vehicle_code IS NULL THEN va.weight\n" +
-                "		ELSE vh.weight\n" +
-                "	END AS weight,\n" +
-                "	CASE\n" +
-                "		WHEN vh.vehicle_code IS NULL THEN va.volume\n" +
-                "		ELSE vh.volume\n" +
-                "	END AS volume,\n" +
-                "	CASE\n" +
-                "		WHEN vh.vehicle_code IS NULL THEN va.branch\n" +
-                "		ELSE vh.plant\n" +
-                "	END AS plant,\n" +
-                "	CASE\n" +
-                "		WHEN vh.vehicle_code IS NULL THEN va.vehicle_type\n" +
-                "		ELSE vh.vehicle_type\n" +
-                "	END AS vehicle_type,\n" +
-                "	va.included,\n" +
-                "	va.costPerM,\n" +
-                "	va.fixedCost,\n" +
-                "	va.Channel,\n" +
-                "	va.IdDriver,\n" +
-                "	va.NamaDriver\n" +
-                "FROM\n" +
-                "	BOSNET1.dbo.Vehicle vh\n" +
-                "LEFT JOIN BOSNET1.dbo.TMS_VehicleAtr va ON\n" +
-                "	vh.Vehicle_Code = va.vehicle_code\n" +
-                "WHERE\n" +
-                "	vh.vehicle_code = '"+vCode+"';";
+                sql = "SELECT\n" +
+                    "	vh.vehicle_code,\n" +
+                    "	va.startLon,\n" +
+                    "	va.startLat,\n" +
+                    "	va.endLon,\n" +
+                    "	va.endLat,\n" +
+                    "	va.startTime,\n" +
+                    "	va.endTime,\n" +
+                    "	va.source1,\n" +
+                    "	CASE\n" +
+                    "		WHEN vh.vehicle_code IS NULL THEN va.weight\n" +
+                    "		ELSE vh.weight\n" +
+                    "	END AS weight,\n" +
+                    "	CASE\n" +
+                    "		WHEN vh.vehicle_code IS NULL THEN va.volume\n" +
+                    "		ELSE vh.volume\n" +
+                    "	END AS volume,\n" +
+                    "	CASE\n" +
+                    "		WHEN vh.vehicle_code IS NULL THEN va.branch\n" +
+                    "		ELSE vh.plant\n" +
+                    "	END AS plant,\n" +
+                    "	CASE\n" +
+                    "		WHEN vh.vehicle_code IS NULL THEN va.vehicle_type\n" +
+                    "		ELSE vh.vehicle_type\n" +
+                    "	END AS vehicle_type,\n" +
+                    "	va.included,\n" +
+                    "	va.costPerM,\n" +
+                    "	va.fixedCost,\n" +
+                    "	va.Channel,\n" +
+                    "	va.IdDriver,\n" +
+                    "	va.NamaDriver\n" +
+                    "FROM\n" +
+                    "	BOSNET1.dbo.Vehicle vh\n" +
+                    "LEFT JOIN BOSNET1.dbo.TMS_VehicleAtr va ON\n" +
+                    "	vh.Vehicle_Code = va.vehicle_code\n" +
+                    "WHERE\n" +
+                    "	vh.vehicle_code = '"+vCode+"'\n" +
+                    "UNION ALL SELECT\n" +
+                    "	va.vehicle_code,\n" +
+                    "	va.startLon,\n" +
+                    "	va.startLat,\n" +
+                    "	va.endLon,\n" +
+                    "	va.endLat,\n" +
+                    "	va.startTime,\n" +
+                    "	va.endTime,\n" +
+                    "	va.source1,\n" +
+                    "	va.weight,\n" +
+                    "	va.volume,\n" +
+                    "	va.branch AS plant,\n" +
+                    "	va.vehicle_type,\n" +
+                    "	va.included,\n" +
+                    "	va.costPerM,\n" +
+                    "	va.fixedCost,\n" +
+                    "	va.Channel,\n" +
+                    "	va.IdDriver,\n" +
+                    "	va.NamaDriver\n" +
+                    "FROM\n" +
+                    "	BOSNET1.dbo.TMS_VehicleAtr va\n" +
+                    "WHERE\n" +
+                    "	va.vehicle_code = '"+vCode+"'";
                 
                 // query
                 try (ResultSet rs = stm.executeQuery(sql)){

@@ -39,6 +39,11 @@
                     "scrollbars=1,resizable=1,height=500,width=750");
                 });
                  */
+                
+                $('#branchId').on('change', function () {
+                    var a = document.getElementById('urls'); //or grab it by tagname etc
+                    a.href = "VehicleAttrView.jsp?flag=insert"+"&branchId="+$("#branchId").val();
+                });
             });
         </script>
         <form class="container" action="LoadBranchVehi.jsp" method="post">
@@ -59,6 +64,7 @@
             <%--<input class="fzInput" type="text" id="veID" name="veID">--%>
             <br><br>
             <button class="btn fzButton" type="submit">GO</button>
+            <a href="VehicleAttrView.jsp?flag=insert" id="urls">Add New</a>
         </form>        
         <%@include file="../appGlobal/bodyBottom.jsp"%>
     </body>

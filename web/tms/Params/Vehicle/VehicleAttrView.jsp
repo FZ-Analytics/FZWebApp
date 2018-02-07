@@ -3,6 +3,7 @@
     Created on : Oct 5, 2017, 10:02:24 AM
     Author     : dwi.rangga
 --%>
+<%@page import="com.fz.util.FZUtil"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@include file="../appGlobal/pageTop.jsp"%>
 <%@page import="com.fz.tms.params.model.Vehicle"%>
@@ -71,7 +72,12 @@
             <input type="text" id="extVe" name="extVe" value="<%=get("extVe")%>" hidden="true">
             <br>
             <label class="fzLabel">vehicle Id:</label> 
-            <input class="fzInput" type="text" id="vehicle_code" name="vehicle_code" value="<%=get("vehicle_code")%>" readonly="true">
+            <% 
+                String flag = FZUtil.getHttpParam(request, "flag");
+                System.out.println("vehicle_code" + flag);
+            %>
+            <input class="fzInput" type="text" id="vehicle_code" name="vehicle_code" value="<%=get("vehicle_code")%>" 
+                   <%if (!flag.equalsIgnoreCase("insert")) {%>readonly="true"<%}%>>
                 
             <br>
             <label class="fzLabel">branch:</label> 
