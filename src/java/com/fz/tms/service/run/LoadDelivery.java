@@ -103,63 +103,67 @@ public class LoadDelivery implements BusinessLogic {
     public void setObjectValue(String no, String vNo, String custId, String depart) throws Exception {
         ArrayList<String> a = getRouteData(custId);
         String[] aSplit = a.get(0).split("split");
-        if (getIsFix(oriRunId, custId) == null) {
-            //not a break-time row
-            if (!vNo.equals("")) {
-                Delivery d = new Delivery();
-                Delivery dl = new Delivery();
-                if (!vNo.equals("NA")) {
-                    d.no = no;
-                }
-                d.vehicleCode = vNo;
-                d.custId = custId;
-                d.doNum = aSplit[0];
-                d.serviceTime = aSplit[4];
-                d.storeName = aSplit[5];
-                d.priority = aSplit[1];
-                d.distChannel = aSplit[7];
-                d.street = aSplit[6];
-                d.weight = "" + Math.round(Double.parseDouble(aSplit[9]) * 10) / 10.0;
-                try {
-                    d.volume = "" + Math.round(Double.parseDouble(getVolume(custId, oriRunId)) * 10) / 10.0;
-                } catch (Exception e) {
-                }
-                d.rdd = aSplit[8];
-                if (!custId.equals("") || depart.equals("")) {
-                    d.arrive = prevDepart;
-                }
-                //start row
-                if (d.custId.equals("")) {
-                    d.depart = depart;
-                } else {
-                    d.depart = addTime(d.arrive, Integer.parseInt(d.serviceTime));
-                }
+        //not a break-time row
+        if (!vNo.equals("")) {
+            Delivery d = new Delivery();
+            Delivery dl = new Delivery();
+            if (!vNo.equals("NA")) {
+                d.no = no;
+            }
+            d.vehicleCode = vNo;
+            d.custId = custId;
+            d.doNum = aSplit[0];
+            d.serviceTime = aSplit[4];
+            d.storeName = aSplit[5];
+            d.priority = aSplit[1];
+            d.distChannel = aSplit[7];
+            d.street = aSplit[6];
+            d.weight = "" + Math.round(Double.parseDouble(aSplit[9]) * 10) / 10.0;
+            d.isFix = getIsFix(oriRunId, vNo);
+            try {
+                d.volume = "" + Math.round(Double.parseDouble(getVolume(custId, oriRunId)) * 10) / 10.0;
+            } catch (Exception e) {
+            }
+            d.rdd = aSplit[8];
+            if (!custId.equals("") || depart.equals("")) {
+                d.arrive = prevDepart;
+            }
+            //start row
+            if (d.custId.equals("")) {
+                d.depart = depart;
+            } else {
+                d.depart = addTime(d.arrive, Integer.parseInt(d.serviceTime));
+            }
 
-                //set long lat of store name
-                if (!d.vehicleCode.equals("NA")) {
-                    //start row
-                    if (!d.vehicleCode.equals("") && d.custId.equals("") && !d.depart.equals("")) {
-                        previousCustId = d.vehicleCode;
-                        b = false;
-                    } //normal row
-                    else if (!d.vehicleCode.equals("") && !d.custId.equals("") && !d.doNum.equals("")) {
-                        //previousCustId is normal row
-                        if (previousCustId.matches("[0-9]+")) {
-                            String[] longlat1 = getLongLatCustomer(previousCustId).split("split");
-                            d.lon1 = reFormatLongLat(longlat1[0]);
-                            d.lat1 = reFormatLongLat(longlat1[1]);
-                        } //previousCustId is a start row
-                        else {
+            //set long lat of store name
+            if (!d.vehicleCode.equals("NA")) {
+                //start row
+                if (!d.vehicleCode.equals("") && d.custId.equals("") && !d.depart.equals("")) {
+                    previousCustId = d.vehicleCode;
+                    b = false;
+                } //normal row
+                else if (!d.vehicleCode.equals("") && !d.custId.equals("") && !d.doNum.equals("")) {
+                    //previousCustId is normal row
+                    if (previousCustId.matches("[0-9]+")) {
+                        String[] longlat1 = getLongLatCustomer(previousCustId).split("split");
+                        d.lon1 = reFormatLongLat(longlat1[0]);
+                        d.lat1 = reFormatLongLat(longlat1[1]);
+                    } //previousCustId is a start row
+                    else {
+                        try {
                             String[] longlat1 = getLongLatVehicle(previousCustId).split("split");
                             d.lon1 = reFormatLongLat(longlat1[0]);
                             d.lat1 = reFormatLongLat(longlat1[1]);
+                        } catch (Exception e) {
                         }
-                        String[] longlat2 = getLongLatCustomer(d.custId).split("split");
-                        d.lon2 = reFormatLongLat(longlat2[0]);
-                        d.lat2 = reFormatLongLat(longlat2[1]);
-                        previousCustId = d.custId;
-                    } //end row
-                    else if (!d.vehicleCode.equals("") && d.custId.equals("") && d.depart.equals("")) {
+                    }
+                    String[] longlat2 = getLongLatCustomer(d.custId).split("split");
+                    d.lon2 = reFormatLongLat(longlat2[0]);
+                    d.lat2 = reFormatLongLat(longlat2[1]);
+                    previousCustId = d.custId;
+                } //end row
+                else if (!d.vehicleCode.equals("") && d.custId.equals("") && d.depart.equals("")) {
+                    try {
                         String[] longlat1 = getLongLatCustomer(previousCustId).split("split");
                         d.lon1 = reFormatLongLat(longlat1[0]);
                         d.lat1 = reFormatLongLat(longlat1[1]);
@@ -167,176 +171,187 @@ public class LoadDelivery implements BusinessLogic {
                         d.lon2 = reFormatLongLat(longlat2[0]);
                         d.lat2 = reFormatLongLat(longlat2[1]);
                         b = true;
+                    } catch (Exception e) {
                     }
-                    //set arrive, depart, distance using lon lat of store
-                    if (!custId.equals("") || depart.equals("")) {
-                        //Manhattan
-                        if (getTripCalc(oriRunId).equals("M")) {
+                }
+                //set arrive, depart, distance using lon lat of store
+                if (!custId.equals("") || depart.equals("")) {
+                    //Manhattan
+                    if (getTripCalc(oriRunId).equals("M")) {
+                        try {
                             double distance1 = calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat1), Double.parseDouble(d.lon1), Double.parseDouble(d.lat2));
                             double distance2 = calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat2), Double.parseDouble(d.lon2), Double.parseDouble(d.lat2));
                             d.arrive = "" + addTime(prevDepart, Math.round(trafficFactor * calcTripMinutes(distance1 + distance2, speedTruck)));
 
                             d.dist = "" + Math.round(((distance1 + distance2) / 1000) * 10) / 10.0;
                             d.transportCost = (int) Math.round(getCostPerM(d.vehicleCode, oriRunId) * (distance1 + distance2));
-                        } //Google
-                        else {
-                            try {
-                                ArrayList<Double> alDurDist = getDistDurByGoogle(d.lon1, d.lat1, d.lon2, d.lat2);
-                                double distance = alDurDist.get(0);
-                                d.arrive = addTime(prevDepart, Math.round(alDurDist.get(1)));
-                                d.dist = "" + Math.round((distance / 1000) * 10) / 10.0;
-                                d.transportCost = (int) ((int) Math.round((getCostPerM(d.vehicleCode, oriRunId) * distance) * 10) / 10.0);
-                            }
-                            catch(Exception e) {}
+                        } catch (Exception e) {
                         }
-
-                        //break if depart + 60 minutes is more than 11:30
-                        if (hasBreak == false && !d.depart.equals("") && timeMoreThan(addTime(addTime(d.arrive, Integer.parseInt(d.serviceTime)), 60), "11:30")) {
-                            dl.no = "";
-                            dl.vehicleCode = "";
-                            dl.custId = "";
-                            dl.doNum = "";
-                            dl.serviceTime = "0";
-                            dl.storeName = "";
-                            dl.priority = "";
-                            dl.distChannel = "";
-                            dl.street = "";
-                            dl.weight = "";
-                            dl.volume = "";
-                            dl.rdd = "null";
-                            dl.transportCost = 0;
-                            dl.dist = "null";
-
-                            hasBreak = true;
-                        } else if (d.depart.equals("")) {
-                            hasBreak = false;
+                    } //Google
+                    else {
+                        try {
+                            ArrayList<Double> alDurDist = getDistDurByGoogle(d.lon1, d.lat1, d.lon2, d.lat2);
+                            double distance = alDurDist.get(0);
+                            d.arrive = addTime(prevDepart, Math.round(alDurDist.get(1)));
+                            d.dist = "" + Math.round((distance / 1000) * 10) / 10.0;
+                            d.transportCost = (int) ((int) Math.round((getCostPerM(d.vehicleCode, oriRunId) * distance) * 10) / 10.0);
+                        } catch (Exception e) {
                         }
                     }
-                    if (d.custId.equals("")) {
-                        d.depart = depart;
+
+                    //break if depart + 60 minutes is more than 11:30
+                    if (hasBreak == false && !d.depart.equals("") && timeMoreThan(addTime(addTime(d.arrive, Integer.parseInt(d.serviceTime)), 60), "11:30")) {
+                        dl.no = "";
+                        dl.vehicleCode = "";
+                        dl.custId = "";
+                        dl.doNum = "";
+                        dl.serviceTime = "0";
+                        dl.storeName = "";
+                        dl.priority = "";
+                        dl.distChannel = "";
+                        dl.street = "";
+                        dl.weight = "";
+                        dl.volume = "";
+                        dl.rdd = "null";
+                        dl.transportCost = 0;
+                        dl.dist = "null";
+                        dl.isFix = d.isFix;
+
+                        hasBreak = true;
+                    } else if (d.depart.equals("")) {
+                        hasBreak = false;
+                    }
+                }
+                if (d.custId.equals("")) {
+                    d.depart = depart;
+                } else {
+                    d.depart = addTime(d.arrive, Integer.parseInt(d.serviceTime));
+                }
+            }
+            try {
+                if (hasBreak) {
+                    d.feasibleTruck = isTimeinRange(d.arrive, getTruckTime(runId, d.vehicleCode));
+                    ArrayList<String> al = getCustomerTime(runId, d.custId);
+                    String custEndTime = addTime(al.get(1), 60);
+                    al.set(1, custEndTime);
+                    d.feasibleCustomer = isTimeinRange(d.arrive, al);
+
+                    String vehicleType = getVehicleType(runId, d.vehicleCode);
+                    String vehicleTypeList = getAccessList(d.custId, runId);
+                    if (vehicleTypeList.toLowerCase().contains(vehicleType.toLowerCase())) {
+                        d.feasibleAccess = "Yes";
                     } else {
-                        d.depart = addTime(d.arrive, Integer.parseInt(d.serviceTime));
+                        d.feasibleAccess = "No";
                     }
+                } else {
+                    d.feasibleTruck = isTimeinRange(d.arrive, getTruckTime(runId, d.vehicleCode));
+                    d.feasibleCustomer = isTimeinRange(d.arrive, getCustomerTime(runId, d.custId));
+
+                    String vehicleType = getVehicleType(runId, d.vehicleCode);
+                    String vehicleTypeList = getAccessList(d.custId, runId);
+                    if (vehicleTypeList.toLowerCase().contains(vehicleType.toLowerCase())) {
+                        d.feasibleAccess = "Yes";
+                    } else {
+                        d.feasibleAccess = "No";
+                    }
+                }
+            } catch (Exception e) {
+            }
+
+            prevDepart = d.depart;
+            ld.add(d);
+            if (dl.dist.equals("null")) {
+                ld.add(dl);
+                prevDepart = addTime(prevDepart, 60);
+            }
+
+            /********************************************
+             * Data object Route_Job to be pushed to db *
+             ********************************************/
+            if (!d.vehicleCode.equals("") || !d.custId.equals("")) {
+                if (!prevVehiCode.equals(d.vehicleCode) && !d.vehicleCode.equals("NA")) {
+                    jobNb = 1;
+                    routeNb++;
+                }
+                RouteJobLog r = new RouteJobLog();
+                String[] doSplit = d.doNum.split(";");
+                if (!d.vehicleCode.equals("") && !d.vehicleCode.equals("NA") && d.custId.equals("")) {
+                    if (oneVehicle == false) {
+                        oneVehicle = true;
+                    } else {
+                        oneVehicle = false;
+                    }
+                    r.jobId = "DEPO";
+                } else {
+                    r.jobId = d.custId + "-" + doSplit.length;
+                }
+                r.custId = d.custId;
+                if (!r.jobId.equals("DEPO")) {
+                    r.countDoNo = "" + doSplit.length;
+                }
+                r.vehicleCode = d.vehicleCode;
+                if (!r.vehicleCode.equals("NA")) {
+                    r.activity = "start";
+                    r.routeNb = routeNb;
+                    if (oneVehicle) {
+                        r.jobNb = jobNb;
+                    } else {
+                        r.jobNb = jobNb - 1;
+                    }
+                } else {
+                    r.routeNb = 0;
+                    r.jobNb = 0;
+                }
+                r.arrive = d.arrive;
+                r.depart = d.depart;
+                r.runId = runId;
+                r.branch = branch;
+                r.shift = shift;
+                if (r.custId.equals("")) {
+                    String[] longlatSplit = getLongLatVehicle(r.vehicleCode).split("split");
+                    try {
+                        r.lon = reFormatLongLat(longlatSplit[0]);
+                        r.lat = reFormatLongLat(longlatSplit[1]);
+                    } catch (Exception e) {
+
+                    }
+                } else {
+                    String[] longlatSplit = getLongLatCustomer(r.custId).split("split");
+                    try {
+                        r.lon = reFormatLongLat(longlatSplit[0]);
+                        r.lat = reFormatLongLat(longlatSplit[1]);
+                    } catch (Exception e) {
+
+                    }
+                }
+                r.weight = aSplit[9];
+                r.volume = getVolume(d.custId, oriRunId);
+                try {
+                    r.transportCost = d.transportCost;
+                } catch (Exception e) {
+                    r.transportCost = 0;
                 }
                 try {
-                    if (hasBreak) {
-                        d.feasibleTruck = isTimeinRange(d.arrive, getTruckTime(runId, d.vehicleCode));
-                        ArrayList<String> al = getCustomerTime(runId, d.custId);
-                        String custEndTime = addTime(al.get(1), 60);
-                        al.set(1, custEndTime);
-                        d.feasibleCustomer = isTimeinRange(d.arrive, al);
-
-                        String vehicleType = getVehicleType(runId, d.vehicleCode);
-                        String vehicleTypeList = getAccessList(d.custId, runId);
-                        if (vehicleTypeList.toLowerCase().contains(vehicleType.toLowerCase())) {
-                            d.feasibleAccess = "Yes";
-                        } else {
-                            d.feasibleAccess = "No";
-                        }
-                    } else {
-                        d.feasibleTruck = isTimeinRange(d.arrive, getTruckTime(runId, d.vehicleCode));
-                        d.feasibleCustomer = isTimeinRange(d.arrive, getCustomerTime(runId, d.custId));
-
-                        String vehicleType = getVehicleType(runId, d.vehicleCode);
-                        String vehicleTypeList = getAccessList(d.custId, runId);
-                        if (vehicleTypeList.toLowerCase().contains(vehicleType.toLowerCase())) {
-                            d.feasibleAccess = "Yes";
-                        } else {
-                            d.feasibleAccess = "No";
-                        }
-                    }
+                    double distance1 = Math.round(calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat1), Double.parseDouble(d.lon1), Double.parseDouble(d.lat2)) * 100.0) / 100.0;
+                    double distance2 = Math.round(calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat2), Double.parseDouble(d.lon2), Double.parseDouble(d.lat2)) * 100.0) / 100.0;
+                    r.dist = distance1 + distance2;
                 } catch (Exception e) {
+                    r.dist = 0.00;
+                }
+                
+                if(d.isFix.equals("null")) {
+                    r.isFix = null;
+                } else {
+                    r.isFix = d.isFix;
                 }
 
-                prevDepart = d.depart;
-                ld.add(d);
-                if (dl.dist.equals("null")) {
-                    ld.add(dl);
-                    prevDepart = addTime(prevDepart, 60);
-                }
-
-                /********************************************
-                 * Data object Route_Job to be pushed to db *
-                 ********************************************/
-                if (!d.vehicleCode.equals("") || !d.custId.equals("")) {
-                    if (!prevVehiCode.equals(d.vehicleCode) && !d.vehicleCode.equals("NA")) {
-                        jobNb = 1;
-                        routeNb++;
-                    }
-                    RouteJobLog r = new RouteJobLog();
-                    String[] doSplit = d.doNum.split(";");
-                    if (!d.vehicleCode.equals("") && !d.vehicleCode.equals("NA") && d.custId.equals("")) {
-                        if (oneVehicle == false) {
-                            oneVehicle = true;
-                        } else {
-                            oneVehicle = false;
-                        }
-                        r.jobId = "DEPO";
-                    } else {
-                        r.jobId = d.custId + "-" + doSplit.length;
-                    }
-                    r.custId = d.custId;
-                    if (!r.jobId.equals("DEPO")) {
-                        r.countDoNo = "" + doSplit.length;
-                    }
-                    r.vehicleCode = d.vehicleCode;
-                    if (!r.vehicleCode.equals("NA")) {
-                        r.activity = "start";
-                        r.routeNb = routeNb;
-                        if (oneVehicle) {
-                            r.jobNb = jobNb;
-                        } else {
-                            r.jobNb = jobNb - 1;
-                        }
-                    } else {
-                        r.routeNb = 0;
-                        r.jobNb = 0;
-                    }
-                    r.arrive = d.arrive;
-                    r.depart = d.depart;
-                    r.runId = runId;
-                    r.branch = branch;
-                    r.shift = shift;
-                    if (r.custId.equals("")) {
-                        String[] longlatSplit = getLongLatVehicle(r.vehicleCode).split("split");
-                        try {
-                            r.lon = reFormatLongLat(longlatSplit[0]);
-                            r.lat = reFormatLongLat(longlatSplit[1]);
-                        } catch (Exception e) {
-
-                        }
-                    } else {
-                        String[] longlatSplit = getLongLatCustomer(r.custId).split("split");
-                        try {
-                            r.lon = reFormatLongLat(longlatSplit[0]);
-                            r.lat = reFormatLongLat(longlatSplit[1]);
-                        } catch (Exception e) {
-
-                        }
-                    }
-                    r.weight = aSplit[9];
-                    r.volume = getVolume(d.custId, oriRunId);
-                    try {
-                        r.transportCost = d.transportCost;
-                    } catch (Exception e) {
-                        r.transportCost = 0;
-                    }
-                    try {
-                        double distance1 = Math.round(calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat1), Double.parseDouble(d.lon1), Double.parseDouble(d.lat2)) * 100.0) / 100.0;
-                        double distance2 = Math.round(calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat2), Double.parseDouble(d.lon2), Double.parseDouble(d.lat2)) * 100.0) / 100.0;
-                        r.dist = distance1 + distance2;
-                    } catch (Exception e) {
-                        r.dist = 0.00;
-                    }
-
-                    arlistR.add(r);
-                    jobNb++;
-                    prevVehiCode = r.vehicleCode;
-                }
+                arlistR.add(r);
+                jobNb++;
+                prevVehiCode = r.vehicleCode;
             }
         }
     }
-    
+
     public String reFormatLongLat(String longlat) {
         String ret = "";
         //Sometimes long lat use "," instead of "."
@@ -347,7 +362,7 @@ public class LoadDelivery implements BusinessLogic {
         }
         return ret;
     }
-    
+
     public String addTime(String currentTime, long minToAdd) {
         String newTime = "";
         try {
@@ -615,13 +630,12 @@ public class LoadDelivery implements BusinessLogic {
         return costPerM;
     }
 
-    public String getIsFix(String runId, String custId) throws Exception {
+    public String getIsFix(String runId, String vehicleCode) throws Exception {
         String isFix = "";
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
                 String sql;
-                sql = "SELECT TOP 1 isFix FROM BOSNET1.dbo.TMS_RouteJob where runID = '" + runId + "' and customer_id = '" + custId + "';";
-                // query
+                sql = "SELECT TOP 1 isFix FROM BOSNET1.dbo.TMS_RouteJob where runID = '" + runId + "' and vehicle_code = '" + vehicleCode + "';";
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
                         isFix = rs.getString("isFix");
@@ -631,7 +645,7 @@ public class LoadDelivery implements BusinessLogic {
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
-        return isFix;
+        return "" + isFix;
     }
 
     public String getLongLatVehicle(String vehicleCode) throws Exception {
@@ -838,8 +852,8 @@ public class LoadDelivery implements BusinessLogic {
             }
         }
         String sql = "INSERT INTO bosnet1.dbo.TMS_RouteJob "
-                + "(job_id, customer_id, do_number, vehicle_code, activity, routeNb, jobNb, arrive, depart, runID, create_dtm, branch, shift, lon, lat, weight, volume, transportCost, activityCost, Dist) "
-                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+                + "(job_id, customer_id, do_number, vehicle_code, activity, routeNb, jobNb, arrive, depart, runID, create_dtm, branch, shift, lon, lat, weight, volume, transportCost, activityCost, Dist, isFix) "
+                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
         for (int i = 0; i < arlist.size(); i++) {
             RouteJobLog r = arlist.get(i);
@@ -864,6 +878,7 @@ public class LoadDelivery implements BusinessLogic {
                 psHdr.setDouble(18, r.transportCost);
                 psHdr.setDouble(19, r.activityCost);
                 psHdr.setDouble(20, r.dist);
+                psHdr.setString(21, r.isFix);
 
                 psHdr.executeUpdate();
             }

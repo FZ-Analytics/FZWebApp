@@ -82,6 +82,7 @@ public class SubmitToSapAPI {
             HashMap<String, String> hmPRV = getFromPreRouteVehicle(he.RunId, he.vehicle_no);
             ArrayList<String> alCustId = getCustomerId(he.RunId, he.vehicle_no);
             ArrayList<String> alStartAndEndTime = getStartAndEndTime(he.RunId, he.vehicle_no);
+            Timestamp time = getTimeID();
             for (int i = 0; i < alCustId.size(); i++) {
                 ArrayList<HashMap<String, String>> alSP = getFromShipmentPlan(he.RunId, alCustId.get(i));
 
@@ -96,8 +97,10 @@ public class SubmitToSapAPI {
                     rs.Description = "";
                     rs.Status_Plan = parseRunId(he.RunId, true);
                     rs.Status_Check_In = null;
-                    rs.Status_Load_Start = parseRunId(he.RunId, false) + " " + hmSP.get("arrive");
-                    rs.Status_Load_End = parseRunId(he.RunId, false) + " " + hmSP.get("depart");
+//                    rs.Status_Load_Start = parseRunId(he.RunId, false) + " " + hmSP.get("arrive");
+//                    rs.Status_Load_End = parseRunId(he.RunId, false) + " " + hmSP.get("depart");
+                    rs.Status_Load_Start = null;
+                    rs.Status_Load_End = null;
                     rs.Status_Complete = null;
                     rs.Status_Shipment_Start = parseRunId(he.RunId, false) + " " + alStartAndEndTime.get(0);
                     rs.Status_Shipment_End = parseRunId(he.RunId, false) + " " + alStartAndEndTime.get(1);
@@ -109,11 +112,11 @@ public class SubmitToSapAPI {
                     rs.Delivery_Quantity_Split = 0.000;
                     rs.Delivery_Quantity = Double.parseDouble(hmSP.get("DOQty"));
                     rs.Delivery_Flag_Split = "";
-                    rs.Material = hmSP.get("DOQtyUOM");
+                    rs.Material = hmSP.get("Product_ID");
                     rs.Vehicle_Number = he.vehicle_no;
                     rs.Vehicle_Type = hmPRV.get("vehicle_type");
                     rs.Batch = hmSP.get("Batch");
-                    rs.Time_Stamp = getTimeID();
+                    rs.Time_Stamp = time;
                     rs.Shipment_Number_SAP = "";
                     rs.I_Status = "0";
                     rs.Shipment_Flag = "";
@@ -123,7 +126,11 @@ public class SubmitToSapAPI {
                     insertResultShipment(rs);
                 }
             }
-
+            
+//            if(!checkStatusShipment(time).equals("ERROR")) {
+//                ret = "OK";
+//            }
+            
             ret = "OK";
         } catch (Exception e) {
             System.out.println("ERROR: " + e.getMessage());
@@ -132,6 +139,46 @@ public class SubmitToSapAPI {
         String jsonOutput = gson.toJson(ret);
         return jsonOutput;
     }
+    
+//    public String checkStatusShipment(Timestamp time) throws Exception {
+//        String msg = "";
+//        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+//            try (Statement stm = con.createStatement()) {
+//                String sql;
+//                sql = "SELECT \n" +
+//                        "COUNT(*) num\n" +
+//                      "FROM \n" +
+//                        "BOSNET1.dbo.TMS_Status_Shipment " +
+//                      "WHERE \n" +
+//                        "TimeStamp = '" + time + "';";
+//
+//                try (ResultSet rs = stm.executeQuery(sql)) {
+//                    while (rs.next()) {
+//                        if(rs.getInt("num") == 0) {
+//                            checkStatusShipment(time);
+//                        } else {
+//                            sql = "SELECT \n" +
+//                                    "SAP_Message\n" +
+//                                  "FROM \n" +
+//                                    "BOSNET1.dbo.TMS_Status_Shipment " +
+//                                  "WHERE \n" +
+//                                    "TimeStamp = '" + time + "';";
+//                            try (ResultSet rst = stm.executeQuery(sql)) {
+//                                while (rst.next()) {
+//                                    if(!rst.getString("SAP_Message").equals("NULL")) {
+//                                        msg = "ERROR";
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            throw new Exception(e.getMessage());
+//        }
+//        return msg;
+//    }
 
     public static String decodeContent(String content) throws UnsupportedEncodingException {
         content = java.net.URLDecoder.decode(content, "UTF-8");
@@ -191,15 +238,19 @@ public class SubmitToSapAPI {
                             "WHEN source1 = 'INT' THEN 'ZDSI' " +
                             "ELSE 'ZDSH' " +
                         "END as source1 " +
-                        "FROM BOSNET1.dbo.TMS_PreRouteVehicle " +
-                        "WHERE runID = '" + runId + "' and vehicle_code = '" + vehicleNo + "';";
+                      "FROM BOSNET1.dbo.TMS_PreRouteVehicle " +
+                      "WHERE runID = '" + runId + "' and vehicle_code = '" + vehicleNo + "';";
 
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
                         hm.put("source1", rs.getString("source1"));
                         hm.put("vehicle_type", rs.getString("vehicle_type"));
                         hm.put("IdDriver", rs.getString("IdDriver"));
-                        hm.put("NamaDriver", rs.getString("NamaDriver"));
+                        if(rs.getString("NamaDriver") == null) {
+                            hm.put("NamaDriver", "");
+                        } else {
+                            hm.put("NamaDriver", rs.getString("NamaDriver"));
+                        }
                     }
                 }
             }
@@ -220,7 +271,7 @@ public class SubmitToSapAPI {
                   "     sp.Item_Number,\n" +
                   "     sp.Plant,\n" +
                   "     sp.DOQty,\n" +
-                  "     sp.DOQtyUOM,\n" +
+                  "     sp.Product_ID,\n" +
                   "     sp.Batch,\n" +
                   "     rj.arrive,\n" +
                   "     rj.depart,\n" +
@@ -240,6 +291,7 @@ public class SubmitToSapAPI {
                   "		AND rj.Customer_ID = '"+custId+"') rj ON rj.customer_id = sp.Customer_ID\n" +
                   " WHERE\n" +
                   "         sp.Customer_ID = '"+custId+"'\n" +
+                  "         AND sp.Already_Shipment <> 'Y'\n" +
                   "         AND sp.Batch <> 'NULL'\n" + 
                   "         AND sp.Request_Delivery_Date = (SELECT TOP 1\n" +
                   "                                             prj.Request_Delivery_Date\n" +
@@ -261,7 +313,7 @@ public class SubmitToSapAPI {
                         hm.put("Item_Number", rs.getString("Item_Number"));
                         hm.put("Plant", rs.getString("Plant"));
                         hm.put("DOQty", rs.getString("DOQty"));
-                        hm.put("DOQtyUOM", rs.getString("DOQtyUOM"));
+                        hm.put("Product_ID", rs.getString("Product_ID"));
                         hm.put("Batch", rs.getString("Batch"));
                         
                         al.add(hm);

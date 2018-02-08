@@ -30,4 +30,5 @@ public class RouteJobLog {
     public int transportCost = 0;
     public double activityCost = 0;
     public double dist = 0;
+    public String isFix = "";
 }

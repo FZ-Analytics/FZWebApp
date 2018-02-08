@@ -293,9 +293,15 @@
                             edit
                         </td>
                     <%} else if(j.arrive.length() > 0) {%>
-                        <td class="" onclick="" style="">
-                            <button id="<%=j.vehicleCode%>" class="btn btn-success btn-xs submitBtn" type="submit" value="<%=j.vehicleCode%>">Submit</button>
-                        </td>
+                        <%if(j.isFix.equals("1")) {%>
+                            <td class="" onclick="" style="">
+                                <button id="<%=j.vehicleCode%>" class="btn btn-success btn-xs disabled">Submitted</button>
+                            </td>
+                        <%} else {%>
+                            <td class="" onclick="" style="">
+                                <button id="<%=j.vehicleCode%>" class="btn btn-success btn-xs submitBtn" type="submit" value="<%=j.vehicleCode%>">Submit</button>
+                            </td>
+                        <%}%>
                     <%} else {%>
                         <td class="editCust" onclick="" style="color: blue;">
                             
