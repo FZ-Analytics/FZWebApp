@@ -1175,7 +1175,10 @@ public class AlgoRunner implements BusinessLogic {
                 "	df.value AS Priority_value,\n" +
                 "	dn.value AS BufferEndDefault,\n" +
                 "	dj.value AS SatDelivDefault,\n" +
-                "	du.value AS ChannelNullDefault\n" +
+                "	du.value AS ChannelNullDefault,\n" +
+                "	cs.Desa_Kelurahan,\n" +
+                "	cs.Kecamatan,\n" +
+                "	cs.Kodya_Kabupaten\n" +
                 "FROM\n" +
                 "	bosnet1.dbo.TMS_ShipmentPlan sp\n" +
                 "LEFT OUTER JOIN(\n" +
@@ -1305,6 +1308,9 @@ public class AlgoRunner implements BusinessLogic {
                     pl.put("SatDelivDefault", rs.getString("SatDelivDefault"));
                     pl.put("ChannelNullDefault", rs.getString("ChannelNullDefault"));
                     pl.put("marketId", rs.getString("marketId"));
+                    pl.put("Desa_Kelurahan", rs.getString("Desa_Kelurahan"));
+                    pl.put("Kecamatan", rs.getString("Kecamatan"));
+                    pl.put("Kodya_Kabupaten", rs.getString("Kodya_Kabupaten"));
                     //pl.put("DOCreationDate", rs.getString("DOCreationDate"));                    
                     asd.add(pl);
                     if(pl.get("DO_Number").equals("8020089252")){
@@ -1353,8 +1359,11 @@ public class AlgoRunner implements BusinessLogic {
                 "			Customer_Order_Block_all,\n" +
                 "			Customer_Order_Block,\n" +
                 "			Request_Delivery_Date,\n" +
-                "			MarketId\n" +
-                "		) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                "			MarketId,\n" +
+                "			Desa_Kelurahan,\n" +
+                "			Kecamatan,\n" +
+                "			Kodya_Kabupaten\n" +
+                "		) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         
             List<HashMap<String, String>> ins = new ArrayList<HashMap<String, String>>();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");            
@@ -1453,6 +1462,9 @@ public class AlgoRunner implements BusinessLogic {
                             ps.setString(i++, ins.get(a).get("Customer_Order_Block"));   
                             ps.setString(i++, ins.get(a).get("Request_Delivery_Date")); 
                             ps.setString(i++, ins.get(a).get("marketId")); 
+                            ps.setString(i++, ins.get(a).get("Desa_Kelurahan"));   
+                            ps.setString(i++, ins.get(a).get("Kecamatan")); 
+                            ps.setString(i++, ins.get(a).get("Kodya_Kabupaten")); 
 
                             ps.addBatch();
                         }
@@ -1580,8 +1592,8 @@ public class AlgoRunner implements BusinessLogic {
         //-1 > 12:00 deliv_start
         if (c.after(date2)) {
             System.out.println("bfr" + pl.toString());
-            c.add(Calendar.HOUR, -1);
-            pl.replace("deliv_start", shf.format(c.getTime()).toString());
+            //c.add(Calendar.HOUR, -1);
+            //pl.replace("deliv_start", shf.format(c.getTime()).toString());
             //System.out.println("afr" + pl.toString());
         }
         
@@ -1589,8 +1601,8 @@ public class AlgoRunner implements BusinessLogic {
         //-1 > 12:00 deliv_end
         if (c.after(date2)) {
             //System.out.println("bfr" + pl.toString());
-            c.add(Calendar.HOUR, -1);
-            pl.replace("deliv_end", shf.format(c.getTime()).toString());
+            //c.add(Calendar.HOUR, -1);
+            //pl.replace("deliv_end", shf.format(c.getTime()).toString());
             //System.out.println("afr" + pl.toString());
         }
         
