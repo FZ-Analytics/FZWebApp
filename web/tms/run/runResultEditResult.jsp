@@ -211,7 +211,7 @@
                         <th width="100px" class="fzCol">Cust. Feas.</th>
                         <th width="100px" class="fzCol">Truck Feas.</th>
                         <th width="100px" class="fzCol">Edit</th>
-                        <th width="100px" class="fzCol">SAP</th>
+                        <th width="100px" class="fzCol">Submit</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -268,17 +268,21 @@
                         </td>
                         <%}%>
 
-                        <%if (j.isFix.equals("1") && !j.vehicleCode.equals("NA")) {%>
+                        <%if (j.isFix.equals("1") && !j.vehicleCode.equals("NA") && !j.custId.equals("")) {%>
                         <td class="" onclick="" style="">
                             <button id="<%=j.vehicleCode%>" class="btn btn-success btn-xs disabled">Submitting</button>
                         </td>
-                        <%} else if (j.isFix.equals("null") && !j.vehicleCode.equals("NA")) {%>
+                        <%} else if (j.isFix.equals("null") && !j.vehicleCode.equals("NA") && !j.custId.equals("")) {%>
                         <td class="" onclick="" style="">
                             <button id="<%=j.vehicleCode%>" class="btn btn-success btn-xs submitBtn" type="submit" value="<%=j.vehicleCode%>">Submit</button>
                         </td>
-                        <%} else if (j.isFix.equals("2") && !j.vehicleCode.equals("NA")) {%>
+                        <%} else if (j.isFix.equals("2") && !j.vehicleCode.equals("NA") && !j.custId.equals("")) {%>
                         <td class="" onclick="" style="">
-                            <button id="<%=j.vehicleCode%>" class="btn btn-success btn-xs disabled" value="<%=j.vehicleCode%>">Submitted</button>
+                            <button id="<%=j.vehicleCode%>" class="btn btn-default btn-xs disabled" value="<%=j.vehicleCode%>">Submitted</button>
+                        </td>
+                        <%} else {%>
+                        <td class="editCust" onclick="" style="color: blue;">
+
                         </td>
                         <%}%>
                     </tr>
