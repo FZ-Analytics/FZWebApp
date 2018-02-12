@@ -12,6 +12,7 @@
         <%@include file="../appGlobal/bodyTop.jsp"%>
         <script>
             $(document).ready(function () {
+                /*
                 setInterval(function () {
                     if($('#stat').text() == 'INPR'){
                         window.location.reload(1);
@@ -19,6 +20,7 @@
                         window.location.replace('runResult.jsp?runID='+$('#runId').val()+'&OriRunID='+$('#oriRunID').val()+'&channel='+$('#channel').val());
                     }
                 }, 5000);
+                */
             });
         </script>
         <h3>Runs</h3>

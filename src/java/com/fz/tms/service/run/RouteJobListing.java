@@ -306,9 +306,9 @@ public class RouteJobListing implements BusinessLogic {
             }
         }catch(Exception e){
             HashMap<String, String> pl = new HashMap<String, String>();
-            pl.put("ID", runID);
+            pl.put("ID", OriRunID+ "_" +runID);
             pl.put("fileNmethod", "RouteJobListing&run Exc");
-            pl.put("datas", "");
+            pl.put("datas", sql);
             pl.put("msg", e.getMessage());
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
             Date date = new Date();
