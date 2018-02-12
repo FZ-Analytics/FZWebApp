@@ -126,13 +126,48 @@ public class RouteJobListing implements BusinessLogic {
                 "			j.transportCost AS NUMERIC(9)\n" +
                 "		) AS VARCHAR\n" +
                 "	) AS transportCost,\n" +
-                "	cast(Dist / 1000 as Numeric(9,1)) as Dist,\n" +
+                "	CAST(\n" +
+                "		Dist / 1000 AS NUMERIC(\n" +
+                "			9,\n" +
+                "			1\n" +
+                "		)\n" +
+                "	) AS Dist,\n" +
                 "	Request_Delivery_Date,\n" +
                 "	CASE\n" +
                 "		WHEN j.isFix IS NULL\n" +
+                "		AND(\n" +
+                "			SELECT\n" +
+                "				COUNT(*)\n" +
+                "			FROM\n" +
+                "				BOSNET1.dbo.TMS_Status_Shipment\n" +
+                "			WHERE\n" +
+                "				Shipment_Number_Dummy = concat(\n" +
+                "					REPLACE(\n" +
+                "						j.runID,\n" +
+                "						'_',\n" +
+                "						''\n" +
+                "					),\n" +
+                "					j.vehicle_code\n" +
+                "				)\n" +
+                "		)= 0\n" +
                 "		AND len(j.customer_ID)> 3\n" +
                 "		AND j.vehicle_code <> 'NA' THEN 'OK'\n" +
                 "		WHEN j.vehicle_code = 'NA' THEN ''\n" +
+                "		WHEN(\n" +
+                "			SELECT\n" +
+                "				COUNT(*)\n" +
+                "			FROM\n" +
+                "				BOSNET1.dbo.TMS_Status_Shipment\n" +
+                "			WHERE\n" +
+                "				Shipment_Number_Dummy = concat(\n" +
+                "					REPLACE(\n" +
+                "						j.runID,\n" +
+                "						'_',\n" +
+                "						''\n" +
+                "					),\n" +
+                "					j.vehicle_code\n" +
+                "				)\n" +
+                "		)> 0 THEN 'SEND'\n" +
                 "		ELSE 'NO'\n" +
                 "	END\n" +
                 "FROM\n" +
