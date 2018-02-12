@@ -28,7 +28,6 @@
         <%@include file="../appGlobal/bodyTop.jsp"%>
         <link href="../appGlobal/eFreezeTable.css" rel="stylesheet">
         <script src="../appGlobal/eFreezeTable.js"></script>
-        <script src="jquery.ui.touch-punch.min.js"></script>
         <script>
             $(document).ready(function () {
                 $(".submitToSap").hide();

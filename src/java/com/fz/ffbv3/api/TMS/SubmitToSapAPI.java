@@ -92,7 +92,6 @@ public class SubmitToSapAPI {
                     
                     rs.Shipment_Type = hmPRV.get("source1");
                     rs.Plant = hmSP.get("Plant");
-                    rs.Shipping_Type = "";
                     rs.Shipment_Route = hmSP.get("Route");
                     rs.Shipment_Number_Dummy = he.RunId.replace("_", "")+he.vehicle_no;
                     rs.Description = "";
@@ -104,15 +103,24 @@ public class SubmitToSapAPI {
                     rs.Status_Shipment_Start = parseRunId(he.RunId, false) + " " + alStartAndEndTime.get(0);
                     rs.Status_Shipment_End = parseRunId(he.RunId, false) + " " + alStartAndEndTime.get(1);
                     rs.Service_Agent_Id = hmPRV.get("IdDriver");
-                    rs.No_Pol = he.vehicle_no;
-                    rs.Driver_Name = hmPRV.get("NamaDriver");
+                    if(rs.Shipment_Type.equals("ZDSI")) {
+                        System.out.println("INT");
+                        rs.No_Pol = he.vehicle_no;
+                        rs.Driver_Name = hmPRV.get("NamaDriver");
+                        rs.Vehicle_Number = he.vehicle_no;
+                    } else {
+                        System.out.println("EXT");
+                        rs.No_Pol = hmPRV.get("vehicle_type");
+                        rs.Driver_Name = splitVendorAndVehicleCode(he.vehicle_no);
+                        rs.Vehicle_Number = hmPRV.get("vehicle_type");
+                    }
+
                     rs.Delivery_Number = hmSP.get("DO_Number");
                     rs.Delivery_Item = hmSP.get("Item_Number");
                     rs.Delivery_Quantity_Split = 0.000;
                     rs.Delivery_Quantity = Double.parseDouble(hmSP.get("DOQty"));
                     rs.Delivery_Flag_Split = "";
                     rs.Material = hmSP.get("Product_ID");
-                    rs.Vehicle_Number = he.vehicle_no;
                     rs.Vehicle_Type = hmPRV.get("vehicle_type");
                     rs.Batch = hmSP.get("Batch");
                     rs.Time_Stamp = time;
@@ -139,6 +147,21 @@ public class SubmitToSapAPI {
         content = content.substring(5);
 
         return content;
+    }
+    
+    public String splitVendorAndVehicleCode(String v) {
+        int count = 1;
+        String ret = "";
+        for(int i = 0; i < v.length(); i++) {
+            if(Character.isUpperCase(v.charAt(i))) {
+                if(count == 2) {
+                    String[] vSplit = v.split("" + v.charAt(i));
+                    ret = vSplit[0];
+                }
+                count++;
+            }
+        }
+        return ret;
     }
     
     public Timestamp getTimeID() throws ParseException {

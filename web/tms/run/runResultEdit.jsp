@@ -54,7 +54,6 @@
         <%@include file="../appGlobal/bodyTop.jsp"%>
         <link href="../appGlobal/eFreezeTable.css" rel="stylesheet">
         <script src="../appGlobal/eFreezeTable.js"></script>
-        <script src="jquery.ui.touch-punch.min.js"></script>
         <script>
             var rowIdx = 0;
             var vNoTop = "";

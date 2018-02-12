@@ -102,7 +102,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         request.setAttribute("channel", channel);
         request.setAttribute("vehicles", vehicles);
         request.setAttribute("runId", runId);
-        request.setAttribute("OriRunID", oriRunId);
+        request.setAttribute("oriRunId", oriRunId);
         request.setAttribute("tableArr", tableArr);
     }
 
