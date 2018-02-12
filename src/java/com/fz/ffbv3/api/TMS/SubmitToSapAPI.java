@@ -83,6 +83,7 @@ public class SubmitToSapAPI {
             ArrayList<String> alCustId = getCustomerId(he.RunId, he.vehicle_no);
             ArrayList<String> alStartAndEndTime = getStartAndEndTime(he.RunId, he.vehicle_no);
             Timestamp time = getTimeID();
+            
             for (int i = 0; i < alCustId.size(); i++) {
                 ArrayList<HashMap<String, String>> alSP = getFromShipmentPlan(he.RunId, alCustId.get(i));
 
@@ -97,8 +98,6 @@ public class SubmitToSapAPI {
                     rs.Description = "";
                     rs.Status_Plan = parseRunId(he.RunId, true);
                     rs.Status_Check_In = null;
-//                    rs.Status_Load_Start = parseRunId(he.RunId, false) + " " + hmSP.get("arrive");
-//                    rs.Status_Load_End = parseRunId(he.RunId, false) + " " + hmSP.get("depart");
                     rs.Status_Load_Start = null;
                     rs.Status_Load_End = null;
                     rs.Status_Complete = null;
@@ -126,11 +125,6 @@ public class SubmitToSapAPI {
                     insertResultShipment(rs);
                 }
             }
-            
-//            if(!checkStatusShipment(time).equals("ERROR")) {
-//                ret = "OK";
-//            }
-            
             ret = "OK";
         } catch (Exception e) {
             System.out.println("ERROR: " + e.getMessage());
@@ -139,46 +133,6 @@ public class SubmitToSapAPI {
         String jsonOutput = gson.toJson(ret);
         return jsonOutput;
     }
-    
-//    public String checkStatusShipment(Timestamp time) throws Exception {
-//        String msg = "";
-//        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-//            try (Statement stm = con.createStatement()) {
-//                String sql;
-//                sql = "SELECT \n" +
-//                        "COUNT(*) num\n" +
-//                      "FROM \n" +
-//                        "BOSNET1.dbo.TMS_Status_Shipment " +
-//                      "WHERE \n" +
-//                        "TimeStamp = '" + time + "';";
-//
-//                try (ResultSet rs = stm.executeQuery(sql)) {
-//                    while (rs.next()) {
-//                        if(rs.getInt("num") == 0) {
-//                            checkStatusShipment(time);
-//                        } else {
-//                            sql = "SELECT \n" +
-//                                    "SAP_Message\n" +
-//                                  "FROM \n" +
-//                                    "BOSNET1.dbo.TMS_Status_Shipment " +
-//                                  "WHERE \n" +
-//                                    "TimeStamp = '" + time + "';";
-//                            try (ResultSet rst = stm.executeQuery(sql)) {
-//                                while (rst.next()) {
-//                                    if(!rst.getString("SAP_Message").equals("NULL")) {
-//                                        msg = "ERROR";
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            throw new Exception(e.getMessage());
-//        }
-//        return msg;
-//    }
 
     public static String decodeContent(String content) throws UnsupportedEncodingException {
         content = java.net.URLDecoder.decode(content, "UTF-8");
@@ -368,12 +322,13 @@ public class SubmitToSapAPI {
         return al;
     }
 
-    public void insertResultShipment(ResultShipment rs) throws Exception {
+    public String insertResultShipment(ResultShipment rs) throws Exception {
+        String ret = "error";
         String sql = "INSERT INTO bosnet1.dbo.TMS_Result_Shipment "
                 + "(Shipment_Type, Plant, Shipping_Type, Shipment_Route, Shipment_Number_Dummy, Description, Status_Plan, Status_Check_In, Status_Load_Start, Status_Load_End, "
                 + "Status_Complete, Status_Shipment_Start, Status_Shipment_End, Service_Agent_Id, No_Pol, Driver_Name, Delivery_Number, Delivery_Item, Delivery_Quantity_Split, "
-                + "Delivery_Quantity, Delivery_Flag_Split, Material, Batch, Vehicle_Number, Vehicle_Type, Time_Stamp, Shipment_Number_SAP, I_Status, Shipment_Flag) "
-                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+                + "Delivery_Quantity, Delivery_Flag_Split, Material, Batch, Vehicle_Number, Vehicle_Type, Time_Stamp, Shipment_Number_SAP, I_Status, Shipment_Flag, Distance, Distance_Unit) "
+                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
         try (Connection con = (new Db()).getConnection("jdbc/fztms"); PreparedStatement psHdr = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
             psHdr.setString(1, rs.Shipment_Type);
@@ -405,8 +360,13 @@ public class SubmitToSapAPI {
             psHdr.setString(27, rs.Shipment_Number_SAP);
             psHdr.setString(28, rs.I_Status);
             psHdr.setString(29, rs.Shipment_Flag);
+            psHdr.setString(30, rs.distance);
+            psHdr.setString(31, rs.distanceUnit);
 
             psHdr.executeUpdate();
+            
+            ret = "ok";
         }
+        return ret;
     }
 }

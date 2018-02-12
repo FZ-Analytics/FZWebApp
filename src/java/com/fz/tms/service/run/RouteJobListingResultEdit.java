@@ -102,7 +102,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         request.setAttribute("channel", channel);
         request.setAttribute("vehicles", vehicles);
         request.setAttribute("runId", runId);
-        request.setAttribute("oriRunId", oriRunId);
+        request.setAttribute("OriRunID", oriRunId);
         request.setAttribute("tableArr", tableArr);
     }
 
@@ -312,7 +312,6 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                 } else {
                     r.isFix = d.isFix;
                 }
-                System.out.println(r.isFix);
 
                 arlistR.add(r);
                 jobNb++;

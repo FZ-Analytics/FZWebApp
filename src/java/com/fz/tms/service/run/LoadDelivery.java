@@ -97,6 +97,7 @@ public class LoadDelivery implements BusinessLogic {
         request.setAttribute("channel", channel);
         request.setAttribute("vehicle", vehicle);
         request.setAttribute("runId", runId);
+        request.setAttribute("OriRunID", oriRunId);
         request.setAttribute("listDelivery", ld);
     }
 
@@ -119,7 +120,17 @@ public class LoadDelivery implements BusinessLogic {
             d.distChannel = aSplit[7];
             d.street = aSplit[6];
             d.weight = "" + Math.round(Double.parseDouble(aSplit[9]) * 10) / 10.0;
-            d.isFix = getIsFix(oriRunId, vNo);
+            if (getIsFix(oriRunId, vNo).equals("1")) {
+                if (checkStatusShipment(d.doNum, runId.replace("_", "")+d.vehicleCode).equals("submitting")) {
+                    d.isFix = "1";
+                } else if (checkStatusShipment(d.doNum, runId.replace("_", "")+d.vehicleCode).equals("submitted")) {
+                    d.isFix = "2";
+                } else if (checkStatusShipment(d.doNum, runId.replace("_", "")+d.vehicleCode).equals("error")) {
+                    d.isFix = "null";
+                }
+            } else {
+                d.isFix = "null";
+            }
             try {
                 d.volume = "" + Math.round(Double.parseDouble(getVolume(custId, oriRunId)) * 10) / 10.0;
             } catch (Exception e) {
@@ -265,9 +276,11 @@ public class LoadDelivery implements BusinessLogic {
                 prevDepart = addTime(prevDepart, 60);
             }
 
-            /********************************************
+            /**
+             * ******************************************
              * Data object Route_Job to be pushed to db *
-             ********************************************/
+             * ******************************************
+             */
             if (!d.vehicleCode.equals("") || !d.custId.equals("")) {
                 if (!prevVehiCode.equals(d.vehicleCode) && !d.vehicleCode.equals("NA")) {
                     jobNb = 1;
@@ -338,8 +351,8 @@ public class LoadDelivery implements BusinessLogic {
                 } catch (Exception e) {
                     r.dist = 0.00;
                 }
-                
-                if(d.isFix.equals("null")) {
+
+                if (d.isFix.equals("null")) {
                     r.isFix = null;
                 } else {
                     r.isFix = d.isFix;
@@ -446,6 +459,31 @@ public class LoadDelivery implements BusinessLogic {
 
         }
         return moreThan;
+    }
+
+    public String checkStatusShipment(String doNum, String shipmentNo) throws Exception {
+        String msg = "";
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql;
+                sql = "SELECT TOP 1 SAP_Message FROM BOSNET1.dbo.TMS_Status_Shipment WHERE Delivery_Number = '" + doNum + "' and Shipment_Number_Dummy = '" + shipmentNo + "'";
+
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    if (rs.next()) {
+                        if (rs.getString("SAP_Message") != null) {
+                            msg = "error";
+                        } else {
+                            msg = "submitted";
+                        }
+                    } else {
+                        msg = "submitting";
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return msg;
     }
 
     private String getVehicleType(String runId, String vehicleCode) throws Exception {
