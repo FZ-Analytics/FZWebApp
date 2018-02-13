@@ -30,6 +30,7 @@
                 <th width="100px" class="fzCol">Description</th>
                 <th width="100px" class="fzCol">Kg</th>
                 <th width="100px" class="fzCol">Qty</th>
+                <th width="100px" class="fzCol">Send SAP</th>
                 <%--<th width="100px" class="fzCol">Pck</th>--%>
             </tr>
 
@@ -40,6 +41,7 @@
                 <td class="fzCell"><%=j.Product_Description%></td>
                 <td class="fzCell"><%=j.Total_KG_Item%></td>
                 <td class="fzCell"><%=j.DOQty%> <%=j.DOQtyUOM%></td>
+                <th width="100px" class="fzCol"><%=j.sap%></th>
                 <%--<td class="fzCell"><%=j.pck%></td>--%>
             </tr>
 

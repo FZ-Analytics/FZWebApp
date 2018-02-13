@@ -288,6 +288,8 @@
                     style="background-color: lightyellow"
                     <%} else if (j.arrive.length() == 0 && j.name1.length() == 0) {%>
                     style="background-color: #e6ffe6"
+                    <%} else if (j.bat == "1" ) {%>
+                    style="background-color: #ffe6e6"
                     <%}%> >
                     <td class="fzCell"><%=j.no%></td>
                     <td class="vCodeClick" style="color: blue;"><%=j.vehicleCode%></td>

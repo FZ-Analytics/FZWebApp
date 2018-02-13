@@ -97,7 +97,7 @@ public class popupDetilRunId implements BusinessLogic {
                 "					a.weight / 100\n" +
                 "				)\n" +
                 "			) AS NUMERIC(\n" +
-                "				9,\n" +
+                "				15,\n" +
                 "				0\n" +
                 "			)\n" +
                 "		) AS VARCHAR\n" +
@@ -105,7 +105,7 @@ public class popupDetilRunId implements BusinessLogic {
                 "	CAST(\n" +
                 "		CAST(\n" +
                 "			a.avolume AS NUMERIC(\n" +
-                "				9,\n" +
+                "				15,\n" +
                 "				1\n" +
                 "			)\n" +
                 "		) AS VARCHAR\n" +
@@ -121,7 +121,7 @@ public class popupDetilRunId implements BusinessLogic {
                 "					a.volume / 100\n" +
                 "				)\n" +
                 "			) AS NUMERIC(\n" +
-                "				9,\n" +
+                "				15,\n" +
                 "				0\n" +
                 "			)\n" +
                 "		) AS VARCHAR\n" +
@@ -146,21 +146,21 @@ public class popupDetilRunId implements BusinessLogic {
                 "	(\n" +
                 "		SELECT\n" +
                 "			ra.vehicle_code,\n" +
-                "			SUM( CASE WHEN LEN( ra.weight )= 0 THEN 0 ELSE CAST( ra.weight AS NUMERIC( 9, 0 )) END ) AS aweight,\n" +
-                "			SUM( CASE WHEN LEN( ra.volume )= 0 THEN 0 ELSE CAST( ra.volume AS NUMERIC( 9, 0 )) END ) AS avolume,\n" +
+                "			SUM( CASE WHEN LEN( ra.weight )= 0 THEN 0 ELSE CAST( ra.weight AS NUMERIC( 15, 0 )) END ) AS aweight,\n" +
+                "			SUM( CASE WHEN LEN( ra.volume )= 0 THEN 0 ELSE CAST( ra.volume AS NUMERIC( 15, 0 )) END ) AS avolume,\n" +
                 "			SUM( CAST( pr.gross_amount AS NUMERIC( 9, 0 ))) AS gross_amount,\n" +
                 "			SUM( pr.Service_time ) AS Service_time,\n" +
                 "			COUNT( CASE ra.do_number WHEN '' THEN 0 ELSE CAST( ra.do_number AS NUMERIC( 9, 0 )) END )- 1 AS do_number,\n" +
                 "			ra.branch,\n" +
                 "			CAST(\n" +
                 "				ve.weight AS NUMERIC(\n" +
-                "					9,\n" +
+                "					15,\n" +
                 "					0\n" +
                 "				)\n" +
                 "			) AS weight,\n" +
                 "			CAST(\n" +
                 "				ve.volume AS NUMERIC(\n" +
-                "					9,\n" +
+                "					15,\n" +
                 "					0\n" +
                 "				)\n" +
                 "			) AS volume,\n" +

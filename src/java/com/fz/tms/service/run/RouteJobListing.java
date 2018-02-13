@@ -100,7 +100,7 @@ public class RouteJobListing implements BusinessLogic {
                 "					j.weight AS FLOAT\n" +
                 "				)\n" +
                 "			) AS NUMERIC(\n" +
-                "				9,\n" +
+                "				15,\n" +
                 "				1\n" +
                 "			)\n" +
                 "		) AS VARCHAR\n" +
@@ -108,11 +108,13 @@ public class RouteJobListing implements BusinessLogic {
                 "	CAST(\n" +
                 "		CAST(\n" +
                 "			(\n" +
-                "				CAST(\n" +
-                "					j.volume AS FLOAT\n" +
+                "				(\n" +
+                "					CAST(\n" +
+                "						j.volume AS FLOAT\n" +
+                "					)/ 1000000\n" +
                 "				)\n" +
                 "			) AS NUMERIC(\n" +
-                "				9,\n" +
+                "				15,\n" +
                 "				1\n" +
                 "			)\n" +
                 "		) AS VARCHAR\n" +
@@ -169,7 +171,8 @@ public class RouteJobListing implements BusinessLogic {
                 "				)\n" +
                 "		)> 0 THEN 'SEND'\n" +
                 "		ELSE 'NO'\n" +
-                "	END\n" +
+                "	END,\n" +
+                "	rt.batch\n" +
                 "FROM\n" +
                 "	bosnet1.dbo.tms_RouteJob j\n" +
                 "LEFT OUTER JOIN(\n" +
@@ -182,7 +185,7 @@ public class RouteJobListing implements BusinessLogic {
                 "			name1,\n" +
                 "			street,\n" +
                 "			distribution_channel,\n" +
-                "			MIN(Request_Delivery_Date) Request_Delivery_Date\n" +
+                "			MIN( Request_Delivery_Date ) Request_Delivery_Date\n" +
                 "		FROM\n" +
                 "			(\n" +
                 "				SELECT\n" +
@@ -211,6 +214,22 @@ public class RouteJobListing implements BusinessLogic {
                 "	) d ON\n" +
                 "	j.runID = d.RunId\n" +
                 "	AND j.customer_id = d.Customer_ID\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			COUNT( CASE WHEN batch IS NULL THEN 1 ELSE 0 END ) AS batch,\n" +
+                "			Customer_ID,\n" +
+                "			runID\n" +
+                "		FROM\n" +
+                "			bosnet1.dbo.TMS_PreRouteJob\n" +
+                "		WHERE\n" +
+                "			Is_Edit = 'ori'\n" +
+                "			AND batch IS NULL\n" +
+                "		GROUP BY\n" +
+                "			Customer_ID,\n" +
+                "			runID\n" +
+                "	) rt ON\n" +
+                "	j.runID = rt.runID\n" +
+                "	AND j.customer_id = rt.Customer_ID\n" +
                 "WHERE\n" +
                 "	j.runID = '"+runID+"'\n" +
                 "ORDER BY\n" +
@@ -271,6 +290,8 @@ public class RouteJobListing implements BusinessLogic {
                     j.dist = FZUtil.getRsString(rs, i++, "");
                     j.rdd = FZUtil.getRsString(rs, i++, "");
                     j.send = FZUtil.getRsString(rs, i++, "");
+                    j.bat = FZUtil.getRsString(rs, i++, "").length() > 0 ? "1" : "0";
+                    System.out.println(j.custID +"_"+j.bat);
                     
                     js.add(j);
                     

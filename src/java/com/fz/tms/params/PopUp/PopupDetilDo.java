@@ -48,7 +48,11 @@ public class PopupDetilDo  implements BusinessLogic {
                 "	rb.Total_KG,\n" +
                 "	rb.DOQty,\n" +
                 "	rb.DOQtyUOM,\n" +
-                "	rj.branch\n" +
+                "	rj.branch,\n" +
+                "	CASE\n" +
+                "		WHEN rb.batch IS NULL THEN 'no'\n" +
+                "		ELSE 'yes'\n" +
+                "	END sendSap\n" +
                 "FROM\n" +
                 "	BOSNET1.dbo.TMS_PreRouteJob rb\n" +
                 "INNER JOIN BOSNET1.dbo.TMS_RouteJob rj ON\n" +
@@ -79,6 +83,7 @@ public class PopupDetilDo  implements BusinessLogic {
                     dt.DOQty = String.valueOf(new BigDecimal(FZUtil.getRsString(rs, i++, "")).intValue());
                     dt.DOQtyUOM = FZUtil.getRsString(rs, i++, "");  
                     br = FZUtil.getRsString(rs, i++, ""); 
+                    dt.sap = FZUtil.getRsString(rs, i++, "");  
                     /*                    
                     String str = FZUtil.getRsString(rs, i++, "");
                     DecimalFormat df = new DecimalFormat("##.0");

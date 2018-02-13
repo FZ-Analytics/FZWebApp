@@ -168,12 +168,12 @@ public class AlgoRunner implements BusinessLogic {
                     errMsg = "Insert PreRouteVehicle Error";
                     resp = insertPreRouteVehicle(runID, branchCode, dateDeliv, chn);
                     if (resp.equalsIgnoreCase("OK")){
-                        errMsg = "Insert PreRouteJob Copy ori Error";
+                        errMsg = "Insert PreRouteJob ori Error";
                         resp = QueryCust(runID, branchCode, channel, dateDeliv, "ori");
                     }
                     //resp = insertPreRouteJob(runID, branchCode, dateDeliv, "ori", chn);
                     if (resp.equalsIgnoreCase("OK")){
-                        errMsg = "Insert PreRouteJob edit ori Error";
+                        errMsg = "Insert PreRouteJob edit Error";
                         resp = QueryCust(runID, branchCode, channel, dateDeliv, "edit");
                     }
                     //resp = insertPreRouteJob(runID, branchCode, dateDeliv, "edit", chn);
@@ -735,7 +735,9 @@ public class AlgoRunner implements BusinessLogic {
                 + "			Request_Delivery_Date,\n"
                 + "			Desa_Kelurahan,\n"
                 + "			Kecamatan,\n"
-                + "			Kodya_Kabupaten\n"
+                + "			Kodya_Kabupaten,\n"
+                + "			Batch,\n"
+                + "			Ket_DO\n"
                 + "		) select\n"
                 + "			'" + runID + "' as RunId,\n"
                 + "			Customer_ID,\n"
@@ -779,7 +781,9 @@ public class AlgoRunner implements BusinessLogic {
                 + "			Request_Delivery_Date,\n"
                 + "			Desa_Kelurahan,\n"
                 + "			Kecamatan,\n"
-                + "			Kodya_Kabupaten\n"
+                + "			Kodya_Kabupaten,\n"
+                + "			Batch,\n"
+                + "			Ket_DO\n"
                 + "		from\n"
                 + "			bosnet1.dbo.TMS_PreRouteJob\n"
                 + "		where\n"
@@ -1184,7 +1188,8 @@ public class AlgoRunner implements BusinessLogic {
                 "	du.value AS ChannelNullDefault,\n" +
                 "	cs.Desa_Kelurahan,\n" +
                 "	cs.Kecamatan,\n" +
-                "	cs.Kodya_Kabupaten\n" +
+                "	cs.Kodya_Kabupaten,\n" +
+                "	sp.Batch\n" +
                 "FROM\n" +
                 "	bosnet1.dbo.TMS_ShipmentPlan sp\n" +
                 "LEFT OUTER JOIN(\n" +
@@ -1317,6 +1322,7 @@ public class AlgoRunner implements BusinessLogic {
                     pl.put("Desa_Kelurahan", rs.getString("Desa_Kelurahan"));
                     pl.put("Kecamatan", rs.getString("Kecamatan"));
                     pl.put("Kodya_Kabupaten", rs.getString("Kodya_Kabupaten"));
+                    pl.put("Batch", rs.getString("Batch"));
                     //pl.put("DOCreationDate", rs.getString("DOCreationDate"));                    
                     asd.add(pl);
                     if(pl.get("DO_Number").equals("8020089252")){
@@ -1368,8 +1374,10 @@ public class AlgoRunner implements BusinessLogic {
                 "			MarketId,\n" +
                 "			Desa_Kelurahan,\n" +
                 "			Kecamatan,\n" +
-                "			Kodya_Kabupaten\n" +
-                "		) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                "			Kodya_Kabupaten,\n" +
+                    "			Batch,\n" +
+                    "			Ket_DO\n" +
+                "		) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         
             List<HashMap<String, String>> ins = new ArrayList<HashMap<String, String>>();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");            
@@ -1471,6 +1479,8 @@ public class AlgoRunner implements BusinessLogic {
                             ps.setString(i++, ins.get(a).get("Desa_Kelurahan"));   
                             ps.setString(i++, ins.get(a).get("Kecamatan")); 
                             ps.setString(i++, ins.get(a).get("Kodya_Kabupaten")); 
+                            ps.setString(i++, ins.get(a).get("Batch")); 
+                            ps.setString(i++, ins.get(a).get("Ket_DO")); 
 
                             ps.addBatch();
                         }
@@ -1485,6 +1495,7 @@ public class AlgoRunner implements BusinessLogic {
     public HashMap<String, String> tree(HashMap<String, String> pl, Date dateDeliv, String DDl, String chn) throws Exception {
         pl = time(pl, dateDeliv);
         pl = priority(pl, dateDeliv, DDl, chn);
+        pl = other(pl);
         return pl;
     }
 
@@ -1620,4 +1631,13 @@ public class AlgoRunner implements BusinessLogic {
         return pl;
     }
 
+    public HashMap<String, String> other(HashMap<String, String> pl){
+        
+        if(pl.get("Batch") == null){
+            pl.put("Ket_DO", "Batch null tidak masuk SAP");
+        }else{
+            pl.put("Ket_DO", "-");
+        }
+        return pl;
+    }
 }
