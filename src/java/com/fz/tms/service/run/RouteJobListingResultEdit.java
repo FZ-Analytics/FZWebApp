@@ -24,6 +24,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -75,6 +76,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
             }
 
             String[] dataSplit = data.split(",");
+            System.out.println(getLongLatCustomer(oriRunId, "5810003518"));
             switch (dataSplit.length) {
                 case 3: //normal row or start
                     if (!dataSplit[2].equals("start")) {
@@ -150,26 +152,29 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                 else if (!d.vehicleCode.equals("") && !d.custId.equals("") && !d.doNum.equals("")) {
                     //previousCustId is normal row
                     if (previousCustId.matches("[0-9]+")) {
-                        String[] longlat1 = getLongLatCustomer(previousCustId).split("split");
-                        d.lon1 = reFormatLongLat(longlat1[0]);
-                        d.lat1 = reFormatLongLat(longlat1[1]);
+                        try {
+                            String[] longlat1 = getLongLatCustomer(oriRunId, previousCustId).split("split");
+                            d.lon1 = reFormatLongLat(longlat1[0]);
+                            d.lat1 = reFormatLongLat(longlat1[1]);
+                        } catch (Exception e) { }
                     } //previousCustId is a start row
                     else {
                         try {
                             String[] longlat1 = getLongLatVehicle(previousCustId).split("split");
                             d.lon1 = reFormatLongLat(longlat1[0]);
                             d.lat1 = reFormatLongLat(longlat1[1]);
-                        } catch (Exception e) {
-                        }
+                        } catch (Exception e) { }
                     }
-                    String[] longlat2 = getLongLatCustomer(d.custId).split("split");
-                    d.lon2 = reFormatLongLat(longlat2[0]);
-                    d.lat2 = reFormatLongLat(longlat2[1]);
+                    String[] longlat2 = getLongLatCustomer(oriRunId, d.custId).split("split");
+                    try {
+                        d.lon2 = reFormatLongLat(longlat2[0]);
+                        d.lat2 = reFormatLongLat(longlat2[1]);
+                    } catch(Exception e) { }
                     previousCustId = d.custId;
                 } //end row
                 else if (!d.vehicleCode.equals("") && d.custId.equals("") && d.depart.equals("")) {
                     try {
-                        String[] longlat1 = getLongLatCustomer(previousCustId).split("split");
+                        String[] longlat1 = getLongLatCustomer(oriRunId, previousCustId).split("split");
                         d.lon1 = reFormatLongLat(longlat1[0]);
                         d.lat1 = reFormatLongLat(longlat1[1]);
                         String[] longlat2 = getLongLatVehicle(d.vehicleCode).split("split");
@@ -288,7 +293,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
 
                     }
                 } else {
-                    String[] longlatSplit = getLongLatCustomer(r.custId).split("split");
+                    String[] longlatSplit = getLongLatCustomer(oriRunId, r.custId).split("split");
                     try {
                         r.lon = reFormatLongLat(longlatSplit[0]);
                         r.lat = reFormatLongLat(longlatSplit[1]);
@@ -396,7 +401,16 @@ public class RouteJobListingResultEdit implements BusinessLogic {
 
     public ArrayList<String> getRouteData(String custId) throws Exception {
         ArrayList<String> d = new ArrayList<>();
-        String doNumber = "", priority = "", storeOpen = "", storeClose = "", serviceTime = "", storeName = "", storeStreet = "", distChannel = "", rdd = "", isFix = "";
+        ArrayList<String> tempDO = new ArrayList<>();
+        String doNumber = "";
+        String priority = "";
+        String storeOpen = "";
+        String storeClose = "";
+        String serviceTime = "";
+        String storeName = "";
+        String storeStreet = "";
+        String distChannel = "";
+        String rdd = "";
         double weight = 0.0;
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
@@ -406,31 +420,33 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                         + "     deliv_start, "
                         + "     deliv_end, "
                         + "     Service_time, "
-                        + "     Name1, "
-                        + "     Street, "
+                        + "     Name1, Street, "
                         + "     Distribution_Channel, "
                         + "     Request_Delivery_Date, "
                         + "     SUM(total_kg) as total_kg "
-                        + " FROM "
+                        + "FROM "
                         + "     BOSNET1.dbo.TMS_PreRouteJob "
-                        + " WHERE "
+                        + "WHERE "
                         + "     RunId = '" + oriRunId + "' "
-                        + "     AND Customer_ID = '" + custId + "' "
-                        + "     AND Is_Edit = 'edit' "
-                        + " GROUP BY "
-                        + "     DO_Number, "
+                        + "     and Customer_ID = '" + custId + "' "
+                        + "     and Is_Edit = 'edit' "
+                        + "GROUP "
+                        + "     BY DO_Number, "
                         + "     Customer_priority, "
                         + "     deliv_start, "
                         + "     deliv_end, "
                         + "     Service_time, "
-                        + "     Name1, "
-                        + "     Street, "
+                        + "     Name1, Street, "
                         + "     Distribution_Channel, "
-                        + "     Request_Delivery_Date ";
+                        + "     Request_Delivery_Date "
+                        + "ORDER BY"
+                        + "     Request_Delivery_Date DESC";;
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
-                        doNumber += rs.getString("DO_Number") + ";\n";
-                        priority = rs.getString("Customer_priority");
+                        tempDO.add(rs.getString("DO_Number"));
+                        if (priority.length() == 0) {
+                            priority = rs.getString("Customer_priority");
+                        }
                         storeOpen = rs.getString("deliv_start");
                         storeClose = rs.getString("deliv_end");
                         serviceTime = rs.getString("Service_time");
@@ -440,8 +456,12 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                         rdd = rs.getString("Request_Delivery_Date");
                         weight += rs.getDouble("total_kg");
                     }
+                    Collections.sort(tempDO);
+                    for(int i = 0; i < tempDO.size(); i++) {
+                        doNumber += tempDO.get(i) + ";\n";
+                    }
                     if (doNumber.length() > 0) {
-                        doNumber = doNumber.substring(0, doNumber.length() - 2); // Remove last semicolon
+                        doNumber = doNumber.substring(0, doNumber.length() - 2);
                     }
 
                     d.add(doNumber + "split" + priority + "split" + storeOpen + "split" + storeClose + "split" + serviceTime + "split" + storeName + "split"
@@ -454,12 +474,12 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         return d;
     }
 
-    public String getLongLatCustomer(String custId) throws Exception {
+    public String getLongLatCustomer(String runId, String custId) throws Exception {
         String longitude = "";
         String latitude = "";
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
-                String sql = "SELECT TOP 1 Long, Lat FROM BOSNET1.dbo.TMS_CustLongLat where CustId = '" + custId + "';";
+                String sql = "SELECT DISTINCT Long, Lat FROM BOSNET1.dbo.TMS_PreRouteJob where Customer_ID = '" + custId + "' and runId = '" + runId + "';";
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
                         longitude = rs.getString("Long");
@@ -554,31 +574,12 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         return id;
     }
 
-    public String getLongLatCustomer(String custId, String oriRunId) throws Exception {
-        String longitude = "";
-        String latitude = "";
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql = "SELECT TOP 1 Long, Lat FROM BOSNET1.dbo.TMS_PreRouteJob where Customer_ID = '" + custId + "' and RunId = '" + oriRunId + "';";
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        longitude = rs.getString("Long");
-                        latitude = rs.getString("Lat");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return longitude + "split" + latitude;
-    }
-
     public String getLongLatVehicle(String vehicleCode) throws Exception {
         String startLon = "";
         String startLat = "";
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
-                String sql = "SELECT TOP 1 startLon, startLat FROM BOSNET1.dbo.TMS_VehicleAtr where vehicle_code = '" + vehicleCode + "';";
+                String sql = "SELECT TOP 1 startLon, startLat FROM BOSNET1.dbo.TMS_PreRouteVehicle where vehicle_code = '" + vehicleCode + "' and RunId = '" + oriRunId + "';";
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
                         startLon = rs.getString("startLon");

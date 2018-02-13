@@ -211,7 +211,7 @@
                         <th width="100px" class="fzCol">Cust. Feas.</th>
                         <th width="100px" class="fzCol">Truck Feas.</th>
                         <th width="100px" class="fzCol">Edit</th>
-                        <th width="100px" class="fzCol">Submit</th>
+                        <th width="100px" class="fzCol">Send SAP</th>
                     </tr>
                 </thead>
                 <tbody>

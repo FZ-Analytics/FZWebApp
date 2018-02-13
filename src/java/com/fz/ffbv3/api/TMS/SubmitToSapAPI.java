@@ -253,7 +253,7 @@ public class SubmitToSapAPI {
                   "     rj.arrive,\n" +
                   "     rj.depart,\n" +
                   "     rj.distance\n" +
-                  " FROM\n" +
+                  "FROM\n" +
                   "     [BOSNET1].[dbo].[TMS_ShipmentPlan] sp\n" +
                   "INNER JOIN (\n" +
                   "	SELECT\n" +
@@ -266,17 +266,19 @@ public class SubmitToSapAPI {
                   "	WHERE\n" +
                   "		rj.runId = '"+runId+"'\n" +
                   "		AND rj.Customer_ID = '"+custId+"') rj ON rj.customer_id = sp.Customer_ID\n" +
-                  " WHERE\n" +
+                  "INNER JOIN (\n" +
+                  "	SELECT DISTINCT\n" +
+                  "		prj.Request_Delivery_Date\n" +
+                  "	FROM \n" +
+                  "		[BOSNET1].[dbo].[TMS_PreRouteJob] prj\n" +
+                  "	WHERE \n" +
+                  "		prj.runId = '"+runId+"'\n" +
+                  "             AND prj.Customer_ID = '"+custId+"') prj ON sp.Request_Delivery_Date = prj.Request_Delivery_Date\n" +
+                  "WHERE\n" +
                   "         sp.Customer_ID = '"+custId+"'\n" +
                   "         AND sp.Already_Shipment <> 'Y'\n" +
-                  "         AND sp.Batch <> 'NULL'\n" + 
-                  "         AND sp.Request_Delivery_Date = (SELECT TOP 1\n" +
-                  "                                             prj.Request_Delivery_Date\n" +
-                  "                                         FROM \n" +
-                  "                                             [BOSNET1].[dbo].[TMS_PreRouteJob] prj\n" +
-                  "                                         WHERE \n" +
-                  "                                             prj.runId = '"+runId+"' AND prj.Customer_ID = '"+custId+"')\n" + 
-                  " ORDER BY\n" +
+                  "         AND sp.Batch <> 'NULL'\n" +
+                  "ORDER BY\n" +
                   "         sp.DO_Number";
 
                 try (ResultSet rs = stm.executeQuery(sql)) {
