@@ -205,13 +205,14 @@
                         <th width="100px" class="fzCol">Weight</th>
                         <th width="100px" class="fzCol">Volume</th>
                         <th width="100px" class="fzCol">RDD</th>
-                        <th width="100px" class="fzCol">Transport Cost</th>
+                        <th width="100px" class="fzCol">Trans. Cost</th>
                         <th width="100px" class="fzCol">Dist</th>
                         <th width="100px" class="fzCol">Access Feas.</th>
                         <th width="100px" class="fzCol">Cust. Feas.</th>
                         <th width="100px" class="fzCol">Truck Feas.</th>
                         <th width="100px" class="fzCol">Edit</th>
                         <th width="100px" class="fzCol">Send SAP</th>
+                        <th width="100px" class="fzCol">Err. SAP</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -285,6 +286,7 @@
 
                         </td>
                         <%}%>
+                        <td class="fzCell" style="font-size: 10px;"><%=j.error%></td>
                     </tr>
 
                     <%} // for ProgressRecord %>

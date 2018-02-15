@@ -34,6 +34,7 @@ import javax.servlet.jsp.PageContext;
 public class LoadDelivery implements BusinessLogic {
 
     List<Delivery> ld = new ArrayList<>();
+
     String prevCustId = "";
     String previousCustId = "";
     String prevDepart = "";
@@ -41,6 +42,7 @@ public class LoadDelivery implements BusinessLogic {
     boolean b = true;
 
     ArrayList<RouteJobLog> arlistR = new ArrayList<>();
+    ArrayList<RouteJobLog> arlistOriR = new ArrayList<>();
     String prevVehiCode = "";
     int routeNb = 0;
     int jobNb = 1;
@@ -93,6 +95,7 @@ public class LoadDelivery implements BusinessLogic {
         }
 
         updateRouteJob(arlistR, runId);
+        updateOriRouteJob(arlistOriR, oriRunId);
         request.setAttribute("branchId", branch);
         request.setAttribute("shift", shift);
         request.setAttribute("channel", channel);
@@ -121,23 +124,53 @@ public class LoadDelivery implements BusinessLogic {
             d.distChannel = aSplit[7];
             d.street = aSplit[6];
             d.weight = "" + Math.round(Double.parseDouble(aSplit[9]) * 10) / 10.0;
+            //Check IsFix
             if (getIsFix(oriRunId, vNo).equals("1")) {
                 String[] doNumSplit = d.doNum.split(";");
-                if(doNumSplit.length == 1) {
-                    if (checkStatusShipment(d.doNum, oriRunId.replace("_", "")+d.vehicleCode).equals("submitting")) {
-                        d.isFix = "1";
-                    } else if (checkStatusShipment(d.doNum, oriRunId.replace("_", "")+d.vehicleCode).equals("submitted")) {
-                        d.isFix = "2";
-                    } else if (checkStatusShipment(d.doNum, oriRunId.replace("_", "")+d.vehicleCode).equals("error")) {
-                        d.isFix = "null";
+                //For one DO
+                if (doNumSplit.length == 1) {
+                    //This try is for EXT vehicle
+                    try {
+                        String check = checkStatusShipment(d.doNum, runId.replace("_", "") + getVendorId(d.vehicleCode));
+                        if (check.length() > 1) {
+                            d.isFix = "null";
+                            d.error = check;
+                        } else {
+                            d.isFix = check;
+                        }
+                    } 
+                    //This catch is for INT vehicle
+                    catch(Exception e) {
+                        String check = checkStatusShipment(d.doNum, runId.replace("_", "") + d.vehicleCode);
+                        if (check.length() > 1) {
+                            d.isFix = "null";
+                            d.error = check;
+                        } else {
+                            d.isFix = check;
+                        }
                     }
-                } else {
-                    if (checkStatusShipment(doNumSplit[0], oriRunId.replace("_", "")+d.vehicleCode).equals("submitting")) {
-                        d.isFix = "1";
-                    } else if (checkStatusShipment(doNumSplit[0], oriRunId.replace("_", "")+d.vehicleCode).equals("submitted")) {
-                        d.isFix = "2";
-                    } else if (checkStatusShipment(doNumSplit[0], oriRunId.replace("_", "")+d.vehicleCode).equals("error")) {
-                        d.isFix = "null";
+                } 
+                //For many DO
+                else {
+                    //This try is for EXT vehicle
+                    try {
+                        String check = checkStatusShipment(doNumSplit[0], runId.replace("_", "") + getVendorId(d.vehicleCode));
+                        if (check.length() > 1) {
+                            d.isFix = "null";
+                            d.error = check;
+                        } else {
+                            d.isFix = check;
+                        }
+                    }
+                    //This catch is for INT vehicle
+                    catch (Exception e) {
+                        String check = checkStatusShipment(doNumSplit[0], runId.replace("_", "") + d.vehicleCode);
+                        if (check.length() > 1) {
+                            d.isFix = "null";
+                            d.error = check;
+                        } else {
+                            d.isFix = check;
+                        }
                     }
                 }
             } else {
@@ -177,14 +210,16 @@ public class LoadDelivery implements BusinessLogic {
                             String[] longlat1 = getLongLatVehicle(previousCustId).split("split");
                             d.lon1 = reFormatLongLat(longlat1[0]);
                             d.lat1 = reFormatLongLat(longlat1[1]);
-                        } catch (Exception e) { }
+                        } catch (Exception e) {
+                        }
                     }
                     try {
                         String[] longlat2 = getLongLatCustomer(oriRunId, d.custId).split("split");
                         d.lon2 = reFormatLongLat(longlat2[0]);
                         d.lat2 = reFormatLongLat(longlat2[1]);
                         previousCustId = d.custId;
-                    } catch(Exception e) { }
+                    } catch (Exception e) {
+                    }
                 } //end row
                 else if (!d.vehicleCode.equals("") && d.custId.equals("") && d.depart.equals("")) {
                     try {
@@ -370,12 +405,17 @@ public class LoadDelivery implements BusinessLogic {
                 } else {
                     r.isFix = d.isFix;
                 }
-
                 arlistR.add(r);
+                arlistOriR.add(r);
                 jobNb++;
                 prevVehiCode = r.vehicleCode;
             }
         }
+    }
+
+    public String getVendorId(String v) {
+        String[] vSplit = v.split("_");
+        return vSplit[1] + vSplit[3];
     }
 
     public String reFormatLongLat(String longlat) {
@@ -484,12 +524,12 @@ public class LoadDelivery implements BusinessLogic {
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     if (rs.next()) {
                         if (rs.getString("SAP_Message") != null) {
-                            msg = "error";
+                            msg = rs.getString("SAP_Message"); //Error
                         } else {
-                            msg = "submitted";
+                            msg = "2"; //Submitted
                         }
                     } else {
-                        msg = "submitting";
+                        msg = "1"; //Submitting
                     }
                 }
             }
@@ -776,7 +816,7 @@ public class LoadDelivery implements BusinessLogic {
                         weight += rs.getDouble("total_kg");
                     }
                     Collections.sort(tempDO);
-                    for(int i = 0; i < tempDO.size(); i++) {
+                    for (int i = 0; i < tempDO.size(); i++) {
                         doNumber += tempDO.get(i) + ";\n";
                     }
                     if (doNumber.length() > 0) {
@@ -962,5 +1002,45 @@ public class LoadDelivery implements BusinessLogic {
                 psHdr.executeUpdate();
             }
         }
+    }
+
+    public String updateOriRouteJob(ArrayList<RouteJobLog> arlist, String runId) throws Exception {
+        System.out.println(oriRunId);
+        String str = "Error";
+        ArrayList<RouteJobLog> al = arlist;
+        for (int i = 0; i < arlist.size(); i++) {
+            RouteJobLog rjl = al.get(i);
+            String sql = "";
+            System.out.println(rjl.vehicleCode + " " + rjl.isFix);
+            if (rjl.isFix == null) {
+                sql
+                        = "UPDATE\n"
+                        + "   bosnet1.dbo.TMS_RouteJob\n"
+                        + "SET\n"
+                        + "	isFix = " + null + "\n"
+                        + "WHERE\n"
+                        + "	and vehicle_code = '" + rjl.vehicleCode + "'\n"
+                        + "	and customer_id = '" + rjl.custId + "'";
+            } else {
+                System.out.println("IN");
+                sql
+                        = "UPDATE\n"
+                        + "   bosnet1.dbo.TMS_RouteJob\n"
+                        + "SET\n"
+                        + "	isFix = '" + rjl.isFix + "'\n"
+                        + "WHERE\n"
+                        + "	runID = '" + runId + "'\n"
+                        + "	and vehicle_code = '" + rjl.vehicleCode + "'\n"
+                        + "	and customer_id = '" + rjl.custId + "'";
+            }
+
+            try (Connection con = (new Db()).getConnection("jdbc/fztms"); PreparedStatement psHdr = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
+                con.setAutoCommit(false);
+                psHdr.executeUpdate();
+                con.setAutoCommit(true);
+                str = "OK";
+            }
+        }
+        return str;
     }
 }

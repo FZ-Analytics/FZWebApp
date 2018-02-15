@@ -93,7 +93,6 @@ public class SubmitToSapAPI {
                     rs.Shipment_Type = hmPRV.get("source1");
                     rs.Plant = hmSP.get("Plant");
                     rs.Shipment_Route = hmSP.get("Route");
-                    rs.Shipment_Number_Dummy = he.RunId.replace("_", "")+he.vehicle_no;
                     rs.Description = "";
                     rs.Status_Plan = parseRunId(he.RunId, true);
                     rs.Status_Check_In = null;
@@ -105,13 +104,15 @@ public class SubmitToSapAPI {
                     rs.Service_Agent_Id = hmPRV.get("IdDriver");
                     if(rs.Shipment_Type.equals("ZDSI")) {
                         System.out.println("INT");
+                        rs.Shipment_Number_Dummy = he.RunId.replace("_", "")+he.vehicle_no;
                         rs.No_Pol = he.vehicle_no;
                         rs.Driver_Name = hmPRV.get("NamaDriver");
                         rs.Vehicle_Number = he.vehicle_no;
                     } else {
                         System.out.println("EXT");
+                        rs.Shipment_Number_Dummy = he.RunId.replace("_", "")+getVendorId(he.vehicle_no);
                         rs.No_Pol = hmPRV.get("vehicle_type");
-                        rs.Driver_Name = splitVendorAndVehicleCode(he.vehicle_no);
+                        rs.Driver_Name = getVendorName(he.vehicle_no);
                         rs.Vehicle_Number = hmPRV.get("vehicle_type");
                     }
 
@@ -149,21 +150,16 @@ public class SubmitToSapAPI {
         return content;
     }
     
-    public String splitVendorAndVehicleCode(String v) {
-        int count = 1;
-        String ret = "";
-        for(int i = 0; i < v.length(); i++) {
-            if(Character.isUpperCase(v.charAt(i))) {
-                if(count == 2) {
-                    String[] vSplit = v.split("" + v.charAt(i));
-                    ret = vSplit[0];
-                }
-                count++;
-            }
-        }
-        return ret;
+    public String getVendorId(String v) {
+        String[] vSplit = v.split("_");
+        return vSplit[1]+vSplit[3];
     }
     
+    public String getVendorName(String v) {
+        String[] vSplit = v.split("_");
+        return vSplit[0];
+    }
+            
     public Timestamp getTimeID() throws ParseException {
         String time = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()));
         Timestamp ts = Timestamp.valueOf(time);
@@ -348,6 +344,59 @@ public class SubmitToSapAPI {
     }
 
     public String insertResultShipment(ResultShipment rs) throws Exception {
+        int rowNum = 0;
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql = 
+                        "SELECT " +
+                        "   COUNT(*) total " +
+                        "FROM " +
+                        "   bosnet1.dbo.TMS_Result_Shipment " +
+                        "WHERE " +
+                        "   Shipment_Number_Dummy = '" + rs.Shipment_Number_Dummy + "'" +
+                        "   AND Delivery_Number = '" + rs.Delivery_Number + "'" +
+                        "   AND Delivery_Item = '" + rs.Delivery_Item + "';";
+                try (ResultSet rst = stm.executeQuery(sql)) {
+                    while (rst.next()) {
+                        rowNum = rst.getInt("total");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        if (rowNum > 0) {
+            try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+                try (Statement stm = con.createStatement()) {
+                    String sql = 
+                        "DELETE " +
+                        "FROM " +
+                        "   bosnet1.dbo.TMS_Result_Shipment " +
+                        "WHERE " +
+                        "   Shipment_Number_Dummy = '" + rs.Shipment_Number_Dummy + "'" +
+                        "   AND Delivery_Number = '" + rs.Delivery_Number + "'" +
+                        "   AND Delivery_Item = '" + rs.Delivery_Item + "';";
+                    stm.executeQuery(sql);
+                }
+            } catch (Exception e) {
+
+            }
+            try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+                try (Statement stm = con.createStatement()) {
+                    String sql = 
+                        "DELETE " +
+                        "FROM " +
+                        "   bosnet1.dbo.TMS_Status_Shipment " +
+                        "WHERE " +
+                        "   Shipment_Number_Dummy = '" + rs.Shipment_Number_Dummy + "'" +
+                        "   AND Delivery_Number = '" + rs.Delivery_Number + "'" +
+                        "   AND Delivery_Item = '" + rs.Delivery_Item + "';";
+                    stm.executeQuery(sql);
+                }
+            } catch (Exception e) {
+
+            }
+        }
         String ret = "error";
         String sql = "INSERT INTO bosnet1.dbo.TMS_Result_Shipment "
                 + "(Shipment_Type, Plant, Shipping_Type, Shipment_Route, Shipment_Number_Dummy, Description, Status_Plan, Status_Check_In, Status_Load_Start, Status_Load_End, "

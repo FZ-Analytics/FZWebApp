@@ -42,6 +42,7 @@ public class Delivery {
     public String feasibleTruck = "-";
     public String feasibleCustomer ="-";
     public String isFix = "";
+    public String error = "";
     
     public String getMapLink() {
         String s = "https://www.google.com/maps/dir/"

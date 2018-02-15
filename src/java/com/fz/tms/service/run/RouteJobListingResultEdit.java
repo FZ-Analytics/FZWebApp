@@ -76,7 +76,6 @@ public class RouteJobListingResultEdit implements BusinessLogic {
             }
 
             String[] dataSplit = data.split(",");
-            System.out.println(getLongLatCustomer(oriRunId, "5810003518"));
             switch (dataSplit.length) {
                 case 3: //normal row or start
                     if (!dataSplit[2].equals("start")) {
