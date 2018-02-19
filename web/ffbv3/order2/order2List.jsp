@@ -12,54 +12,7 @@
     <body>
     <%@include file="../appGlobal/bodyTop.jsp"%>
     <script>
-        function shw(jobID
-            , runID
-            , hvsDt
-            , rmk
-            , vhRmk
-            , crtSrc
-            , task2ReasonName
-            , size
-            , planStart
-            , planEnd
-            , actualStart
-            , actualEnd
-            , blocks
-            , isLastOrder
-            , isLast2Order
-            , assignedDt
-            , takenDt
-            , doneDt
-            , createDt
-            , dirLoc
-            , estmFfb
-            ){
-        
-            var s = 
-                    '\nJobID = ' + jobID
-                    + '\nPlan Start = ' + planStart
-                    + '\nPlan End = ' + planEnd
-                    + '\nActual Start = ' + actualStart
-                    + '\nActual End = ' + actualEnd
-                    + '\nEstm Kg = ' + size
-                    + '\nEstm FFB = ' + estmFfb
-                    + '\nIs Last 2 Order = ' + isLast2Order
-                    + '\nDirLoc = ' + dirLoc
-                    + '\nReason = ' + task2ReasonName
-                    + '\n'
-                    + '\nRunID = ' + runID
-                    //+ '\nBlocks = ' + blocks
-                    + '\nCreate Source = ' + crtSrc
-                    + '\nHarvest Date = ' + hvsDt
-                    + '\nJob Remark = ' + rmk
-                    + '\nVehicle Remark = ' + vhRmk
-                    + '\n'
-                    + '\nOrdered = ' + createDt
-                    + '\nAssigned = ' + assignedDt
-                    + '\nTaken = ' + takenDt
-                    + '\nDone = ' + doneDt
-            ;
-//            alert(s);
+        function toggle_more(jobID) { 
             var x = document.getElementById("more"+jobID);
             x.hidden = !x.hidden;
             document.getElementById("tgl"+jobID).innerHTML=(x.hidden)?"More":"Less";
@@ -67,6 +20,16 @@
         
         function batal(jobID,divID) { 
             var x = confirm("Cancel Job " + jobID + " ? ");
+            if (x == true) {
+                var f = document.getElementById("frm_batal");
+                document.getElementById("jobID").value = jobID;
+                document.getElementById("divID").value = divID;
+                f.submit();
+            }
+        }
+
+        function reOrder(jobID,divID) { 
+            var x = confirm("Reorder Job " + jobID + " ? ");
             if (x == true) {
                 var f = document.getElementById("frm_batal");
                 document.getElementById("jobID").value = jobID;
@@ -104,17 +67,11 @@
 
             // determine reorder code & color
             String reorderRef = 
-                    "<a href='../order2/order2Reorder.jsp?jobID=" 
-                    + r.jobID + "&divID=" + r.divID
-                    + "'>Re-Order</a>";
+                    "<button class='btn fzButton' type='button' onclick=\"reOrder(" + r.jobID 
+                    + ",'" + r.divID + "')\">Re-Order</button>";
             String cancelRef = 
-                    "<button type='button' onclick=\"batal(" + r.jobID 
+                    "<button class='btn fzButton' type='button' onclick=\"batal(" + r.jobID 
                     + ",'" + r.divID + "')\">Cancel</button>";
-            /*
-                    "<a href='../order2/order2Cancel.jsp?jobID=" 
-                    + r.jobID + "&divID=" + r.divID
-                    + "'>Cancel</a>";
-            */
             String reorderCode = ""; 
             String cancelCode = ""; 
             String statusColor = "";
@@ -218,13 +175,16 @@
                 <td class="fzCell"><%=r.readyTime%></td>
                 <td class="fzCell"><%=r.jobID%></td>
                 <td class="fzCell">
-                    <a href="javascript:shw('<%=r.jobID%>','<%=r.runID%>','<%=r.hvsDate%>','<%=FZUtil.escapeText(r.remark)%>','<%=r.vehicleRemark%>','<%=r.createSource%>','<%=r.Task2ReasonName%>','<%=r.size%>','<%=r.planStart%>','<%=r.planEnd%>','<%=r.actualStart%>','<%=r.actualEnd%>','<%=r.getBlocks()%>','<%=r.isLastOrder%>','<%=r.isLast2Order%>','<%=r.assignedDate%>','<%=r.takenDate%>','<%=r.doneDate%>','<%=r.createDate%>','<%=r.dirLoc%>','<%=r.estmFfb%>');"
-                      id="tgl<%=r.jobID%>">More</a>
+                    <a href="javascript:toggle_more('<%=r.jobID%>');" id="tgl<%=r.jobID%>">More</a>
                 </td>
             </tr>
             <div>
             <tr id="more<%=r.jobID%>" name="more<%=r.jobID%>" hidden>
                     <form id="frm_batal" name="frm_batal" action="order2Cancel.jsp" method="get">
+                        <input type="hidden" id="jobID" name="jobID" value="<%=r.jobID%>">
+                        <input type="hidden" id="divID" name="divID" value="<%=r.divID%>">
+                    </form>
+                    <form id="frm_reorder" name="frm_reorder" action="order2Reorder.jsp" method="get">
                         <input type="hidden" id="jobID" name="jobID" value="<%=r.jobID%>">
                         <input type="hidden" id="divID" name="divID" value="<%=r.divID%>">
                     </form>
@@ -272,16 +232,8 @@
                         </tr>
                         <tr>
                             <td>&nbsp;</td>
-                            <td style="padding: 2px;">Driver </td><td>:</td><td><%=r.vehicleRemark%></td>
-                            <td>&nbsp;</td>
-                            <td colspan='3'></td>
+                            <td style="padding: 2px;">Driver </td><td>:</td><td colspan="4"><%=r.vehicleRemark%></td>
                         </tr>
-                        <!--tr>
-                            <td>&nbsp;</td>
-                            <td style="padding: 2px; ">Harvest Date</td><td style="padding: 2px;">:</td><td width="80px"><%=r.hvsDate%></td>
-                            <td>&nbsp;</td>
-                            <td colspan='3'></td>
-                        </tr-->
                         <tr>
                             <td>&nbsp;</td>
                             <td style="padding: 2px;">Plan Start</td><td style="padding: 2px;">:</td><td><%=r.planStart%></td>
@@ -309,9 +261,16 @@
                         <tr><td colspan='7>'>&nbsp;</td></tr>
 			<tr>
                             <td>&nbsp;</td>
-                            <td colspan="3" style='align-items: center;'><%=reorderCode%></td>
+                            <td colspan="3" style='text-align: left;'><%=reorderCode%></td>
 							<td></td>
-                            <td colspan="3" style='align-items: center;'><%=cancelCode%></td>
+                            <td colspan="3" style='text-align: right; padding-right: 10px;'><%=cancelCode%></td>
+                        </tr>
+                        <tr>
+                            <td colspan="100%" style="text-align: center;">
+                                <a href="javascript:toggle_more('<%=r.jobID%>');" id="tgl<%=r.jobID%>">
+                                <img src="../img/hline.png"/><br/>Close
+                                </a>
+                            </td>
                         </tr>
                     </table>
                 </td>

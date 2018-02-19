@@ -85,25 +85,23 @@
                 }
             }
             
-                // get sequence number of job for a division, and runID
-                StringBuffer retVal = new StringBuffer();
-                getSeqAndRunID(hvsDate, divID, con, retVal);
-                String[] seqAndRunID = retVal.toString().split(";");
-                //int seq = Integer.parseInt(seqAndRunID[0]);
-                String runID = seqAndRunID[0];
-                int prevLastOdrCnt = 0;
-
             if (isLast2Order.equals("yes")){
                     // select lastOdr from schdRun whererunid
 		sql = "select lastOdrCnt from fbSchedRun where runID='" + runID + "'";
-                try (
+            try (
 			PreparedStatement ps = con.prepareStatement(sql);
 			ResultSet rs = ps.executeQuery()) {
+				if (rs.next()) {
+					logIt(cx,"lastOdrCnt = " + rs.getString("runID"));
+				} else 
+					logIt(cx,"No Record found");
+			}
 //prevLastOdCnt= rs...                
-				if (rs.next()) prevLastOdrCnt = rs.getInt("lasOdrCnt");
-		}
-            }
+}
 
+else{
+    //prevLastOdCnt = 0;
+}
 
             // insert
             sql = "insert into fbjob("
@@ -128,6 +126,13 @@
                     + " values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
                     ;
             try (PreparedStatement ps = con.prepareStatement(sql)){
+
+                // get sequence number of job for a division, and runID
+                StringBuffer retVal = new StringBuffer();
+                getSeqAndRunID(hvsDate, divID, con, retVal);
+                String[] seqAndRunID = retVal.toString().split(";");
+                //int seq = Integer.parseInt(seqAndRunID[0]);
+                String runID = seqAndRunID[0];
 
                 // validate blocks
                 validateDivBlock(divID, block1, con);
@@ -155,7 +160,6 @@
                 ps.setString(i++, isLastOrder);
                 ps.setString(i++, isLast2Order);
                 ps.setString(i++, estmFfb);
-                ps.setInt(i++, prevLastOdrCnt);
 
                 ps.executeUpdate();
 
