@@ -309,9 +309,15 @@
                         <tr><td colspan='7>'>&nbsp;</td></tr>
 			<tr>
                             <td>&nbsp;</td>
-                            <td colspan="3" style='align-items: center;'><%=reorderCode%></td>
+                            <td colspan="3" style='text-align: center;'><%=reorderCode%></td>
 							<td></td>
-                            <td colspan="3" style='align-items: center;'><%=cancelCode%></td>
+                            <td colspan="3" style='text-align: center;'><%=cancelCode%></td>
+                        </tr>
+                        <tr>
+                            <td colspan="100%" style="text-align: right;">
+                                <a href="javascript:shw('<%=r.jobID%>','<%=r.runID%>','<%=r.hvsDate%>','<%=FZUtil.escapeText(r.remark)%>','<%=r.vehicleRemark%>','<%=r.createSource%>','<%=r.Task2ReasonName%>','<%=r.size%>','<%=r.planStart%>','<%=r.planEnd%>','<%=r.actualStart%>','<%=r.actualEnd%>','<%=r.getBlocks()%>','<%=r.isLastOrder%>','<%=r.isLast2Order%>','<%=r.assignedDate%>','<%=r.takenDate%>','<%=r.doneDate%>','<%=r.createDate%>','<%=r.dirLoc%>','<%=r.estmFfb%>');"
+                                  id="tgl<%=r.jobID%>">Close</a>
+                            </td>
                         </tr>
                     </table>
                 </td>

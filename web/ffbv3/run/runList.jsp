@@ -15,7 +15,7 @@
     <body>
     <%@include file="../appGlobal/bodyTop.jsp"%>
 
-        <h3>Taxation</h3>
+        <h3>Estimation</h3>
         <table class="table" id="tbData">
             <tr>
                 <th width="100px" class="fzCol">To Run</th>

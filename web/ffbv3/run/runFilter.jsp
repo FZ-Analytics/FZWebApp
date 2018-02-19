@@ -36,7 +36,7 @@
             <br><br>
             <label class="fzLabel">Mill</label>
             <input class="fzInput" type="text" id="millID" name="millID" 
-                   value="LWSM">
+                   value="">
             
             <br><br>
             <button class="btn fzButton" type="submit" 

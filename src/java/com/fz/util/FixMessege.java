@@ -56,4 +56,5 @@ public class FixMessege
 	public static final String strMobileHistoryStateFailed = "History job gagal";
 
 	public static final String strStatusUploadDataSuccess = "DONE";
+	public static final String strImageFileFailed = "Download file gambar gagal";
 }

@@ -43,6 +43,8 @@
         String isLast2Order = FZUtil.getHttpParam(request, "isLast2Order");
 
         String remark = FZUtil.getHttpParam(request, "remark");
+
+        String lastOdrCnt = "" ;
         if (remark.trim().length() == 0) 
             throw new Exception("Bin Position / Remark cannot empty");
         
@@ -54,6 +56,8 @@
 //        }
         
         try (Connection con = (new Db()).getConnection("jdbc/fz")){
+
+        // begin trans
 
             // check similar job
             String sql = 
@@ -81,6 +85,26 @@
                 }
             }
             
+                // get sequence number of job for a division, and runID
+                StringBuffer retVal = new StringBuffer();
+                getSeqAndRunID(hvsDate, divID, con, retVal);
+                String[] seqAndRunID = retVal.toString().split(";");
+                //int seq = Integer.parseInt(seqAndRunID[0]);
+                String runID = seqAndRunID[0];
+                int prevLastOdrCnt = 0;
+
+            if (isLast2Order.equals("yes")){
+                    // select lastOdr from schdRun whererunid
+		sql = "select lastOdrCnt from fbSchedRun where runID='" + runID + "'";
+                try (
+			PreparedStatement ps = con.prepareStatement(sql);
+			ResultSet rs = ps.executeQuery()) {
+//prevLastOdCnt= rs...                
+				if (rs.next()) prevLastOdrCnt = rs.getInt("lasOdrCnt");
+		}
+            }
+
+
             // insert
             sql = "insert into fbjob("
                     + "doneStatus"
@@ -99,17 +123,11 @@
                     + ", isLastOrder"
                     + ", isLast2Order"
                     + ", EstmFfb"
+                    + ", PrevLastOdrCnt"
                     + ")"
-                    + " values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+                    + " values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
                     ;
             try (PreparedStatement ps = con.prepareStatement(sql)){
-
-                // get sequence number of job for a division, and runID
-                StringBuffer retVal = new StringBuffer();
-                getSeqAndRunID(hvsDate, divID, con, retVal);
-                String[] seqAndRunID = retVal.toString().split(";");
-                //int seq = Integer.parseInt(seqAndRunID[0]);
-                String runID = seqAndRunID[0];
 
                 // validate blocks
                 validateDivBlock(divID, block1, con);
@@ -137,10 +155,11 @@
                 ps.setString(i++, isLastOrder);
                 ps.setString(i++, isLast2Order);
                 ps.setString(i++, estmFfb);
+                ps.setInt(i++, prevLastOdrCnt);
 
                 ps.executeUpdate();
 
-                if (isLast2Order.equals("yes"))
+                if (isLast2Order.equals("yes"))            
                     incrementLastOdrCnt(con, runID);
             }
         }
@@ -151,6 +170,7 @@
 
     private void incrementLastOdrCnt(Connection con, String runID) 
             throws Exception {
+
 
         String sql = "update fbSchedRun set lastOdrCnt = lastOdrCnt + 2"
             + " where runID = '" + runID + "'";
