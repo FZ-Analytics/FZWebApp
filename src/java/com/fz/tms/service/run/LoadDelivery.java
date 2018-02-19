@@ -95,7 +95,6 @@ public class LoadDelivery implements BusinessLogic {
         }
 
         updateRouteJob(arlistR, runId);
-        updateOriRouteJob(arlistOriR, oriRunId);
         request.setAttribute("branchId", branch);
         request.setAttribute("shift", shift);
         request.setAttribute("channel", channel);
@@ -124,58 +123,53 @@ public class LoadDelivery implements BusinessLogic {
             d.distChannel = aSplit[7];
             d.street = aSplit[6];
             d.weight = "" + Math.round(Double.parseDouble(aSplit[9]) * 10) / 10.0;
-            //Check IsFix
-            if (getIsFix(oriRunId, vNo).equals("1")) {
-                String[] doNumSplit = d.doNum.split(";");
-                //For one DO
-                if (doNumSplit.length == 1) {
-                    //This try is for EXT vehicle
-                    try {
-                        String check = checkStatusShipment(d.doNum, runId.replace("_", "") + getVendorId(d.vehicleCode));
-                        if (check.length() > 1) {
-                            d.isFix = "null";
-                            d.error = check;
-                        } else {
-                            d.isFix = check;
-                        }
-                    } 
-                    //This catch is for INT vehicle
-                    catch(Exception e) {
-                        String check = checkStatusShipment(d.doNum, runId.replace("_", "") + d.vehicleCode);
-                        if (check.length() > 1) {
-                            d.isFix = "null";
-                            d.error = check;
-                        } else {
-                            d.isFix = check;
-                        }
+
+            String[] doNumSplit = d.doNum.split(";");
+            //For one DO
+            if (doNumSplit.length == 1) {
+                //This try is for EXT vehicle
+                try {
+                    String check = checkStatusShipment(d.doNum, runId.replace("_", "") + getVendorId(d.vehicleCode));
+                    if (check.length() > 1) {
+                        d.isFix = "null";
+                        d.error = check;
+                    } else {
+                        d.isFix = check;
                     }
-                } 
-                //For many DO
-                else {
-                    //This try is for EXT vehicle
-                    try {
-                        String check = checkStatusShipment(doNumSplit[0], runId.replace("_", "") + getVendorId(d.vehicleCode));
-                        if (check.length() > 1) {
-                            d.isFix = "null";
-                            d.error = check;
-                        } else {
-                            d.isFix = check;
-                        }
-                    }
-                    //This catch is for INT vehicle
-                    catch (Exception e) {
-                        String check = checkStatusShipment(doNumSplit[0], runId.replace("_", "") + d.vehicleCode);
-                        if (check.length() > 1) {
-                            d.isFix = "null";
-                            d.error = check;
-                        } else {
-                            d.isFix = check;
-                        }
+                } //This catch is for INT vehicle
+                catch (Exception e) {
+                    String check = checkStatusShipment(d.doNum, runId.replace("_", "") + d.vehicleCode);
+                    if (check.length() > 1) {
+                        d.isFix = "null";
+                        d.error = check;
+                    } else {
+                        d.isFix = check;
                     }
                 }
-            } else {
-                d.isFix = "null";
             }
+            //For many DO
+            else {
+                //This try is for EXT vehicle
+                try {
+                    String check = checkStatusShipment(doNumSplit[0], runId.replace("_", "") + getVendorId(d.vehicleCode));
+                    if (check.length() > 1) {
+                        d.isFix = "null";
+                        d.error = check;
+                    } else {
+                        d.isFix = check;
+                    }
+                } //This catch is for INT vehicle
+                catch (Exception e) {
+                    String check = checkStatusShipment(doNumSplit[0], runId.replace("_", "") + d.vehicleCode);
+                    if (check.length() > 1) {
+                        d.isFix = "null";
+                        d.error = check;
+                    } else {
+                        d.isFix = check;
+                    }
+                }
+            }
+
             try {
                 d.volume = "" + Math.round(Double.parseDouble(getVolume(custId, oriRunId)) * 10) / 10.0;
             } catch (Exception e) {
@@ -274,7 +268,6 @@ public class LoadDelivery implements BusinessLogic {
                         dl.rdd = "null";
                         dl.transportCost = 0;
                         dl.dist = "null";
-                        dl.isFix = d.isFix;
 
                         hasBreak = true;
                     } else if (d.depart.equals("")) {
@@ -400,11 +393,6 @@ public class LoadDelivery implements BusinessLogic {
                     r.dist = 0.00;
                 }
 
-                if (d.isFix.equals("null")) {
-                    r.isFix = null;
-                } else {
-                    r.isFix = d.isFix;
-                }
                 arlistR.add(r);
                 arlistOriR.add(r);
                 jobNb++;
@@ -507,7 +495,6 @@ public class LoadDelivery implements BusinessLogic {
                     moreThan = true;
                 }
             }
-
         } catch (Exception e) {
 
         }
@@ -719,24 +706,6 @@ public class LoadDelivery implements BusinessLogic {
             throw new Exception(e.getMessage());
         }
         return costPerM;
-    }
-
-    public String getIsFix(String runId, String vehicleCode) throws Exception {
-        String isFix = "";
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql;
-                sql = "SELECT TOP 1 isFix FROM BOSNET1.dbo.TMS_RouteJob where runID = '" + runId + "' and vehicle_code = '" + vehicleCode + "';";
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        isFix = rs.getString("isFix");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return "" + isFix;
     }
 
     public String getLongLatVehicle(String vehicleCode) throws Exception {
@@ -971,8 +940,8 @@ public class LoadDelivery implements BusinessLogic {
             }
         }
         String sql = "INSERT INTO bosnet1.dbo.TMS_RouteJob "
-                + "(job_id, customer_id, do_number, vehicle_code, activity, routeNb, jobNb, arrive, depart, runID, create_dtm, branch, shift, lon, lat, weight, volume, transportCost, activityCost, Dist, isFix) "
-                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+                + "(job_id, customer_id, do_number, vehicle_code, activity, routeNb, jobNb, arrive, depart, runID, create_dtm, branch, shift, lon, lat, weight, volume, transportCost, activityCost, Dist) "
+                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
         for (int i = 0; i < arlist.size(); i++) {
             RouteJobLog r = arlist.get(i);
@@ -997,50 +966,9 @@ public class LoadDelivery implements BusinessLogic {
                 psHdr.setDouble(18, r.transportCost);
                 psHdr.setDouble(19, r.activityCost);
                 psHdr.setDouble(20, r.dist);
-                psHdr.setString(21, r.isFix);
 
                 psHdr.executeUpdate();
             }
         }
-    }
-
-    public String updateOriRouteJob(ArrayList<RouteJobLog> arlist, String runId) throws Exception {
-        System.out.println(oriRunId);
-        String str = "Error";
-        ArrayList<RouteJobLog> al = arlist;
-        for (int i = 0; i < arlist.size(); i++) {
-            RouteJobLog rjl = al.get(i);
-            String sql = "";
-            System.out.println(rjl.vehicleCode + " " + rjl.isFix);
-            if (rjl.isFix == null) {
-                sql
-                        = "UPDATE\n"
-                        + "   bosnet1.dbo.TMS_RouteJob\n"
-                        + "SET\n"
-                        + "	isFix = " + null + "\n"
-                        + "WHERE\n"
-                        + "	and vehicle_code = '" + rjl.vehicleCode + "'\n"
-                        + "	and customer_id = '" + rjl.custId + "'";
-            } else {
-                System.out.println("IN");
-                sql
-                        = "UPDATE\n"
-                        + "   bosnet1.dbo.TMS_RouteJob\n"
-                        + "SET\n"
-                        + "	isFix = '" + rjl.isFix + "'\n"
-                        + "WHERE\n"
-                        + "	runID = '" + runId + "'\n"
-                        + "	and vehicle_code = '" + rjl.vehicleCode + "'\n"
-                        + "	and customer_id = '" + rjl.custId + "'";
-            }
-
-            try (Connection con = (new Db()).getConnection("jdbc/fztms"); PreparedStatement psHdr = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
-                con.setAutoCommit(false);
-                psHdr.executeUpdate();
-                con.setAutoCommit(true);
-                str = "OK";
-            }
-        }
-        return str;
     }
 }
