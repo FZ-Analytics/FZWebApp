@@ -78,6 +78,26 @@ public class RunResultAPI {
         return jsonOutput;        
     }
     
+    @POST
+    @Path("DeleteShipmentPlan")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String DeleteShipmentPlan(String content) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String tr = "";
+        RouteJobListing rj = new RouteJobListing();
+        
+        try{
+            Vehicle he = gson.fromJson(content.contains("json") ? 
+                    decodeContent(content) : content, Vehicle.class);
+            tr = rj.DeleteResultShipment(he);
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+            tr = "";
+        }
+        String jsonOutput = gson.toJson(tr);
+        return jsonOutput;        
+    }
+    
     public static String decodeContent(String content) throws UnsupportedEncodingException{
         content = java.net.URLDecoder.decode(content, "UTF-8");
         content = content.substring(5);

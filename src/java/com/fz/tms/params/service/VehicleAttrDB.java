@@ -466,14 +466,14 @@ public class VehicleAttrDB {
                 "			AND SFA = 0\n" +
                 "			AND WorkplaceId = '"+str+"'\n" +
                 "	UNION ALL SELECT\n" +
-                "			Branch COLLATE Database_Default AS workplaceid,\n" +
-                "			Service_agent_id COLLATE Database_Default AS salesid,\n" +
-                "			Driver_Name COLLATE Database_Default AS salesname\n" +
-                "		FROM\n" +
-                "			BOSNET1.dbo.TMS_ForwadingAgent\n" +
-                "		WHERE\n" +
-                "			Branch = '"+str+"'\n" +
-                "			AND inc = 1\n" +
+                "				Workplace AS workplaceid,\n" +
+                "				Driver_ID AS salesid,\n" +
+                "				Driver_Name AS salesname\n" +
+                "			FROM\n" +
+                "				BOSNET1.dbo.Driver\n" +
+                "			WHERE\n" +
+                "				Driver_ID LIKE '000008%'\n" +
+                "				AND Workplace = '"+str+"'\n" +
                 "	) w\n" +
                 nt;
                 

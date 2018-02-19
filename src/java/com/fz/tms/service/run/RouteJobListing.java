@@ -136,45 +136,113 @@ public class RouteJobListing implements BusinessLogic {
                 "	) AS Dist,\n" +
                 "	Request_Delivery_Date,\n" +
                 "	CASE\n" +
-                "		WHEN j.isFix IS NULL\n" +
+                "		WHEN len(j.customer_ID)> 3\n" +
+                "		AND j.vehicle_code <> 'NA'\n" +
                 "		AND(\n" +
                 "			SELECT\n" +
-                "				COUNT(*)\n" +
+                "				COUNT( Shipment_Number_Dummy )\n" +
                 "			FROM\n" +
-                "				BOSNET1.dbo.TMS_Status_Shipment\n" +
+                "				BOSNET1.dbo.TMS_Result_Shipment\n" +
                 "			WHERE\n" +
-                "				Shipment_Number_Dummy = concat(\n" +
-                "					REPLACE(\n" +
-                "						j.runID,\n" +
-                "						'_',\n" +
-                "						''\n" +
-                "					),\n" +
-                "					j.vehicle_code\n" +
-                "				)\n" +
-                "		)= 0\n" +
-                "		AND len(j.customer_ID)> 3\n" +
-                "		AND j.vehicle_code <> 'NA' THEN 'OK'\n" +
+                "				Shipment_Number_Dummy = j.Shipment_Number_Dummy\n" +
+                "		)= 0 THEN 'OK'\n" +
                 "		WHEN j.vehicle_code = 'NA' THEN ''\n" +
                 "		WHEN(\n" +
                 "			SELECT\n" +
                 "				COUNT(*)\n" +
                 "			FROM\n" +
+                "				BOSNET1.dbo.TMS_Result_Shipment\n" +
+                "			WHERE\n" +
+                "				Shipment_Number_Dummy = j.Shipment_Number_Dummy\n" +
+                "		)> 0\n" +
+                "		AND(\n" +
+                "			SELECT\n" +
+                "				COUNT( CASE WHEN SAP_Status IS NULL THEN 1 ELSE SAP_Status END )\n" +
+                "			FROM\n" +
                 "				BOSNET1.dbo.TMS_Status_Shipment\n" +
                 "			WHERE\n" +
-                "				Shipment_Number_Dummy = concat(\n" +
-                "					REPLACE(\n" +
-                "						j.runID,\n" +
-                "						'_',\n" +
-                "						''\n" +
-                "					),\n" +
-                "					j.vehicle_code\n" +
-                "				)\n" +
+                "				SAP_Status IS NULL\n" +
+                "				AND Shipment_Number_Dummy = j.Shipment_Number_Dummy\n" +
                 "		)> 0 THEN 'SEND'\n" +
-                "		ELSE 'NO'\n" +
+                "		WHEN(\n" +
+                "			SELECT\n" +
+                "				COUNT(*)\n" +
+                "			FROM\n" +
+                "				BOSNET1.dbo.TMS_Result_Shipment\n" +
+                "			WHERE\n" +
+                "				Shipment_Number_Dummy = j.Shipment_Number_Dummy\n" +
+                "		)> 0\n" +
+                "		AND(\n" +
+                "			SELECT\n" +
+                "				COUNT( CASE WHEN SAP_Status IS NULL THEN 1 ELSE SAP_Status END )\n" +
+                "			FROM\n" +
+                "				BOSNET1.dbo.TMS_Status_Shipment\n" +
+                "			WHERE\n" +
+                "				SAP_Status IS NULL\n" +
+                "				AND Shipment_Number_Dummy = j.Shipment_Number_Dummy\n" +
+                "		)= 0\n" +
+                "		AND(\n" +
+                "			SELECT\n" +
+                "				DATEDIFF(\n" +
+                "					MINUTE,\n" +
+                "					Time_Stamp,\n" +
+                "					TIMESTAMP\n" +
+                "				) AS ts\n" +
+                "			FROM\n" +
+                "				(\n" +
+                "					SELECT\n" +
+                "						top 1 Time_Stamp,\n" +
+                "						Shipment_Number_Dummy\n" +
+                "					FROM\n" +
+                "						BOSNET1.dbo.TMS_Result_Shipment\n" +
+                "					WHERE\n" +
+                "						Shipment_Number_Dummy = j.Shipment_Number_Dummy\n" +
+                "				) rs\n" +
+                "			INNER JOIN(\n" +
+                "					SELECT\n" +
+                "						top 1 TIMESTAMP,\n" +
+                "						Shipment_Number_Dummy\n" +
+                "					FROM\n" +
+                "						BOSNET1.dbo.TMS_Status_Shipment\n" +
+                "					WHERE\n" +
+                "						Shipment_Number_Dummy = j.Shipment_Number_Dummy\n" +
+                "				) ss ON\n" +
+                "				ss.Shipment_Number_Dummy = rs.Shipment_Number_Dummy\n" +
+                "		)> 0 THEN 'DELL'\n" +
+                "		WHEN(\n" +
+                "			SELECT\n" +
+                "				COUNT( Shipment_Number_Dummy )\n" +
+                "			FROM\n" +
+                "				BOSNET1.dbo.TMS_Result_Shipment\n" +
+                "			WHERE\n" +
+                "				Shipment_Number_Dummy = j.Shipment_Number_Dummy\n" +
+                "		)> 0\n" +
+                "		AND(\n" +
+                "			SELECT\n" +
+                "				COUNT( CASE WHEN SAP_Status IS NULL THEN 1 ELSE SAP_Status END )\n" +
+                "			FROM\n" +
+                "				BOSNET1.dbo.TMS_Status_Shipment\n" +
+                "			WHERE\n" +
+                "				SAP_Status IS NULL\n" +
+                "				AND Shipment_Number_Dummy = j.Shipment_Number_Dummy\n" +
+                "		)= 0 THEN 'INPR'\n" +
                 "	END,\n" +
                 "	rt.batch\n" +
                 "FROM\n" +
-                "	bosnet1.dbo.tms_RouteJob j\n" +
+                "	(\n" +
+                "		SELECT\n" +
+                "			*,\n" +
+                "			concat(\n" +
+                "				REPLACE(\n" +
+                "					runID,\n" +
+                "					'_',\n" +
+                "					''\n" +
+                "				),\n" +
+                "				vehicle_code\n" +
+                "			) AS Shipment_Number_Dummy\n" +
+                "		FROM\n" +
+                "			bosnet1.dbo.tms_RouteJob\n" +
+                "	) j\n" +
                 "LEFT OUTER JOIN(\n" +
                 "		SELECT\n" +
                 "			RunId,\n" +
@@ -291,7 +359,7 @@ public class RouteJobListing implements BusinessLogic {
                     j.rdd = FZUtil.getRsString(rs, i++, "");
                     j.send = FZUtil.getRsString(rs, i++, "");
                     j.bat = FZUtil.getRsString(rs, i++, "").length() > 0 ? "1" : "0";
-                    System.out.println(j.custID +"_"+j.bat);
+                    //System.out.println(j.custID +"_"+j.bat);
                     
                     js.add(j);
                     
@@ -389,6 +457,42 @@ public class RouteJobListing implements BusinessLogic {
                 + "	runID = '" + he.RunId + "'\n"
                 + "	and vehicle_code = '" + he.vehicle_code + "'\n"
                 + "	and isFix is null";
+        try (
+            Connection con = (new Db()).getConnection("jdbc/fztms");
+            PreparedStatement psHdr = con.prepareStatement(sql
+                    , Statement.RETURN_GENERATED_KEYS);
+            )  {
+            con.setAutoCommit(false);
+
+            psHdr.executeUpdate();
+            
+             con.setAutoCommit(true);
+             str = "OK";
+        }
+        return str;
+    }
+    
+    public String DeleteResultShipment(Vehicle he) throws Exception{
+        String str = "ERROR";
+        
+        String sql = "DELETE\n" +
+                "FROM\n" +
+                "	BOSNET1.dbo.TMS_Result_Shipment\n" +
+                "WHERE\n" +
+                "	Shipment_Number_Dummy = (SELECT\n" +
+                "		DISTINCT concat(\n" +
+                "			REPLACE(\n" +
+                "				runID,\n" +
+                "				'_',\n" +
+                "				''\n" +
+                "			),\n" +
+                "			vehicle_code\n" +
+                "		)\n" +
+                "	FROM\n" +
+                "		bosnet1.dbo.tms_RouteJob\n" +
+                "	WHERE\n" +
+                "		runID = '" + he.RunId + "'\n" +
+                "		AND vehicle_code = '" + he.vehicle_code + "')";
         try (
             Connection con = (new Db()).getConnection("jdbc/fztms");
             PreparedStatement psHdr = con.prepareStatement(sql

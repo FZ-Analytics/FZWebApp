@@ -57,16 +57,6 @@
                 });
 
                 $('#reRun').click(function () {
-                    //setTimeout(function () {
-                    //Some code
-                    //alert( $("#runID").text()+"&vCode="+$(this).text() ); 
-                    //if ($(this).text().length > 0) {
-                    //window.open("../Params/map/GoogleDirMapAllVehi.jsp?runID=" + $("#RunIdClick").text(), null,
-                    // "scrollbars=1,resizable=1,height=530,width=530");
-                    //return true;
-                    //}
-                    //var currentDate = new Date();
-                    //currentDate.setDate(currentDate.getDate() + 1);
                     var dateNow = $.datepicker.formatDate('yy-mm-dd', new Date());//currentDate.getFullYear()+"-"+(currentDate.getMonth()+1)+"-"+currentDate.getDate();
 
                     var win = window.open('runProcess.jsp?shift=1&dateDeliv=' + dateNow + '&branch=' + $('#branch').text() + '&runId=' + $("#RunIdClick").text() + '&oriRunID=' + $("#OriRunID").val() + '&reRun=A' + '&channel=' + $('#channel').text(), '_blank');
@@ -76,22 +66,6 @@
                     }
                     //}, 3000);
                 });
-                /*
-                 $('#branch').click(function () {
-                 var $apiAddress = '../../api/customerAttrView/submitTest';
-                 var jsonForServer = '{\"flag\": \"flag\"}';
-                 var data = [];
-                 //alert(jsonForServer);
-                 $.post($apiAddress, {json: jsonForServer}).done(function (data) {
-                 if(data == 'OK'){
-                 alert( 'sukses' );
-                 location.reload()
-                 }else{
-                 alert( data ); 
-                 }
-                 });
-                 });
-                 */
             });
 
             function openEditRoutePage() {
@@ -123,52 +97,46 @@
                 }
             }
 
-//            function openEditRoutePage() {
-//                var table = document.getElementById( "table" );
-//                
-//                var tableArr = [];
-//                for (var i = 1; i < table.rows.length; i++ ) {
-//                    tableArr.push(
-//                        table.rows[i].cells[0].innerHTML, //no
-//                        table.rows[i].cells[1].innerHTML, //truck
-//                        table.rows[i].cells[2].innerHTML + "split"//custId 
-//                        table.rows[i].cells[3].innerHTML, //arrive
-//                        table.rows[i].cells[4].innerHTML, //depart
-//                        table.rows[i].cells[5].innerHTML, //do count
-//                        table.rows[i].cells[6].innerHTML, //service time
-//                        table.rows[i].cells[8].innerHTML, //priority
-//                        table.rows[i].cells[9].innerHTML, //dist channel
-//                        table.rows[i].cells[11].innerHTML, //weight
-//                        table.rows[i].cells[12].innerHTML, //volume
-//                        table.rows[i].cells[13].innerHTML, //rdd
-//                        table.rows[i].cells[14].innerHTML, //transport cost
-//                        table.rows[i].cells[15].innerHTML + "split" // dist
-//                    );
-//                }
-
-//                var win = window.open('runResultEdit.jsp?&OriRunID='+$('#RunIdClick').text()+'&runId='+$('#nextRunId').text()+'&channel='+$('#channel').text()+
-//                        '&branch='+$('#branch').text()+'&shift='+$('#shift').text()+'&vehicles='+$('#vehicles').text()+'&tableArr='+tableArr);
-//                if (win) {
-//                    //Browser has allowed it to be opened
-//                    win.focus();
-//                }
-//            }
-
             function klik(kode) {
                 //alert('tes : ' + kode);
                 window.open("../Params/PopUp/popupEditCust.jsp?runId=" + $("#RunIdClick").text() + "&custId=" + kode, null,
                         "scrollbars=1,resizable=1,height=500,width=750");
             }
 
-            function sendSAP(kode) {
-                var $apiAddress = '../../api/submitToSap/submitToSap';
-                    
-                var jsonForServer = '{\"RunId\": \"' + $("#RunIdClick").text() + '\",\"vehicle_no\":\"' + kode+ '\"}';
+            function sendSAP(kode, kd) {
+                if(kd == 'DELL'){
+                    deletes(kode);
+                }else{
+                    send(kode);
+                }                               
+                //var data = [];
+                
+            }
+            
+            function deletes(kode){
+                var $apiAddress = '';
+                var jsonForServer = '';
+                
+                $apiAddress = '../../api/runResult/DeleteShipmentPlan';
+                jsonForServer = '{\"RunId\": \"' + $("#RunIdClick").text() + '\",\"vehicle_code\":\"' + kode + '\"}';
+                $.post($apiAddress, {json: jsonForServer}).done(function (data) {
+                    if (data == 'OK') {                            
+                        send(kode);
+                    }else {
+                        alert('submit Status error');
+                    }
+                });
+            }
+            
+            function send(kode){
+                $apiAddress = '../../api/submitToSap/submitToSap';                    
+                jsonForServer = '{\"RunId\": \"' + $("#RunIdClick").text() + '\",\"vehicle_no\":\"' + kode+ '\"}';
                 $.post($apiAddress, {json: jsonForServer}).done(function (data) {
                     if(data == 'OK'){
+                        //alert('data: ' + data + 'stat: ' + stat);
                         $apiAddress = '../../api/runResult/SubmitShipmentPlan';
                         jsonForServer = '{\"RunId\": \"' + $("#RunIdClick").text() + '\",\"vehicle_code\":\"' + kode + '\"}';
-                        
+
                         $.post($apiAddress, {json: jsonForServer}).done(function (data) {
                             if (data == 'OK') {
                                 alert('sukses');
@@ -180,9 +148,7 @@
                     }else{
                         alert( 'submit SAP error' ); 
                     }
-                });                
-                //var data = [];
-                
+                }); 
             }
 
             function fnExcelReport()
@@ -311,8 +277,8 @@
                     <td class="fzCell"><%=j.transportCost%></td>
                     <td class="fzCell"><%=j.dist%></td>
                     <td class="fzCell" 
-                        <%if (j.send != null && j.send.equalsIgnoreCase("OK")) {%>
-                        onclick="sendSAP('<%=j.vehicleCode%>')" style="color: green;"
+                        <%if (j.send != null && (j.send.equalsIgnoreCase("OK") || j.send.equalsIgnoreCase("DELL"))) {%>
+                        onclick="sendSAP('<%=j.vehicleCode%>','<%=j.send%>')" style="color: green;"
                         <%}%> ><%=j.send%></td>
                     <td class="editCust" onclick="klik(<%=j.custID%>)" style="color: blue;"><%=j.edit%></td>
                 </tr>
