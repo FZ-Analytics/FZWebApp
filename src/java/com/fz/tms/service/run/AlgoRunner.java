@@ -26,9 +26,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 
-/**
- *
- */
+
 public class AlgoRunner implements BusinessLogic {
 
     @Override
@@ -139,9 +137,9 @@ public class AlgoRunner implements BusinessLogic {
                         errMsg = "TMSAlgo Error";
                         resp = UrlResponseGetter.getURLResponse(url.toString());
                         if (resp.equals("OK")) {
-                            errMsg = "";
+                            errMsg = "runProgress Error";
                             response.sendRedirect("runProgress.jsp?runId=" + runID + "&dateDeliv=" + dateDeliv + "&oriRunID=" + oriRunID + "&channel=" + channel);
-                        } else {
+                        } /*else {
                             HashMap<String, String> pl = new HashMap<String, String>();
                             pl.put("ID", runId);
                             pl.put("fileNmethod", "AlgoRunner&run");
@@ -151,15 +149,12 @@ public class AlgoRunner implements BusinessLogic {
                             Date date = new Date();
                             pl.put("dates", dateFormat.format(date).toString());
                             Other.insertLog(pl);
-                            /*
-                            request.setAttribute("errMsg", errMsg);
-                            request.getRequestDispatcher("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
-                                + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel + "&error=N")
-                                .forward(pc.getRequest(), pc.getResponse());
-                            */
                             response.sendRedirect("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
                                     + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel + "&error=N" + "&errMsg=" + errMsg);
-                        }
+                        }*/
+                    }
+                    if (!resp.equalsIgnoreCase("OK")){
+                        throw new Exception(); 
                     }
 
                 } else if (reRun.equals("N")) {
@@ -181,7 +176,10 @@ public class AlgoRunner implements BusinessLogic {
                         errMsg = "";
                         response.sendRedirect("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
                             + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel + "&error=N");
-                        
+                    }
+                    
+                    if (!resp.equalsIgnoreCase("OK")){
+                        throw new Exception(); 
                     }
 
                 }
