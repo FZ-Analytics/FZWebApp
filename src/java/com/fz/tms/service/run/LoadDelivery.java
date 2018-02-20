@@ -129,43 +129,62 @@ public class LoadDelivery implements BusinessLogic {
             if (doNumSplit.length == 1) {
                 //This try is for EXT vehicle
                 try {
-                    String check = checkStatusShipment(d.doNum, runId.replace("_", "") + getVendorId(d.vehicleCode));
-                    if (check.length() > 1) {
-                        d.isFix = "null";
-                        d.error = check;
+                    int checkResultShipment = checkResultShipment(d.doNum, runId.replace("_", "") + getVendorId(d.vehicleCode));
+                    if (checkResultShipment > 0) {
+                        String check = checkStatusShipment(d.doNum, runId.replace("_", "") + getVendorId(d.vehicleCode));
+                        if (check.length() > 1) {
+                            d.isFix = "null";
+                            d.error = check;
+                        } else {
+                            d.isFix = check;
+                        }
                     } else {
-                        d.isFix = check;
+                        d.isFix = "null";
                     }
                 } //This catch is for INT vehicle
                 catch (Exception e) {
-                    String check = checkStatusShipment(d.doNum, runId.replace("_", "") + d.vehicleCode);
-                    if (check.length() > 1) {
-                        d.isFix = "null";
-                        d.error = check;
+                    int checkResultShipment = checkResultShipment(d.doNum, runId.replace("_", "") + d.vehicleCode);
+                    if (checkResultShipment > 0) {
+                        String check = checkStatusShipment(d.doNum, runId.replace("_", "") + d.vehicleCode);
+                        if (check.length() > 1) {
+                            d.isFix = "null";
+                            d.error = check;
+                        } else {
+                            d.isFix = check;
+                        }
                     } else {
-                        d.isFix = check;
+                        d.isFix = "null";
                     }
                 }
-            }
-            //For many DO
+            } //For many DO
             else {
                 //This try is for EXT vehicle
                 try {
-                    String check = checkStatusShipment(doNumSplit[0], runId.replace("_", "") + getVendorId(d.vehicleCode));
-                    if (check.length() > 1) {
-                        d.isFix = "null";
-                        d.error = check;
+                    int checkResultShipment = checkResultShipment(d.doNum, runId.replace("_", "") + getVendorId(d.vehicleCode));
+                    if (checkResultShipment > 0) {
+                        String check = checkStatusShipment(doNumSplit[0], runId.replace("_", "") + getVendorId(d.vehicleCode));
+                        if (check.length() > 1) {
+                            d.isFix = "null";
+                            d.error = check;
+                        } else {
+                            d.isFix = check;
+                        }
                     } else {
-                        d.isFix = check;
+                        d.isFix = "null";
                     }
                 } //This catch is for INT vehicle
                 catch (Exception e) {
-                    String check = checkStatusShipment(doNumSplit[0], runId.replace("_", "") + d.vehicleCode);
-                    if (check.length() > 1) {
-                        d.isFix = "null";
-                        d.error = check;
+                    int checkResultShipment = checkResultShipment(d.doNum, runId.replace("_", "") + d.vehicleCode);
+                    if (checkResultShipment > 0) {
+                        String check = checkStatusShipment(doNumSplit[0], runId.replace("_", "") + d.vehicleCode);
+                        if (check.length() > 1) {
+                            d.isFix = "null";
+                            d.error = check;
+                        } else {
+                            d.isFix = check;
+                        }
                     } else {
-                        d.isFix = check;
+                        d.isFix = "null";
                     }
                 }
             }
@@ -501,6 +520,27 @@ public class LoadDelivery implements BusinessLogic {
         return moreThan;
     }
 
+    public int checkResultShipment(String doNum, String shipmentNo) throws Exception {
+        int rowNum = 0;
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql;
+                sql = "SELECT COUNT(*) rowNum FROM BOSNET1.dbo.TMS_Result_Shipment WHERE Delivery_Number = '" + doNum + "' and Shipment_Number_Dummy = '" + shipmentNo + "'";
+
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    if (rs.next()) {
+                        rowNum = rs.getInt("rowNum");
+                    } else {
+                        rowNum = 0; //Submitting
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return rowNum;
+    }
+
     public String checkStatusShipment(String doNum, String shipmentNo) throws Exception {
         String msg = "";
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
@@ -758,8 +798,8 @@ public class LoadDelivery implements BusinessLogic {
                         + "     RunId = '" + oriRunId + "' "
                         + "     and Customer_ID = '" + custId + "' "
                         + "     and Is_Edit = 'edit' "
-                        + "GROUP "
-                        + "     BY DO_Number, "
+                        + "GROUP BY "
+                        + "     DO_Number, "
                         + "     Customer_priority, "
                         + "     deliv_start, "
                         + "     deliv_end, "
