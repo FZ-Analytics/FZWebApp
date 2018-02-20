@@ -126,51 +126,71 @@ public class RouteJobListingResultEdit implements BusinessLogic {
             d.distChannel = aSplit[7];
             d.street = aSplit[6];
             d.weight = "" + Math.round(Double.parseDouble(aSplit[9]) * 10) / 10.0;
-            
+
             String[] doNumSplit = d.doNum.split(";");
             //For one DO
             if (doNumSplit.length == 1) {
                 //This try is for EXT vehicle
                 try {
-                    String check = checkStatusShipment(d.doNum, runId.replace("_", "") + getVendorId(d.vehicleCode));
-                    if (check.length() > 1) {
-                        d.isFix = "null";
+                    int checkResultShipment = checkResultShipment(d.doNum, runId.replace("_", "") + getVendorId(d.vehicleCode));
+                    if (checkResultShipment > 0) {
+                        String check = checkStatusShipment(d.doNum, runId.replace("_", "") + getVendorId(d.vehicleCode));
+                        if (check.length() > 1) {
+                            d.isFix = "null";
+                        } else {
+                            d.isFix = check;
+                        }
                     } else {
-                        d.isFix = check;
+                        d.isFix = "null";
                     }
                 } //This catch is for INT vehicle
                 catch (Exception e) {
-                    String check = checkStatusShipment(d.doNum, runId.replace("_", "") + d.vehicleCode);
-                    if (check.length() > 1) {
-                        d.isFix = "null";
+                    int checkResultShipment = checkResultShipment(d.doNum, runId.replace("_", "") + d.vehicleCode);
+                    if (checkResultShipment > 0) {
+                        String check = checkStatusShipment(d.doNum, runId.replace("_", "") + d.vehicleCode);
+                        if (check.length() > 1) {
+                            d.isFix = "null";
+                        } else {
+                            d.isFix = check;
+                        }
                     } else {
-                        d.isFix = check;
+                        d.isFix = "null";
                     }
                 }
-            }
-            //For many DO
+            } //For many DO
             else {
                 //This try is for EXT vehicle
                 try {
-                    String check = checkStatusShipment(doNumSplit[0], runId.replace("_", "") + getVendorId(d.vehicleCode));
-                    if (check.length() > 1) {
-                        d.isFix = "null";
+                    int checkResultShipment = checkResultShipment(doNumSplit[0], runId.replace("_", "") + getVendorId(d.vehicleCode));
+                    if (checkResultShipment > 0) {
+                        String check = checkStatusShipment(doNumSplit[0], runId.replace("_", "") + getVendorId(d.vehicleCode));
+                        if (check.length() > 1) {
+                            d.isFix = "null";
+                        } else {
+                            d.isFix = check;
+                        }
                     } else {
-                        d.isFix = check;
+                        d.isFix = "null";
                     }
                 } //This catch is for INT vehicle
                 catch (Exception e) {
-                    String check = checkStatusShipment(doNumSplit[0], runId.replace("_", "") + d.vehicleCode);
-                    if (check.length() > 1) {
-                        d.isFix = "null";
+                    int checkResultShipment = checkResultShipment(d.doNum, runId.replace("_", "") + d.vehicleCode);
+                    if (checkResultShipment > 0) {
+                        String check = checkStatusShipment(doNumSplit[0], runId.replace("_", "") + d.vehicleCode);
+                        if (check.length() > 1) {
+                            d.isFix = "null";
+                        } else {
+                            d.isFix = check;
+                        }
                     } else {
-                        d.isFix = check;
+                        d.isFix = "null";
                     }
                 }
             }
             try {
                 d.volume = "" + Math.round(Double.parseDouble(getVolume(custId, oriRunId)) * 10) / 10.0;
-            } catch (Exception e) { }
+            } catch (Exception e) {
+            }
             d.rdd = aSplit[8];
             if (!custId.equals("") || depart.equals("")) {
                 d.arrive = prevDepart;
@@ -196,20 +216,23 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                             String[] longlat1 = getLongLatCustomer(oriRunId, previousCustId).split("split");
                             d.lon1 = reFormatLongLat(longlat1[0]);
                             d.lat1 = reFormatLongLat(longlat1[1]);
-                        } catch (Exception e) { }
+                        } catch (Exception e) {
+                        }
                     } //previousCustId is a start row
                     else {
                         try {
                             String[] longlat1 = getLongLatVehicle(previousCustId).split("split");
                             d.lon1 = reFormatLongLat(longlat1[0]);
                             d.lat1 = reFormatLongLat(longlat1[1]);
-                        } catch (Exception e) { }
+                        } catch (Exception e) {
+                        }
                     }
                     String[] longlat2 = getLongLatCustomer(oriRunId, d.custId).split("split");
                     try {
                         d.lon2 = reFormatLongLat(longlat2[0]);
                         d.lat2 = reFormatLongLat(longlat2[1]);
-                    } catch(Exception e) { }
+                    } catch (Exception e) {
+                    }
                     previousCustId = d.custId;
                 } //end row
                 else if (!d.vehicleCode.equals("") && d.custId.equals("") && d.depart.equals("")) {
@@ -221,7 +244,8 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                         d.lon2 = reFormatLongLat(longlat2[0]);
                         d.lat2 = reFormatLongLat(longlat2[1]);
                         b = true;
-                    } catch (Exception e) { }
+                    } catch (Exception e) {
+                    }
                 }
                 //set arrive, depart, distance using lon lat of store
                 if (!custId.equals("") || depart.equals("")) {
@@ -243,7 +267,8 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                             d.arrive = addTime(prevDepart, Math.round(alDurDist.get(1)));
                             d.dist = "" + Math.round((distance / 1000) * 10) / 10.0;
                             d.transportCost = (int) ((int) Math.round((getCostPerM(d.vehicleCode, oriRunId) * distance) * 10) / 10.0);
-                        } catch (Exception e) { }
+                        } catch (Exception e) {
+                        }
                     }
 
                     //break if depart + 60 minutes is more than 11:30
@@ -280,10 +305,12 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                 ld.add(dl);
                 prevDepart = addTime(prevDepart, 60);
             }
-            
-             /*******************************************
+
+            /**
+             * *****************************************
              * Data object Route_Job to be pushed to db *
-             ********************************************/
+             * ******************************************
+             */
             if (!d.vehicleCode.equals("") || !d.custId.equals("")) {
                 if (!prevVehiCode.equals(d.vehicleCode) && !d.vehicleCode.equals("NA")) {
                     jobNb = 1;
@@ -358,7 +385,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
             }
         }
     }
-    
+
     public String checkStatusShipment(String doNum, String shipmentNo) throws Exception {
         String msg = "";
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
@@ -383,7 +410,28 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         }
         return msg;
     }
-    
+
+    public int checkResultShipment(String doNum, String shipmentNo) throws Exception {
+        int rowNum = 0;
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql;
+                sql = "SELECT COUNT(*) rowNum FROM BOSNET1.dbo.TMS_Result_Shipment WHERE Delivery_Number = '" + doNum + "' and Shipment_Number_Dummy = '" + shipmentNo + "'";
+
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    if (rs.next()) {
+                        rowNum = rs.getInt("rowNum");
+                    } else {
+                        rowNum = 0; //Submitting
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return rowNum;
+    }
+
     public String getVendorId(String v) {
         String[] vSplit = v.split("_");
         return vSplit[1] + vSplit[3];
@@ -503,7 +551,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                         weight += rs.getDouble("total_kg");
                     }
                     Collections.sort(tempDO);
-                    for(int i = 0; i < tempDO.size(); i++) {
+                    for (int i = 0; i < tempDO.size(); i++) {
                         doNumber += tempDO.get(i) + ";\n";
                     }
                     if (doNumber.length() > 0) {
