@@ -426,7 +426,7 @@
             <tbody>
                 <%for(Delivery j : (List<Delivery>) getList("listDelivery")) { %> 
                 <tr 
-                    <%if (!j.isFix.equals("null")) {%>
+                    <%if (j.isFix.equals("2")) {%>
                     style="background-color: #e2e1e1"
                     <%} else {%>
                     class="tableRows" id="tableRow"
