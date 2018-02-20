@@ -1,46 +1,44 @@
-/******
+--update BOSNET1.dbo.TMS_ShipmentPlan set Create_Date = CAST(GETDATE() AS DATE), Request_Delivery_Date = CAST(GETDATE() AS DATE)
+
 IF OBJECT_ID('bosnet1.dbo.Customer', 'U') IS NOT NULL DROP TABLE bosnet1.dbo.Customer;
 CREATE TABLE BOSNET1.dbo.Customer (
 	Customer_ID varchar(10) NOT NULL,
 	Account_Group varchar(4) NOT NULL,
 	Distribution_Channel varchar(2) NOT NULL,
 	Division varchar(2) NOT NULL,
-	Name1 varchar(40) DEFAULT ('n/a'),
-	Name2 varchar(40) DEFAULT ('n/a'),
-	Street varchar(40) DEFAULT ('n/a'),
-	Distric varchar(35) DEFAULT ('n/a'),
-	Postal_Code varchar(10) DEFAULT ((0)),
-	City varchar(40) DEFAULT ('n/a'),
-	Transportation_Zone varchar(10) DEFAULT ('n/a'),
-	Longitude varchar(10) DEFAULT (''),
-	Latitude varchar(25) DEFAULT (''),
-	Industry_Code varchar(10) DEFAULT ('n/a'),
-	Contact_Person varchar(35) DEFAULT ('n/a'),
-	Contact_Person_Number varchar(16) DEFAULT ('n/a'),
-	Terms_of_Payment varchar(4) DEFAULT ('n/a'),
-	Sales_Distric varchar(6) DEFAULT ('n/a'),
-	Sales_Office varchar(4) DEFAULT ('n/a'),
-	Customer_Group varchar(8) DEFAULT ('n/a'),
-	Delivering_Plant varchar(4) DEFAULT ('n/a'),
-	Incoterms varchar(3) DEFAULT ('n/a'),
-	Customer_Group1 varchar(7) DEFAULT ('n/a_cg1'),
-	Customer_Group2 varchar(7) DEFAULT ('n/a_cg2'),
-	Customer_Group3 varchar(7) DEFAULT ('n/a_cg3'),
-	Customer_Group4 varchar(7) DEFAULT ('n/a_cg4'),
-	Sold_To varchar(10) DEFAULT ('n/a'),
-	Ship_To varchar(10) DEFAULT ('n/a'),
-	Payer varchar(10) DEFAULT ('n/a'),
-	Bill_To varchar(10) DEFAULT ('n/a'),
-	Salesman varchar(10) DEFAULT ('n/a'),
-	Tax_Indicator varchar(1),
+	Name1 varchar(40) NOT NULL DEFAULT ('n/a'),
+	Name2 varchar(40) NOT NULL DEFAULT ('n/a'),
+	Street varchar(40) NOT NULL DEFAULT ('n/a'),
+	Distric varchar(35) NOT NULL DEFAULT ('n/a'),
+	Postal_Code varchar(10) NOT NULL DEFAULT ('n/a'),
+	City varchar(40) NOT NULL DEFAULT ('n/a'),
+	Transportation_Zone varchar(10) NOT NULL DEFAULT ('n/a'),
+	Longitude varchar(10) NOT NULL DEFAULT ('n/a'),
+	Latitude varchar(25) NOT NULL DEFAULT ('n/a'),
+	Industry_Code varchar(10) NOT NULL DEFAULT ('n/a'),
+	Contact_Person varchar(35) NOT NULL DEFAULT ('n/a'),
+	Contact_Person_Number varchar(16) NOT NULL DEFAULT ('n/a'),
+	Terms_of_Payment varchar(4) NOT NULL DEFAULT ('n/a'),
+	Sales_Distric varchar(6) NOT NULL DEFAULT ('n/a'),
+	Sales_Office varchar(4) NOT NULL DEFAULT ('n/a'),
+	Customer_Group varchar(8) NOT NULL DEFAULT ('na'),
+	Delivering_Plant varchar(4) NOT NULL DEFAULT ('n/a'),
+	Incoterms varchar(3) NOT NULL DEFAULT ('n/a'),
+	Customer_Group1 varchar(7) NOT NULL DEFAULT ('n/a_cg1'),
+	Customer_Group2 varchar(7) NOT NULL DEFAULT ('n/a_cg2'),
+	Customer_Group3 varchar(7) NOT NULL DEFAULT ('n/a_cg3'),
+	Customer_Group4 varchar(7) NOT NULL DEFAULT ('n/a_cg4'),
+	Sold_To varchar(10) NOT NULL DEFAULT ('n/a'),
+	Ship_To varchar(10) NOT NULL DEFAULT ('n/a'),
+	Payer varchar(10) NOT NULL DEFAULT ('n/a'),
+	Bill_To varchar(10) NOT NULL DEFAULT ('n/a'),
+	Salesman varchar(10) NOT NULL DEFAULT ('n/a'),
+	Tax_Indicator varchar(1) NOT NULL,
 	Credit_Limit bigint NOT NULL DEFAULT ((0)),
 	Customer_Order_Block_all varchar(2),
 	Customer_Order_Block varchar(2),
 	Deletion_Flag_all varchar(1),
 	Deletion_Flag varchar(1),
-	Create_Date date,
-	Create_Time time,
-	Flag smallint,
 	NOO_Create_Date date,
 	NOO_Approved_Date date,
 	NOO_Update_Date date,
@@ -49,12 +47,25 @@ CREATE TABLE BOSNET1.dbo.Customer (
 	Kecamatan varchar(40),
 	Kodya_Kabupaten varchar(40),
 	Province_Code char(3),
+	Create_Date date,
+	Create_Time time,
+	Flag smallint,
 	Customer_Priority int,
 	Tax_Class varchar(1),
 	CONSTRAINT PK_Customer PRIMARY KEY (Customer_ID,Account_Group,Distribution_Channel,Division)
 ) ;
-******/
---update BOSNET1.dbo.TMS_ShipmentPlan set Create_Date = CAST(GETDATE() AS DATE), Request_Delivery_Date = CAST(GETDATE() AS DATE)
+
+IF OBJECT_ID('bosnet1.dbo.Driver', 'U') IS NOT NULL DROP TABLE bosnet1.dbo.Driver; 
+CREATE TABLE BOSNET1.dbo.Driver (
+	Driver_ID varchar(10) NOT NULL,
+	Driver_Name varchar(35) NOT NULL DEFAULT ('n/a'),
+	Workplace varchar(4) NOT NULL DEFAULT ('n/a'),
+	NIK varchar(20),
+	Create_Date date,
+	Create_Time time,
+	Flag smallint,
+	CONSTRAINT PK_Driver PRIMARY KEY (Driver_ID)
+) ;
 
 IF OBJECT_ID('bosnet1.dbo.TMS_CostDist', 'U') IS NOT NULL DROP TABLE bosnet1.dbo.TMS_CostDist; 
 CREATE TABLE BOSNET1.dbo.TMS_CostDist (
@@ -67,7 +78,7 @@ CREATE TABLE BOSNET1.dbo.TMS_CostDist (
 	branch varchar(10),
 	from1 varchar(100),
 	to1 varchar(100)
-);
+) ;
 
 IF OBJECT_ID('bosnet1.dbo.TMS_CustAtr', 'U') IS NOT NULL DROP TABLE bosnet1.dbo.TMS_CustAtr; 
 CREATE TABLE BOSNET1.dbo.TMS_CustAtr (
@@ -79,7 +90,7 @@ CREATE TABLE BOSNET1.dbo.TMS_CustAtr (
 	DayWinStart varchar(5),
 	DayWinEnd varchar(5),
 	DeliveryDeadline varchar(5)
-);
+) ;
 
 IF OBJECT_ID('bosnet1.dbo.TMS_CustLongLat', 'U') IS NOT NULL DROP TABLE bosnet1.dbo.TMS_CustLongLat; 
 CREATE TABLE BOSNET1.dbo.TMS_CustLongLat (
@@ -87,7 +98,7 @@ CREATE TABLE BOSNET1.dbo.TMS_CustLongLat (
 	BranchName varchar(50),
 	CustId varchar(10) NOT NULL,
 	CustName varchar,
-	Address varchar(2147483647),
+	Address varchar(MAX),
 	MarketId varchar(20),
 	SubDistrict varchar(254),
 	District varchar(254),
@@ -188,13 +199,13 @@ CREATE TABLE BOSNET1.dbo.TMS_PreRouteVehicle (
 	costPerTravelMin decimal(18,2),
 	IdDriver varchar(20),
 	NamaDriver varchar(50)
-);
+) ;
 
 IF OBJECT_ID('bosnet1.dbo.TMS_Progress', 'U') IS NOT NULL DROP TABLE bosnet1.dbo.TMS_Progress; 
 CREATE TABLE BOSNET1.dbo.TMS_Progress (
 	runID varchar(50),
 	status varchar(4),
-	msg varchar(2147483647),
+	msg varchar(MAX),
 	pct tinyint,
 	mustFinish int,
 	branch varchar(20),
@@ -245,7 +256,6 @@ CREATE TABLE BOSNET1.dbo.TMS_Result_Shipment (
 	CONSTRAINT PK_TMS_Result_Shipment PRIMARY KEY (Shipment_Number_Dummy,Delivery_Number,Delivery_Item)
 ) ;
 
-
 IF OBJECT_ID('bosnet1.dbo.TMS_RouteJob', 'U') IS NOT NULL DROP TABLE bosnet1.dbo.TMS_RouteJob; 
 CREATE TABLE BOSNET1.dbo.TMS_RouteJob (
 	job_id varchar(50),
@@ -295,7 +305,6 @@ CREATE TABLE BOSNET1.dbo.TMS_SALESOFFICE (
 	UpdatedBy varchar(25)
 ) ;
 
-/******
 IF OBJECT_ID('bosnet1.dbo.TMS_ShipmentPlan', 'U') IS NOT NULL DROP TABLE bosnet1.dbo.TMS_ShipmentPlan; 
 CREATE TABLE BOSNET1.dbo.TMS_ShipmentPlan (
 	DO_Number varchar(40) NOT NULL,
@@ -331,9 +340,9 @@ CREATE TABLE BOSNET1.dbo.TMS_ShipmentPlan (
 	NotUsed_Flag char(1),
 	Order_Type varchar(4),
 	Incoterm varchar(3),
+	Good_Movement_Status varchar(1),
 	CONSTRAINT PK_TMS_ShipmentPlan PRIMARY KEY (DO_Number,Item_Number)
 ) ;
-******/
 
 IF OBJECT_ID('bosnet1.dbo.TMS_Status_Shipment', 'U') IS NOT NULL DROP TABLE bosnet1.dbo.TMS_Status_Shipment; 
 CREATE TABLE BOSNET1.dbo.TMS_Status_Shipment (
@@ -379,7 +388,6 @@ CREATE TABLE BOSNET1.dbo.TMS_VehicleAtr (
 	DriverDates varchar(20)
 ) ;
 
-/******
 IF OBJECT_ID('bosnet1.dbo.Vehicle', 'U') IS NOT NULL DROP TABLE bosnet1.dbo.Vehicle; 
 CREATE TABLE BOSNET1.dbo.Vehicle (
 	Vehicle_Code varchar(50) NOT NULL,
@@ -398,7 +406,7 @@ CREATE TABLE BOSNET1.dbo.Vehicle (
 	Flag smallint,
 	CONSTRAINT PK_Vehicle PRIMARY KEY (Vehicle_Code)
 ) ;
-******/
+
 
 /*
 create Procedure dbo.GetCustLongLat --'D312'
@@ -423,3 +431,58 @@ CREATE TABLE bosnet1.dbo.Tms_CustLongLat (
 	[Source] varchar(18) NOT NULL
 );
 */
+
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'firstPriorityUnassignedPenalty','9999999');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'secondPriorityUnassignedPenalty','0.2');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'maxDestInAPI','1');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'SpeedKmPHour','25');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'TrafficFactor','2.6');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'MaxLoadFactor','0.95');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'CapacityInWeightOrVolume','Weight');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'DefaultCustStartTime','07:00');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'DefaultCustEndTime','15:00');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'DefaultCustPriority','5');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'DefaultCustVehicleTypes','CDE4|L300|VAN4');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'DefaultVehicleStartTime','07:00');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'DefaultVehicleEndTime','16:00');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'MaxIteration','500');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'UpdateToDbFreq','10');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'WorkingFolder','c:\\fza\log\\');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'DefaultCustServiceTime','10');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'DayWinStart','2');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'DayWinEnd','7');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'DeliveryDeadline','AFTR');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'HargaSolar','5150');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'DefaultKonsumsiBBm','5');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'MTDefault','BFOR');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'BufferEndDefault','30');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'SatDelivDefault','12:00');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'ChannelNullDefault','GT');
+INSERT INTO BOSNET1.dbo.TMS_Params (param,value) VALUES (
+'DefaultDistance','10');

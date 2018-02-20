@@ -1,0 +1,23 @@
+CREATE TABLE BOSNET1.dbo.TMS_RouteJob (
+	job_id varchar(50),
+	customer_id varchar(50),
+	do_number varchar(50),
+	vehicle_code varchar(50),
+	activity varchar(50),
+	routeNb int,
+	jobNb int,
+	arrive varchar(5),
+	depart varchar(5),
+	runID varchar(50),
+	create_dtm datetime,
+	branch varchar(50),
+	shift varchar(50),
+	lon varchar(50),
+	lat varchar(50),
+	weight varchar(50),
+	volume varchar(50),
+	transportCost decimal(18,2),
+	activityCost decimal(18,2),
+	Dist decimal(18,2),
+	isFix varchar(2)
+) ;
