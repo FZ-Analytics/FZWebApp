@@ -132,9 +132,9 @@ public class RouteJobListingResultEdit implements BusinessLogic {
             if (doNumSplit.length == 1) {
                 //This try is for EXT vehicle
                 try {
-                    int checkResultShipment = checkResultShipment(d.doNum, runId.replace("_", "") + getVendorId(d.vehicleCode));
+                    int checkResultShipment = checkResultShipment(d.doNum, oriRunId.replace("_", "") + getVendorId(d.vehicleCode));
                     if (checkResultShipment > 0) {
-                        String check = checkStatusShipment(d.doNum, runId.replace("_", "") + getVendorId(d.vehicleCode));
+                        String check = checkStatusShipment(d.doNum, oriRunId.replace("_", "") + getVendorId(d.vehicleCode));
                         if (check.length() > 1) {
                             d.isFix = "null";
                         } else {
@@ -145,7 +145,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                     }
                 } //This catch is for INT vehicle
                 catch (Exception e) {
-                    int checkResultShipment = checkResultShipment(d.doNum, runId.replace("_", "") + d.vehicleCode);
+                    int checkResultShipment = checkResultShipment(d.doNum, oriRunId.replace("_", "") + d.vehicleCode);
                     if (checkResultShipment > 0) {
                         String check = checkStatusShipment(d.doNum, runId.replace("_", "") + d.vehicleCode);
                         if (check.length() > 1) {
@@ -161,9 +161,9 @@ public class RouteJobListingResultEdit implements BusinessLogic {
             else {
                 //This try is for EXT vehicle
                 try {
-                    int checkResultShipment = checkResultShipment(doNumSplit[0], runId.replace("_", "") + getVendorId(d.vehicleCode));
+                    int checkResultShipment = checkResultShipment(doNumSplit[0], oriRunId.replace("_", "") + getVendorId(d.vehicleCode));
                     if (checkResultShipment > 0) {
-                        String check = checkStatusShipment(doNumSplit[0], runId.replace("_", "") + getVendorId(d.vehicleCode));
+                        String check = checkStatusShipment(doNumSplit[0], oriRunId.replace("_", "") + getVendorId(d.vehicleCode));
                         if (check.length() > 1) {
                             d.isFix = "null";
                         } else {
@@ -174,9 +174,9 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                     }
                 } //This catch is for INT vehicle
                 catch (Exception e) {
-                    int checkResultShipment = checkResultShipment(doNumSplit[0], runId.replace("_", "") + d.vehicleCode);
+                    int checkResultShipment = checkResultShipment(doNumSplit[0], oriRunId.replace("_", "") + d.vehicleCode);
                     if (checkResultShipment > 0) {
-                        String check = checkStatusShipment(doNumSplit[0], runId.replace("_", "") + d.vehicleCode);
+                        String check = checkStatusShipment(doNumSplit[0], oriRunId.replace("_", "") + d.vehicleCode);
                         if (check.length() > 1) {
                             d.isFix = "null";
                         } else {

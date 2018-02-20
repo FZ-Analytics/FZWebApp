@@ -63,7 +63,7 @@
 
                 $(".submitBtn").click(function () {
                     var vNo = $(this).val();
-                    var runId = $("#RunIdClick").text();
+                    var runId = $("#OriRunID").val();
 
                     var $apiAddress = '../../api/submitToSap/submitToSap';
 
