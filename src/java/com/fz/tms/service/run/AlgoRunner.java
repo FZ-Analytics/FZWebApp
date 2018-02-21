@@ -1638,4 +1638,23 @@ public class AlgoRunner implements BusinessLogic {
         }
         return pl;
     }
+    
+    public String cekRunId(String runId) throws Exception{
+        String err = "ERROR";
+        String sql = "select count(*) as num from bosnet1.dbo.TMS_progress where runID = '"+runId+"'";
+        
+        int num = 0;
+        try (Connection con = (new Db()).getConnection("jdbc/fztms");
+                PreparedStatement ps = con.prepareStatement(sql)){
+            try (ResultSet rs = ps.executeQuery()){
+                if (rs.next()) 
+                    num = rs.getInt("num");
+                
+                if(num == 0)
+                    err = "OK";
+                
+            }
+        }
+        return err;
+    }
 }

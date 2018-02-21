@@ -43,7 +43,7 @@ public class PopupDetilDo  implements BusinessLogic {
                 + " where p.Product_Description = inv.szName and p.DOQtyUOM = inv.szUomId"
                 + " and p.NotUsed_Flag is null and p.DO_Number = '"+doID+"';";*/
         String sql = "SELECT\n" +
-                "	DISTINCT rb.DO_Number,\n" +
+                "	rb.DO_Number,\n" +
                 "	rb.Product_Description,\n" +
                 "	rb.Total_KG,\n" +
                 "	rb.DOQty,\n" +
@@ -55,7 +55,13 @@ public class PopupDetilDo  implements BusinessLogic {
                 "	END sendSap\n" +
                 "FROM\n" +
                 "	BOSNET1.dbo.TMS_PreRouteJob rb\n" +
-                "INNER JOIN BOSNET1.dbo.TMS_RouteJob rj ON\n" +
+                "INNER JOIN(\n" +
+                "		SELECT\n" +
+                "			DISTINCT branch,\n" +
+                "			RunId\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_RouteJob\n" +
+                "	) rj ON\n" +
                 "	rb.RunId = rj.RunId\n" +
                 "WHERE\n" +
                 "	is_edit = 'edit'\n" +
