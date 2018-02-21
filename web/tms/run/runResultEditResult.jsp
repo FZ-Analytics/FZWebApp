@@ -63,37 +63,16 @@
 
                 $(".submitBtn").click(function () {
                     var vNo = $(this).val();
-                    var runId = $("#OriRunID").val();
 
                     var $apiAddress = '../../api/submitToSap/submitToSap';
 
-                    var jsonForServer = '{\"RunId\": \"' + runId + '\",\"vehicle_no\":\"' + vNo + '\"}';
+                    var jsonForServer = '{\"RunId\": \"' + $("#OriRunID").val() + 'split' + $("#RunIdClick").text() + '\",\"vehicle_no\":\"' + vNo + '\"}';
 
                     //Submit to Result_Shipment
                     $.post($apiAddress, {json: jsonForServer}).done(function (data) {
                         if (data == 'OK') {
-                            $apiAddress = '../../api/runResult/SubmitShipmentPlan';
-                            jsonForServer = '{\"RunId\": \"' + runId + '\",\"vehicle_code\":\"' + vNo + '\"}';
-
-                            //Submit to RouteJob for OriRunId
-                            $.post($apiAddress, {json: jsonForServer}).done(function (data) {
-                                if (data == 'OK') {
-                                    $apiAddress = '../../api/runResult/SubmitShipmentPlan';
-                                    jsonForServer = '{\"RunId\": \"' + $("#OriRunID").val() + '\",\"vehicle_code\":\"' + vNo + '\"}';
-
-                                    //Submit to RouteJob for RunId
-                                    $.post($apiAddress, {json: jsonForServer}).done(function (data) {
-                                        if (data == 'OK') {
-                                            alert('Submitting, waiting response from SAP');
-                                            location.reload()
-                                        } else {
-                                            alert('Submit error');
-                                        }
-                                    });
-                                } else {
-                                    alert('submit Status error');
-                                }
-                            });
+                            alert('Submitting, waiting response from SAP');
+                            location.reload()
                         } else {
                             alert('submit error');
                         }
@@ -235,8 +214,8 @@
                             <%if (!j.vehicleCode.equals("NA")) {%>
                             <%=j.serviceTime%>
                             <%} else {
-                                out.print("0");
-                            }%>  
+                                    out.print("0");
+                                }%>  
                         </td>
                         <td class="fzCell">
                             <%if (!j.vehicleCode.equals("NA")) {%>
@@ -356,8 +335,8 @@
                                         <%if (!j.vehicleCode.equals("NA")) {%>
                                         <%=j.serviceTime%>
                                         <%} else {
-                                            out.print("0");
-                                        }%>  
+                                                out.print("0");
+                                            }%>  
                                     </td>
                                     <td class="fzCell">
                                         <%if (!j.vehicleCode.equals("NA")) {%>
