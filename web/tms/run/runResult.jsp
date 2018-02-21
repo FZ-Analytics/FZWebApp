@@ -129,8 +129,8 @@
             }
             
             function send(kode){
-                $apiAddress = '../../api/submitToSap/submitToSap';                    
-                jsonForServer = '{\"RunId\": \"' + $("#RunIdClick").text() + '\",\"vehicle_no\":\"' + kode+ '\"}';
+                $apiAddress = '../../api/submitToSap/submitToSap';
+                jsonForServer = '{\"RunId\": \"' + $("#RunIdClick").text() + 'split' + $("#RunIdClick").text() + '\",\"vehicle_no\":\"' + kode + '\"}';
                 $.post($apiAddress, {json: jsonForServer}).done(function (data) {
                     if(data == 'OK'){
                         //alert('data: ' + data + 'stat: ' + stat);
