@@ -92,9 +92,9 @@ public class SubmitToSapAPI {
             for (int i = 0; i < alCustId.size(); i++) {
                 ArrayList<HashMap<String, String>> alSP = getFromShipmentPlan(runId, alCustId.get(i));
 
-                for(int j = 0; j < alSP.size(); j++) {
+                for (int j = 0; j < alSP.size(); j++) {
                     HashMap<String, String> hmSP = alSP.get(j); //HashMap Shipment Plan
-                    
+
                     rs.Shipment_Type = hmPRV.get("source1");
                     rs.Plant = hmSP.get("Plant");
                     rs.Shipment_Route = route;
@@ -107,13 +107,13 @@ public class SubmitToSapAPI {
                     rs.Status_Shipment_Start = parseRunId(oriRunId, false) + " " + alStartAndEndTime.get(0);
                     rs.Status_Shipment_End = parseRunId(oriRunId, false) + " " + alStartAndEndTime.get(1);
                     rs.Service_Agent_Id = hmPRV.get("IdDriver");
-                    if(rs.Shipment_Type.equals("ZDSI")) {
-                        rs.Shipment_Number_Dummy = oriRunId.replace("_", "")+he.vehicle_no;
+                    if (rs.Shipment_Type.equals("ZDSI")) {
+                        rs.Shipment_Number_Dummy = oriRunId.replace("_", "") + he.vehicle_no;
                         rs.No_Pol = he.vehicle_no;
                         rs.Driver_Name = hmPRV.get("NamaDriver");
                         rs.Vehicle_Number = he.vehicle_no;
                     } else {
-                        rs.Shipment_Number_Dummy = oriRunId.replace("_", "")+getVendorId(he.vehicle_no);
+                        rs.Shipment_Number_Dummy = oriRunId.replace("_", "") + getVendorId(he.vehicle_no);
                         rs.No_Pol = hmPRV.get("vehicle_type");
                         rs.Driver_Name = getVendorName(he.vehicle_no);
                         rs.Vehicle_Number = hmPRV.get("vehicle_type");
@@ -131,14 +131,14 @@ public class SubmitToSapAPI {
                     rs.Shipment_Number_SAP = "";
                     rs.I_Status = "0";
                     rs.Shipment_Flag = "";
-                    if(isAlreadyOnce == false) {
-                        rs.distance = hmSP.get("distance");
+                    if (isAlreadyOnce == false) {
+                        rs.distance = "" + getTotalDist(runId);
                         isAlreadyOnce = true;
                     } else {
                         rs.distance = null;
                     }
                     rs.distanceUnit = "M";
-                    
+
                     insertResultShipment(rs);
                 }
             }
@@ -157,23 +157,23 @@ public class SubmitToSapAPI {
 
         return content;
     }
-    
+
     public String getVendorId(String v) {
         String[] vSplit = v.split("_");
-        return vSplit[1]+vSplit[3];
+        return vSplit[1] + vSplit[3];
     }
-    
+
     public String getVendorName(String v) {
         String[] vSplit = v.split("_");
         return vSplit[0];
     }
-            
+
     public Timestamp getTimeID() throws ParseException {
         String time = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()));
         Timestamp ts = Timestamp.valueOf(time);
         return ts;
     }
-    
+
     public String reFormatLongLat(String longlat) {
         String ret = "";
         //Sometimes long lat use "," instead of "."
@@ -184,36 +184,36 @@ public class SubmitToSapAPI {
         }
         return ret;
     }
-    
+
     public String parseRunId(String runId, boolean fullRunId) {
         String[] runIdSplit = runId.split("_");
         String date = runIdSplit[0];
         String time = runIdSplit[1];
         String y = "", m = "", d = "", h = "", min = "", s = "", ms = "";
-        for(int i = 0; i < date.length(); i++) {
-            if(i <= 3) {
+        for (int i = 0; i < date.length(); i++) {
+            if (i <= 3) {
                 y += date.charAt(i);
             } else if (i >= 4 && i <= 5) {
                 m += date.charAt(i);
-            } else if(i >= 6) {
+            } else if (i >= 6) {
                 d += date.charAt(i);
             }
         }
-        if(fullRunId) {
-            for(int i = 0; i < time.length(); i++) {
-                if(i <= 1) {
+        if (fullRunId) {
+            for (int i = 0; i < time.length(); i++) {
+                if (i <= 1) {
                     h += time.charAt(i);
                 } else if (i >= 2 && i <= 3) {
                     min += time.charAt(i);
-                } else if(i >= 4 && i <= 5) {
+                } else if (i >= 4 && i <= 5) {
                     s += time.charAt(i);
-                } else if(i >= 6) {
+                } else if (i >= 6) {
                     ms += time.charAt(i);
                 }
             }
-            return y+"-"+m+"-"+d + " " + h + ":" + min + ":" + s + ":" + ms;
+            return y + "-" + m + "-" + d + " " + h + ":" + min + ":" + s + ":" + ms;
         } else {
-            return y+"-"+m+"-"+d;
+            return y + "-" + m + "-" + d;
         }
     }
 
@@ -222,23 +222,23 @@ public class SubmitToSapAPI {
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
                 String sql;
-                sql = "SELECT " +
-                        "vehicle_type, " +
-                        "IdDriver, " +
-                        "NamaDriver, " +
-                        "CASE " + 
-                            "WHEN source1 = 'INT' THEN 'ZDSI' " +
-                            "ELSE 'ZDSH' " +
-                        "END as source1 " +
-                      "FROM BOSNET1.dbo.TMS_PreRouteVehicle " +
-                      "WHERE runID = '" + runId + "' and vehicle_code = '" + vehicleNo + "';";
+                sql = "SELECT "
+                        + "vehicle_type, "
+                        + "IdDriver, "
+                        + "NamaDriver, "
+                        + "CASE "
+                        + "WHEN source1 = 'INT' THEN 'ZDSI' "
+                        + "ELSE 'ZDSH' "
+                        + "END as source1 "
+                        + "FROM BOSNET1.dbo.TMS_PreRouteVehicle "
+                        + "WHERE runID = '" + runId + "' and vehicle_code = '" + vehicleNo + "';";
 
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
                         hm.put("source1", rs.getString("source1"));
                         hm.put("vehicle_type", rs.getString("vehicle_type"));
                         hm.put("IdDriver", rs.getString("IdDriver"));
-                        if(rs.getString("NamaDriver") == null) {
+                        if (rs.getString("NamaDriver") == null) {
                             hm.put("NamaDriver", "");
                         } else {
                             hm.put("NamaDriver", rs.getString("NamaDriver"));
@@ -257,51 +257,48 @@ public class SubmitToSapAPI {
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
                 String sql;
-                sql = "SELECT DISTINCT\n" +
-                  "     sp.DO_Number,\n" +
-                  "     sp.Route,\n" +
-                  "     sp.Item_Number,\n" +
-                  "     sp.Plant,\n" +
-                  "     sp.DOQty,\n" +
-                  "     sp.Product_ID,\n" +
-                  "     sp.Batch,\n" +
-                  "     rj.arrive,\n" +
-                  "     rj.depart,\n" +
-                  "     rj.distance\n" +
-                  "FROM\n" +
-                  "     [BOSNET1].[dbo].[TMS_ShipmentPlan] sp\n" +
-                  "INNER JOIN (\n" +
-                  "	SELECT\n" +
-                  "		rj.customer_id,\n" +
-                  "		rj.arrive,\n" +
-                  "		rj.depart,\n" +
-                  "		rj.Dist distance\n" +
-                  "	FROM\n" +
-                  "		[BOSNET1].[dbo].[TMS_RouteJob] rj\n" +
-                  "	WHERE\n" +
-                  "		rj.runId = '"+runId+"'\n" +
-                  "		AND rj.Customer_ID = '"+custId+"') rj ON rj.customer_id = sp.Customer_ID\n" +
-                  "INNER JOIN (\n" +
-                  "	SELECT DISTINCT\n" +
-                  "		prj.Request_Delivery_Date\n" +
-                  "	FROM \n" +
-                  "		[BOSNET1].[dbo].[TMS_PreRouteJob] prj\n" +
-                  "	WHERE \n" +
-                  "		prj.runId = '"+runId+"'\n" +
-                  "             AND prj.Customer_ID = '"+custId+"') prj ON sp.Request_Delivery_Date = prj.Request_Delivery_Date\n" +
-                  "WHERE\n" +
-                  "         sp.Customer_ID = '"+custId+"'\n" +
-                  "         AND sp.Already_Shipment <> 'Y'\n" +
-                  "         AND sp.Batch <> 'NULL'\n" +
-                  "ORDER BY\n" +
-                  "         sp.DO_Number";
+                sql = "SELECT DISTINCT\n"
+                        + "     sp.DO_Number,\n"
+                        + "     sp.Route,\n"
+                        + "     sp.Item_Number,\n"
+                        + "     sp.Plant,\n"
+                        + "     sp.DOQty,\n"
+                        + "     sp.Product_ID,\n"
+                        + "     sp.Batch,\n"
+                        + "     rj.arrive,\n"
+                        + "     rj.depart\n"
+                        + "FROM\n"
+                        + "     [BOSNET1].[dbo].[TMS_ShipmentPlan] sp\n"
+                        + "INNER JOIN (\n"
+                        + "	SELECT\n"
+                        + "		rj.customer_id,\n"
+                        + "		rj.arrive,\n"
+                        + "		rj.depart\n"
+                        + "	FROM\n"
+                        + "		[BOSNET1].[dbo].[TMS_RouteJob] rj\n"
+                        + "	WHERE\n"
+                        + "		rj.runId = '" + runId + "'\n"
+                        + "		AND rj.Customer_ID = '" + custId + "') rj ON rj.customer_id = sp.Customer_ID\n"
+                        + "INNER JOIN (\n"
+                        + "	SELECT DISTINCT\n"
+                        + "		prj.Request_Delivery_Date\n"
+                        + "	FROM \n"
+                        + "		[BOSNET1].[dbo].[TMS_PreRouteJob] prj\n"
+                        + "	WHERE \n"
+                        + "		prj.runId = '" + runId + "'\n"
+                        + "             AND prj.Customer_ID = '" + custId + "') prj ON sp.Request_Delivery_Date = prj.Request_Delivery_Date\n"
+                        + "WHERE\n"
+                        + "         sp.Customer_ID = '" + custId + "'\n"
+                        + "         AND sp.Already_Shipment <> 'Y'\n"
+                        + "         AND sp.Batch <> 'NULL'\n"
+                        + "ORDER BY\n"
+                        + "         sp.DO_Number";
 
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
                         HashMap<String, String> hm = new HashMap<>();
                         hm.put("arrive", rs.getString("arrive"));
                         hm.put("depart", rs.getString("depart"));
-                        hm.put("distance", rs.getString("distance"));
                         hm.put("DO_Number", rs.getString("DO_Number"));
                         hm.put("Route", rs.getString("Route"));
                         hm.put("Item_Number", rs.getString("Item_Number"));
@@ -309,7 +306,7 @@ public class SubmitToSapAPI {
                         hm.put("DOQty", rs.getString("DOQty"));
                         hm.put("Product_ID", rs.getString("Product_ID"));
                         hm.put("Batch", rs.getString("Batch"));
-                        
+
                         al.add(hm);
                     }
                 }
@@ -319,24 +316,43 @@ public class SubmitToSapAPI {
         }
         return al;
     }
-    
+
     public String getLongestRoute(ArrayList<String> alCustId, String vNo, String runId) throws Exception {
         double longestDist = 0;
         String custId = "";
-        for(int i = 0; i < alCustId.size(); i++) {
-            HashMap<String,String> hmLongLat = getLongLat(alCustId.get(i), runId, vNo);
+        for (int i = 0; i < alCustId.size(); i++) {
+            HashMap<String, String> hmLongLat = getLongLat(alCustId.get(i), runId, vNo);
             double distance1 = calcMeterDist(Double.parseDouble(hmLongLat.get("Long")), Double.parseDouble(hmLongLat.get("Lat")), Double.parseDouble(hmLongLat.get("Long")), Double.parseDouble(hmLongLat.get("startLat")));
             double distance2 = calcMeterDist(Double.parseDouble(hmLongLat.get("Long")), Double.parseDouble(hmLongLat.get("startLat")), Double.parseDouble(hmLongLat.get("startLon")), Double.parseDouble(hmLongLat.get("startLat")));
             double temp = distance1 + distance2;
-            System.out.println(longestDist + " " + temp);
-            if(temp > longestDist) {
+            System.out.println(temp + " " + alCustId.get(i) + " " + getRoute(alCustId.get(i)));
+            if (temp > longestDist) {
                 longestDist = temp;
                 custId = alCustId.get(i);
             }
+            
         }
         return getRoute(custId);
     }
-    
+
+    public double getTotalDist(String runId) throws Exception {
+        double totDist = 0;
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql;
+                sql = "SELECT Dist FROM BOSNET1.dbo.TMS_RouteJob WHERE runID = '" + runId + "';";
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    while (rs.next()) {
+                        totDist += Math.round(rs.getDouble("Dist"));
+                    }
+                }
+            } catch (Exception e) {
+                throw new Exception(e.getMessage());
+            }
+        }
+        return totDist;
+    }
+
     public String getRoute(String custId) throws Exception {
         String route = "";
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
@@ -354,34 +370,34 @@ public class SubmitToSapAPI {
         }
         return route;
     }
-    
-    public HashMap<String,String> getLongLat(String custId, String runId, String vNo) throws Exception {
-        HashMap<String,String> hmLongLat = new HashMap<>();
+
+    public HashMap<String, String> getLongLat(String custId, String runId, String vNo) throws Exception {
+        HashMap<String, String> hmLongLat = new HashMap<>();
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
                 String sql;
-                sql = "SELECT DISTINCT " +
-                      "     prj.Long, " +
-                      "     prj.Lat, " +
-                      "     (SELECT " +
-                      "         prv.startLon " +
-                      "     FROM " +
-                      "         BOSNET1.dbo.TMS_PreRouteVehicle prv " +
-                      "     WHERE " +
-                      "         prv.RunID = '" + runId + "' " +
-                      "         and prv.vehicle_code = '" + vNo + "') startLon, " +
-                      "     (SELECT " +
-                      "         prv.startLat " +
-                      "     FROM " +
-                      "         BOSNET1.dbo.TMS_PreRouteVehicle prv " +
-                      "     WHERE " +
-                      "         prv.RunID = '" + runId + "' " +
-                      "         and prv.vehicle_code = '" + vNo + "') startLat " +
-                      "FROM " +
-                      "     BOSNET1.dbo.TMS_PreRouteJob prj " +
-                      "WHERE " +
-                      "     prj.RunID = '" + runId + "' " +
-                      "     and prj.Customer_ID = '" + custId + "';";
+                sql = "SELECT DISTINCT "
+                        + "     prj.Long, "
+                        + "     prj.Lat, "
+                        + "     (SELECT "
+                        + "         prv.startLon "
+                        + "     FROM "
+                        + "         BOSNET1.dbo.TMS_PreRouteVehicle prv "
+                        + "     WHERE "
+                        + "         prv.RunID = '" + runId + "' "
+                        + "         and prv.vehicle_code = '" + vNo + "') startLon, "
+                        + "     (SELECT "
+                        + "         prv.startLat "
+                        + "     FROM "
+                        + "         BOSNET1.dbo.TMS_PreRouteVehicle prv "
+                        + "     WHERE "
+                        + "         prv.RunID = '" + runId + "' "
+                        + "         and prv.vehicle_code = '" + vNo + "') startLat "
+                        + "FROM "
+                        + "     BOSNET1.dbo.TMS_PreRouteJob prj "
+                        + "WHERE "
+                        + "     prj.RunID = '" + runId + "' "
+                        + "     and prj.Customer_ID = '" + custId + "';";
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
                         hmLongLat.put("Long", reFormatLongLat(rs.getString("Long")));
@@ -414,7 +430,7 @@ public class SubmitToSapAPI {
         }
         return al;
     }
-    
+
     public ArrayList<String> getStartAndEndTime(String runId, String vehicleCode) throws Exception {
         ArrayList<String> al = new ArrayList<>();
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
@@ -424,7 +440,7 @@ public class SubmitToSapAPI {
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     int i = 0;
                     while (rs.next()) {
-                        if(i == 0) {
+                        if (i == 0) {
                             al.add(rs.getString("depart"));
                         } else {
                             al.add(rs.getString("arrive"));
@@ -443,15 +459,15 @@ public class SubmitToSapAPI {
         int rowNum = 0;
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
-                String sql = 
-                        "SELECT " +
-                        "   COUNT(*) total " +
-                        "FROM " +
-                        "   bosnet1.dbo.TMS_Result_Shipment " +
-                        "WHERE " +
-                        "   Shipment_Number_Dummy = '" + rs.Shipment_Number_Dummy + "'" +
-                        "   AND Delivery_Number = '" + rs.Delivery_Number + "'" +
-                        "   AND Delivery_Item = '" + rs.Delivery_Item + "';";
+                String sql
+                        = "SELECT "
+                        + "   COUNT(*) total "
+                        + "FROM "
+                        + "   bosnet1.dbo.TMS_Result_Shipment "
+                        + "WHERE "
+                        + "   Shipment_Number_Dummy = '" + rs.Shipment_Number_Dummy + "'"
+                        + "   AND Delivery_Number = '" + rs.Delivery_Number + "'"
+                        + "   AND Delivery_Item = '" + rs.Delivery_Item + "';";
                 try (ResultSet rst = stm.executeQuery(sql)) {
                     while (rst.next()) {
                         rowNum = rst.getInt("total");
@@ -464,14 +480,14 @@ public class SubmitToSapAPI {
         if (rowNum > 0) {
             try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
                 try (Statement stm = con.createStatement()) {
-                    String sql = 
-                        "DELETE " +
-                        "FROM " +
-                        "   bosnet1.dbo.TMS_Result_Shipment " +
-                        "WHERE " +
-                        "   Shipment_Number_Dummy = '" + rs.Shipment_Number_Dummy + "'" +
-                        "   AND Delivery_Number = '" + rs.Delivery_Number + "'" +
-                        "   AND Delivery_Item = '" + rs.Delivery_Item + "';";
+                    String sql
+                            = "DELETE "
+                            + "FROM "
+                            + "   bosnet1.dbo.TMS_Result_Shipment "
+                            + "WHERE "
+                            + "   Shipment_Number_Dummy = '" + rs.Shipment_Number_Dummy + "'"
+                            + "   AND Delivery_Number = '" + rs.Delivery_Number + "'"
+                            + "   AND Delivery_Item = '" + rs.Delivery_Item + "';";
                     stm.executeQuery(sql);
                 }
             } catch (Exception e) {
@@ -479,14 +495,14 @@ public class SubmitToSapAPI {
             }
             try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
                 try (Statement stm = con.createStatement()) {
-                    String sql = 
-                        "DELETE " +
-                        "FROM " +
-                        "   bosnet1.dbo.TMS_Status_Shipment " +
-                        "WHERE " +
-                        "   Shipment_Number_Dummy = '" + rs.Shipment_Number_Dummy + "'" +
-                        "   AND Delivery_Number = '" + rs.Delivery_Number + "'" +
-                        "   AND Delivery_Item = '" + rs.Delivery_Item + "';";
+                    String sql
+                            = "DELETE "
+                            + "FROM "
+                            + "   bosnet1.dbo.TMS_Status_Shipment "
+                            + "WHERE "
+                            + "   Shipment_Number_Dummy = '" + rs.Shipment_Number_Dummy + "'"
+                            + "   AND Delivery_Number = '" + rs.Delivery_Number + "'"
+                            + "   AND Delivery_Item = '" + rs.Delivery_Item + "';";
                     stm.executeQuery(sql);
                 }
             } catch (Exception e) {
@@ -534,7 +550,7 @@ public class SubmitToSapAPI {
             psHdr.setString(31, rs.distanceUnit);
 
             psHdr.executeUpdate();
-            
+
             ret = "ok";
         }
         return ret;
