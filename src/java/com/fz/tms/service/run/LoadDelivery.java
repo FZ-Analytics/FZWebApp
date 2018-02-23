@@ -100,7 +100,7 @@ public class LoadDelivery implements BusinessLogic {
         request.setAttribute("channel", channel);
         request.setAttribute("vehicle", vehicle);
         request.setAttribute("runId", runId);
-        request.setAttribute("OriRunID", oriRunId);
+        request.setAttribute("oriRunId", oriRunId);
         request.setAttribute("listDelivery", ld);
     }
 

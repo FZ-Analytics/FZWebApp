@@ -132,7 +132,7 @@ public class SubmitToSapAPI {
                     rs.I_Status = "0";
                     rs.Shipment_Flag = "";
                     if (isAlreadyOnce == false) {
-                        rs.distance = "" + getTotalDist(runId);
+                        rs.distance = "" + getTotalDist(runId, he.vehicle_no);
                         isAlreadyOnce = true;
                     } else {
                         rs.distance = null;
@@ -335,12 +335,12 @@ public class SubmitToSapAPI {
         return getRoute(custId);
     }
 
-    public double getTotalDist(String runId) throws Exception {
+    public double getTotalDist(String runId, String vehicleCode) throws Exception {
         double totDist = 0;
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
                 String sql;
-                sql = "SELECT Dist FROM BOSNET1.dbo.TMS_RouteJob WHERE runID = '" + runId + "';";
+                sql = "SELECT Dist FROM BOSNET1.dbo.TMS_RouteJob WHERE runID = '" + runId + "' and vehicle_code = '" + vehicleCode + "';";
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
                         totDist += Math.round(rs.getDouble("Dist"));

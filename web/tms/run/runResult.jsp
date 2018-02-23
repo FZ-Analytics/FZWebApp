@@ -41,7 +41,7 @@
                     //Some code
                     //alert( $("#runID").text()+"&vCode="+$(this).text() ); 
                     if ($(this).text().length > 0) {
-                        window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text(), null,
+                        window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text() + "&oriRunID=" + $("#RunIdClick").text(), null,
                                 "scrollbars=1,resizable=1,height=500,width=850");
                         return true;
                     }
@@ -241,7 +241,7 @@
                     <th width="100px" class="fzCol">RDD</th>
                     <th width="100px" class="fzCol">Transport Cost</th>
                     <th width="100px" class="fzCol">Dist</th>
-                    <th width="100px" class="fzCol">Send SAP</th>
+<!--                    <th width="100px" class="fzCol">Send SAP</th>-->
                     <th width="100px" class="fzCol">Edit</th>
                 </tr>
             </thead>
@@ -276,10 +276,10 @@
                     <td class="fzCell"><%=j.rdd%></td>
                     <td class="fzCell"><%=j.transportCost%></td>
                     <td class="fzCell"><%=j.dist%></td>
-                    <td class="fzCell" 
+<!--                    <td class="fzCell" 
                         <%if (j.send != null && (j.send.equalsIgnoreCase("OK") || j.send.equalsIgnoreCase("DELL"))) {%>
                         onclick="sendSAP('<%=j.vehicleCode%>','<%=j.send%>')" style="color: green;"
-                        <%}%> ><%=j.send%></td>
+                        <%}%> ><%=j.send%></td>-->
                     <td class="editCust" onclick="klik(<%=j.custID%>)" style="color: blue;"><%=j.edit%></td>
                 </tr>
 

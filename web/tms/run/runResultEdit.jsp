@@ -65,13 +65,6 @@
             var vehicleCode = "";
             
             $(document).ready(function () {
-                
-                //draggable table row
-//                $("tbody").sortable({
-//                    appendTo: "parent",
-//                    helper: "clone"
-//                });
-                
                 $('#table').eFreezeTableHead();
                 $('.custIDClick').click(function () {
                     if ($(this).text().length > 0) {
@@ -89,7 +82,7 @@
                 });
                 $('#RunIdClick').click(function () {
                     if ($(this).text().length > 0) {
-                        window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text(), null,
+                        window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text() + "&oriRunID=" + $("#OriRunID").val(), null,
                                 "scrollbars=1,resizable=1,height=500,width=850");
                         return true;
                     }
@@ -100,18 +93,6 @@
                                 "scrollbars=1,resizable=1,height=530,width=530");
                         return true;
                     }
-                });
-
-                $('#reRun').click(function () {
-                    setTimeout(function () {
-                        var dateNow = $.datepicker.formatDate('yy-mm-dd', new Date());//currentDate.getFullYear()+"-"+(currentDate.getMonth()+1)+"-"+currentDate.getDate();
-
-                        var win = window.open('runProcess.jsp?tripCalc=M&shift=1&dateDeliv=' + dateNow + '&branch=' + $('#branch').text() + '&runId=' + $("#RunIdClick").text() + '&oriRunID=' + $("#OriRunID").val()  + '&reRun=A' + '&channel=' + $('#channel').text(), '_blank');
-                        if (win) {
-                            //Browser has allowed it to be opened
-                            win.focus();
-                        }
-                    }, 3000);
                 });
                 
                 initContextMenu();
@@ -374,7 +355,7 @@
         </script>
         <h3>Runs</h3>
 
-        <label class="fzLabel" id="oriRunId"><%=get("oriRunId")%></label>
+        <input class="fzInput" id="OriRunID" name="OriRunID" value="<%=get("oriRunId")%>" hidden="true"/>
         
         <br>
         <label class="fzLabel">Branch:</label> 

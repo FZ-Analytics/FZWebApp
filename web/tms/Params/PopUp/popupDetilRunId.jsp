@@ -15,11 +15,33 @@
     </head>
     <body>
         <%@include file="../appGlobal/bodyTop.jsp"%>
+        <script>
+            $(document).ready(function () {
+                $(".submitBtn").click(function () {
+                    var vNo = $(this).val();
+
+                    var $apiAddress = '../../../api/submitToSap/submitToSap';
+
+                    var jsonForServer = '{\"RunId\": \"' + $("#oriRunID").val() + 'split' + $("#runID").text() + '\",\"vehicle_no\":\"' + vNo + '\"}';
+
+                    //Submit to Result_Shipment
+                    $.post($apiAddress, {json: jsonForServer}).done(function (data) {
+                        if (data == 'OK') {
+                            alert('Submitting, waiting response from SAP');
+                            location.reload()
+                        } else {
+                            alert('submit error');
+                        }
+                    });
+                });
+            });
+        </script>
         <br>
         <label class="fzLabel">Branch:</label> 
         <label class="fzLabel"><%=get("branch")%></label>
         
         <br>
+        <input class="fzInput" id="oriRunID" name="oriRunID" value="<%=get("oriRunID")%>" hidden="true"/>
         <label class="fzLabel">RunID:</label> 
         <label class="fzLabel" id="runID"><%=get("runID")%></label> 
         
@@ -38,6 +60,8 @@
                 <th width="100px" class="fzCol">waktu service</th>
                 <th width="100px" class="fzCol">Cust Visit</th>
                 <th width="100px" class="fzCol">Transport Cost</th>
+                <th width="100px" class="fzCol">Submit to SAP</th>
+                <th width="100px" class="fzCol">Error msg.</th>
             </tr>
             <%for (SummaryVehicle s : (List<SummaryVehicle>) getList("ListSum")) {%> 
             <tr>
@@ -53,6 +77,20 @@
                 <th width="100px" class="fzCol"><%=s.sctime%></th>
                 <th width="100px" class="fzCol"><%=s.DOcount%></th>
                 <th width="100px" class="fzCol"><%=s.transportCost%></th>
+                <%if (s.isFix.equals("1")) {%>
+                    <th class="" onclick="" style="">
+                        <button id="<%=s.truckid%>" class="btn btn-success btn-xs disabled">Submitting</button>
+                    </th>
+                <%} else if (s.isFix.equals("2")) {%>
+                    <th class="" onclick="" style="">
+                        <button id="<%=s.truckid%>" class="btn btn-default btn-xs disabled" value="<%=s.truckid%>">Submitted</button>
+                    </th>
+                <%} else {%>
+                    <th class="" onclick="" style="">
+                        <button id="<%=s.truckid%>" class="btn btn-success btn-xs submitBtn" type="submit" value="<%=s.truckid%>">Submit</button>
+                    </th>
+                <%}%>
+                <th class="fzCell" style="font-size: 10px;"><%=s.error%></th>
             </tr>
             <%} // for ProgressRecord %>
             <tr>

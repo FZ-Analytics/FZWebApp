@@ -30,7 +30,6 @@
         <script src="../appGlobal/eFreezeTable.js"></script>
         <script>
             $(document).ready(function () {
-                $(".submitToSap").hide();
                 $('#table').eFreezeTableHead();
                 $('.custIDClick').click(function () {
                     if ($(this).text().length > 0) {
@@ -48,7 +47,7 @@
                 });
                 $('#RunIdClick').click(function () {
                     if ($(this).text().length > 0) {
-                        window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text(), null,
+                        window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text() + "&oriRunID=" + $("#OriRunID").val(), null,
                                 "scrollbars=1,resizable=1,height=500,width=850");
                         return true;
                     }
@@ -60,41 +59,7 @@
                         return true;
                     }
                 });
-
-                $(".submitBtn").click(function () {
-                    var vNo = $(this).val();
-
-                    var $apiAddress = '../../api/submitToSap/submitToSap';
-
-                    var jsonForServer = '{\"RunId\": \"' + $("#OriRunID").val() + 'split' + $("#RunIdClick").text() + '\",\"vehicle_no\":\"' + vNo + '\"}';
-
-                    //Submit to Result_Shipment
-                    $.post($apiAddress, {json: jsonForServer}).done(function (data) {
-                        if (data == 'OK') {
-                            alert('Submitting, waiting response from SAP');
-                            location.reload()
-                        } else {
-                            alert('submit error');
-                        }
-                    });
-                });
-
-                $("#success-alert").hide();
             });
-
-            function jumpToResult() {
-                //array of customer id at 4th column
-                var arrayOfCustId = $('#table td:nth-child(4)').map(function () {
-                    return $(this).text();
-                }).get();
-                var arrStr = encodeURIComponent(JSON.stringify(arrayOfCustId));
-
-                var win = window.open('runResultEditResult.jsp?array=' + arrStr);
-                if (win) {
-                    //Browser has allowed it to be opened
-                    win.focus();
-                }
-            }
 
             function klik(kode) {
                 window.open("../Params/PopUp/popupEditCust.jsp?runId=" + $("#RunIdClick").text() + "&custId=" + kode, null,
@@ -102,17 +67,13 @@
             }
 
             function fnExcelReport() {
-                //var t = document.getElementById('btnHi');
-                //t.hidden = true;
                 var tab_text = "<table border='2px'><tr bgcolor='#87AFC6'>";
-                var textRange;
                 var j = 0;
                 tab = document.getElementById('t_table'); // id of table
 
                 for (j = 0; j < tab.rows.length; j++)
                 {
                     tab_text = tab_text + tab.rows[j].innerHTML + "</tr>";
-                    //tab_text=tab_text+"</tr>";
                 }
 
                 tab_text = tab_text + "</table>";
@@ -140,7 +101,7 @@
         <div id="body">
             <h3>Runs</h3>
 
-            <input class="fzInput" id="OriRunID" name="OriRunID" value="<%=get("OriRunID")%>" hidden="true"/>
+            <input class="fzInput" id="OriRunID" name="OriRunID" value="<%=get("oriRunId")%>" hidden="true"/>
 
             <br>
             <label class="fzLabel">Branch:</label> 
@@ -190,8 +151,6 @@
                         <th width="100px" class="fzCol">Cust. Feas.</th>
                         <th width="100px" class="fzCol">Truck Feas.</th>
                         <th width="100px" class="fzCol">Edit</th>
-                        <th width="100px" class="fzCol">Send SAP</th>
-                        <th width="100px" class="fzCol">Err. SAP</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -247,25 +206,6 @@
 
                         </td>
                         <%}%>
-
-                        <%if (j.isFix.equals("1") && !j.vehicleCode.equals("NA") && !j.custId.equals("")) {%>
-                        <td class="" onclick="" style="">
-                            <button id="<%=j.vehicleCode%>" class="btn btn-success btn-xs disabled">Submitting</button>
-                        </td>
-                        <%} else if (j.isFix.equals("null") && !j.vehicleCode.equals("NA") && !j.custId.equals("")) {%>
-                        <td class="" onclick="" style="">
-                            <button id="<%=j.vehicleCode%>" class="btn btn-success btn-xs submitBtn" type="submit" value="<%=j.vehicleCode%>">Submit</button>
-                        </td>
-                        <%} else if (j.isFix.equals("2") && !j.vehicleCode.equals("NA") && !j.custId.equals("")) {%>
-                        <td class="" onclick="" style="">
-                            <button id="<%=j.vehicleCode%>" class="btn btn-default btn-xs disabled" value="<%=j.vehicleCode%>">Submitted</button>
-                        </td>
-                        <%} else {%>
-                        <td class="editCust" onclick="" style="color: blue;">
-
-                        </td>
-                        <%}%>
-                        <td class="fzCell" style="font-size: 10px;"><%=j.error%></td>
                     </tr>
 
                     <%} // for ProgressRecord %>
