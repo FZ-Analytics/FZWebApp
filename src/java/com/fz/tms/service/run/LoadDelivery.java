@@ -118,6 +118,8 @@ public class LoadDelivery implements BusinessLogic {
             d.custId = custId;
             d.doNum = aSplit[0];
             d.serviceTime = aSplit[4];
+            System.out.println("serv time: " + d.serviceTime);
+            System.out.println("doNum: " + d.doNum);
             d.storeName = aSplit[5];
             d.priority = aSplit[1];
             d.distChannel = aSplit[7];
@@ -125,69 +127,6 @@ public class LoadDelivery implements BusinessLogic {
             d.weight = "" + Math.round(Double.parseDouble(aSplit[9]) * 10) / 10.0;
 
             String[] doNumSplit = d.doNum.split(";");
-            //For one DO
-            if (doNumSplit.length == 1) {
-                //This try is for EXT vehicle
-                try {
-                    int checkResultShipment = checkResultShipment(d.doNum, oriRunId.replace("_", "") + getVendorId(d.vehicleCode));
-                    if (checkResultShipment > 0) {
-                        String check = checkStatusShipment(d.doNum, oriRunId.replace("_", "") + getVendorId(d.vehicleCode));
-                        if (check.length() > 1) {
-                            d.isFix = "null";
-                            d.error = check;
-                        } else {
-                            d.isFix = check;
-                        }
-                    } else {
-                        d.isFix = "null";
-                    }
-                } //This catch is for INT vehicle
-                catch (Exception e) {
-                    int checkResultShipment = checkResultShipment(d.doNum, oriRunId.replace("_", "") + d.vehicleCode);
-                    if (checkResultShipment > 0) {
-                        String check = checkStatusShipment(d.doNum, oriRunId.replace("_", "") + d.vehicleCode);
-                        if (check.length() > 1) {
-                            d.isFix = "null";
-                            d.error = check;
-                        } else {
-                            d.isFix = check;
-                        }
-                    } else {
-                        d.isFix = "null";
-                    }
-                }
-            } //For many DO
-            else {
-                //This try is for EXT vehicle
-                try {
-                    int checkResultShipment = checkResultShipment(doNumSplit[0], oriRunId.replace("_", "") + getVendorId(d.vehicleCode));
-                    if (checkResultShipment > 0) {
-                        String check = checkStatusShipment(doNumSplit[0], oriRunId.replace("_", "") + getVendorId(d.vehicleCode));
-                        if (check.length() > 1) {
-                            d.isFix = "null";
-                            d.error = check;
-                        } else {
-                            d.isFix = check;
-                        }
-                    } else {
-                        d.isFix = "null";
-                    }
-                } //This catch is for INT vehicle
-                catch (Exception e) {
-                    int checkResultShipment = checkResultShipment(doNumSplit[0], oriRunId.replace("_", "") + d.vehicleCode);
-                    if (checkResultShipment > 0) {
-                        String check = checkStatusShipment(doNumSplit[0], oriRunId.replace("_", "") + d.vehicleCode);
-                        if (check.length() > 1) {
-                            d.isFix = "null";
-                            d.error = check;
-                        } else {
-                            d.isFix = check;
-                        }
-                    } else {
-                        d.isFix = "null";
-                    }
-                }
-            }
 
             try {
                 d.volume = "" + Math.round(Double.parseDouble(getVolume(custId, oriRunId)) * 10) / 10.0;
@@ -201,7 +140,11 @@ public class LoadDelivery implements BusinessLogic {
             if (d.custId.equals("")) {
                 d.depart = depart;
             } else {
-                d.depart = addTime(d.arrive, Integer.parseInt(d.serviceTime));
+                try {
+                    d.depart = addTime(d.arrive, Integer.parseInt(d.serviceTime));
+                } catch (Exception e) {
+
+                }
             }
 
             //set long lat of store name
@@ -296,7 +239,11 @@ public class LoadDelivery implements BusinessLogic {
                 if (d.custId.equals("")) {
                     d.depart = depart;
                 } else {
-                    d.depart = addTime(d.arrive, Integer.parseInt(d.serviceTime));
+                    try {
+                        d.depart = addTime(d.arrive, Integer.parseInt(d.serviceTime));
+                    } catch (Exception e) {
+
+                    }
                 }
             }
             try {
@@ -808,7 +755,7 @@ public class LoadDelivery implements BusinessLogic {
                         + "     Distribution_Channel, "
                         + "     Request_Delivery_Date "
                         + "ORDER BY"
-                        + "     Request_Delivery_Date DESC";;
+                        + "     Request_Delivery_Date DESC";
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
                         tempDO.add(rs.getString("DO_Number"));

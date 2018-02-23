@@ -534,7 +534,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                         + "     Distribution_Channel, "
                         + "     Request_Delivery_Date "
                         + "ORDER BY"
-                        + "     Request_Delivery_Date DESC";;
+                        + "     Request_Delivery_Date DESC";
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
                         tempDO.add(rs.getString("DO_Number"));

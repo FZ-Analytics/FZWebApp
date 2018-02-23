@@ -340,7 +340,7 @@
                     );
                 }
                 
-                var win = window.open('runResultEditResult.jsp?runId='+$('#RunIdClick').text()+'&oriRunId='+$('#oriRunId').text()+'&branchId='+$('#branch').text()+
+                var win = window.open('runResultEditResult.jsp?runId='+$('#RunIdClick').text()+'&oriRunId='+$('#OriRunID').val()+'&branchId='+$('#branch').text()+
                         '&shift='+$('#shift').text()+'&channel='+$('#channel').text()+'&vehicle='+$('#vehicles').text()+'&array='+tableArr2);
                 if (win) {
                     //Browser has allowed it to be opened
@@ -354,7 +354,6 @@
             }
         </script>
         <h3>Runs</h3>
-
         <input class="fzInput" id="OriRunID" name="OriRunID" value="<%=get("oriRunId")%>" hidden="true"/>
         
         <br>
