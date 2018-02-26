@@ -1,5 +1,5 @@
 BEGIN
-	DECLARE @RunId Varchar(50) = '20180220_143237504';
+	DECLARE @RunId Varchar(50) = '20180222_142519695';
 	DECLARE @Insert AS TABLE 
 		(sc Varchar(2000) NOT NULL);
 	DECLARE @CustT AS TABLE 
@@ -7,7 +7,16 @@ BEGIN
 
 	insert into @CustT
 	select Customer_ID as CID from BOSNET1.dbo.TMS_PreRouteJob
-		WHERE runid =  @RunId
+		WHERE runid =  @RunId;
+		
+	insert into @Insert
+	select 'delete from BOSNET1.dbo.TMS_PreRouteJob;';
+	insert into @Insert
+	select 'delete from BOSNET1.dbo.TMS_PreRouteVehicle;';
+	insert into @Insert
+	select 'delete from BOSNET1.dbo.TMS_CustLongLat;';
+	insert into @Insert
+	select 'delete from BOSNET1.dbo.TMS_Progress;';
 	
 	insert into @Insert
 	SELECT
@@ -76,6 +85,19 @@ BEGIN
 	FROM
 		BOSNET1.dbo.TMS_CustLongLat
 	where CustId in (select * from @CustT);
+	
+	insert into @Insert
+	SELECT concat('insert into BOSNET1.dbo.TMS_Progress values(''',runID,''''
+      ,',''',status,'''',',',(select case when msg is null then 'NULL' else '''' + msg + ''''end)
+      ,',',(select case when pct is null then 0 else pct end)
+	  ,',',(select case when mustFinish is null then 0 else mustFinish end),','''
+	  ,branch,'''',',''',shift,'''',','''
+	  ,tripcalc,'''',',''',(select FORMAT(lastUpd,'yyyy-MM-dd hh:mm:ss')),''''
+      ,',''',(select FORMAT(created,'yyyy-MM-dd hh:mm:ss')),'''',',',
+	  (select case when maxIter is null then 0 else maxIter end)
+      ,',''',DelivDate,'''',',''',Re_RunId,''''
+	  ,',''',OriRunId,'''',',''',Channel,''');') as sc 
+	FROM BOSNET1.dbo.TMS_Progress where runId = @RunId;
 
 	select * from @Insert;
 --select * from bosnet1.dbo.TMS_PreRouteJob where RunId = @RunId;

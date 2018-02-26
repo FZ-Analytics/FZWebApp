@@ -112,6 +112,8 @@ BEGIN
 	select 'delete from BOSNET1.dbo.TMS_CustLongLat;';
 	insert into @Insert
 	select 'delete from BOSNET1.dbo.TMS_ShipmentPlan;';
+	insert into @Insert
+	select 'delete from BOSNET1.dbo.TMS_VehicleAtr;';
 
 	insert into @Insert
 	select concat(
@@ -235,6 +237,24 @@ BEGIN
 	FROM
 		BOSNET1.dbo.TMS_ShipmentPlan
 	where DO_Number in (select DO_Number from @Temp);
+	
+	  SELECT
+		concat('insert into BOSNET1.dbo.TMS_VehicleAtr values(''',
+			vehicle_code,'''',',''',branch,'''',',''',
+			startLon,'''',',''',startLat,'''',',''',
+			endLon,'''',',''',endLat,'''',',''',
+			startTime,'''',',''',endTime,'''',',''',
+			source1,'''',',''',vehicle_type,'''',',''',
+			weight,'''',',''',volume,'''',',',included,
+			',',costPerM,',',fixedCost,',''',Channel,
+			(select case when IdDriver is null then 'NULL' else '''' + IdDriver + '''' end),',',
+			(select case when NamaDriver is null then 'NULL' else '''' + NamaDriver + '''' end),',',
+			(select case when DriverDates is null then 'NULL' else '''' + DriverDates + '''' end),
+			');'
+		)	as sc 
+	FROM
+		BOSNET1.dbo.TMS_VehicleAtr
+	where branch = @BrId;
 
 	select * from @Insert;
 END
