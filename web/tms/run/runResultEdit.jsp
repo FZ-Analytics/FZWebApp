@@ -405,12 +405,8 @@
             </thead>
             <tbody>
                 <%for(Delivery j : (List<Delivery>) getList("listDelivery")) { %> 
-                <tr 
-                    <%if (!j.isFix.equals("null") && !j.vehicleCode.equals("")) {%>
-                    style="background-color: #e2e1e1"
-                    <%} else {%>
-                    class="tableRows" id="tableRow"
-                    <%}%>
+                <tr class="tableRows" id="tableRow"
+                   
                     <%if (j.vehicleCode.equals("NA")) {%>
                     style="color: red"
                     <%} else if (j.arrive.length() == 0 && j.depart.length() > 0) {%>
