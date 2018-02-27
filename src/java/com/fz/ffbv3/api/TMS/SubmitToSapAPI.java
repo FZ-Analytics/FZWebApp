@@ -82,7 +82,7 @@ public class SubmitToSapAPI {
             RunResultEditResultSubmitToSap he = gson.fromJson(content.contains("json") ? decodeContent(content) : content, RunResultEditResultSubmitToSap.class);
             String[] runIdArr = he.RunId.split("split");
             String oriRunId = runIdArr[0];
-            String runId = runId = runIdArr[1];
+            String runId = runIdArr[1];
             HashMap<String, String> hmPRV = getFromPreRouteVehicle(runId, he.vehicle_no);
             ArrayList<String> alCustId = getCustomerId(runId, he.vehicle_no);
             ArrayList<String> alStartAndEndTime = getStartAndEndTime(runId, he.vehicle_no);
@@ -325,7 +325,6 @@ public class SubmitToSapAPI {
             double distance1 = calcMeterDist(Double.parseDouble(hmLongLat.get("Long")), Double.parseDouble(hmLongLat.get("Lat")), Double.parseDouble(hmLongLat.get("Long")), Double.parseDouble(hmLongLat.get("startLat")));
             double distance2 = calcMeterDist(Double.parseDouble(hmLongLat.get("Long")), Double.parseDouble(hmLongLat.get("startLat")), Double.parseDouble(hmLongLat.get("startLon")), Double.parseDouble(hmLongLat.get("startLat")));
             double temp = distance1 + distance2;
-            System.out.println(temp + " " + alCustId.get(i) + " " + getRoute(alCustId.get(i)));
             if (temp > longestDist) {
                 longestDist = temp;
                 custId = alCustId.get(i);

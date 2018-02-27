@@ -68,7 +68,7 @@
                 $('#table').eFreezeTableHead();
                 $('.custIDClick').click(function () {
                     if ($(this).text().length > 0) {
-                        window.open("../Params/PopUp/popupDetilDOCust.jsp?custId=" + $(this).text() + "&runId=" + $("#RunIdClick").text(), null,
+                        window.open("../Params/PopUp/popupDetilDOCust.jsp?custId=" + $(this).text() + "&runId=" + $("#OriRunID").val(), null,
                                 "scrollbars=1,resizable=1,height=500,width=750");
                         return true;
                     }
@@ -405,8 +405,7 @@
             </thead>
             <tbody>
                 <%for(Delivery j : (List<Delivery>) getList("listDelivery")) { %> 
-                <tr class="tableRows" id="tableRow"
-                   
+                <tr 
                     <%if (j.vehicleCode.equals("NA")) {%>
                     style="color: red"
                     <%} else if (j.arrive.length() == 0 && j.depart.length() > 0) {%>
