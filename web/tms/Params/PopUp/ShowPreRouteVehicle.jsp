@@ -64,8 +64,9 @@
                     <th width="100px" class="fzCol">endTime</th>
                     <th width="100px" class="fzCol">source</th>
                     <th width="100px" class="fzCol">costPerM</th>
-                    <th width="100px" class="fzCol">IdDriver</th>
-                    <th width="100px" class="fzCol">NamaDriver</th>
+                    <th width="100px" class="fzCol">Id Driver</th>
+                    <th width="100px" class="fzCol">Nama Driver</th>
+                    <th width="100px" class="fzCol">agent priority</th>
                     <th width="100px" class="fzCol">inc</th>
                     <th width="100px" class="fzCol">Edit</th>
                 </tr>
@@ -85,6 +86,7 @@
                     <td class="fzCell"><%=j.costPerM%></td>
                     <td class="fzCell"><%=j.IdDriver%></td>
                     <td class="fzCell"><%=j.NamaDriver%></td>
+                    <td class="fzCell"><%=j.agent_priority%></td>
                     <td class="fzCell" ><%=j.isActive%></td>
                     <td class="fzCell"onclick="klik('<%=j.vehicle_code%>')" >
                         <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>

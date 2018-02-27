@@ -135,6 +135,7 @@ public class RouteJobListing implements BusinessLogic {
                 "		)\n" +
                 "	) AS Dist,\n" +
                 "	Request_Delivery_Date,\n" +
+                /*
                 "	CASE\n" +
                 "		WHEN len(j.customer_ID)> 3\n" +
                 "		AND j.vehicle_code <> 'NA'\n" +
@@ -227,6 +228,7 @@ public class RouteJobListing implements BusinessLogic {
                 "				AND Shipment_Number_Dummy = j.Shipment_Number_Dummy\n" +
                 "		)= 0 THEN 'INPR'\n" +
                 "	END,\n" +
+                */
                 "	rt.batch\n" +
                 "FROM\n" +
                 "	(\n" +
@@ -238,7 +240,7 @@ public class RouteJobListing implements BusinessLogic {
                 "					'_',\n" +
                 "					''\n" +
                 "				),\n" +
-                "				vehicle_code\n" +
+                "				(select concat(substring(vehicle_code,charindex('_',vehicle_code)+1,2), RIGHT(vehicle_code, 1)) as vehicle_code)\n" +
                 "			) AS Shipment_Number_Dummy\n" +
                 "		FROM\n" +
                 "			bosnet1.dbo.tms_RouteJob\n" +
@@ -357,7 +359,7 @@ public class RouteJobListing implements BusinessLogic {
                     j.transportCost = FZUtil.getRsString(rs, i++, "");
                     j.dist = FZUtil.getRsString(rs, i++, "");
                     j.rdd = FZUtil.getRsString(rs, i++, "");
-                    j.send = FZUtil.getRsString(rs, i++, "");
+                    //j.send = FZUtil.getRsString(rs, i++, "");
                     j.bat = FZUtil.getRsString(rs, i++, "").length() > 0 ? "1" : "0";
                     //System.out.println(j.custID +"_"+j.bat);
                     

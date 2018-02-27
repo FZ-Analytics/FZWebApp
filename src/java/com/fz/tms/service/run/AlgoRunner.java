@@ -843,7 +843,8 @@ public class AlgoRunner implements BusinessLogic {
                 "			costPerServiceMin,\n" +
                 "			costPerTravelMin,\n" +
                 "			IdDriver,\n" +
-                "			NamaDriver\n" +
+                "			NamaDriver,\n" +
+                "			agent_priority\n" +
                 "		FROM\n" +
                 "			BOSNET1.dbo.TMS_PreRouteVehicle\n" +
                 "		WHERE\n" +
@@ -903,7 +904,8 @@ public class AlgoRunner implements BusinessLogic {
                 "			costPerServiceMin,\n" +
                 "			costPerTravelMin,\n" +
                 "			IdDriver,\n" +
-                "			NamaDriver\n" +
+                "			NamaDriver,\n" +
+                "			agent_priority\n" +
                 "		) SELECT\n" +
                 "			'"+runID+"' AS RunId,\n" +
                 "			v.vehicle_code,\n" +
@@ -954,7 +956,11 @@ public class AlgoRunner implements BusinessLogic {
                 "			0 AS costPerServiceMin,\n" +
                 "			0 AS costPerTravelMin,\n" +
                 "			va.IdDriver,\n" +
-                "			va.NamaDriver\n" +
+                "			va.NamaDriver,\n" +
+                "			CASE\n" +
+                "				WHEN va.agent_priority is null THEN rt.value\n" +
+                "				ELSE va.agent_priority\n" +
+                "			END AS agent_priority\n" +
                 "		FROM\n" +
                 "			(\n" +
                 "				SELECT\n" +
@@ -984,6 +990,8 @@ public class AlgoRunner implements BusinessLogic {
                 "			pr.param = 'HargaSolar'\n" +
                 "		LEFT OUTER JOIN bosnet1.dbo.TMS_Params bm ON\n" +
                 "			bm.param = 'DefaultKonsumsiBBm'\n" +
+                "		LEFT OUTER JOIN bosnet1.dbo.TMS_Params rt ON\n" +
+                "			rt.param = 'Defaultagentpriority'\n" +
                 "		WHERE\n" +
                 "			va.included = 1\n" +
                 "			and va.Channel in (" + shn + ");";

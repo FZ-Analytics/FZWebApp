@@ -45,6 +45,7 @@ public class ShowPreRouteVehicle implements BusinessLogic {
                 "	costPerM,\n" +
                 "	IdDriver,\n" +
                 "	NamaDriver,\n" +
+                "	agent_priority,\n" +
                 "	isActive\n" +
                 "FROM\n" +
                 "	BOSNET1.dbo.TMS_PreRouteVehicle\n" +
@@ -74,6 +75,7 @@ public class ShowPreRouteVehicle implements BusinessLogic {
                     ve.costPerM = FZUtil.getRsString(rs, i++, "");
                     ve.IdDriver = FZUtil.getRsString(rs, i++, "");
                     ve.NamaDriver = FZUtil.getRsString(rs, i++, "");
+                    ve.agent_priority = FZUtil.getRsString(rs, i++, "");
                     ve.isActive = FZUtil.getRsString(rs, i++, "");
                     js.add(ve);
                 }

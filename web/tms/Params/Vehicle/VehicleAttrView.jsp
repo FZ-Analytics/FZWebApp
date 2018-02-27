@@ -31,7 +31,8 @@
                             '\",\"endTime\":\"' + $("#endTime").val() + '\",\"source1\":\"' + $("#source1").val() +
                             '\",\"included\":\"' + $("#included").val() + '\",\"costPerM\":\"' + $("#costPerM").val() +
                             '\",\"fixedCost\":\"' + $("#fixedCost").val() + '\",\"Channel\":\"' + $("#Channel").val() +
-                            '\",\"IdDriver\":\"' + $("#FixIdDriver").val() + '\",\"NamaDriver\":\"' + $("#NamaDriver").val() +'\"}';
+                            '\",\"IdDriver\":\"' + $("#FixIdDriver").val() + '\",\"NamaDriver\":\"' + $("#NamaDriver").val() +
+                            '\",\"agent_priority\":\"' + $("#agent_priority").val() + '\"}';
                     var data = [];
                     //alert(jsonForServer);
                     $.post($apiAddress, {json: jsonForServer}).done(function (data) {
@@ -164,6 +165,10 @@
             <br>
             <label class="fzLabel">Nama Driver:</label> 
             <input class="fzInput" type="text" id="NamaDriver" name="NamaDriver" value="<%=get("NamaDriver")%>" maxlength="50" readonly="true">
+            
+            <br>
+            <label class="fzLabel">Vehicle Priority:</label> 
+            <input class="fzInput" type="text" id="agent_priority" name="agent_priority" value="<%=get("agent_priority")%>" maxlength="50">
             
             <br><br>
             <button class="btn fzButton" type="submit" id="btn"><%=get("flag")%></button>

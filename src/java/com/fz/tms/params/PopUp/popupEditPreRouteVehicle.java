@@ -53,7 +53,8 @@ public class popupEditPreRouteVehicle  implements BusinessLogic {
                 "	pr.value,\n" +
                 "	va.costPerM,\n" +
                 "	re.IdDriver,\n" +
-                "	re.NamaDriver\n" +
+                "	re.NamaDriver,\n" +
+                "	re.agent_priority\n" +
                 "FROM\n" +
                 "	BOSNET1.dbo.TMS_PreRouteVehicle re\n" +
                 "LEFT OUTER JOIN bosnet1.dbo.TMS_Params pr ON\n" +
@@ -91,6 +92,7 @@ public class popupEditPreRouteVehicle  implements BusinessLogic {
                     ve.persentase = FZUtil.getRsString(rs, i++, "");
                     ve.IdDriver = FZUtil.getRsString(rs, i++, "");
                     ve.NamaDriver = FZUtil.getRsString(rs, i++, "");
+                    ve.agent_priority = FZUtil.getRsString(rs, i++, "");
                 }
                 ve.RunId = runId;
                 
@@ -118,6 +120,7 @@ public class popupEditPreRouteVehicle  implements BusinessLogic {
                 request.setAttribute("persentase", ve.persentase);
                 request.setAttribute("IdDriver", ve.IdDriver);
                 request.setAttribute("NamaDriver", ve.NamaDriver);
+                request.setAttribute("agent_priority", ve.agent_priority);
                 
             }
          }
@@ -143,6 +146,7 @@ public class popupEditPreRouteVehicle  implements BusinessLogic {
                 "	fixedCost = '"+ve.fixedCost+"',\n" +
                 "	IdDriver = '"+ve.IdDriver+"',\n" +
                 "	NamaDriver = '"+ve.NamaDriver+"',\n" +
+                "	agent_priority = '"+ve.agent_priority+"',\n" +
                 "	isActive = '"+ve.isActive+"'\n" +
                 "WHERE\n" +
                 "	RunId = '"+ve.RunId+"'\n" +

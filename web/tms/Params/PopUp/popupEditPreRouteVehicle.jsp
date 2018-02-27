@@ -36,7 +36,8 @@
                             '\",\"startTime\":\"' + $("#startTime").val() + '\",\"endTime\":\"' + $("#endTime").val() +
                             '\",\"source1\":\"' + $("#source1").val() + '\",\"costPerM\":\"' + $("#costPerM").val() +
                             '\",\"fixedCost\":\"' + $("#fixedCost").val() + '\",\"IdDriver\":\"' + $("#FixIdDriver").val() + 
-                            '\",\"NamaDriver\":\"' + $("#NamaDriver").val() + '\",\"isActive\":\"' + $("#isActive").val() +'\"}';
+                            '\",\"NamaDriver\":\"' + $("#NamaDriver").val() + '\",\"agent_priority\":\"' + $("#agent_priority").val() + 
+                            '\",\"isActive\":\"' + $("#isActive").val() +'\"}';
                     var data = [];
                     
                     $.post($apiAddress, {json: jsonForServer}).done(function (data) {
@@ -163,6 +164,10 @@
         <br>
         <label class="fzLabel">Driver name:</label> 
         <input class="fzInput" type="text" id="NamaDriver" name="NamaDriver" value='<%=get("NamaDriver")%>'readonly="true">
+        
+        <br>
+        <label class="fzLabel">agent priority:</label> 
+        <input class="fzInput" type="text" id="agent_priority" name="agent_priority" value='<%=get("agent_priority")%>'>
         
         <br>
         <label class="fzLabel">isActive:</label> 

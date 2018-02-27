@@ -53,6 +53,7 @@ public class ParamVehicleViewPre   implements BusinessLogic {
             //System.out.println(ar.get(0).IdDriver.length());
             request.setAttribute("IdDriver", st.get(st.size()-1).IdDriver);
             request.setAttribute("NamaDriver", st.get(st.size()-1).NamaDriver);
+            request.setAttribute("agent_priority", "0");
             request.setAttribute("flag", "insert");
             request.setAttribute("extVe", "false");
         }else{
@@ -82,6 +83,7 @@ public class ParamVehicleViewPre   implements BusinessLogic {
             //System.out.println(ar.get(0).IdDriver.length());
             request.setAttribute("IdDriver", ar.get(0).IdDriver.length() > 0 ? ar.get(0).IdDriver : st.get(st.size()-1).IdDriver);
             request.setAttribute("NamaDriver", ar.get(0).IdDriver.length() > 0 ? ar.get(0).NamaDriver : st.get(st.size()-1).NamaDriver);
+            request.setAttribute("agent_priority", ar.get(0).agent_priority);
             request.setAttribute("flag", dao.isInsert(vehiId).equals("OK") ? "update" : "insert");
             request.setAttribute("extVe", "false");
         }

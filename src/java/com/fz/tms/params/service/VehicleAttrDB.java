@@ -154,11 +154,11 @@ public class VehicleAttrDB {
         
         if(flag.equalsIgnoreCase("insert")){
             sql = "INSERT INTO bosnet1.dbo.TMS_VehicleAtr "
-                + "(vehicle_code, branch, startLon, startLat, endLon, endLat, startTime, endTime, source1, vehicle_type, weight, volume, included, costPerM, fixedCost, Channel, IdDriver, NamaDriver, DriverDates) "
+                + "(vehicle_code, branch, startLon, startLat, endLon, endLat, startTime, endTime, source1, vehicle_type, weight, volume, included, costPerM, fixedCost, Channel, IdDriver, NamaDriver, agent_priority, DriverDates) "
                 + " values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";            
         }else if(flag.equalsIgnoreCase("update")){
             sql = "update bosnet1.dbo.TMS_VehicleAtr "
-                + " set branch = ?, startLon = ?, startLat = ?, endLon = ?, endLat = ?, startTime = ?, endTime = ?, source1 = ?, vehicle_type = ?, weight = ?, volume = ?, included = ?, costPerM = ?, fixedCost = ?, Channel = ?, IdDriver = ?, NamaDriver = ?, DriverDates = ?"
+                + " set branch = ?, startLon = ?, startLat = ?, endLon = ?, endLat = ?, startTime = ?, endTime = ?, source1 = ?, vehicle_type = ?, weight = ?, volume = ?, included = ?, costPerM = ?, fixedCost = ?, Channel = ?, IdDriver = ?, NamaDriver = ?, agent_priority = ?, DriverDates = ?"
                 + " where vehicle_code = ?;";
         }
         
@@ -194,7 +194,8 @@ public class VehicleAttrDB {
                 psHdr.setString(16, c.Channel);
                 psHdr.setString(17, c.IdDriver);
                 psHdr.setString(18, c.NamaDriver);
-                psHdr.setString(19, c.DriverDates);
+                psHdr.setString(19, c.agent_priority);
+                psHdr.setString(20, c.DriverDates);
             }else if(flag.equalsIgnoreCase("update")){
                 psHdr.setString(1, c.branch);
                 psHdr.setString(2, c.startLon);
@@ -213,8 +214,9 @@ public class VehicleAttrDB {
                 psHdr.setString(15, c.Channel);
                 psHdr.setString(16, c.IdDriver);
                 psHdr.setString(17, c.NamaDriver);
-                psHdr.setString(18, c.DriverDates);
-                psHdr.setString(19, c.vehicle_code);
+                psHdr.setString(18, c.agent_priority);
+                psHdr.setString(19, c.DriverDates);
+                psHdr.setString(20, c.vehicle_code);
             }
             
             
@@ -348,7 +350,8 @@ public class VehicleAttrDB {
                     "	va.fixedCost,\n" +
                     "	va.Channel,\n" +
                     "	va.IdDriver,\n" +
-                    "	va.NamaDriver\n" +
+                    "	va.NamaDriver,\n" +
+                    "	va.agent_priority\n" +
                     "FROM\n" +
                     "	BOSNET1.dbo.Vehicle vh\n" +
                     "LEFT JOIN BOSNET1.dbo.TMS_VehicleAtr va ON\n" +
@@ -373,7 +376,8 @@ public class VehicleAttrDB {
                     "	va.fixedCost,\n" +
                     "	va.Channel,\n" +
                     "	va.IdDriver,\n" +
-                    "	va.NamaDriver\n" +
+                    "	va.NamaDriver,\n" +
+                    "	va.agent_priority\n" +
                     "FROM\n" +
                     "	BOSNET1.dbo.TMS_VehicleAtr va\n" +
                     "WHERE\n" +
@@ -402,6 +406,7 @@ public class VehicleAttrDB {
                         c.Channel = FZUtil.getRsString(rs, i++, "");
                         c.IdDriver = FZUtil.getRsString(rs, i++, "");
                         c.NamaDriver = FZUtil.getRsString(rs, i++, "");
+                        c.agent_priority = FZUtil.getRsString(rs, i++, "0");
                         ar.add(c);
                     }
                 }
@@ -451,30 +456,30 @@ public class VehicleAttrDB {
                 // create sql
                 String sql ;
                 sql = "SELECT\n" +
-                "	DISTINCT *\n" +
-                "FROM\n" +
-                "	(\n" +
-                "		SELECT\n" +
-                "			workplaceid,\n" +
-                "			salesid,\n" +
-                "			salesname\n" +
-                "		FROM\n" +
-                "			sysutil.IBACONSOL.dbo.BOSNET_FSR_TYPE\n" +
-                "		WHERE\n" +
-                "			TypeID = 10\n" +
-                "			AND Active = 1\n" +
-                "			AND SFA = 0\n" +
-                "			AND WorkplaceId = '"+str+"'\n" +
-                "	UNION ALL SELECT\n" +
-                "				Workplace AS workplaceid,\n" +
-                "				Driver_ID AS salesid,\n" +
-                "				Driver_Name AS salesname\n" +
-                "			FROM\n" +
-                "				BOSNET1.dbo.Driver\n" +
-                "			WHERE\n" +
-                "				Driver_ID LIKE '000008%'\n" +
-                "				AND Workplace = '"+str+"'\n" +
-                "	) w\n" +
+                    "	DISTINCT *\n" +
+                    "FROM\n" +
+                    "	(\n" +
+                    "		SELECT\n" +
+                    "			workplaceid collate DATABASE_DEFAULT AS workplaceid,\n" +
+                    "			salesid collate DATABASE_DEFAULT AS salesid,\n" +
+                    "			salesname collate DATABASE_DEFAULT AS salesname\n" +
+                    "		FROM\n" +
+                    "			sysutil.IBACONSOL.dbo.BOSNET_FSR_TYPE\n" +
+                    "		WHERE\n" +
+                    "			TypeID = 10\n" +
+                    "			AND Active = 1\n" +
+                    "			AND SFA = 0\n" +
+                    "			AND WorkplaceId = '"+str+"'\n" +
+                    "	UNION ALL SELECT\n" +
+                    "				Workplace collate DATABASE_DEFAULT AS workplaceid,\n" +
+                    "				Driver_ID collate DATABASE_DEFAULT AS salesid,\n" +
+                    "				Driver_Name collate DATABASE_DEFAULT AS salesname\n" +
+                    "			FROM\n" +
+                    "				BOSNET1.dbo.Driver\n" +
+                    "			WHERE\n" +
+                    "				Driver_ID LIKE '000008%'\n" +
+                    "				AND Workplace = '"+str+"'\n" +
+                    "	) w\n" +
                 nt;
                 
                 // query
