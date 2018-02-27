@@ -844,7 +844,8 @@ public class AlgoRunner implements BusinessLogic {
                 "			costPerTravelMin,\n" +
                 "			IdDriver,\n" +
                 "			NamaDriver,\n" +
-                "			agent_priority\n" +
+                "			agent_priority,\n" +
+                "			max_cust\n" +
                 "		FROM\n" +
                 "			BOSNET1.dbo.TMS_PreRouteVehicle\n" +
                 "		WHERE\n" +
@@ -905,7 +906,8 @@ public class AlgoRunner implements BusinessLogic {
                 "			costPerTravelMin,\n" +
                 "			IdDriver,\n" +
                 "			NamaDriver,\n" +
-                "			agent_priority\n" +
+                "			agent_priority,\n" +
+                "			max_cust\n" +
                 "		) SELECT\n" +
                 "			'"+runID+"' AS RunId,\n" +
                 "			v.vehicle_code,\n" +
@@ -960,7 +962,11 @@ public class AlgoRunner implements BusinessLogic {
                 "			CASE\n" +
                 "				WHEN va.agent_priority is null THEN rt.value\n" +
                 "				ELSE va.agent_priority\n" +
-                "			END AS agent_priority\n" +
+                "			END AS agent_priority,\n" +
+                "			CASE\n" +
+                "				WHEN va.max_cust is null THEN ry.value\n" +
+                "				ELSE va.max_cust\n" +
+                "			END AS max_cust\n" +
                 "		FROM\n" +
                 "			(\n" +
                 "				SELECT\n" +
@@ -992,6 +998,8 @@ public class AlgoRunner implements BusinessLogic {
                 "			bm.param = 'DefaultKonsumsiBBm'\n" +
                 "		LEFT OUTER JOIN bosnet1.dbo.TMS_Params rt ON\n" +
                 "			rt.param = 'Defaultagentpriority'\n" +
+                "		LEFT OUTER JOIN bosnet1.dbo.TMS_Params ry ON\n" +
+                "			ry.param = 'DefaultMaxCust'\n" +
                 "		WHERE\n" +
                 "			va.included = 1\n" +
                 "			and va.Channel in (" + shn + ");";
@@ -1245,6 +1253,17 @@ public class AlgoRunner implements BusinessLogic {
                 "			a.noid = 1\n" +
                 "	) cl ON\n" +
                 "	sp.customer_id = cl.custID\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			ty.Delivery_Number\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_Result_Shipment ty\n" +
+                "		INNER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
+                "			ty.Delivery_Number = tu.Delivery_Number\n" +
+                "		WHERE\n" +
+                "			tu.SAP_Status IS NULL\n" +
+                "	) ss ON\n" +
+                "	sp.DO_Number = ss.Delivery_Number\n" +
                 "LEFT OUTER JOIN bosnet1.dbo.TMS_CustAtr ca ON\n" +
                 "	sp.customer_id = ca.customer_id\n" +
                 "LEFT OUTER JOIN bosnet1.dbo.TMS_Params dd ON\n" +
@@ -1285,6 +1304,7 @@ public class AlgoRunner implements BusinessLogic {
                 "		- 7,\n" +
                 "		GETDATE()\n" +
                 "	)\n" +
+                "	AND ss.Delivery_Number IS NULL\n" +
                 query + "\n" +
                 "ORDER BY\n" +
                 "	sp.Customer_ID ASC\n";
@@ -1445,6 +1465,8 @@ public class AlgoRunner implements BusinessLogic {
                 }                
             }
             
+            asd = treeSAP(asd);
+            
             try (Connection con = (new Db()).getConnection("jdbc/fztms")){
                 try (PreparedStatement ps = con.prepareStatement(sql) ){
                     ps.clearParameters();                    
@@ -1571,13 +1593,13 @@ public class AlgoRunner implements BusinessLogic {
             }//System.out.println(pl.get("Customer_ID"));
 
             if(pl.get("Customer_ID").equals("5820001001") || pl.get("Customer_ID").equals("5820000348")){
-                System.out.println(pl.get("Customer_ID"));
+                /*System.out.println(pl.get("Customer_ID"));
                 System.out.println("DeliveryDeadline " + pl.get("DeliveryDeadline"));
                 System.out.println("Distribution_Channel "+pl.get("Distribution_Channel"));
                 System.out.println("dateDeliv "+dateDeliv);
                 System.out.println("Request_Delivery_Date "+pl.get("Request_Delivery_Date"));
                 System.out.println("Customer_priority :" + pl.get("Customer_priority"));
-                System.out.println("str :" + str);
+                System.out.println("str :" + str);*/
             }
         }catch(Exception e){
             throw new Exception(pl.toString() + ";" + e);
@@ -1664,5 +1686,61 @@ public class AlgoRunner implements BusinessLogic {
             }
         }
         return err;
+    }
+    
+    public List<HashMap<String, String>> treeSAP(List<HashMap<String, String>> px) throws Exception{
+        callPI_DeliveryOrder(px);
+        
+        return px;
+    }
+    
+    public List<HashMap<String, String>> callPI_DeliveryOrder(List<HashMap<String, String>> py) throws Exception{
+        HashMap<String, String> px = new HashMap<String, String>();
+        
+        String s = "";
+        for(int a = 0;a<py.size();a++){
+            px = new HashMap<String, String>();
+            px = py.get(a);
+            
+            if(s.length() > 0)  s = s + ",'" + px.get("DO_Number") + "'";
+            else    s = s + "'" + px.get("DO_Number") + "'";            
+        }
+        
+        String sql = "SELECT distinct DONumber\n" +
+                "  FROM PICONSOL.dbo.PI_DeliveryOrder where DONumber in ("+s+")"
+                + " and (GoodsMovementStat = 'C' or PODStatus = 'C')";
+        
+        System.out.println(sql); 
+        List<HashMap<String, String>> pl = new ArrayList<HashMap<String, String>>();        
+        try (Connection con = (new Db()).getConnection("jdbc/sapDB");
+                PreparedStatement ps = con.prepareStatement(sql)) {
+            System.out.println(sql);
+            try (ResultSet rs = ps.executeQuery()){
+                while (rs.next()) {
+                    px = new HashMap<String, String>();
+                    px.put("DONumber", rs.getString("DONumber"));
+                    px.put("GoodsMovementStat", rs.getString("GoodsMovementStat"));
+                    px.put("PODStatus", rs.getString("PODStatus"));
+                    
+                    pl.add(px);
+                }
+            }
+        }
+        
+        for(int a = 0;a<py.size();a++){
+            px = new HashMap<String, String>();
+            px = py.get(a);
+            if(pl.size() > 0){
+                for (HashMap<String, String> pl1 : pl) {                    
+                    if(px.get("DO_Number").equalsIgnoreCase(pl1.get("DONumber"))){
+                       //px.replace("Customer_priority", String.valueOf(10));
+                       System.out.println(px.get("DO_Number") + "()" + pl1.get("GoodsMovementStat") + "()" + pl1.get("PODStatus"));
+                       py.get(a).replace("Customer_priority", String.valueOf(10));                           
+                    }
+                }
+            }           
+        }
+        
+        return py;
     }
 }

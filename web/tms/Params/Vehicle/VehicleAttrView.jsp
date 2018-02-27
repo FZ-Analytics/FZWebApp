@@ -32,7 +32,7 @@
                             '\",\"included\":\"' + $("#included").val() + '\",\"costPerM\":\"' + $("#costPerM").val() +
                             '\",\"fixedCost\":\"' + $("#fixedCost").val() + '\",\"Channel\":\"' + $("#Channel").val() +
                             '\",\"IdDriver\":\"' + $("#FixIdDriver").val() + '\",\"NamaDriver\":\"' + $("#NamaDriver").val() +
-                            '\",\"agent_priority\":\"' + $("#agent_priority").val() + '\"}';
+                            '\",\"agent_priority\":\"' + $("#agent_priority").val() + '\",\"max_cust\":\"' + $("#max_cust").val() + '\"}';
                     var data = [];
                     //alert(jsonForServer);
                     $.post($apiAddress, {json: jsonForServer}).done(function (data) {
@@ -169,6 +169,10 @@
             <br>
             <label class="fzLabel">Vehicle Priority:</label> 
             <input class="fzInput" type="text" id="agent_priority" name="agent_priority" value="<%=get("agent_priority")%>" maxlength="50">
+            
+            <br>
+            <label class="fzLabel">max cust:</label> 
+            <input class="fzInput" type="text" id="max_cust" name="max_cust" value="<%=get("max_cust")%>" maxlength="50">
             
             <br><br>
             <button class="btn fzButton" type="submit" id="btn"><%=get("flag")%></button>

@@ -22,3 +22,12 @@ CREATE TABLE BOSNET1.dbo.TMS_PreRouteVehicle (
 	IdDriver varchar(20),
 	NamaDriver varchar(50)
 ) ;
+
+//26-02-2018
+alter table bosnet1.dbo.TMS_PreRouteVehicle
+add agent_priority int;
+
+//27-02-2018
+alter table bosnet1.dbo.TMS_PreRouteVehicle
+add max_cust int;
+
