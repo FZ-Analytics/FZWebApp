@@ -35,5 +35,6 @@ public class Vehicle {
     public String IdDriver;
     public String NamaDriver;
     public String agent_priority;
-    public String DriverDates;
+    public String max_cust;
+    public String DriverDates;    
 }

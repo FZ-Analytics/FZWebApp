@@ -19,3 +19,11 @@ CREATE TABLE BOSNET1.dbo.TMS_VehicleAtr (
 	NamaDriver varchar(50),
 	DriverDates varchar(20)
 ) ;
+
+//26-02-2018
+alter table bosnet1.dbo.TMS_VehicleAtr
+add agent_priority int;
+
+//27-02-2018
+alter table bosnet1.dbo.TMS_VehicleAtr
+add max_cust int;

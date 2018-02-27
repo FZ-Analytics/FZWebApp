@@ -37,7 +37,7 @@
                             '\",\"source1\":\"' + $("#source1").val() + '\",\"costPerM\":\"' + $("#costPerM").val() +
                             '\",\"fixedCost\":\"' + $("#fixedCost").val() + '\",\"IdDriver\":\"' + $("#FixIdDriver").val() + 
                             '\",\"NamaDriver\":\"' + $("#NamaDriver").val() + '\",\"agent_priority\":\"' + $("#agent_priority").val() + 
-                            '\",\"isActive\":\"' + $("#isActive").val() +'\"}';
+                            '\",\"max_cust\":\"' + $("#max_cust").val() + '\",\"isActive\":\"' + $("#isActive").val() +'\"}';
                     var data = [];
                     
                     $.post($apiAddress, {json: jsonForServer}).done(function (data) {
@@ -168,6 +168,10 @@
         <br>
         <label class="fzLabel">agent priority:</label> 
         <input class="fzInput" type="text" id="agent_priority" name="agent_priority" value='<%=get("agent_priority")%>'>
+        
+        <br>
+        <label class="fzLabel">max cust:</label> 
+        <input class="fzInput" type="text" id="max_cust" name="max_cust" value='<%=get("max_cust")%>'>
         
         <br>
         <label class="fzLabel">isActive:</label> 

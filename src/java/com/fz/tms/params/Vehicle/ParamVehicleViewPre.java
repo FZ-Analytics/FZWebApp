@@ -41,7 +41,7 @@ public class ParamVehicleViewPre   implements BusinessLogic {
             request.setAttribute("endLat", "");
             request.setAttribute("startTime", "");
             request.setAttribute("endTime", "");
-            request.setAttribute("source1", "");
+            request.setAttribute("source1", "EXT");
             request.setAttribute("vehicle_type", "");
             request.setAttribute("weight", "");
             request.setAttribute("volume", "");
@@ -54,6 +54,7 @@ public class ParamVehicleViewPre   implements BusinessLogic {
             request.setAttribute("IdDriver", st.get(st.size()-1).IdDriver);
             request.setAttribute("NamaDriver", st.get(st.size()-1).NamaDriver);
             request.setAttribute("agent_priority", "0");
+            request.setAttribute("max_cust", "0");
             request.setAttribute("flag", "insert");
             request.setAttribute("extVe", "false");
         }else{
@@ -84,6 +85,7 @@ public class ParamVehicleViewPre   implements BusinessLogic {
             request.setAttribute("IdDriver", ar.get(0).IdDriver.length() > 0 ? ar.get(0).IdDriver : st.get(st.size()-1).IdDriver);
             request.setAttribute("NamaDriver", ar.get(0).IdDriver.length() > 0 ? ar.get(0).NamaDriver : st.get(st.size()-1).NamaDriver);
             request.setAttribute("agent_priority", ar.get(0).agent_priority);
+            request.setAttribute("max_cust", ar.get(0).max_cust);
             request.setAttribute("flag", dao.isInsert(vehiId).equals("OK") ? "update" : "insert");
             request.setAttribute("extVe", "false");
         }
