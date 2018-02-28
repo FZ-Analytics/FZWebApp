@@ -46,7 +46,7 @@ public class UserLogic
     rspMsg = new ResponseMessege();
     sendRsp = new StatusHolder();
    
-    strQuery = "SELECT c.gbUserID as UserID, a.Name, a.Phone, a.lnkRoleID, b.Brand, b.Type, d.VehicleID, d.VehicleName FROM fbuser as a, " +
+    strQuery = "SELECT c.gbUserID as UserID, a.Name, a.Phone, a.lnkRoleID, b.Brand, b.Tipe, d.VehicleID, d.VehicleName FROM fbuser as a, " +
                 "fbdevice as b, gbuser AS c, fbvehicle AS d WHERE c.Username=\"" + Username + "\" AND c.Password=\"" +
                 Password + "\" AND a.lnkDeviceID=b.DeviceID AND a.gbUserID=c.gbUserID AND a.VehicleID=d.VehicleID";
 
@@ -70,7 +70,7 @@ public class UserLogic
       else
       {
         sendRsp.setCode(FixValue.intResponSuccess);
-        sendRsp.setRsp(rspMsg.LoginMsgResponse(FixValue.intSuccess, FixMessege.strLoginSuccess, res, rows, res.getInt("VehicleID")));
+        sendRsp.setRsp(rspMsg.LoginMsgResponse(FixValue.intSuccess, FixMessege.strLoginSuccess, res, rows, -1));
 
 				strQuery = "UPDATE gbuser SET StartTime=CURRENT_TIMESTAMP()" + ", lnkLoginID=" + 
 									 FixValue.intLoginStatus + " WHERE Username=\"" + Username + "\" AND Password=\"" + Password + "\"";
@@ -157,7 +157,7 @@ public class UserLogic
       {
   			if(VehicleID == 0)
         {
-          strQuery = "SELECT a.NAME, a.Phone, a.lnkRoleID, b.Brand, b.Type, c.gbUserID AS UserID, " +
+          strQuery = "SELECT a.NAME, a.Phone, a.lnkRoleID, b.Brand, b.Tipe, c.gbUserID AS UserID, " +
                      "e.divID AS Divisi, e.estateID AS Estate, e.millID FROM fbuser AS a, fbdevice AS b, " +
                      "gbuser AS c, fbrole AS d, fbdiv AS e WHERE c.Username=\"" + Username + "\"" +
                      "AND c.PASSWORD=\"" + Password + "\" AND a.lnkDeviceID=b.DeviceID AND a.gbUserID=c.gbUserID " +
@@ -165,9 +165,9 @@ public class UserLogic
         }
         else
     		{
-          strQuery = "SELECT c.gbUserID as UserID, a.Name, a.Phone, a.lnkRoleID, b.Brand, b.Tipe, d.VehicleID, d.VehicleName, d.Type, d.Description FROM fbuser as a, " +
-                "fbdevice as b, gbuser AS c, fbvehicle AS d WHERE c.Username=\"" + Username + "\" AND c.Password=\"" +
-                Password + "\" AND a.lnkDeviceID=b.DeviceID AND a.gbUserID=c.gbUserID AND a.VehicleID=d.VehicleID";
+          strQuery = "SELECT c.gbUserID as UserID, a.Name, a.Phone, a.lnkRoleID, b.Brand, b.Tipe, d.VehicleID, d.VehicleName, d.Type, d.Description, e.estateID AS Estate " +
+                "FROM fbuser as a, fbdevice as b, gbuser AS c, fbvehicle AS d, fbdiv AS e WHERE c.Username=\"" + Username + "\" AND c.Password=\"" +
+                Password + "\" AND a.lnkDeviceID=b.DeviceID AND a.gbUserID=c.gbUserID AND a.VehicleID=d.VehicleID AND d.DefDivCode=e.divID";
         }
  
    			logger.severe("[Query Username] -> " + strQuery);

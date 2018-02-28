@@ -125,20 +125,27 @@ public class EntryLogic
     String divID = entryModel.getJobData().getDivID().trim().toUpperCase();
     String block1 = entryModel.getJobData().getBlock1().trim().toUpperCase();
     String block2 = entryModel.getJobData().getBlock2().trim().toUpperCase();
-    String readyTime = entryModel.getJobData().getReadyTime().trim();
 
     String estmKg = entryModel.getJobData().getEstmKg().toString();
     String dirLoc = entryModel.getJobData().getDirLoc();
     String isLastOrder = entryModel.getJobData().getIsLastOrder();
-    String remark = entryModel.getJobData().getRemark();
 
     Integer userID = entryModel.getJobData().getUserID();
 		
-		if(validateClock(readyTime) == -1)
-		{
+    String readyTime = "";
+    String remark = "Kosong";
+
+    if(entryModel.getJobData().getReadyTime() != null)
+      readyTime = entryModel.getJobData().getReadyTime().trim();
+
+    if(entryModel.getJobData().getRemark() != null)
+      remark = entryModel.getJobData().getRemark();
+
+    if(!readyTime.matches("") && (validateClock(readyTime) == -1))
+    {
       sendRsp.setCode(FixValue.intResponFail);
-			sendRsp.setRsp(rspMsg.CoreMsgResponse(FixValue.intFail, FixMessege.strBinReadyFailed));
-		}		
+    	sendRsp.setRsp(rspMsg.CoreMsgResponse(FixValue.intFail, FixMessege.strBinReadyFailed));
+    }
 		else
 		if (!(isLastOrder.equals("yes") ||  isLastOrder.equals("no"))) 
 		{
@@ -146,7 +153,7 @@ public class EntryLogic
 			sendRsp.setRsp(rspMsg.CoreMsgResponse(FixValue.intFail, FixMessege.strBinReadyFailed));
 		}
 		else
-    if (remark.trim().length() == 0) 
+    if((remark.trim().length() == 0) && (!remark.matches("Kosong")))  
 		{
       sendRsp.setCode(FixValue.intResponFail);
 			sendRsp.setRsp(rspMsg.CoreMsgResponse(FixValue.intFail, FixMessege.strRemarkFailed));
@@ -281,6 +288,9 @@ public class EntryLogic
 
   private int validateClock(String readyTime) 
 	{
+    if(readyTime.matches(""))
+      return -2;
+    
 		int readyTimeInt = FZUtil.clockToMin(readyTime);
     if ((readyTimeInt < 0) || (readyTimeInt > 24 * 60))
 			return -1;

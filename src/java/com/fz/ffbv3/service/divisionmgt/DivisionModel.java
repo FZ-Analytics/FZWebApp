@@ -15,15 +15,15 @@ import com.google.gson.annotations.SerializedName;
  */
 public class DivisionModel
 {
-  @SerializedName("RequestData")
+  @SerializedName("DashboardData")
   @Expose
-  private DivisionData RequestData;
+  private DivisionData DashboardData;
 
-  public DivisionData getRequestData() {
-    return RequestData;
+  public DivisionData getDashboardData() {
+    return DashboardData;
   }
 
-  public void setRequestData(DivisionData RequestData) {
-    this.RequestData = RequestData;
+  public void setDashboardData(DivisionData DashboardData) {
+    this.DashboardData = DashboardData;
   }
 }

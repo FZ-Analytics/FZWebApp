@@ -41,8 +41,8 @@ import javax.ws.rs.core.Response;
  *
  * @author Ignat
  */
-@Path("v1/reasons")
-public class ReasonApi
+@Path("v2/reasons")
+public class Reason2Api
 {
   private final Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
 //  FileHandler fh = null;
@@ -55,7 +55,7 @@ public class ReasonApi
   /**
    * Creates a new instance of ReasonApi
    */
-  public ReasonApi()
+  public Reason2Api()
   {
 /*    
 		try 

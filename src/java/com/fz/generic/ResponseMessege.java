@@ -5,6 +5,8 @@
  */
 package com.fz.generic;
 
+import com.fz.ffbv3.service.divisionmgt.DivisionHolder;
+import com.fz.ffbv3.service.divisionmgt.DivisionModule;
 import com.fz.ffbv3.service.entrymgt.EntryHolder;
 import com.fz.ffbv3.service.entrymgt.EntryModule;
 import com.fz.ffbv3.service.reasonmgt.ReasonHolder;
@@ -70,6 +72,9 @@ public class ResponseMessege
 	EntryModule entryModule;
 	EntryHolder entryHolder;
 
+  DivisionModule divisionModule;
+  DivisionHolder divisionHolder;
+
   Gson gson;
 
   public String CoreMsgResponse(Integer Code, String Msg)
@@ -126,10 +131,15 @@ public class ResponseMessege
       else
       if(VehicleID > 0)
       {
-        userRsp.setVehicleID(res.getInt("VehicleID"));
-        userRsp.setVehicleName(res.getString("VehicleName"));
         userRsp.setType(res.getString("Type"));
         userRsp.setDescription(res.getString("Description"));
+        userRsp.setEstate(res.getString("Estate"));
+      }
+
+      if((VehicleID == -1) || (VehicleID > 0))
+      {
+        userRsp.setVehicleID(res.getInt("VehicleID"));
+        userRsp.setVehicleName(res.getString("VehicleName"));
       }
     }
     
@@ -335,5 +345,40 @@ public class ResponseMessege
     res.close();
     gson = new GsonBuilder().setPrettyPrinting().create(); 
   	return gson.toJson(entryHolder);
+  }
+
+   public String DashbordDivisiMsgResponse(Integer Code, String Msg, ResultSet res, Integer rows) throws SQLException
+  {
+    coreRsp = new CoreModule();    
+    coreRsp.setCode(Code);
+    coreRsp.setMsg(Msg);
+    
+    divisionModule = new DivisionModule();
+
+    for(int i=0; i<rows; i++)
+    {      
+      divisionModule.setDivID(res.getString("divID"));
+      divisionModule.setTripsCount(res.getInt("TripsCount"));
+      divisionModule.setKg1(res.getInt("kg1"));
+      divisionModule.setKg2(res.getInt("kg2"));
+      divisionModule.setKg3(res.getInt("kg3"));
+      divisionModule.setKg4(res.getInt("kg4"));   
+      divisionModule.setTrip1(res.getInt("trip1"));
+      divisionModule.setTrip2(res.getInt("trip2"));
+      divisionModule.setTrip3(res.getInt("trip3"));
+      divisionModule.setTrip4(res.getInt("trip4"));      
+      divisionModule.setActualKgs(res.getDouble("ActualKgs"));
+      divisionModule.setAvgTrip(res.getDouble("avgTrip"));
+      divisionModule.setKgsTax(res.getDouble("KgsTax"));
+      divisionModule.setAvgTax(res.getDouble("avgTax"));
+
+      res.next();
+    }
+    
+    divisionHolder = new DivisionHolder(coreRsp, divisionModule);
+    
+    res.close();
+    gson = new GsonBuilder().setPrettyPrinting().create(); 
+  	return gson.toJson(divisionHolder);
   }
 }

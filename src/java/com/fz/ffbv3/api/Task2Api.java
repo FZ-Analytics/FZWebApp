@@ -44,8 +44,8 @@ import javax.ws.rs.core.Response;
  *
  * @author Ignat
  */
-@Path("v1/tasks")
-public class TaskApi
+@Path("v2/tasks")
+public class Task2Api
 {
   private final Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
 //  FileHandler fh = null;
@@ -58,7 +58,7 @@ public class TaskApi
   /**
    * Creates a new instance of TaskApi
    */
-  public TaskApi()
+  public Task2Api()
   {
 /*    
     try 

@@ -29,14 +29,12 @@ public class UserModel
   this.userData = userData; 
   }
 
-	public
-	UserData getLogoutuser()
+	public UserData getLogoutuser()
 	{
 		return logoutuser;
 	}
 
-	public
-	void setLogoutuser(UserData logoutuser)
+	public void setLogoutuser(UserData logoutuser)
 	{
 		this.logoutuser = logoutuser;
 	}
