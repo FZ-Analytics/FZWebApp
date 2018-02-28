@@ -43,8 +43,8 @@ import javax.ws.rs.core.Response;
  *
  * @author Agustinus Ignat
  */
-@Path("v1/track")
-public class TrackApi 
+@Path("v2/track")
+public class Track2Api 
 {
   private final Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
 //  FileHandler fh = null;
@@ -57,7 +57,7 @@ public class TrackApi
     /**
      * Creates a new instance of TrackApi
      */
-    public TrackApi() 
+    public Track2Api() 
     {
 /*      
 			try 
