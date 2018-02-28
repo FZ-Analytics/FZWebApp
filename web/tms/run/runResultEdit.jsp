@@ -405,7 +405,7 @@
             </thead>
             <tbody>
                 <%for(Delivery j : (List<Delivery>) getList("listDelivery")) { %> 
-                <tr 
+                <tr class="tableRows" id="tableRow"
                     <%if (j.vehicleCode.equals("NA")) {%>
                     style="color: red"
                     <%} else if (j.arrive.length() == 0 && j.depart.length() > 0) {%>
