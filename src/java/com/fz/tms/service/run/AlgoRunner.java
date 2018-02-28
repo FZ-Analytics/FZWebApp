@@ -698,96 +698,116 @@ public class AlgoRunner implements BusinessLogic {
 
         String cds = "ERROR insertPreRouteJob";
 
-        String sql = "insert\n"
-                + "	into\n"
-                + "		bosnet1.dbo.TMS_PreRouteJob(\n"
-                + "			RunId,\n"
-                + "			Customer_ID,\n"
-                + "			DO_Number,\n"
-                + "			Long,\n"
-                + "			Lat,\n"
-                + "			Customer_priority,\n"
-                + "			Service_time,\n"
-                + "			deliv_start,\n"
-                + "			deliv_end,\n"
-                + "			vehicle_type_list,\n"
-                + "			total_kg,\n"
-                + "			total_cubication,\n"
-                + "			DeliveryDeadline,\n"
-                + "			DayWinStart,\n"
-                + "			DayWinEnd,\n"
-                + "			UpdatevDate,\n"
-                + "			CreateDate,\n"
-                + "			isActive,\n"
-                + "			Is_Exclude,\n"
-                + "			Is_Edit\n,"
-                + "			Product_Description,\n"
-                + "			Gross_Amount,\n"
-                + "			DOQty,\n"
-                + "			DOQtyUOM,\n"
-                + "			Name1,\n"
-                + "			Street,\n"
-                + "			Distribution_Channel,\n"
-                + "			Customer_Order_Block_all,\n"
-                + "			Customer_Order_Block,\n"
-                + "			Request_Delivery_Date,\n"
-                + "			Desa_Kelurahan,\n"
-                + "			Kecamatan,\n"
-                + "			Kodya_Kabupaten,\n"
-                + "			Batch,\n"
-                + "			Ket_DO\n"
-                + "		) select\n"
-                + "			'" + runID + "' as RunId,\n"
-                + "			Customer_ID,\n"
-                + "			DO_Number,\n"
-                + "			Long,\n"
-                + "			Lat,\n"
-                + "			Customer_priority,\n"
-                + "			Service_time,\n"
-                + "			deliv_start,\n"
-                + "			deliv_end,\n"
-                + "			vehicle_type_list,\n"
-                + "			total_kg,\n"
-                + "			total_cubication,\n"
-                + "			DeliveryDeadline,\n"
-                + "			DayWinStart,\n"
-                + "			DayWinEnd,\n"
-                + "			cast(\n"
-                + "				FORMAT(\n"
-                + "					getdate(),\n"
-                + "					'yyyy-MM-dd hh-mm'\n"
-                + "				) as varchar\n"
-                + "			) as UpdatevDate,\n"
-                + "			cast(\n"
-                + "				FORMAT(\n"
-                + "					getdate(),\n"
-                + "					'yyyy-MM-dd hh-mm'\n"
-                + "				) as varchar\n"
-                + "			) as CreateDate,\n"
-                + "			isActive,\n"
-                + "			Is_Exclude,\n"
-                + "			'" + str + "'Is_Edit,\n"
-                + "			Product_Description,\n"
-                + "			Gross_Amount,\n"
-                + "			DOQty,\n"
-                + "			DOQtyUOM,\n"
-                + "			Name1,\n"
-                + "			Street,\n"
-                + "			Distribution_Channel,\n"
-                + "			Customer_Order_Block_all,\n"
-                + "			Customer_Order_Block,\n"
-                + "			Request_Delivery_Date,\n"
-                + "			Desa_Kelurahan,\n"
-                + "			Kecamatan,\n"
-                + "			Kodya_Kabupaten,\n"
-                + "			Batch,\n"
-                + "			Ket_DO\n"
-                + "		from\n"
-                + "			bosnet1.dbo.TMS_PreRouteJob\n"
-                + "		where\n"
-                + "			RunId = '" + prevRunID + "'\n"
-                + "			and Is_Exclude = 'inc'\n"
-                + "			and Is_Edit = 'edit'";
+        String sql = "INSERT\n" +
+                "	INTO\n" +
+                "		bosnet1.dbo.TMS_PreRouteJob(\n" +
+                "			RunId,\n" +
+                "			Customer_ID,\n" +
+                "			DO_Number,\n" +
+                "			Long,\n" +
+                "			Lat,\n" +
+                "			Customer_priority,\n" +
+                "			Service_time,\n" +
+                "			deliv_start,\n" +
+                "			deliv_end,\n" +
+                "			vehicle_type_list,\n" +
+                "			total_kg,\n" +
+                "			total_cubication,\n" +
+                "			DeliveryDeadline,\n" +
+                "			DayWinStart,\n" +
+                "			DayWinEnd,\n" +
+                "			UpdatevDate,\n" +
+                "			CreateDate,\n" +
+                "			isActive,\n" +
+                "			Is_Exclude,\n" +
+                "			Is_Edit,\n" +
+                "			Product_Description,\n" +
+                "			Gross_Amount,\n" +
+                "			DOQty,\n" +
+                "			DOQtyUOM,\n" +
+                "			Name1,\n" +
+                "			Street,\n" +
+                "			Distribution_Channel,\n" +
+                "			Customer_Order_Block_all,\n" +
+                "			Customer_Order_Block,\n" +
+                "			Request_Delivery_Date,\n" +
+                "			Desa_Kelurahan,\n" +
+                "			Kecamatan,\n" +
+                "			Kodya_Kabupaten,\n" +
+                "			Batch,\n" +
+                "			Ket_DO\n" +
+                "		) SELECT\n" +
+                "			'"+runID+"' AS RunId,\n" +
+                "			jb.Customer_ID,\n" +
+                "			jb.DO_Number,\n" +
+                "			jb.Long,\n" +
+                "			jb.Lat,\n" +
+                "			jb.Customer_priority,\n" +
+                "			jb.Service_time,\n" +
+                "			jb.deliv_start,\n" +
+                "			jb.deliv_end,\n" +
+                "			jb.vehicle_type_list,\n" +
+                "			jb.total_kg,\n" +
+                "			jb.total_cubication,\n" +
+                "			jb.DeliveryDeadline,\n" +
+                "			jb.DayWinStart,\n" +
+                "			jb.DayWinEnd,\n" +
+                "			CAST(\n" +
+                "				FORMAT(\n" +
+                "					getdate(),\n" +
+                "					'yyyy-MM-dd hh-mm'\n" +
+                "				) AS VARCHAR\n" +
+                "			) AS UpdatevDate,\n" +
+                "			CAST(\n" +
+                "				FORMAT(\n" +
+                "					getdate(),\n" +
+                "					'yyyy-MM-dd hh-mm'\n" +
+                "				) AS VARCHAR\n" +
+                "			) AS CreateDate,\n" +
+                "			jb.isActive,\n" +
+                "			jb.Is_Exclude,\n" +
+                "			'"+str+"' Is_Edit,\n" +
+                "			jb.Product_Description,\n" +
+                "			jb.Gross_Amount,\n" +
+                "			jb.DOQty,\n" +
+                "			jb.DOQtyUOM,\n" +
+                "			jb.Name1,\n" +
+                "			jb.Street,\n" +
+                "			jb.Distribution_Channel,\n" +
+                "			jb.Customer_Order_Block_all,\n" +
+                "			jb.Customer_Order_Block,\n" +
+                "			jb.Request_Delivery_Date,\n" +
+                "			jb.Desa_Kelurahan,\n" +
+                "			jb.Kecamatan,\n" +
+                "			jb.Kodya_Kabupaten,\n" +
+                "			jb.Batch,\n" +
+                "			jb.Ket_DO\n" +
+                "		FROM\n" +
+                "			bosnet1.dbo.TMS_PreRouteJob jb\n" +
+                "		INNER JOIN(\n" +
+                "				SELECT\n" +
+                "					DISTINCT DO_Number\n" +
+                "				FROM\n" +
+                "					bosnet1.dbo.TMS_ShipmentPlan\n" +
+                "				WHERE\n" +
+                "					already_shipment = 'N'\n" +
+                "					AND notused_flag IS NULL\n" +
+                "					AND incoterm = 'FCO'\n" +
+                "					AND(\n" +
+                "						Order_Type = 'ZDCO'\n" +
+                "						OR Order_Type = 'ZDTO'\n" +
+                "					)\n" +
+                "					AND create_date >= DATEADD(\n" +
+                "						DAY,\n" +
+                "						- 7,\n" +
+                "						GETDATE()\n" +
+                "					)\n" +
+                "			) sp ON\n" +
+                "			jb.DO_Number = sp.DO_Number\n" +
+                "		WHERE\n" +
+                "			jb.RunId = '"+prevRunID+"'\n" +
+                "			AND jb.Is_Exclude = 'inc'\n" +
+                "			AND jb.Is_Edit = 'edit'";
 
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
                 PreparedStatement ps = con.prepareStatement(sql)) {
