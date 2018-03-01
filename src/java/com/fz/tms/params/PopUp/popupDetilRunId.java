@@ -275,32 +275,43 @@ public class popupDetilRunId implements BusinessLogic {
                         //This try is for EXT vehicle
                         try {
                             int checkResultShipment = checkResultShipment(doNum, oriRunID.replace("_", "") + getVendorId(sq.truckid));
+                            //Submitted to Result_Shipment
                             if (checkResultShipment > 0) {
                                 String check = checkStatusShipment(doNum, oriRunID.replace("_", "") + getVendorId(sq.truckid));
-                                if (check.length() > 1) {
+                                //Success to be submitted to Status_Shipment
+                                try {
+                                    long isNumber = Long.parseLong(check);
+                                    sq.isFix = "" + isNumber;
+                                } //Failed to be submitted to Status_Shipment
+                                catch (Exception e) {
                                     sq.isFix = "null";
                                     sq.error = check;
                                     break;
-                                } else {
-                                    sq.isFix = check;
                                 }
-                            } else {
+                            } //Failed to be submitted to Result_Shipment
+                            else {
                                 sq.isFix = "null";
                                 break;
                             }
+
                         } //This catch is for INT vehicle
                         catch (Exception e) {
                             int checkResultShipment = checkResultShipment(doNum, oriRunID.replace("_", "") + sq.truckid);
+                            //Submitted to Result_Shipment
                             if (checkResultShipment > 0) {
                                 String check = checkStatusShipment(doNum, oriRunID.replace("_", "") + sq.truckid);
-                                if (check.length() > 1) {
+                                //Success to be submitted to Status_Shipment
+                                try {
+                                    long isNumber = Long.parseLong(check);
+                                    sq.isFix = "" + isNumber;
+                                } // Failed to be submitted to Status_Shipment
+                                catch (Exception er) {
                                     sq.isFix = "null";
                                     sq.error = check;
                                     break;
-                                } else {
-                                    sq.isFix = check;
                                 }
-                            } else {
+                            }//Failed to be submitted to Result_Shipment
+                            else {
                                 sq.isFix = "null";
                                 break;
                             }
@@ -419,14 +430,15 @@ public class popupDetilRunId implements BusinessLogic {
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
                 String sql;
-                sql = "SELECT TOP 1 SAP_Message FROM BOSNET1.dbo.TMS_Status_Shipment WHERE Delivery_Number = '" + doNum + "' and Shipment_Number_Dummy = '" + shipmentNo + "'";
+                sql = "SELECT TOP 1 SAP_Message, Ship_No_SAP FROM BOSNET1.dbo.TMS_Status_Shipment WHERE Delivery_Number = '" + doNum + "' and Shipment_Number_Dummy = '" + shipmentNo + "'";
 
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     if (rs.next()) {
                         if (rs.getString("SAP_Message") != null) {
                             msg = rs.getString("SAP_Message"); //Error
                         } else {
-                            msg = "2"; //Submitted
+                            msg = rs.getString("Ship_No_SAP"); //Submitted
+
                         }
                     } else {
                         msg = "1"; //Submitting

@@ -76,7 +76,7 @@ public class SubmitToSapAPI {
     @Produces(MediaType.APPLICATION_JSON)
     public String submitToSap(String content) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String ret = "";
+        String ret = "OK";
         ResultShipment rs = new ResultShipment();
         try {
             RunResultEditResultSubmitToSap he = gson.fromJson(content.contains("json") ? decodeContent(content) : content, RunResultEditResultSubmitToSap.class);
@@ -95,39 +95,141 @@ public class SubmitToSapAPI {
                 for (int j = 0; j < alSP.size(); j++) {
                     HashMap<String, String> hmSP = alSP.get(j); //HashMap Shipment Plan
 
-                    rs.Shipment_Type = hmPRV.get("source1");
-                    rs.Plant = hmSP.get("Plant");
-                    rs.Shipment_Route = route;
-                    rs.Description = "";
-                    rs.Status_Plan = parseRunId(oriRunId, true);
-                    rs.Status_Check_In = null;
-                    rs.Status_Load_Start = null;
-                    rs.Status_Load_End = null;
-                    rs.Status_Complete = null;
-                    rs.Status_Shipment_Start = parseRunId(oriRunId, false) + " " + alStartAndEndTime.get(0);
-                    rs.Status_Shipment_End = parseRunId(oriRunId, false) + " " + alStartAndEndTime.get(1);
-                    rs.Service_Agent_Id = hmPRV.get("IdDriver");
-                    if (rs.Shipment_Type.equals("ZDSI")) {
-                        rs.Shipment_Number_Dummy = oriRunId.replace("_", "") + he.vehicle_no;
-                        rs.No_Pol = he.vehicle_no;
-                        rs.Driver_Name = hmPRV.get("NamaDriver");
-                        rs.Vehicle_Number = he.vehicle_no;
+                    if (hmPRV.get("source1").length() == 0) {
+                        ret = "Shipment Type Empty";
+                        break;
                     } else {
-                        rs.Shipment_Number_Dummy = oriRunId.replace("_", "") + getVendorId(he.vehicle_no);
-                        rs.No_Pol = hmPRV.get("vehicle_type");
-                        rs.Driver_Name = getVendorName(he.vehicle_no);
-                        rs.Vehicle_Number = hmPRV.get("vehicle_type");
+                        rs.Shipment_Type = hmPRV.get("source1");
+                    }
+                    if (hmSP.get("Plant").length() == 0) {
+                        ret = "Plant Empty";
+                        break;
+                    } else {
+                        rs.Plant = hmSP.get("Plant");
+                    }
+                    if (route.length() == 0) {
+                        ret = "Route Empty";
+                        break;
+                    } else {
+                        rs.Shipment_Route = route;
+                    }
+                    rs.Description = ""; //optional
+                    rs.Status_Plan = parseRunId(oriRunId, true); //optional
+                    rs.Status_Check_In = null; //optional
+                    rs.Status_Load_Start = null; //optional
+                    rs.Status_Load_End = null; //optional
+                    rs.Status_Complete = null; //optional
+                    rs.Status_Shipment_Start = parseRunId(oriRunId, false) + " " + alStartAndEndTime.get(0); //optional
+                    rs.Status_Shipment_End = parseRunId(oriRunId, false) + " " + alStartAndEndTime.get(1); //optional
+                    if (hmPRV.get("idDriver").length() == 0) {
+                        ret = "Service Agent ID Empty";
+                        break;
+                    } else {
+                        rs.Service_Agent_Id = hmPRV.get("IdDriver");
                     }
 
-                    rs.Delivery_Number = hmSP.get("DO_Number");
-                    rs.Delivery_Item = hmSP.get("Item_Number");
+                    if (rs.Shipment_Type.equals("ZDSI")) {
+                        if (hmPRV.get("source1").length() == 0) {
+                            ret = "Shipment Type Empty";
+                            break;
+                        } else {
+                            rs.Shipment_Type = hmPRV.get("source1");
+                        }
+                        if (hmSP.get("Plant").length() == 0) {
+                            ret = "Plant Empty";
+                            break;
+                        } else {
+                            rs.Plant = hmSP.get("Plant");
+                        }
+                        if (route.length() == 0) {
+                            ret = "Route Empty";
+                            break;
+                        } else {
+                            rs.Shipment_Route = route;
+                        }
+                        rs.Description = ""; //optional
+                        rs.Status_Plan = parseRunId(oriRunId, true); //optional
+                        rs.Status_Check_In = null; //optional
+                        rs.Status_Load_Start = null; //optional
+                        rs.Status_Load_End = null; //optional
+                        rs.Status_Complete = null; //optional
+                        rs.Status_Shipment_Start = parseRunId(oriRunId, false) + " " + alStartAndEndTime.get(0); //optional
+                        rs.Status_Shipment_End = parseRunId(oriRunId, false) + " " + alStartAndEndTime.get(1); //optional
+                        if (hmPRV.get("idDriver").length() == 0) {
+                            ret = "Service Agent ID Empty";
+                            break;
+                        } else {
+                            rs.Service_Agent_Id = hmPRV.get("IdDriver");
+                        }
+                        if ((oriRunId.replace("_", "") + he.vehicle_no).length() == 0) {
+                            ret = "Shipment Number Dummy Empty";
+                            break;
+                        } else {
+                            rs.Shipment_Number_Dummy = oriRunId.replace("_", "") + he.vehicle_no;
+                        }
+                        rs.No_Pol = he.vehicle_no; //optional
+                        rs.Driver_Name = hmPRV.get("NamaDriver"); //optioanl
+                        rs.Vehicle_Number = he.vehicle_no; //optional
+
+                    } else {
+                        if ((oriRunId.replace("_", "") + getVendorId(he.vehicle_no)).length() == 0) {
+                            ret = "Shipment Number Dummy Empty";
+                            break;
+                        } else {
+                            rs.Shipment_Number_Dummy = oriRunId.replace("_", "") + getVendorId(he.vehicle_no);
+                        }
+                        rs.No_Pol = hmPRV.get("vehicle_type"); //optional
+                        rs.Driver_Name = getVendorName(he.vehicle_no); //optional
+                        rs.Vehicle_Number = hmPRV.get("vehicle_type"); //optional
+
+                    }
+                    if (hmSP.get("DO_Number").length() == 0) {
+                        ret = "DO Number Empty";
+                        break;
+                    } else {
+                        rs.Delivery_Number = hmSP.get("DO_Number");
+                    }
+                    if (hmSP.get("Item_Number").length() == 0) {
+                        ret = "Item Number Empty";
+                        break;
+                    } else {
+                        rs.Delivery_Item = hmSP.get("Item_Number");
+                    }
+
                     rs.Delivery_Quantity_Split = 0.000;
-                    rs.Delivery_Quantity = Double.parseDouble(hmSP.get("DOQty"));
+                    if (hmSP.get("DOQty").length() == 0) {
+                        ret = "DO Quantity Empty";
+                        break;
+                    } else {
+                        rs.Delivery_Quantity = Double.parseDouble(hmSP.get("DOQty"));
+                    }
+
                     rs.Delivery_Flag_Split = "";
-                    rs.Material = hmSP.get("Product_ID");
-                    rs.Vehicle_Type = hmPRV.get("vehicle_type");
-                    rs.Batch = hmSP.get("Batch");
-                    rs.Time_Stamp = time;
+                    if (hmSP.get("Product_ID").length() == 0) {
+                        ret = "Product ID Empty";
+                        break;
+                    } else {
+                        rs.Material = hmSP.get("Product_ID");
+                    }
+                    if (hmPRV.get("vehicle_type").length() == 0) {
+                        ret = "Vehicle Type Empty";
+                        break;
+                    } else {
+                        rs.Vehicle_Type = hmPRV.get("vehicle_type");
+                    }
+                    if (hmSP.get("Batch").length() == 0) {
+                        ret = "Batch Empty";
+                        break;
+                    } else {
+                        rs.Batch = hmSP.get("Batch");
+                    }
+                    if (time.equals("")) {
+                        ret = "Time Empty";
+                        break;
+                    } else {
+                        rs.Time_Stamp = time;
+                    }
+
                     rs.Shipment_Number_SAP = "";
                     rs.I_Status = "0";
                     rs.Shipment_Flag = "";
@@ -141,8 +243,10 @@ public class SubmitToSapAPI {
 
                     insertResultShipment(rs);
                 }
+                if (!ret.equals("OK")) {
+                    break;
+                }
             }
-            ret = "OK";
         } catch (Exception e) {
             System.out.println("ERROR: " + e.getMessage());
             ret = "ERROR";
@@ -344,7 +448,7 @@ public class SubmitToSapAPI {
                 longestDist = temp;
                 custId = alCustId.get(i);
             }
-            
+
         }
         return getRoute(custId);
     }

@@ -94,7 +94,7 @@
                         } else {
                             $("#body").fadeIn();
                             $("#loader").fadeOut();
-                            alert('submit error');
+                            alert(data);
                         }
                     });
                 });
@@ -113,16 +113,16 @@
             <br><br>
             <table class="table" border1="1" style="border-color: lightgray;">
                 <tr style="background-color:orange">
-                    <th width="100px" class="fzCol">truck id</th>
-                    <th width="100px" class="fzCol">truck type</th>
+                    <th width="100px" class="fzCol">Truck id</th>
+                    <th width="100px" class="fzCol">Truck type</th>
                     <th width="100px" class="fzCol">capacity(KG)</th>
                     <th width="100px" class="fzCol">(%)</th>
-                    <th width="100px" class="fzCol">kubikasi(M3)</th>
+                    <th width="100px" class="fzCol">Kubikasi(M3)</th>
                     <th width="100px" class="fzCol">(%)</th>
-                    <th width="100px" class="fzCol">amount</th>
-                    <th width="100px" class="fzCol">km</th>
-                    <th width="100px" class="fzCol">waktu travel</th>
-                    <th width="100px" class="fzCol">waktu service</th>
+                    <th width="100px" class="fzCol">Amount</th>
+                    <th width="100px" class="fzCol">Jarak tempuh (km)</th>
+                    <th width="100px" class="fzCol">Waktu travel</th>
+                    <th width="100px" class="fzCol">Waktu service</th>
                     <th width="100px" class="fzCol">Cust Visit</th>
                     <th width="100px" class="fzCol">Transport Cost</th>
                     <th width="100px" class="fzCol">Submit to SAP</th>
@@ -146,9 +146,9 @@
                     <th class="" onclick="" style="">
                         <button id="<%=s.truckid%>" class="btn btn-success btn-xs disabled">Submitting</button>
                     </th>
-                    <%} else if (s.isFix.equals("2")) {%>
+                    <%} else if (Character.isDigit(s.isFix.charAt(0)) && s.isFix.length() == 10) {%>
                     <th class="" onclick="" style="">
-                        <button id="<%=s.truckid%>" class="btn btn-default btn-xs disabled" value="<%=s.truckid%>">Submitted</button>
+                        <button id="<%=s.truckid%>" class="btn btn-default btn-xs disabled" value="<%=s.isFix%>"><%=s.isFix%></button>
                     </th>
                     <%} else {%>
                     <th class="" onclick="" style="">
