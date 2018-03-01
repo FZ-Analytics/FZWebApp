@@ -1726,15 +1726,15 @@ public class AlgoRunner implements BusinessLogic {
             else    s = s + "'" + px.get("DO_Number") + "'";            
         }
         
-        String sql = "SELECT distinct DONumber\n" +
+        String sql = "SELECT distinct DONumber, GoodsMovementStat, PODStatus\n" +
                 "  FROM PICONSOL.dbo.PI_DeliveryOrder where DONumber in ("+s+")"
                 + " and (GoodsMovementStat = 'C' or PODStatus = 'C')";
         
-        System.out.println(sql); 
+        //System.out.println(sql); 
         List<HashMap<String, String>> pl = new ArrayList<HashMap<String, String>>();        
         try (Connection con = (new Db()).getConnection("jdbc/sapDB");
                 PreparedStatement ps = con.prepareStatement(sql)) {
-            System.out.println(sql);
+            //System.out.println(sql);
             try (ResultSet rs = ps.executeQuery()){
                 while (rs.next()) {
                     px = new HashMap<String, String>();
@@ -1747,6 +1747,7 @@ public class AlgoRunner implements BusinessLogic {
             }
         }
         
+        //do diexclude
         for(int a = 0;a<py.size();a++){
             px = new HashMap<String, String>();
             px = py.get(a);
