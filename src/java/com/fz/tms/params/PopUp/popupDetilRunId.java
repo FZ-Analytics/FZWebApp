@@ -293,7 +293,6 @@ public class popupDetilRunId implements BusinessLogic {
                                 sq.isFix = "null";
                                 break;
                             }
-
                         } //This catch is for INT vehicle
                         catch (Exception e) {
                             int checkResultShipment = checkResultShipment(doNum, oriRunID.replace("_", "") + sq.truckid);
@@ -316,6 +315,22 @@ public class popupDetilRunId implements BusinessLogic {
                                 break;
                             }
                         }
+                    }
+                    
+                    //Check if volume or weight is overload
+                    //volume
+                    if(Integer.parseInt(sq.capacityPer) > 100) {
+                        sq.isFix = "er";
+                        sq.error = "Volume overload";
+                    }
+                    //weight
+                    if(Integer.parseInt(sq.kubikasiPer) > 100) {
+                        sq.isFix = "er";
+                        sq.error = "Weight overload";
+                    }
+                    if(Integer.parseInt(sq.kubikasiPer) > 100 && Integer.parseInt(sq.capacityPer) > 100) {
+                        sq.isFix = "er";
+                        sq.error = "Volume and weight overload";
                     }
 
                     asd.add(sq);
