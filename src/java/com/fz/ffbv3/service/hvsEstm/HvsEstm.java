@@ -20,6 +20,8 @@ public class HvsEstm {
     public String remark = "";
     public double kg = 0;
     public String hvsEstmID = "";
+    public String millID = "";
+    public String note = "";
     public Location millLoc = new Location();
     public List<HvsEstmDtl> dtl = new ArrayList<HvsEstmDtl>();
     public HashMap<String, String> params = new HashMap<String, String>();

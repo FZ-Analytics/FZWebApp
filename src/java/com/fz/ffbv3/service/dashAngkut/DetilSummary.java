@@ -538,4 +538,75 @@ public class DetilSummary {
         }
         return result;
     }
+    
+    public static JSONObject rdbTripsMobile01(String tgl, String divID) {
+        JSONObject result = null;
+        String stgl = (tgl==null || tgl.isEmpty())?"curdate()":"'"+tgl+"'";
+
+        String sql = "select \n" +
+"		a.millID,a.estateID,a.divID,b.*,c.Kgs KgsTax, \n" +
+"               (case when ifnull(b.TripsCount,0)=0 then 0.00 else ifnull(b.ActualKgs,0)/ifnull(b.TripsCount,0) end) avgTrip, \n" +
+"               (case when ifnull(c.Kgs,0)=0 then 0 else ifnull(b.ActualKgs,0)/c.Kgs end)*100 avgTax \n" + 
+"	from fbdiv a\n" +
+"	left join ( \n" +
+"		select \n" +
+"                       ba.divID, COUNT(*) TripsCount, sum(ba.ActualKg) ActualKgs, \n" +
+"          		SUM( CASE WHEN CONVERT( bb.ActualEnd, TIME )< '10:00:00' THEN ifnull(ba.ActualKg,0) ELSE 0 END ) kg1,     \n" +
+"          		SUM( CASE WHEN CONVERT( bb.ActualEnd, TIME )>= '10:00:00' and CONVERT( bb.ActualEnd, TIME )< '14:00:00' THEN ifnull(ba.ActualKg,0) ELSE 0 END ) kg2,     \n" +
+"          		SUM( CASE WHEN CONVERT( bb.ActualEnd, TIME )>= '14:00:00' and CONVERT( bb.ActualEnd, TIME )< '18:00:00' THEN ifnull(ba.ActualKg,0) ELSE 0 END ) kg3,\n" +
+"          		SUM( CASE WHEN CONVERT( bb.ActualEnd, TIME )>= '18:00:00' THEN ifnull(ba.ActualKg,0) ELSE 0 END ) kg4,\n" +
+"          		SUM( CASE WHEN CONVERT( bb.ActualEnd, TIME )< '10:00:00' THEN 1 ELSE 0 END ) trip1,     \n" +
+"          		SUM( CASE WHEN CONVERT( bb.ActualEnd, TIME )>= '10:00:00' and CONVERT( bb.ActualEnd, TIME )< '14:00:00' THEN 1 ELSE 0 END ) trip2,     \n" +
+"          		SUM( CASE WHEN CONVERT( bb.ActualEnd, TIME )>= '14:00:00' and CONVERT( bb.ActualEnd, TIME )< '18:00:00' THEN 1 ELSE 0 END ) trip3,\n" +
+"          		SUM( CASE WHEN CONVERT( bb.ActualEnd, TIME )>= '18:00:00' THEN 1 ELSE 0 END ) trip4\n" +
+"		from fbjob ba \n" +
+"		left join fbtask2 bb on ba.JobID=bb.JobID\n" +
+"		where CONVERT(ba.hvsDt, DATE)=" + stgl + "\n" +
+"          		AND ba.DoneStatus = 'DONE' and ba.reorderToJobID is null \n" +
+"          		AND bb.TaskSeq = 2     \n" +
+"		group by ba.divID\n" +
+"	) b on a.divID=b.divID\n" +
+"	LEFT JOIN(     \n" +
+"		SELECT ca.divID, SUM( cb.size1 ) Kgs     \n" +
+"		FROM fbhvsestm ca     \n" +
+"		LEFT JOIN fbhvsestmdtl cb ON ca.HvsEstmID = cb.hvsEstmID \n" +
+"		WHERE \n" +
+"			CONVERT(ca.hvsDt,DATE)= " + stgl + " \n" +
+"			AND ca.status = 'FNAL' \n" +
+"		GROUP BY ca.divID \n" +
+"	) c ON a.divID = c.divID     \n" +
+"       where divID='" + divID +"'\n" +
+"	order by a.millID,a.estateID,a.divID";
+
+        try (Connection con = (new Db()).getConnection("jdbc/fz");) {
+            try (Statement stm = con.createStatement()) {
+                ResultSet rs = stm.executeQuery(sql);
+                JSONObject o;
+                if (rs.next()) {
+                    o = new JSONObject();
+                    o.put("divID", rs.getString("divID"));
+                    o.put("TripsCount", rs.getInt("TripsCount"));
+                    o.put("kg1", rs.getInt("kg1"));
+                    o.put("kg2", rs.getInt("kg2"));
+                    o.put("kg3", rs.getInt("kg3"));
+                    o.put("kg4", rs.getInt("kg4"));
+                    o.put("trip1", rs.getInt("trip1"));
+                    o.put("trip2", rs.getInt("trip2"));
+                    o.put("trip3", rs.getInt("trip3"));
+                    o.put("trip4", rs.getInt("trip4"));
+                    o.put("ActualKgs", rs.getDouble("ActualKgs"));
+                    o.put("avgTrip", rs.getDouble("avgTrip"));
+                    o.put("KgsTax", rs.getDouble("KgsTax"));
+                    o.put("avgTax", rs.getDouble("avgTax"));
+//                    o.put("kgsRestan", rs.getDouble("kgsRestan"));
+                    result = o;
+                }
+            } catch (Exception e) {
+                String err = e.getMessage();
+            }
+        } catch (Exception e) {
+            String err = e.getMessage();
+        }
+        return result;
+    }
 }

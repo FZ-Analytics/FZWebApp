@@ -37,6 +37,8 @@ public class HvsEstmDAO {
                 + "\n, m.lon"
                 + "\n, m.lat"
                 + "\n, h.remark"
+                + "\n, (case when h.millID is null or h.millID='' then d.millID else h.millID end) millID"
+                + "\n, h.note "
                 + "\n from fbHvsEstm h"
                 + "\n     left outer join fbDiv d"
                 + "\n         on h.divID = d.divID"

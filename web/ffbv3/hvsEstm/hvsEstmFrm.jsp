@@ -45,9 +45,22 @@
             <span class="fzLabelBottom">e.g. "BINE1"</span>
             
             <br><br>
-            <label class="fzLabel">Remark / 1st empty bin location</label>
+            <label class="fzLabel">Mill</label>
+            <select class="fzInput" id="millID" name="millID">
+                <option value="LWSM">LWSM</option>
+                <option value="BPRM">BPRM</option>
+            </select>
+
+            <br><br>
+            <label class="fzLabel">Bin location</label>
             <input class="fzInput" type="text" id="remark" 
                    name="remark" value="<%=get("remark")%>">
+
+
+            <br><br>
+            <label class="fzLabel">Note</label>
+            <input class="fzInput" type="text" id="note" 
+                   name="note" value="<%=get("note")%>">
 
             <br><br>
             <label class="fzLabel">Status</label>

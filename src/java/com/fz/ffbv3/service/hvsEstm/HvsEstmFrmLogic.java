@@ -50,16 +50,13 @@ public class HvsEstmFrmLogic implements BusinessLogic {
                 if (he != null){
                     
                     // keep values in session attribute
-                    request.setAttribute("hvsDt"
-                            , he.hvsDate);
-                    request.setAttribute("divID"
-                            , he.divID);
-                    request.setAttribute("status"
-                            , he.status);
-                    request.setAttribute("hvsEstmDtlList"
-                            , he.dtl);
-                    request.setAttribute("remark"
-                            , he.remark);
+                    request.setAttribute("hvsDt", he.hvsDate);
+                    request.setAttribute("divID", he.divID);
+                    request.setAttribute("status", he.status);
+                    request.setAttribute("hvsEstmDtlList", he.dtl);
+                    request.setAttribute("remark", he.remark);
+                    request.setAttribute("millID", he.millID);
+                    request.setAttribute("note", he.note);
                 }
 
             }

@@ -90,11 +90,11 @@ public class FB2RunLogic implements BusinessLogic {
         
         // call algo web
         StringBuffer url = new StringBuffer();
-        url.append("http://");
-        url.append(request.getServerName());
-        url.append(":");
-        url.append(request.getServerPort());
-        url.append("/fzffbcalc/run.jsp?runID=");
+//        url.append("http://");
+//        url.append(request.getServerName());
+//        url.append(":");
+//        url.append(request.getServerPort());
+        url.append("http://localhost:8080/fzffbcalc/run.jsp?runID=");
         url.append(runID);
 //        url.append("&json=");
 //        url.append(jsonInput);
