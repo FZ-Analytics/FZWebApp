@@ -254,8 +254,25 @@ public class TaskLogic
       {
         if(UpdateJobByJobID("UPDATE fbjob SET doneDt=CURRENT_TIMESTAMP(), DoneStatus=\"DONE\", ActualKg=" + uploadModel.getActualKg() + " WHERE JobID=" + mJobID))
         {
+          String strStatus;
+          Integer intStatus = uploadModel.getUploadData().get(1).getReasonState();
+          
+          if(intStatus == -1)
+            strStatus = "Unknown";
+          else
+          if(intStatus == 0)
+            strStatus = "DONE";
+          else
+          if(intStatus == 1)
+            strStatus = "STOP";
+          else
+          if(intStatus == 2)
+            strStatus = "LATE";
+          else
+            strStatus = FixMessege.strStatusUploadDataSuccess;
+          
           sendRsp.setCode(FixValue.intResponSuccess);
-					sendRsp.setRsp(rspMsg.CoreMsgResponse(FixValue.intSuccess, FixMessege.strStatusUploadDataSuccess));
+					sendRsp.setRsp(rspMsg.CoreMsgResponse(FixValue.intSuccess, strStatus));
           UpdateVehicleByVehicleID(VehicleID, "AVLB");
         }
         else
