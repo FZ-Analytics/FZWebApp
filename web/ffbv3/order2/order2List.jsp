@@ -261,7 +261,6 @@
                         <tr><td colspan='7>'>&nbsp;</td></tr>
 			<tr>
                             <td>&nbsp;</td>
-<<<<<<< HEAD
                             <td colspan="3" style='text-align: left;'><%=reorderCode%></td>
 							<td></td>
                             <td colspan="3" style='text-align: right; padding-right: 10px;'><%=cancelCode%></td>
@@ -271,17 +270,6 @@
                                 <a href="javascript:toggle_more('<%=r.jobID%>');" id="tgl<%=r.jobID%>">
                                 <img src="../img/hline.png"/><br/>Close
                                 </a>
-=======
-                            <td colspan="3" style='text-align: center;'><%=reorderCode%></td>
-							<td></td>
-                            <td colspan="3" style='text-align: center;'><%=cancelCode%></td>
-                        </tr>
-                        <tr>
-                            <td colspan="100%" style="text-align: right;">
-                                <a href="javascript:shw('<%=r.jobID%>','<%=r.runID%>','<%=r.hvsDate%>','<%=FZUtil.escapeText(r.remark)%>','<%=r.vehicleRemark%>','<%=r.createSource%>','<%=r.Task2ReasonName%>','<%=r.size%>','<%=r.planStart%>','<%=r.planEnd%>','<%=r.actualStart%>','<%=r.actualEnd%>','<%=r.getBlocks()%>','<%=r.isLastOrder%>','<%=r.isLast2Order%>','<%=r.assignedDate%>','<%=r.takenDate%>','<%=r.doneDate%>','<%=r.createDate%>','<%=r.dirLoc%>','<%=r.estmFfb%>');"
-                                  id="tgl<%=r.jobID%>">Close</a>
->>>>>>> 9d51d5685d105f0d8de216f966cda54c7d18d5f8
-                            </td>
                         </tr>
                     </table>
                 </td>

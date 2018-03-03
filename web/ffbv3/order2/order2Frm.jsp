@@ -106,12 +106,12 @@
             <input class="fzInput" type="text" id="block1" name="block2" 
                    value="">
             
-            <br><br>
+            <!--br><br>
             <label class="fzLabel">Mill</label>
             <select class="fzInput" id="millID" name="millID">
                 <option value="LWSM">LWSM</option>
                 <option value="BPRM">BPRM</option>
-            </select>
+            </select-->
 
             <br><br>
             <label class="fzLabel">Direction Location</label>
@@ -123,7 +123,7 @@
             
             <br><br>
             <label class="fzLabel">Bin Ready Estimate</label>
-            <input class="fzInput" type="time" id="readyTime" name="readyTime" 
+            <input class="fzInput" type="text" id="readyTime" name="readyTime" 
                    value="" required>
             
             <br>

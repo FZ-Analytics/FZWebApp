@@ -22,6 +22,7 @@ public class HvsEstm {
     public String hvsEstmID = "";
     public String millID = "";
     public String note = "";
+    public String grabbercondition = "";
     public Location millLoc = new Location();
     public List<HvsEstmDtl> dtl = new ArrayList<HvsEstmDtl>();
     public HashMap<String, String> params = new HashMap<String, String>();

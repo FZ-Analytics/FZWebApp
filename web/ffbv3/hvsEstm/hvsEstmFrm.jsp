@@ -2,6 +2,9 @@
     Document   : hvsEstmList
     Created on : Sep 23, 2017, 5:07:33 AM
 --%>
+<%@page import="org.json.JSONObject"%>
+<%@page import="org.json.JSONArray"%>
+<%@page import="com.fz.ffbv3.service.division.divisionDAO"%>
 <%@page import="com.fz.ffbv3.service.hvsEstm.HvsEstm"%>
 <%@page import="com.fz.ffbv3.service.hvsEstm.HvsEstmDtl"%>
 <%@page import="java.util.List"%>
@@ -16,6 +19,10 @@
     </head>
     <body>
   <%@include file="../appGlobal/bodyTop.jsp"%>
+  <%
+      JSONArray oDiv = divisionDAO.lstDivisions("", "");
+      JSONArray oMill = divisionDAO.lstMill();
+  %>
   <script>
   $( function() {
     var v = $( "#hvsDt" ).val();
@@ -24,6 +31,17 @@
     //$( "#hvsDt" ).val(yyyymmddDate(new Date()));
     $( "#hvsDt" ).val(v);
   } );
+  
+  function pilihDiv() {
+      var odiv = <%=oDiv%>;
+      var divid = $("#divID").val();
+      var millID = "";
+      $.each(odiv,function(k,v){
+          if (divid == v.divID) millID=v.millID;
+      });
+      $("#millID options[value=millID]").attr("selected","selected");
+      $("#millID").val(millID);
+    }
   </script>
         <h3>Estimation / Restan Form</h3>
             <div class="fzErrMsg" id="errMsg">
@@ -37,8 +55,25 @@
             
             <br><br>
             <label class="fzLabel">Estate + Division</label>
-            <input class="fzInput" type="text" id="divID" 
-                   name="divID" value="<%=get("divID")%>">
+            <!--input class="fzInput" type="text" id="divID" 
+                   name="divID" value="< %=get("divID")%>"-->
+            <select class="fzInput" id="divID" name="divID" onchange="pilihDiv()">
+                <%
+                    String divID = get("divID");
+                    String selected = (divID == null || divID.isEmpty())?"selected":"";
+                %>
+                <option value="" <%=selected%>>--</option>
+                <%
+                    JSONObject o ;
+                    for (int i=0; i < oDiv.length(); i++) { 
+                        o = oDiv.getJSONObject(i);
+                        selected = (divID.equals(o.getString("divID")))?"selected":"";
+                %>
+                <option value='<%=o.getString("divID")%>' <%=selected%>><%=o.getString("divID")%></option>
+                <%
+                    }
+                %>
+            </select>
 
             <br>
             <label class="fzLabel"></label>
@@ -56,11 +91,20 @@
             <input class="fzInput" type="text" id="remark" 
                    name="remark" value="<%=get("remark")%>">
 
+            <br><br>
+            <label class="fzLabel">Grabber Condition</label>
+            <select class="fzInput" id="grabbercondition" name="grabbercondition"
+                    value="<%=get("grabbercondition")%>">>
+                <option value="0">Ready</option>
+                <option value="1">Break Down</option>
+            </select>
 
+            <div hidden>
             <br><br>
             <label class="fzLabel">Note</label>
             <input class="fzInput" type="text" id="note" 
                    name="note" value="<%=get("note")%>">
+            </div>
 
             <br><br>
             <label class="fzLabel">Status</label>

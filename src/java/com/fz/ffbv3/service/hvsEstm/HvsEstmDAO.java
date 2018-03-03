@@ -211,8 +211,8 @@ public class HvsEstmDAO {
     private void add(HvsEstm he) throws Exception {
         
         // open db connection and 1 statement to insert header
-        String sql = "insert into fbHvsEstm(hvsDt, status, divID, createdBy, remark)"
-                + " values(?,?,?,?,?)";
+        String sql = "insert into fbHvsEstm(hvsDt, status, divID, createdBy, remark, millID, grabbercondition)"
+                + " values(?,?,?,?,?,?,?)";
         try (
             Connection con = (new Db()).getConnection("jdbc/fz");
             PreparedStatement psHdr = con.prepareStatement(sql
@@ -226,6 +226,8 @@ public class HvsEstmDAO {
             psHdr.setString(3, he.divID);
             psHdr.setString(4, "");
             psHdr.setString(5, he.remark);
+            psHdr.setString(6, he.millID);
+            psHdr.setString(7, he.grabbercondition);
             
             // transaction needed because we have several sql 
             con.setAutoCommit(false);

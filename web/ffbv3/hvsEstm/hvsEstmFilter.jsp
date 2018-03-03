@@ -30,7 +30,7 @@
             
             <br>
             <label class="fzLabel">Harvest Date</label>
-            <input class="fzInput" id="hvsDt" 
+            <input type="date" class="fzInput" id="hvsDt" 
                    name="hvsDt" value=""/>
             
             <br><br>

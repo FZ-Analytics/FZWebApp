@@ -57,6 +57,7 @@ public class HvsEstmFrmLogic implements BusinessLogic {
                     request.setAttribute("remark", he.remark);
                     request.setAttribute("millID", he.millID);
                     request.setAttribute("note", he.note);
+                    request.setAttribute("grabbercondition", he.grabbercondition);
                 }
 
             }

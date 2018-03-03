@@ -117,7 +117,7 @@
 			PreparedStatement ps = con.prepareStatement(sql);
 			ResultSet rs = ps.executeQuery()) {
 //prevLastOdCnt= rs...                
-				if (rs.next()) prevLastOdrCnt = rs.getInt("lasOdrCnt");
+				if (rs.next()) prevLastOdrCnt = rs.getInt("lastOdrCnt");
 		}
             }
 
