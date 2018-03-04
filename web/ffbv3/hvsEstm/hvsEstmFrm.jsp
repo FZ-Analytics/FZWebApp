@@ -120,7 +120,9 @@
                       <th width="100px" class="fzCol">Type</th>
                       <th width="100px" class="fzCol">Block</th>
                       <th width="100px" class="fzCol">Kg</th>
-                      <th></th>
+                      <th width="50px">&nbsp;</th>
+                      <th width="50px">&nbsp;</th>
+                      <th width="50px">&nbsp;</th>
                   </tr>
                   <%for (HvsEstmDtl hd : (List<HvsEstmDtl>) getList("hvsEstmDtlList")) { %>
                   
@@ -158,11 +160,9 @@
                       </td>
                       <td contenteditable="true" class="fzCell celVal">A01</td>
                       <td contenteditable="true" class="fzCell celVal">10000</td>
-                      <td class="fzCell">
-                        <span class="table-up fzTextButton">Up</span>
-                        <span class="table-down fzTextButton">Down</span>
-                        <span class="table-remove fzTextButton">Del</span>
-                      </td>
+                    <td class="fzCell"><span class="table-up fzTextButton">Up</span></td>
+                    <td class="fzCell"><span class="table-down fzTextButton">Down</span></td>
+                    <td class="fzCell"><span class="table-remove fzTextButton">Del</span></td>
                   </tr>
               </table>
                   

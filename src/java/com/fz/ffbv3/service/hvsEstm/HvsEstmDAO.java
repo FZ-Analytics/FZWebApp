@@ -488,12 +488,12 @@ public class HvsEstmDAO {
             
             hed.block = hed.block.trim().toUpperCase();
             
-            if (ss.contains(hed.block)){
+            if (ss.contains(hed.block+':'+hed.taskType)){
                 
                 throw new Exception("Duplicate block " + hed.block);
             }
             else {
-                ss.add(hed.block);
+                ss.add(hed.block+':'+hed.taskType);
             }
         }
     }
