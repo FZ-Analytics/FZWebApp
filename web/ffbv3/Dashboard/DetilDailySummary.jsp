@@ -145,7 +145,7 @@
                                 TotalKgs = TotalKgs + x.getInt("ActualKgs");
                                 iBin = x.getInt("remainingBin");
                                 sBin = String.valueOf(iBin).trim();
-                                if (tBin >= 999) sBin = "N/A";
+                                if (iBin >= 999) sBin = "N/A";
                                 tBin = tBin + iBin;
                 %>
                 <tr>                    
@@ -173,7 +173,7 @@
             </tbody>
                 <%
                         }
-                        String stBin = (tBin>=999)?"N/A":String.valueOf(tBin);
+                        String stBin = (tBin >= 999)?"N/A":String.valueOf(tBin);
                  %>
             <tfoot>
                 <tr style="background-color: #f2f2f2">                    

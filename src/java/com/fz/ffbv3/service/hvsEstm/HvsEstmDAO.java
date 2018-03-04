@@ -241,6 +241,10 @@ public class HvsEstmDAO {
                 he.hvsEstmID = rs.getString(1);
             }
 
+            String sDiv = "update fbdiv set millID='" + he.millID + "' where divID='" + he.divID + "'";
+            try (PreparedStatement psDiv = con.prepareStatement(sDiv)) {
+                psDiv.executeUpdate();
+            }
             insertNewChildren(he, con);
             checkChildrenBelongToDiv(he, con);
             
