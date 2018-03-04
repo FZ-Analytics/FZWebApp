@@ -164,7 +164,7 @@
 
             <div id="dLastOrder" name="dLastOrder" hidden>
             <br><br>
-            <label class="fzLabel">Bins remaining</label>
+            <label class="fzLabel">Empty Bins remaining</label>
             <input class="fzInput" type="number" id="lastOrders" name="lastOrders" value="999" onchange="showrestan()">
             </div>
 

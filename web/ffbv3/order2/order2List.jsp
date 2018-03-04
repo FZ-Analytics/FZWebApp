@@ -20,22 +20,14 @@
         
         function batal(jobID,divID) { 
             var x = confirm("Cancel Job " + jobID + " ? ");
-            if (x == true) {
-                var f = document.getElementById("frm_batal");
-                document.getElementById("jobID").value = jobID;
-                document.getElementById("divID").value = divID;
-                f.submit();
-            }
+            if (x == true) 
+                document.location.href="order2Cancel.jsp?jobID=" + jobID + "&divID=" +divID;
         }
 
         function reOrder(jobID,divID) { 
             var x = confirm("Reorder Job " + jobID + " ? ");
-            if (x == true) {
-                var f = document.getElementById("frm_batal");
-                document.getElementById("jobID").value = jobID;
-                document.getElementById("divID").value = divID;
-                f.submit();
-            }
+            if (x == true) 
+                document.location.href="order2Reorder.jsp?jobID=" + jobID + "&divID=" +divID;
         }
     </script>
         <h3>Job / Order</h3>

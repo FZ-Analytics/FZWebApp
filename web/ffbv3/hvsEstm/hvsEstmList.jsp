@@ -22,6 +22,8 @@
                 <th width="100px" class="fzCol">Div</th>
                 <th width="100px" class="fzCol">Kg</th>
                 <!--th width="100px" class="fzCol">To Run</th-->
+                <th width="100px" class="fzCol">Mill</th>
+                <th width="100px" class="fzCol">Grabber Condition</th>
                 <th width="100px" class="fzCol"><!--view--></th>
             </tr>
             
@@ -34,6 +36,8 @@
                 <td class="fzCell"><%=he.status%></td>
                 <td class="fzCell"><%=he.divID%></td>
                 <td class="fzCell"><%=he.kg%></td>
+                <td class="fzCell"><%=he.millID%></td>
+                <td class="fzCell"><%=he.grabbercondition%></td>
                 <!--td class="fzCell">
                     
                     <%if (he.status.equals("FNAL")){%>

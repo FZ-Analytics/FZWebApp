@@ -107,6 +107,7 @@
                     <th width="100px" class="fzCol" style="border-right: 2px solid lightgray; text-align: right; padding: 2px">14pm - 18pm</th>
                     <th width="100px" class="fzCol" style="border-right: 2px solid lightgray; text-align: right; padding: 2px">>18pm</th>
                     <th width="100px" class="fzCol" style="text-align: right; padding: 2px">Total</th>
+                    <th width="100px" class="fzCol" style="text-align: right;">Remaining Bin</th>
                 </tr>
             </thead>
             <tbody>
@@ -123,6 +124,9 @@
                     int trips2 = 0;
                     int trips3 = 0;
                     int trips4 = 0;
+                        String sBin = "";
+                        int iBin = 0;
+                        int tBin = 0;
                     if (!dateSummary.isEmpty()) {
                         o = DetilSummary.rdbTrips02(dateSummary,millId,estateId);
                         HashMap<String, String> pl = new HashMap<String, String>();
@@ -139,6 +143,10 @@
                                 Kgs3 = Kgs3 + x.getInt("kg3");
                                 Kgs4 = Kgs4 + x.getInt("kg4");
                                 TotalKgs = TotalKgs + x.getInt("ActualKgs");
+                                iBin = x.getInt("remainingBin");
+                                sBin = String.valueOf(iBin).trim();
+                                if (tBin >= 999) sBin = "N/A";
+                                tBin = tBin + iBin;
                 %>
                 <tr>                    
                     <td class="fzCell" rowspan="2"><%=x.getString("divID")%></td>
@@ -148,6 +156,7 @@
                     <td class="fzCell" align="right" ><%=x.getInt("trip3")%></td>
                     <td class="fzCell" align="right" ><%=x.getInt("trip4")%></td>
                     <td class="fzCell" align="right" ><%=x.getInt("TripsCount")%></td>
+                    <td class="fzCell" align="right" ><%=sBin%></td>
                 </tr>
                 <tr>
                     <td>Kgs</td>
@@ -156,6 +165,7 @@
                     <td class="fzCell" align="right" ><%=df.format(x.getInt("kg3"))%></td>
                     <td class="fzCell" align="right" ><%=df.format(x.getInt("kg4"))%></td>
                     <td class="fzCell" align="right" ><%=df.format(x.getInt("ActualKgs"))%></td>
+                    <td></td>
                 </tr>
                 <%
                     }
@@ -163,6 +173,7 @@
             </tbody>
                 <%
                         }
+                        String stBin = (tBin>=999)?"N/A":String.valueOf(tBin);
                  %>
             <tfoot>
                 <tr style="background-color: #f2f2f2">                    
@@ -173,6 +184,7 @@
                     <td class="fzCell" align="right" ><%=trips3%></td>
                     <td class="fzCell" align="right" ><%=trips4%></td>
                     <td class="fzCell" align="right" ><%=TripsCount%></td>
+                    <td class="fzCell" align="right" ><%=stBin%></td>
                 </tr>
                 <tr style="background-color: #f2f2f2">
                     <td>Kgs</td>
@@ -181,6 +193,7 @@
                     <td class="fzCell" align="right" ><%=df.format(Kgs3)%></td>
                     <td class="fzCell" align="right" ><%=df.format(Kgs4)%></td>
                     <td class="fzCell" align="right" ><%=df.format(TotalKgs)%></td>
+                    <td></td>
                 </tr>
             </tfoot>
                  <%

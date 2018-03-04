@@ -342,6 +342,11 @@ public class HvsEstmDAO {
                 + "\n, a.status, a.divID"
                 + "\n, a.hvsEstmID"
                 + "\n, sum(b.size1) kg "
+                + "\n, a.millID "
+                + "\n, (case a.grabbercondition " 
+                + "\n      when 0 then 'Ready' " 
+                + "\n      when 1 then 'Break Down' "
+                + "        else '?' end) grabberCondition"
                 + "\n from fbHvsEstm a"
                 + "\n inner join fbHvsEstmDtl b"
                 + "\n     on a.hvsEstmID = b.hvsEstmID"
@@ -379,7 +384,8 @@ public class HvsEstmDAO {
                     he.divID = rs.getString(3);
                     he.hvsEstmID = rs.getString(4);
                     he.kg = rs.getDouble(5);
-                    
+                    he.millID = rs.getString(6);
+                    he.grabbercondition = rs.getString(7);
                     // add to list
                     heList.add(he);
                 }
@@ -502,6 +508,12 @@ public class HvsEstmDAO {
                 + "\n, a.status, a.divID"
                 + "\n, a.hvsEstmID"
                 + "\n, sum(b.size1) kg "
+                + "\n, a.MillID "
+                + "\n, (case a.grabbercondition "
+                + "\n        when '0' then 'Ready' "
+                + "\n        when '1' then 'Break Down' "
+                + "\n        else '?'"
+                + "\n   end) grabbercondition "
                 + "\n from fbHvsEstm a"
                 + "\n   inner join fbHvsEstmDtl b"
                 + "\n     on a.hvsEstmID = b.hvsEstmID"
@@ -536,6 +548,8 @@ public class HvsEstmDAO {
                     he.divID = rs.getString(3);
                     he.hvsEstmID = rs.getString(4);
                     he.kg = rs.getDouble(5);
+                    he.millID = rs.getString(6);
+                    he.grabbercondition = rs.getString(7);
                     
                     // add to list
                     heList.add(he);

@@ -91,7 +91,7 @@ public class DetilSummary {
         if (estateId!=null && !estateId.isEmpty() && !estateId.equals("<All>")) 
             whr = whr + ((whr.isEmpty())?" where ":" and ") + " a.estateId='" + estateId + "'";
         String sql = "select \n" +
-"		a.millID,a.estateID,a.divID,b.*,c.Kgs KgsTax, \n" +
+"		a.millID,a.estateID,a.divID,b.*,c.Kgs KgsTax, d.remainingBin, \n" +
 "               (case when ifnull(b.TripsCount,0)=0 then 0.00 else ifnull(b.ActualKgs,0)/ifnull(b.TripsCount,0) end) avgTrip, \n" +
 "               (case when ifnull(c.Kgs,0)=0 then 0 else ifnull(b.ActualKgs,0)/c.Kgs end)*100 avgTax \n" + 
 "	from fbdiv a\n" +
@@ -122,6 +122,12 @@ public class DetilSummary {
 "			AND ca.status = 'FNAL' \n" +
 "		GROUP BY ca.divID \n" +
 "	) c ON a.divID = c.divID     \n" +
+"       left join (select \n" +
+"                       da.divID,sum((case when isnull(da.remainingBin)=0 then da.remainingBin else 9999 end)) remainingBin\n" +
+"                   from fbremainbin da \n" +
+"                   where da.runID like DATE_FORMAT(now(),'%Y%m%d%')\n" +
+"                   group by da.divID \n " + 
+"                  ) d on a.divID=d.divID" +
 "       " + whr + "\n" +
 "	order by a.millID,a.estateID,a.divID";
 /*
@@ -195,6 +201,7 @@ public class DetilSummary {
                     o.put("avgTrip", rs.getDouble("avgTrip"));
                     o.put("KgsTax", rs.getDouble("KgsTax"));
                     o.put("avgTax", rs.getDouble("avgTax"));
+                    o.put("remainingBin",rs.getInt("remainingBin"));
 //                    o.put("kgsRestan", rs.getDouble("kgsRestan"));
                     result.put(o);
                 }
