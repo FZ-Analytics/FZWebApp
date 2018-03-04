@@ -1,3 +1,4 @@
+<%@page import="java.text.SimpleDateFormat"%>
 <%@page import="java.util.Date"%>
 <%@page import="com.fz.ffbv3.service.order2.Order2Record"%>
 <%@page import="java.sql.ResultSet"%>
@@ -54,7 +55,7 @@
         int nLstOrd = Integer.parseInt(lastOrders);
         if (now.getHours()>=15) 
             if (nLstOrd > 10 || nLstOrd < 0) throw new Exception("Please input Bin Remaining");
-        if (nLstOrd == 0 && Integer.parseInt(restanKg) ==0 )
+        if (nLstOrd == 0 && Integer.parseInt(restanKg) < 0 )
             throw new Exception("Please input Restan Size");
 
         String remark = FZUtil.getHttpParam(request, "remark");
@@ -66,7 +67,7 @@
         Auth.check(pc, "Div_" + divID + ";Order_Edit", true);
         
         String block2Criteria = "";
-        String curTimeStamp = "";
+        String curTimeStamp = (new SimpleDateFormat("HH:mm")).format(new Date());
 //        if (block2.length() > 0){
 //            block2Criteria = " and betweenBlock2 = '" + block2 + "'";
 //        }
@@ -77,7 +78,7 @@
         con.setAutoCommit(false);
             // check similar job
             String sql = 
-                    "select jobID, current_time() curTimeStamp from fbJob "
+                    "select jobID from fbJob "
                     + " where "
                     + " hvsDt = '" + hvsDate + "'"
                     + " and divID = '" + divID + "'"
@@ -93,7 +94,7 @@
                 if (rs.next()){
                     
                     String jobID = FZUtil.getRsString(rs, 1, "");
-                    curTimeStamp = FZUtil.getRsString(rs, 2, "");
+//                    curTimeStamp = FZUtil.getRsString(rs, 2, "");
 //                    request.setAttribute("duplicateJobID", jobID);
 //                    request.getRequestDispatcher("../order2/order2Frm.jsp")
 //                        .forward(request, response);

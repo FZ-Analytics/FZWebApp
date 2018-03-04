@@ -73,6 +73,8 @@
                 + "\n, t.reasonState"
                 + "\n, t2.reasonState"
                 + "\n, j.createSource"
+                + "\n, j.LastOrders"
+                + "\n, j.restanKg"
                 + "\n from fbJob j"
                 + "\n   left outer join fbTask2 t"
                 + "\n       on j.jobId = t.jobID"
@@ -124,6 +126,8 @@
                     or.Task1ReasonState = FZUtil.getRsString(rs, i++, "");
                     or.Task2ReasonState = FZUtil.getRsString(rs, i++, "");
                     or.createSource = FZUtil.getRsString(rs, i++, "");
+                    or.LastOrders = FZUtil.getRsInt(rs, i++, 0);
+                    or.restanKg = FZUtil.getRsInt(rs, i++, 0);
                     
 //                    or.from1 = FZUtil.getRsString(rs, i++, "");
 //                    or.to1 = FZUtil.getRsString(rs, i++, "");

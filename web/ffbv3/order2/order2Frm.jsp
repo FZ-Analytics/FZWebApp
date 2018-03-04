@@ -141,7 +141,7 @@
                    value="" required>
             
             <br><br>
-            <label class="fzLabel">Bin Position</label>
+            <label class="fzLabel">Empty Bin Position</label>
             <input class="fzInput" type="text" id="remark" name="remark" 
                    value="" required>
             
@@ -164,7 +164,7 @@
 
             <div id="dLastOrder" name="dLastOrder" hidden>
             <br><br>
-            <label class="fzLabel">Empty Bins remaining</label>
+            <label class="fzLabel">Remaining Bin</label>
             <input class="fzInput" type="number" id="lastOrders" name="lastOrders" value="999" onchange="showrestan()">
             </div>
 

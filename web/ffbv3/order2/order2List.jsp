@@ -246,9 +246,13 @@
                         </tr>
 			<tr>
                             <td>&nbsp;</td>
-                            <td>Is Last 2 Order</td><td style="padding: 2px;">:</td><td width="50px"><%=r.isLast2Order%></td>
+                            <td>Remaining Bin</td><td style="padding: 2px;">:</td><td width="50px"><%=r.LastOrders%></td>
                             <td>&nbsp;</td>
-                            <td style="padding: 2px;">Reason</td><td style="padding: 2px;">:</td><td><%=r.Task2ReasonName%></td>
+                            <td style="padding: 2px;">Restan</td><td style="padding: 2px;">:</td><td><%=r.restanKg%></td>
+                        </tr>
+			<tr>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px;">Reason</td><td style="padding: 2px;">:</td><td colspan="5"><%=r.Task2ReasonName%></td>
                         </tr>
                         <tr><td colspan='7>'>&nbsp;</td></tr>
 			<tr>

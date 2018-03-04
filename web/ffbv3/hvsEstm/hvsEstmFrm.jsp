@@ -115,7 +115,7 @@
             
             <br><br>
             <div id="tbData" class="table-editable">
-              <table class="table" border1="1">
+              <table class="table" border1="1" width="100%">
                   <tr>
                       <th width="100px" class="fzCol">Type</th>
                       <th width="100px" class="fzCol">Block</th>
@@ -135,13 +135,13 @@
                         </td>
                         <td contenteditable="true" class="fzCell celVal"><%=hd.getBlock()%></td>
                         <td contenteditable="true" class="fzCell celVal"><%=hd.getSizeString()%></td>
-                        <td class="fzCell">
-                            <span class="table-up fzTextButton">Up</span>
-                            <span class="table-down fzTextButton">Down</span>
+                        <!--td class="fzCell"-->
+                        <td><span class="table-up fzTextButton">Up</span></td>
+                        <td><span class="table-down fzTextButton">Down</span></td>
 
                             <%if (!get("status").equals("FNAL")) { %>
 
-                                <span class="table-remove ">Del</span>
+                            <td><span class="table-remove ">Del</span></td>
 
                             <% } /* if get status */ %>
 
@@ -160,9 +160,9 @@
                       </td>
                       <td contenteditable="true" class="fzCell celVal">A01</td>
                       <td contenteditable="true" class="fzCell celVal">10000</td>
-                    <td class="fzCell"><span class="table-up fzTextButton">Up</span></td>
-                    <td class="fzCell"><span class="table-down fzTextButton">Down</span></td>
-                    <td class="fzCell"><span class="table-remove fzTextButton">Del</span></td>
+                      <td class="fzCell"><span class="table-up fzTextButton">Up</span></td>
+                      <td class="fzCell"><span class="table-down fzTextButton">Down</span></td>
+                      <td class="fzCell"><span class="table-remove fzTextButton">Del</span></td>
                   </tr>
               </table>
                   
