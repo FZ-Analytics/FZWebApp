@@ -1,3 +1,5 @@
+<%@page import="java.text.SimpleDateFormat"%>
+<%@page import="java.util.Date"%>
 <%@page import="com.fz.ffbv3.service.order2.Order2Record"%>
 <%@page import="java.sql.ResultSet"%>
 <%@page import="java.sql.PreparedStatement"%>
@@ -13,6 +15,7 @@
             , PageContext pc) throws Exception {
 
         // get input
+        Date now = new java.util.Date();
         String hvsDate = (new java.text.SimpleDateFormat("yyyy-MM-dd").format(
                         new java.util.Date()));
         
@@ -37,24 +40,42 @@
 
         String isLastOrder = FZUtil.getHttpParam(request, "isLastOrder")
                 .trim().toLowerCase();
+
+        String millID = FZUtil.getHttpParam(request, "millID");
+        String restanKg = FZUtil.getHttpParam(request,"restanKg").trim();
+
 //        if (!(isLastOrder.equals("yes") ||  isLastOrder.equals("no"))) 
 //            throw new Exception("Is last order should be 'yes' or 'no'");
 
         String isLast2Order = FZUtil.getHttpParam(request, "isLast2Order");
 
+        String lastOrders = (FZUtil.getHttpParam(request,"lastOrders").trim());
+        if (lastOrders.equals("2")) isLast2Order = "yes";
+        if (lastOrders.equals("1")) isLastOrder = "yes";
+        int nLstOrd = Integer.parseInt(lastOrders);
+        if (now.getHours()>=15) 
+            if (nLstOrd > 10 || nLstOrd < 0) throw new Exception("Please input Bin Remaining");
+        if (nLstOrd == 0 && Integer.parseInt(restanKg) < 0 )
+            throw new Exception("Please input Restan Size");
+
         String remark = FZUtil.getHttpParam(request, "remark");
+
+        String lastOdrCnt = "" ;
         if (remark.trim().length() == 0) 
             throw new Exception("Bin Position / Remark cannot empty");
         
         Auth.check(pc, "Div_" + divID + ";Order_Edit", true);
         
         String block2Criteria = "";
+        String curTimeStamp = (new SimpleDateFormat("HH:mm")).format(new Date());
 //        if (block2.length() > 0){
 //            block2Criteria = " and betweenBlock2 = '" + block2 + "'";
 //        }
         
         try (Connection con = (new Db()).getConnection("jdbc/fz")){
 
+        // begin trans
+        con.setAutoCommit(false);
             // check similar job
             String sql = 
                     "select jobID from fbJob "
@@ -73,6 +94,7 @@
                 if (rs.next()){
                     
                     String jobID = FZUtil.getRsString(rs, 1, "");
+//                    curTimeStamp = FZUtil.getRsString(rs, 2, "");
 //                    request.setAttribute("duplicateJobID", jobID);
 //                    request.getRequestDispatcher("../order2/order2Frm.jsp")
 //                        .forward(request, response);
@@ -81,6 +103,26 @@
                 }
             }
             
+                // get sequence number of job for a division, and runID
+                StringBuffer retVal = new StringBuffer();
+                getSeqAndRunID(hvsDate, divID, con, retVal);
+                String[] seqAndRunID = retVal.toString().split(";");
+                //int seq = Integer.parseInt(seqAndRunID[0]);
+                String runID = seqAndRunID[0];
+                int prevLastOdrCnt = 0;
+
+            if (isLast2Order.equals("yes")){
+                    // select lastOdr from schdRun whererunid
+		sql = "select lastOdrCnt from fbSchedRun where runID='" + runID + "'";
+                try (
+			PreparedStatement ps = con.prepareStatement(sql);
+			ResultSet rs = ps.executeQuery()) {
+//prevLastOdCnt= rs...                
+				if (rs.next()) prevLastOdrCnt = rs.getInt("lastOdrCnt");
+		}
+            }
+
+
             // insert
             sql = "insert into fbjob("
                     + "doneStatus"
@@ -99,17 +141,14 @@
                     + ", isLastOrder"
                     + ", isLast2Order"
                     + ", EstmFfb"
+                    + ", PrevLastOdrCnt"
+                    + ", LastOrders"
+                    + ", millID"
+                    + ", restanKg"
                     + ")"
-                    + " values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+                    + " values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
                     ;
             try (PreparedStatement ps = con.prepareStatement(sql)){
-
-                // get sequence number of job for a division, and runID
-                StringBuffer retVal = new StringBuffer();
-                getSeqAndRunID(hvsDate, divID, con, retVal);
-                String[] seqAndRunID = retVal.toString().split(";");
-                //int seq = Integer.parseInt(seqAndRunID[0]);
-                String runID = seqAndRunID[0];
 
                 // validate blocks
                 validateDivBlock(divID, block1, con);
@@ -137,12 +176,41 @@
                 ps.setString(i++, isLastOrder);
                 ps.setString(i++, isLast2Order);
                 ps.setString(i++, estmFfb);
+                ps.setInt(i++, prevLastOdrCnt);
+                ps.setString(i++, lastOrders);
+                ps.setString(i++, millID);
+                ps.setString(i++, restanKg);
 
                 ps.executeUpdate();
 
-                if (isLast2Order.equals("yes"))
-                    incrementLastOdrCnt(con, runID);
-            }
+//                if (isLast2Order.equals("yes"))  incrementLastOdrCnt(con, runID);
+                }
+                //diganti if > jam 3 & remaining order-nya diisi
+                if ((curTimeStamp.compareTo("15:00")>0) && !runID.equals(null) && !runID.isEmpty()) {
+                    sql = "select * from fbremainBin" 
+                        + " where runID='" + runID 
+                        + "' and divID='" + divID + "'";
+                    
+                    try {
+                        PreparedStatement ps = con.prepareStatement(sql);
+                        ResultSet rs = ps.executeQuery() ;
+                        if (lastOrders.equals("0")) lastOrders = "9999";
+                        if (rs.next()) {
+                            String id = rs.getString("id");
+                            sql = "update fbremainBin set remainingBin=" + lastOrders
+                                + " where id=" +id;
+                           //       + " where runID='" + runID + "' and divID='" + divID + "'";
+                        } else {
+                             sql = "insert into fbremainBin (runID, divID, remainingBin) "
+                                 + "values ('" + runID + "', '" + divID + "'," + lastOrders +")";
+                        }
+
+                        ps.executeUpdate(sql);
+                    } catch (Exception ex) { 
+
+                    }
+                }
+        con.setAutoCommit(true);
         }
         request.getRequestDispatcher("../appGlobal/success.jsp")
                 .forward(request, response);
@@ -151,6 +219,7 @@
 
     private void incrementLastOdrCnt(Connection con, String runID) 
             throws Exception {
+
 
         String sql = "update fbSchedRun set lastOdrCnt = lastOdrCnt + 2"
             + " where runID = '" + runID + "'";
@@ -183,17 +252,18 @@
     private void getSeqAndRunID(String hvsDate, String divID, Connection con
             , StringBuffer retVal) 
             throws Exception {
-        String sql = "select max(runID) "
+        String sql = "select runID "
                 + " from fbJob"
                 + " where hvsDt = '" + hvsDate + "'"
                 + "     and divID = '" + divID + "'"
                 + "     and reorderToJobID is null"
+                + " order by JobID desc"
                 ;
 //        int seq = 0;
         String runID = "";
         try (PreparedStatement ps = con.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()){
-            rs.next();
+            if (rs.next()) {
 //            seq = rs.getInt(1);
 //            // if no order yet
 //            if (seq == 0){
@@ -203,6 +273,7 @@
 //                seq += 1;
 //            }
             runID = rs.getString(1);
+            }
         }
 //        retVal.append(seq).append(";").append(runID);
         retVal.append(runID);

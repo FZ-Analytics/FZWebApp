@@ -70,7 +70,7 @@
                     //Some code
                     //alert( $(this).text() ); 
                     if ($(this).text().length > 0) {
-                        window.open("../Vehicle/VehicleAttrView.jsp?vehiId=" + $(this).text(), null,
+                        window.open("../Vehicle/VehicleAttrView.jsp?vehiId=" + $(this).text() + "&flag=update", null,
                                 "scrollbars=1,resizable=1,height=500,width=750");
                         return true;
                     }

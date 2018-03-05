@@ -9,8 +9,8 @@ import com.fz.generic.Db;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import org.primefaces.json.JSONArray;
-import org.primefaces.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  *

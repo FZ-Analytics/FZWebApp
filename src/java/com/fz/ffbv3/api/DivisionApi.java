@@ -10,6 +10,7 @@ import com.fz.ffbv3.service.divisionmgt.DivisionModel;
 import com.fz.ffbv3.service.usermgt.UserLogic;
 import com.fz.ffbv3.service.usermgt.UserModel;
 import com.fz.generic.DBConnector;
+import com.fz.generic.Db;
 import com.fz.generic.ResponseMessege;
 import com.fz.generic.StatusHolder;
 import com.fz.util.FixMessege;
@@ -17,6 +18,8 @@ import com.fz.util.FixValue;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.sql.Connection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Produces;
@@ -33,8 +36,10 @@ import javax.ws.rs.core.Response;
  *
  * @author ignat
  */
-@Path("division")
-public class DivisionApi {
+@Path("v2/divisi")
+public class DivisionApi 
+{
+  private final Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
 
   @Context
   private UriInfo context;
@@ -66,31 +71,35 @@ public class DivisionApi {
   }
   
   @POST
-  @Path("gantipathnya")
+  @Path("dashboard")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response postDivisionJson(String content)
+  public Response postDashboardJson(String content)
   {
+    logger.severe("[Path] -> v2/divisi/dashboard");
+
 		// Get Gson object and parse json string to object
+    logger.severe("[JSON] -> " + content);
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 		DivisionModel divisionModel = gson.fromJson(content, DivisionModel.class);
-
-    DBConnector dBConnector = new DBConnector();
-    Connection conn = dBConnector.ConnectToDatabase();
+    logger.severe("[Parsing] -> Parsing request with GSON done");
 
     StatusHolder statusHolder = new StatusHolder();
     
-    if(conn != null)
-    {
-      DivisionLogic divisionLogic = new DivisionLogic(conn); 
-      statusHolder = divisionLogic.ContohProses(divisionModel.getRequestData().getField1(), divisionModel.getRequestData().getField2());
+		try(Connection conn = (new Db()).getConnection("jdbc/fz"))
+		{
+      logger.severe("[Open] -> Open database done");
+      DivisionLogic divisionLogic = new DivisionLogic(conn, logger); 
+      statusHolder = divisionLogic.DashboarPerDivisi(divisionModel.getDashboardData());
     }
-    else
-    {
+		catch (Exception ex)
+		{
       statusHolder.setCode(FixValue.intResponError);
-      statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strLoginFailed));
-    }
+      statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strDashboardDivisiFailed));
+      logger.log(Level.SEVERE, "[Stack Trace] -> {0}", ex.toString());
+		}
     
-    dBConnector.CloseDatabase(conn);    
+    logger.severe("[Close] -> Close database done");
+    logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
     return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build();
   }
 }

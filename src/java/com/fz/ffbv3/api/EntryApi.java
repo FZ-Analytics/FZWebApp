@@ -12,6 +12,7 @@ import com.fz.ffbv3.service.hvsEstm.HvsEstmDAO;
 import com.fz.ffbv3.service.usermgt.UserLogic;
 import com.fz.ffbv3.service.usermgt.UserModel;
 import com.fz.generic.DBConnector;
+import com.fz.generic.Db;
 import com.fz.generic.ResponseMessege;
 import com.fz.generic.StatusHolder;
 import com.fz.util.FixMessege;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Random;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,12 +47,13 @@ import javax.ws.rs.core.Response;
  * @author
  * Agustinus Ignat
  */
-@Path("entry")
+@Path("v2/entry")
 public class EntryApi
 {
   private final Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
-  FileHandler fh = null;
-  final String DATE_FORMAT = "yyyyMMdd";
+//  FileHandler fh = null;
+//  final String DATE_FORMAT = "yyyyMMdd.HHmm";
+//  Random rand = new Random();
 	
 	@Context private UriInfo context;
 
@@ -64,12 +67,13 @@ public class EntryApi
 	 */
 	public EntryApi()
 	{
+/*    
     try 
     {
       DateTimeFormatter dateTimeformatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
       LocalDateTime localDateTime = LocalDateTime.now();
 
-      this.fh = new FileHandler("D:\\fza\\log\\EntryApi." + dateTimeformatter.format(localDateTime) + ".log", true);
+      this.fh = new FileHandler(FixValue.strLogPath + "EntryApi." + dateTimeformatter.format(localDateTime) + ".log", true);
     }
     catch (IOException ex)
     {
@@ -82,6 +86,7 @@ public class EntryApi
 
     fh.setFormatter(new SimpleFormatter());
     logger.addHandler(fh);
+*/    
 	}
 
 	/**
@@ -111,29 +116,26 @@ public class EntryApi
   @Consumes(MediaType.APPLICATION_JSON)
   public Response getEstimation()
   {
-    logger.severe("[Path] -> /entry/data");
+    logger.severe("[Path] -> v2/entry/estimation");
     
-    DBConnector dBConnector = new DBConnector();
-    Connection conn = dBConnector.ConnectToDatabase();
-    logger.severe("[Open] -> Open database done");
-
     StatusHolder statusHolder = new StatusHolder();
     
-    if(conn != null)
-    {
+		try(Connection conn = (new Db()).getConnection("jdbc/fz"))
+		{
+      logger.severe("[Open] -> Open database done");
       EntryLogic entryLogic = new EntryLogic(conn, logger); 
       statusHolder = entryLogic.DataEntry(1);
     }
-    else
-    {
+		catch (Exception ex)
+		{
       statusHolder.setCode(FixValue.intResponError);
-      statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strLogoutFailed));
-    }
-    
-    dBConnector.CloseDatabase(conn);
+      statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strDataEstFailed));
+      logger.log(Level.SEVERE, "[Stack Trace] -> {0}", ex.toString());
+		}
+
     logger.severe("[Close] -> Close database done");
     logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
-    fh.close();
+//    fh.close();
     return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build();
   }
 
@@ -142,7 +144,7 @@ public class EntryApi
   @Path("estimation")
 	public Response postEstimationJson(String content)
 	{
-    logger.severe("[Path] -> /entry/estimation");
+    logger.severe("[Path] -> v2/entry/estimation");
 
 		// Get Gson object and parse json string to object
     logger.severe("[JSON] -> " + content);
@@ -151,7 +153,7 @@ public class EntryApi
     logger.severe("[Parsing] -> Parsing request with GSON done");
     
     StatusHolder statusHolder = new StatusHolder();
-    
+
 		try
 		{
       HvsEstmDAO heDAO = new HvsEstmDAO();
@@ -160,45 +162,45 @@ public class EntryApi
       statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strEstimationSuccess));
 	    logger.severe("[Estimasi entry] -> Sukses");
 		}
-		catch(Exception e)
+		catch(Exception ex)
 		{
       statusHolder.setCode(FixValue.intResponFail);
       statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strEstimationFailed));
 	    logger.severe("[Estimasi entry] -> Gagal");
+      logger.log(Level.SEVERE, "[Stack Trace] -> {0}", ex.toString());
 		}
 
-		fh.close();
+//		fh.close();
+    logger.severe("[Close] -> Close database done");
+    logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
     return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build();
 	}
 
   @GET
-  @Path("job")
+  @Path("dirloc")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response getJobJson()
   {
-    logger.severe("[Path] -> /entry/job");
+    logger.severe("[Path] -> v2/entry/dirloc");
     
-    DBConnector dBConnector = new DBConnector();
-    Connection conn = dBConnector.ConnectToDatabase();
-    logger.severe("[Open] -> Open database done");
-
     StatusHolder statusHolder = new StatusHolder();
     
-    if(conn != null)
-    {
+		try(Connection conn = (new Db()).getConnection("jdbc/fz"))
+		{
+      logger.severe("[Open] -> Open database done");
       EntryLogic entryLogic = new EntryLogic(conn, logger); 
       statusHolder = entryLogic.DataEntry(2);
     }
-    else
-    {
+		catch (Exception ex)
+		{
       statusHolder.setCode(FixValue.intResponError);
-      statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strLogoutFailed));
-    }
-    
-    dBConnector.CloseDatabase(conn);
+      statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strDataJobFailed));
+      logger.log(Level.SEVERE, "[Stack Trace] -> {0}", ex.toString());
+		}
+
     logger.severe("[Close] -> Close database done");
     logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
-    fh.close();
+//    fh.close();
     return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build();
   }
 
@@ -207,7 +209,7 @@ public class EntryApi
   @Consumes(MediaType.APPLICATION_JSON)
   public Response postJobJson(String content)
   {
-    logger.severe("[Path] -> /entry/job");
+    logger.severe("[Path] -> v2/entry/job");
     
 		// Get Gson object and parse json string to object
     logger.severe("[JSON] -> " + content);
@@ -215,27 +217,24 @@ public class EntryApi
 		EntryModel entryModel = gson.fromJson(content, EntryModel.class);
     logger.severe("[Parsing] -> Parsing request with GSON done");
 
-    DBConnector dBConnector = new DBConnector();
-    Connection conn = dBConnector.ConnectToDatabase();
-    logger.severe("[Open] -> Open database done");
-
     StatusHolder statusHolder = new StatusHolder();
-    
-    if(conn != null)
-    {
+
+		try(Connection conn = (new Db()).getConnection("jdbc/fz"))
+		{
+      logger.severe("[Open] -> Open database done");
       EntryLogic entryLogic = new EntryLogic(conn, logger); 
       statusHolder = entryLogic.JobEntry(entryModel);
     }
-    else
-    {
+		catch (Exception ex)
+		{
       statusHolder.setCode(FixValue.intResponError);
       statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strDataJobEntryFailed));
-    }
+      logger.log(Level.SEVERE, "[Stack Trace] -> {0}", ex.toString());
+		}
     
-    dBConnector.CloseDatabase(conn);
     logger.severe("[Close] -> Close database done");
     logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
-    fh.close();
+//    fh.close();
     return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build();
   }
 }

@@ -41,6 +41,9 @@ public class Order2Record {
     public String createDate = "";
     public String dirLoc = "";
     public String estmFfb = "";
+    public double ActualKg = 0;
+    public int LastOrders = 0;
+    public int restanKg = 0;
     
     public String getBlocks() {
         String r = "";

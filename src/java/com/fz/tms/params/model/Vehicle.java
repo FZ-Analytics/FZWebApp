@@ -30,4 +30,11 @@ public class Vehicle {
     public String solar;
     public String persentase;
     public String fixedCost;
+    public String Channel;
+    
+    public String IdDriver;
+    public String NamaDriver;
+    public String agent_priority;
+    public String max_cust;
+    public String DriverDates;    
 }

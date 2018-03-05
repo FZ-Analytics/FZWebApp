@@ -4,6 +4,10 @@
     Author     : Administrator
 --%>
 
+<%@page import="org.json.JSONObject"%>
+<%@page import="org.json.JSONArray"%>
+<%@page import="com.fz.ffbv3.service.division.divisionDAO"%>
+<%@page import="com.fz.util.FZUtil"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <%@include file="../appGlobal/pageTop.jsp"%>
@@ -45,11 +49,54 @@
                 <option value="Daily">Daily</option>
                 <option value="Period">Period</option>
             </select>
-
+        <%
+            String millId = FZUtil.getHttpParam(request, "millId");
+            String estateId = FZUtil.getHttpParam(request, "estateId");
+            JSONArray aMill = divisionDAO.lstMill();
+            JSONArray aEst  = divisionDAO.lstEstate("");
+            String slct = "";
+            String s = "";
+        %>
             <br>
             <div id="daily">
                 <form class="container" action="DetilDailySummary.jsp" method="post">
                     <br><br>
+                    <label class="fzLabel">Mill</label>
+                    <select class="fzInput" id="millId" name="millId" >
+                <%
+                    slct = (millId.equals("<All>"))?"selected":"";
+                %>
+                        <option value ="<All>" <%=slct%>>--All--</option>
+                <%
+                    for(int i=0; i<aMill.length(); i++) {
+                        JSONObject o = aMill.getJSONObject(i);
+                        s = o.getString("millID");
+                        slct = (s.equals(millId))?"selected":"";
+                %>
+                <option value="<%=s%>" <%=slct%>><%=s%></option>
+                <%
+                    }
+                %>
+                    </select>
+                    <br>
+                    <label class="fzLabel">Estate</label>
+                    <select class="fzInput" id="estateId" name="estateId">
+                <%
+                    slct = (estateId.equals("<All>"))?"selected":"";
+                %>
+                        <option value ="<All>" <%=slct%>>--All--</option>
+                <%
+                    for(int i=0; i<aEst.length(); i++) {
+                        JSONObject o = aEst.getJSONObject(i);
+                        s = o.getString("estateID");
+                        slct = (s.equals(estateId))?"selected":"";
+                %>
+                        <option value="<%=s%>" <%=slct%>><%=s%></option>
+                <%
+                    }
+                %>
+                    </select>
+                    <br>
                     <label class="fzLabel">Date:</label>
                     <input class="fzInput" id="dateSummary" 
                            name="dateSummary" value=""/>

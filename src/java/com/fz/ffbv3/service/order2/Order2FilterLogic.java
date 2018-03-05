@@ -99,6 +99,7 @@ public class Order2FilterLogic implements BusinessLogic {
                 + "\n, date_format(j.createDt,'%H:%i:%s')"
                 + "\n, j.dirLoc"
                 + "\n, j.estmFfb"
+                + "\n, j.ActualKg"
                 + "\n from fbJob j"
                 + "\n   left outer join fbTask2 t"
                 + "\n       on j.jobId = t.jobID"
@@ -164,6 +165,7 @@ public class Order2FilterLogic implements BusinessLogic {
                     or.createDate = FZUtil.getRsString(rs, i++, "");
                     or.dirLoc = FZUtil.getRsString(rs, i++, "");
                     or.estmFfb = FZUtil.getRsString(rs, i++, "");
+                    or.ActualKg = (double) FZUtil.getRsDouble(rs, i++, 0);
                     
 //                    or.from1 = FZUtil.getRsString(rs, i++, "");
 //                    or.to1 = FZUtil.getRsString(rs, i++, "");

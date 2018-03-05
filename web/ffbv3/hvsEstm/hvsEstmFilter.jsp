@@ -30,13 +30,13 @@
             
             <br>
             <label class="fzLabel">Harvest Date</label>
-            <input class="fzInput" id="hvsDt" 
+            <input type="date" class="fzInput" id="hvsDt" 
                    name="hvsDt" value=""/>
             
             <br><br>
             <label class="fzLabel">Estate + Division</label>
             <input class="fzInput" type="text" id="estateID" 
-                   name="divID" value="BINE1">
+                   name="divID" value="">
             
             <br>
             <label class="fzLabel"></label>

@@ -14,21 +14,19 @@ import java.util.logging.Logger;
  * @author Agustinus Ignat
  */
 public class DBConnector
-{  
-  public Connection ConnectToDatabase()
+{
+  public Connection DatabaseStateConnection()
   {
-	  Connection conn = null;
-
-    try 
-    {	  
-		  conn = (new Db()).getConnection("jdbc/fz");
+    try(Connection conn = (new Db()).getConnection("jdbc/fz"))
+		{
+			return conn;
     }
     catch (Exception e)
-    {
+		{
       // e.printStackTrace();
-  	}
+    }
 
-    return conn;
+		return null;
   }
 
   public void CloseDatabase(Connection conn)
@@ -41,4 +39,20 @@ public class DBConnector
       Logger.getLogger(DBConnector.class.getName()).log(Level.SEVERE, null, ex);
     }
   }
+
+  public Connection ConnectToDatabase()
+  {
+		Connection conn = null;
+
+    try 
+    {	  
+		  conn = (new Db()).getConnection("jdbc/fz");
+    }
+    catch (Exception e)
+    {
+      // e.printStackTrace();
+  	}
+		
+		return conn;
+	}
 }

@@ -7,7 +7,6 @@ package com.fz.tms.params.PopUp;
 
 import com.fz.generic.BusinessLogic;
 import com.fz.generic.Db;
-import com.fz.tms.params.map.AccessGoogleDirection;
 import com.fz.tms.params.model.SummaryVehicle;
 import com.fz.tms.params.service.Other;
 import com.fz.util.FZUtil;
@@ -16,6 +15,7 @@ import java.math.MathContext;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -31,7 +31,8 @@ import javax.servlet.jsp.PageContext;
  *
  * @author dwi.rangga
  */
-public class popupDetilRunId implements BusinessLogic {    
+public class popupDetilRunId implements BusinessLogic {
+
     DecimalFormat df = new DecimalFormat("##.0");
     DecimalFormat mn = new DecimalFormat("###,###");
     String branch = "";
@@ -44,16 +45,23 @@ public class popupDetilRunId implements BusinessLogic {
     BigDecimal tamount = new BigDecimal(0);
     BigDecimal ttransportCost = new BigDecimal(0);
 
+    String runID = "";
+    String oriRunID = "";
+
     @Override
     public void run(HttpServletRequest request, HttpServletResponse response,
             PageContext pc
     ) throws Exception {
         //AccessGoogleDirection w = new AccessGoogleDirection();
         //w.renderLngLat();
-        String runID = FZUtil.getHttpParam(request, "runID");
+        runID = FZUtil.getHttpParam(request, "runID");
+        oriRunID = FZUtil.getHttpParam(request, "oriRunID");
         try {
             List<SummaryVehicle> asd = getSummary(runID);
-
+            for (int i = 0; i < asd.size(); i++) {
+                System.out.println(asd.get(i).truckid);
+            }
+            request.setAttribute("oriRunID", oriRunID);
             request.setAttribute("runID", runID);
             request.setAttribute("cap", df.format(tcap).toString());
             request.setAttribute("kub", df.format(tkub).toString());
@@ -76,151 +84,150 @@ public class popupDetilRunId implements BusinessLogic {
             pl.put("dates", dateFormat.format(date).toString());
             Other.insertLog(pl);
         }
-
     }
 
     public List<SummaryVehicle> getSummary(String runID) throws Exception {
         List<SummaryVehicle> asd = new ArrayList<>();
         SummaryVehicle sq = new SummaryVehicle();
-        String sql = "SELECT\n" +
-                "	a.vehicle_code,\n" +
-                "	a.vehicle_type,\n" +
-                "	CAST(\n" +
-                "		a.aweight AS VARCHAR\n" +
-                "	)+ ' / ' + CAST(\n" +
-                "		a.weight AS VARCHAR\n" +
-                "	),\n" +
-                "	CAST(\n" +
-                "		CAST(\n" +
-                "			(\n" +
-                "				a.aweight /(\n" +
-                "					a.weight / 100\n" +
-                "				)\n" +
-                "			) AS NUMERIC(\n" +
-                "				9,\n" +
-                "				0\n" +
-                "			)\n" +
-                "		) AS VARCHAR\n" +
-                "	),\n" +
-                "	CAST(\n" +
-                "		CAST(\n" +
-                "			a.avolume AS NUMERIC(\n" +
-                "				9,\n" +
-                "				1\n" +
-                "			)\n" +
-                "		) AS VARCHAR\n" +
-                "	)+ ' / ' + CAST(\n" +
-                "		a.volume AS VARCHAR\n" +
-                "	),\n" +
-                "	CAST(\n" +
-                "		CAST(\n" +
-                "			(\n" +
-                "				(\n" +
-                "					a.avolume\n" +
-                "				)/(\n" +
-                "					a.volume / 100\n" +
-                "				)\n" +
-                "			) AS NUMERIC(\n" +
-                "				9,\n" +
-                "				0\n" +
-                "			)\n" +
-                "		) AS VARCHAR\n" +
-                "	),\n" +
-                "	a.gross_amount,\n" +
-                "	a.do_number,\n" +
-                "	a.branch,\n" +
-                "	DATEDIFF(\n" +
-                "		MINUTE,\n" +
-                "		a.startTime,\n" +
-                "		a.arrive\n" +
-                "	)- a.Service_time,\n" +
-                "	a.Service_time,\n" +
-                "	CAST(\n" +
-                "		a.transportCost AS NUMERIC(\n" +
-                "			9,\n" +
-                "			0\n" +
-                "		)\n" +
-                "	) AS transportCost,\n" +
-                "	a.dist\n" +
-                "FROM\n" +
-                "	(\n" +
-                "		SELECT\n" +
-                "			ra.vehicle_code,\n" +
-                "			SUM( CASE WHEN LEN( ra.weight )= 0 THEN 0 ELSE CAST( ra.weight AS NUMERIC( 9, 0 )) END ) AS aweight,\n" +
-                "			SUM( CASE WHEN LEN( ra.volume )= 0 THEN 0 ELSE CAST( ra.volume AS NUMERIC( 9, 0 )) END ) AS avolume,\n" +
-                "			SUM( CAST( pr.gross_amount AS NUMERIC( 9, 0 ))) AS gross_amount,\n" +
-                "			SUM( pr.Service_time ) AS Service_time,\n" +
-                "			COUNT( CASE ra.do_number WHEN '' THEN 0 ELSE CAST( ra.do_number AS NUMERIC( 9, 0 )) END )- 1 AS do_number,\n" +
-                "			ra.branch,\n" +
-                "			CAST(\n" +
-                "				ve.weight AS NUMERIC(\n" +
-                "					9,\n" +
-                "					0\n" +
-                "				)\n" +
-                "			) AS weight,\n" +
-                "			CAST(\n" +
-                "				ve.volume AS NUMERIC(\n" +
-                "					9,\n" +
-                "					0\n" +
-                "				)\n" +
-                "			) AS volume,\n" +
-                "			ve.vehicle_type,\n" +
-                "			ve.startTime,\n" +
-                "			ar.arrive,\n" +
-                "			ar.transportCost,\n" +
-                "			SUM( CAST( ra.Dist / 1000 AS NUMERIC( 9 ))) AS Dist\n" +
-                "		FROM\n" +
-                "			BOSNET1.dbo.TMS_RouteJob ra\n" +
-                "		INNER JOIN BOSNET1.dbo.TMS_PreRouteVehicle ve ON\n" +
-                "			ra.runID = ve.runID\n" +
-                "			AND ra.vehicle_code = ve.vehicle_code\n" +
-                "		INNER JOIN(\n" +
-                "				SELECT\n" +
-                "					runID,\n" +
-                "					vehicle_code,\n" +
-                "					MAX( arrive ) AS arrive,\n" +
-                "					SUM( transportCost ) AS transportCost\n" +
-                "				FROM\n" +
-                "					BOSNET1.dbo.TMS_RouteJob\n" +
-                "				GROUP BY\n" +
-                "					runID,\n" +
-                "					vehicle_code\n" +
-                "			) ar ON\n" +
-                "			ar.RunId = ra.runID\n" +
-                "			AND ar.vehicle_code = ra.vehicle_code\n" +
-                "		LEFT OUTER JOIN(\n" +
-                "				SELECT\n" +
-                "					DISTINCT runID,\n" +
-                "					customer_id,\n" +
-                "					Service_time,\n" +
-                "					is_edit,\n" +
-                "					SUM( gross_amount ) AS gross_amount\n" +
-                "				FROM\n" +
-                "					BOSNET1.dbo.TMS_PreRouteJob\n" +
-                "				WHERE\n" +
-                "					is_edit = 'edit'\n" +
-                "				GROUP BY\n" +
-                "					runID,\n" +
-                "					customer_id,\n" +
-                "					Service_time,\n" +
-                "					is_edit\n" +
-                "			) pr ON\n" +
-                "			ra.runID = pr.runID\n" +
-                "			AND ra.customer_id = pr.customer_id\n" +
-                "		WHERE\n" +
-                "			ra.runID = '"+runID+"'\n" +
-                "			AND ra.vehicle_code <> 'NA'\n" +
-                "			AND ra.arrive <> ''\n" +
-                "		GROUP BY\n" +
-                "			ra.vehicle_code,\n" +
-                "			ra.branch,\n" +
-                "			ve.weight,\n" +
-                "			ve.volume,\n" +
-                "			ve.vehicle_type,\n" +
-                "			ve.startTime,\n" +
-                "			ar.arrive,\n" +
-                "			ar.transportCost\n" +
-                "	) a;";
+        String sql = "SELECT\n"
+                + "	a.vehicle_code,\n"
+                + "	a.vehicle_type,\n"
+                + "	CAST(\n"
+                + "		a.aweight AS VARCHAR\n"
+                + "	)+ ' / ' + CAST(\n"
+                + "		a.weight AS VARCHAR\n"
+                + "	),\n"
+                + "	CAST(\n"
+                + "		CAST(\n"
+                + "			(\n"
+                + "				a.aweight /(\n"
+                + "					a.weight / 100\n"
+                + "				)\n"
+                + "			) AS NUMERIC(\n"
+                + "				15,\n"
+                + "				0\n"
+                + "			)\n"
+                + "		) AS VARCHAR\n"
+                + "	),\n"
+                + "	CAST(\n"
+                + "		CAST(\n"
+                + "			a.avolume AS NUMERIC(\n"
+                + "				15,\n"
+                + "				1\n"
+                + "			)\n"
+                + "		) AS VARCHAR\n"
+                + "	)+ ' / ' + CAST(\n"
+                + "		a.volume AS VARCHAR\n"
+                + "	),\n"
+                + "	CAST(\n"
+                + "		CAST(\n"
+                + "			(\n"
+                + "				(\n"
+                + "					a.avolume \n"
+                + "				)/(\n"
+                + "					a.volume / 100\n"
+                + "				)\n"
+                + "			) AS NUMERIC(\n"
+                + "				15,\n"
+                + "				0\n"
+                + "			)\n"
+                + "		) AS VARCHAR\n"
+                + "	),\n"
+                + "	a.gross_amount,\n"
+                + "	a.do_number,\n"
+                + "	a.branch,\n"
+                + "	DATEDIFF(\n"
+                + "		MINUTE,\n"
+                + "		a.startTime,\n"
+                + "		a.arrive\n"
+                + "	)- a.Service_time,\n"
+                + "	a.Service_time,\n"
+                + "	CAST(\n"
+                + "		a.transportCost AS NUMERIC(\n"
+                + "			9,\n"
+                + "			0\n"
+                + "		)\n"
+                + "	) AS transportCost,\n"
+                + "	a.dist\n"
+                + "FROM\n"
+                + "	(\n"
+                + "		SELECT\n"
+                + "			ra.vehicle_code,\n"
+                + "			SUM( CASE WHEN LEN( ra.weight )= 0 THEN 0 ELSE CAST( ra.weight AS NUMERIC( 15, 0 )) END ) AS aweight,\n"
+                + "			SUM( CASE WHEN LEN( ra.volume )= 0 THEN 0 ELSE CAST( ra.volume AS NUMERIC( 15, 0 )) END ) AS avolume,\n"
+                + "			SUM( CAST( pr.gross_amount AS NUMERIC( 9, 0 ))) AS gross_amount,\n"
+                + "			SUM( pr.Service_time ) AS Service_time,\n"
+                + "			COUNT( CASE ra.do_number WHEN '' THEN 0 ELSE CAST( ra.do_number AS NUMERIC( 9, 0 )) END )- 1 AS do_number,\n"
+                + "			ra.branch,\n"
+                + "			CAST(\n"
+                + "				ve.weight AS NUMERIC(\n"
+                + "					15,\n"
+                + "					0\n"
+                + "				)\n"
+                + "			) AS weight,\n"
+                + "			CAST(\n"
+                + "				ve.volume AS NUMERIC(\n"
+                + "					15,\n"
+                + "					0\n"
+                + "				)\n"
+                + "			) AS volume,\n"
+                + "			ve.vehicle_type,\n"
+                + "			ve.startTime,\n"
+                + "			ar.arrive,\n"
+                + "			ar.transportCost,\n"
+                + "			SUM( CAST( ra.Dist / 1000 AS NUMERIC( 9 ))) AS Dist\n"
+                + "		FROM\n"
+                + "			BOSNET1.dbo.TMS_RouteJob ra\n"
+                + "		INNER JOIN BOSNET1.dbo.TMS_PreRouteVehicle ve ON\n"
+                + "			ra.runID = ve.runID\n"
+                + "			AND ra.vehicle_code = ve.vehicle_code\n"
+                + "		INNER JOIN(\n"
+                + "				SELECT\n"
+                + "					runID,\n"
+                + "					vehicle_code,\n"
+                + "					MAX( arrive ) AS arrive,\n"
+                + "					SUM( transportCost ) AS transportCost\n"
+                + "				FROM\n"
+                + "					BOSNET1.dbo.TMS_RouteJob\n"
+                + "				GROUP BY\n"
+                + "					runID,\n"
+                + "					vehicle_code\n"
+                + "			) ar ON\n"
+                + "			ar.RunId = ra.runID\n"
+                + "			AND ar.vehicle_code = ra.vehicle_code\n"
+                + "		LEFT OUTER JOIN(\n"
+                + "				SELECT\n"
+                + "					DISTINCT runID,\n"
+                + "					customer_id,\n"
+                + "					Service_time,\n"
+                + "					is_edit,\n"
+                + "					SUM( gross_amount ) AS gross_amount\n"
+                + "				FROM\n"
+                + "					BOSNET1.dbo.TMS_PreRouteJob\n"
+                + "				WHERE\n"
+                + "					is_edit = 'edit'\n"
+                + "				GROUP BY\n"
+                + "					runID,\n"
+                + "					customer_id,\n"
+                + "					Service_time,\n"
+                + "					is_edit\n"
+                + "			) pr ON\n"
+                + "			ra.runID = pr.runID\n"
+                + "			AND ra.customer_id = pr.customer_id\n"
+                + "		WHERE\n"
+                + "			ra.runID = '" + runID + "'\n"
+                + "			AND ra.vehicle_code <> 'NA'\n"
+                + "			AND ra.arrive <> ''\n"
+                + "		GROUP BY\n"
+                + "			ra.vehicle_code,\n"
+                + "			ra.branch,\n"
+                + "			ve.weight,\n"
+                + "			ve.volume,\n"
+                + "			ve.vehicle_type,\n"
+                + "			ve.startTime,\n"
+                + "			ar.arrive,\n"
+                + "			ar.transportCost\n"
+                + "	) a;";
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
                 PreparedStatement ps = con.prepareStatement(sql)) {
             try (ResultSet rs = ps.executeQuery()) {
@@ -240,37 +247,142 @@ public class popupDetilRunId implements BusinessLogic {
                     sq.amount = mn.format(BigDecimal.valueOf(Long.valueOf(amount))).toString();
                     tamount = tamount.add(BigDecimal.valueOf(Long.valueOf(amount)));
                     sq.DOcount = FZUtil.getRsString(rs, i++, "");
-                    tcust = tcust.add(BigDecimal.valueOf(Long.valueOf(sq.DOcount)));                    
+                    tcust = tcust.add(BigDecimal.valueOf(Long.valueOf(sq.DOcount)));
                     branch = FZUtil.getRsString(rs, i++, "");
                     String time = FZUtil.getRsString(rs, i++, "");
-                    System.out.println("ttravel " + time + " " +df.format(BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128)));
-                    System.out.println("tservice "+BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128));
-                    ttravel = ttravel.add(BigDecimal.valueOf(Long.valueOf(time)));
+                    //System.out.println("ttravel " + time + " " +df.format(BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128)));
+                    //System.out.println("tservice "+BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128));
                     sq.time = df.format(BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128));
+                    BigDecimal bd = new BigDecimal(sq.time);
+                    ttravel = ttravel.add(bd);
                     time = FZUtil.getRsString(rs, i++, "");
-                    System.out.println("ttravel " + time + " " +df.format(BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128)));
-                    System.out.println("tservice "+BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128));
-                    tservice = tservice.add(BigDecimal.valueOf(Long.valueOf(time)));
-                    sq.sctime =df.format(BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128));
+                    //System.out.println("ttravel " + time + " " +df.format(BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128)));
+                    //System.out.println("tservice "+BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128));
+                    sq.sctime = df.format(BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128));
+                    bd = new BigDecimal(sq.sctime);
+                    tservice = tservice.add(bd);
                     String transportCost = FZUtil.getRsString(rs, i++, "");
                     ttransportCost = ttransportCost.add(BigDecimal.valueOf(Long.valueOf(transportCost)));
                     sq.transportCost = mn.format(BigDecimal.valueOf(Long.valueOf(transportCost))).toString();
                     BigDecimal km = BigDecimal.valueOf(Long.valueOf(FZUtil.getRsString(rs, i++, "")));
                     sq.km = km.toString();
                     tkm = tkm.add(km);
+
+                    //Check error submit SAP
+                    ArrayList<String> alDo = getDo(runID, sq.truckid);
+                    for (int j = 0; j < alDo.size(); j++) {
+                        String doNum = alDo.get(j);
+                        //This try is for EXT vehicle
+                        try {
+                            int checkResultShipment = checkResultShipment(doNum, oriRunID.replace("_", "") + getVendorId(sq.truckid));
+                            //Submitted to Result_Shipment
+                            if (checkResultShipment > 0) {
+                                String check = checkStatusShipment(doNum, oriRunID.replace("_", "") + getVendorId(sq.truckid));
+                                //Success to be submitted to Status_Shipment
+                                try {
+                                    long isNumber = Long.parseLong(check);
+                                    sq.isFix = "" + isNumber;
+                                } //Failed to be submitted to Status_Shipment
+                                catch (Exception e) {
+                                    sq.isFix = "null";
+                                    sq.error = check;
+                                    break;
+                                }
+                            } //Failed to be submitted to Result_Shipment
+                            else {
+                                sq.isFix = "null";
+                                break;
+                            }
+                        } //This catch is for INT vehicle
+                        catch (Exception e) {
+                            int checkResultShipment = checkResultShipment(doNum, oriRunID.replace("_", "") + sq.truckid);
+                            //Submitted to Result_Shipment
+                            if (checkResultShipment > 0) {
+                                String check = checkStatusShipment(doNum, oriRunID.replace("_", "") + sq.truckid);
+                                //Success to be submitted to Status_Shipment
+                                try {
+                                    long isNumber = Long.parseLong(check);
+                                    sq.isFix = "" + isNumber;
+                                } // Failed to be submitted to Status_Shipment
+                                catch (Exception er) {
+                                    sq.isFix = "null";
+                                    sq.error = check;
+                                    break;
+                                }
+                            }//Failed to be submitted to Result_Shipment
+                            else {
+                                sq.isFix = "null";
+                                break;
+                            }
+                        }
+                    }
+                    
+                    //Check if volume or weight is overload
+                    //volume
+                    if(Integer.parseInt(sq.capacityPer) > 100) {
+                        sq.isFix = "er";
+                        sq.error = "Volume overload";
+                    }
+                    //weight
+                    if(Integer.parseInt(sq.kubikasiPer) > 100) {
+                        sq.isFix = "er";
+                        sq.error = "Weight overload";
+                    }
+                    if(Integer.parseInt(sq.kubikasiPer) > 100 && Integer.parseInt(sq.capacityPer) > 100) {
+                        sq.isFix = "er";
+                        sq.error = "Volume and weight overload";
+                    }
+
                     asd.add(sq);
                 }
                 tcap = tcap.divide(BigDecimal.valueOf(asd.size()), MathContext.DECIMAL128);
                 tkub = tkub.divide(BigDecimal.valueOf(asd.size()), MathContext.DECIMAL128);
-                String numb = (ttravel.intValue() / asd.size() / 60) + "." + (ttravel.intValue() / asd.size() % 60);
-                ttravel = BigDecimal.valueOf(Double.valueOf(numb));
-                numb = (tservice.intValue() / asd.size() / 60) + "." + (tservice.intValue() / asd.size() % 60);
-                tservice = BigDecimal.valueOf(Double.valueOf(numb));
+                //String numb = (ttravel.intValue() / asd.size() / 60) + "." + (ttravel.intValue() / asd.size() % 60);
+                ttravel = ttravel.divide(BigDecimal.valueOf(asd.size()), MathContext.DECIMAL128);
+                //numb = (tservice.intValue() / asd.size() / 60) + "." + (tservice.intValue() / asd.size() % 60);
+                tservice = tservice.divide(BigDecimal.valueOf(asd.size()), MathContext.DECIMAL128);
                 tkm = tkm.divide(BigDecimal.valueOf(asd.size()), MathContext.DECIMAL128);
                 //tcust = tcust.divide(BigDecimal.valueOf(asd.size()));
             }
         }
         return asd;
+    }
+
+    public String getVendorId(String v) {
+        String[] vSplit = v.split("_");
+        return vSplit[1] + vSplit[3];
+    }
+
+    public ArrayList<String> getDo(String runId, String vehicleCode) throws Exception {
+        ArrayList<String> alDo = new ArrayList<>();
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql;
+                sql = "SELECT DISTINCT\n"
+                        + "	prj.DO_Number\n"
+                        + "FROM \n"
+                        + "	[BOSNET1].[dbo].[TMS_PreRouteJob] prj\n"
+                        + "INNER JOIN\n"
+                        + "	(SELECT\n"
+                        + "		rj.customer_id\n"
+                        + "	 FROM \n"
+                        + "		[BOSNET1].[dbo].[TMS_RouteJob] rj\n"
+                        + "	 WHERE \n"
+                        + "		rj.RunId = '" + runId + "' and rj.vehicle_code = '" + vehicleCode + "') \n"
+                        + "		rj ON prj.Customer_ID = rj.customer_id\n"
+                        + "WHERE \n"
+                        + "	prj.RunId = '" + runId + "'";
+
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    while (rs.next()) {
+                        alDo.add(rs.getString("DO_Number"));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return alDo;
     }
 
     public BigDecimal hitungKm(String ve, String runId) throws Exception {
@@ -305,6 +417,53 @@ public class popupDetilRunId implements BusinessLogic {
         }
 
         return all;
+    }
+
+    public int checkResultShipment(String doNum, String shipmentNo) throws Exception {
+        int rowNum = 0;
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql;
+                sql = "SELECT COUNT(*) rowNum FROM BOSNET1.dbo.TMS_Result_Shipment WHERE Delivery_Number = '" + doNum + "' and Shipment_Number_Dummy = '" + shipmentNo + "'";
+
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    if (rs.next()) {
+                        rowNum = rs.getInt("rowNum");
+                    } else {
+                        rowNum = 0; //Submitting
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return rowNum;
+    }
+
+    public String checkStatusShipment(String doNum, String shipmentNo) throws Exception {
+        String msg = "";
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql;
+                sql = "SELECT TOP 1 SAP_Message, Ship_No_SAP FROM BOSNET1.dbo.TMS_Status_Shipment WHERE Delivery_Number = '" + doNum + "' and Shipment_Number_Dummy = '" + shipmentNo + "'";
+
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    if (rs.next()) {
+                        if (rs.getString("SAP_Message") != null) {
+                            msg = rs.getString("SAP_Message"); //Error
+                        } else {
+                            msg = rs.getString("Ship_No_SAP"); //Submitted
+
+                        }
+                    } else {
+                        msg = "1"; //Submitting
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return msg;
     }
 
     public List<HashMap<String, String>> getVehicle(String runID) throws Exception {

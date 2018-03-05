@@ -12,13 +12,15 @@
         <%@include file="../appGlobal/bodyTop.jsp"%>
         <script>
             $(document).ready(function () {
-                setInterval(function () {
-                    if($('#stat').text() == 'INPR'){
+                /*
+                if($('#stat').text() == 'INPR'){
+                    setInterval(function () {
                         window.location.reload(1);
-                    }else if($('#stat').text() == 'DONE'){
-                        window.location.replace('runResult.jsp?runID='+$('#runId').val()+'&OriRunID='+$('#oriRunID').val()+'&channel='+$('#channel').val());
-                    }
-                }, 5000);
+                    }, 5000);                    
+                }else if($('#stat').text() == 'DONE'){
+                    window.location.replace('runResult.jsp?runID='+$('#runId').val()+'&OriRunID='+$('#oriRunID').val()+'&channel='+$('#channel').val());
+                }
+                */
             });
         </script>
         <h3>Runs</h3>

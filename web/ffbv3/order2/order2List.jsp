@@ -1,3 +1,4 @@
+<%@page import="java.text.DecimalFormat"%>
 <%@page import="com.fz.util.FZUtil"%>
 <%@page import="com.fz.ffbv3.service.order2.Order2Record"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -11,54 +12,22 @@
     <body>
     <%@include file="../appGlobal/bodyTop.jsp"%>
     <script>
-        function shw(jobID
-            , runID
-            , hvsDt
-            , rmk
-            , vhRmk
-            , crtSrc
-            , task2ReasonName
-            , size
-            , planStart
-            , planEnd
-            , actualStart
-            , actualEnd
-            , blocks
-            , isLastOrder
-            , isLast2Order
-            , assignedDt
-            , takenDt
-            , doneDt
-            , createDt
-            , dirLoc
-            , estmFfb
-            ){
+        function toggle_more(jobID) { 
+            var x = document.getElementById("more"+jobID);
+            x.hidden = !x.hidden;
+            document.getElementById("tgl"+jobID).innerHTML=(x.hidden)?"More":"Less";
+        }
         
-            var s = 
-                    '\nJobID = ' + jobID
-                    + '\nPlan Start = ' + planStart
-                    + '\nPlan End = ' + planEnd
-                    + '\nActual Start = ' + actualStart
-                    + '\nActual End = ' + actualEnd
-                    + '\nEstm Kg = ' + size
-                    + '\nEstm FFB = ' + estmFfb
-                    + '\nIs Last 2 Order = ' + isLast2Order
-                    + '\nDirLoc = ' + dirLoc
-                    + '\nReason = ' + task2ReasonName
-                    + '\n'
-                    + '\nRunID = ' + runID
-                    //+ '\nBlocks = ' + blocks
-                    + '\nCreate Source = ' + crtSrc
-                    + '\nHarvest Date = ' + hvsDt
-                    + '\nJob Remark = ' + rmk
-                    + '\nVehicle Remark = ' + vhRmk
-                    + '\n'
-                    + '\nOrdered = ' + createDt
-                    + '\nAssigned = ' + assignedDt
-                    + '\nTaken = ' + takenDt
-                    + '\nDone = ' + doneDt
-            ;
-            alert(s);
+        function batal(jobID,divID) { 
+            var x = confirm("Cancel Job " + jobID + " ? ");
+            if (x == true) 
+                document.location.href="order2Cancel.jsp?jobID=" + jobID + "&divID=" +divID;
+        }
+
+        function reOrder(jobID,divID) { 
+            var x = confirm("Reorder Job " + jobID + " ? ");
+            if (x == true) 
+                document.location.href="order2Reorder.jsp?jobID=" + jobID + "&divID=" +divID;
         }
     </script>
         <h3>Job / Order</h3>
@@ -90,13 +59,11 @@
 
             // determine reorder code & color
             String reorderRef = 
-                    "&nbsp;|&nbsp;<a href='../order2/order2Reorder.jsp?jobID=" 
-                    + r.jobID + "&divID=" + r.divID
-                    + "'>ReOrd</a>";
+                    "<button class='btn fzButton' type='button' onclick=\"reOrder(" + r.jobID 
+                    + ",'" + r.divID + "')\">Re-Order</button>";
             String cancelRef = 
-                    "&nbsp;|&nbsp;<a href='../order2/order2Cancel.jsp?jobID=" 
-                    + r.jobID + "&divID=" + r.divID
-                    + "'>Cancel</a>";
+                    "<button class='btn fzButton' type='button' onclick=\"batal(" + r.jobID 
+                    + ",'" + r.divID + "')\">Cancel</button>";
             String reorderCode = ""; 
             String cancelCode = ""; 
             String statusColor = "";
@@ -109,8 +76,8 @@
             }
             else if (r.jobStatus.equals("ASGN")){
                 statusColor = "blue";
-                reorderCode = "";
-                cancelCode = "";
+                reorderCode = reorderRef;
+                cancelCode = cancelRef;
             }
             else if (r.jobStatus.equals("NEW")){
                 statusColor = "black";
@@ -124,7 +91,7 @@
             }
             else if (r.jobStatus.equals("DONE")){
                 
-                if (r.Task2ReasonState.equals("0")){
+                if (r.Task2ReasonState.equals("0") || (r.actualEnd.compareTo("10:00")<=0 && r.jobSeq.equals("1"))){
                     statusColor = "green";
                     reorderCode = "";
                     cancelCode = "";
@@ -200,11 +167,111 @@
                 <td class="fzCell"><%=r.readyTime%></td>
                 <td class="fzCell"><%=r.jobID%></td>
                 <td class="fzCell">
-                    <a href="javascript:shw('<%=r.jobID%>','<%=r.runID%>','<%=r.hvsDate%>','<%=FZUtil.escapeText(r.remark)%>','<%=r.vehicleRemark%>','<%=r.createSource%>','<%=r.Task2ReasonName%>','<%=r.size%>','<%=r.planStart%>','<%=r.planEnd%>','<%=r.actualStart%>','<%=r.actualEnd%>','<%=r.getBlocks()%>','<%=r.isLastOrder%>','<%=r.isLast2Order%>','<%=r.assignedDate%>','<%=r.takenDate%>','<%=r.doneDate%>','<%=r.createDate%>','<%=r.dirLoc%>','<%=r.estmFfb%>');"
-                       >More</a>
-                <%=reorderCode%><%=cancelCode%></td>
+                    <a href="javascript:toggle_more('<%=r.jobID%>');" id="tgl<%=r.jobID%>">More</a>
+                </td>
             </tr>
-            
+            <div>
+            <tr id="more<%=r.jobID%>" name="more<%=r.jobID%>" hidden>
+                    <form id="frm_batal" name="frm_batal" action="order2Cancel.jsp" method="get">
+                        <input type="hidden" id="jobID" name="jobID" value="<%=r.jobID%>">
+                        <input type="hidden" id="divID" name="divID" value="<%=r.divID%>">
+                    </form>
+                    <form id="frm_reorder" name="frm_reorder" action="order2Reorder.jsp" method="get">
+                        <input type="hidden" id="jobID" name="jobID" value="<%=r.jobID%>">
+                        <input type="hidden" id="divID" name="divID" value="<%=r.divID%>">
+                    </form>
+                <td colspan="100%" >
+                    <%
+                        DecimalFormat df = new DecimalFormat("#,###,###");
+                    %>
+                    <table frame="box" style="border: lightgray inset medium;">
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td colspan='3'><font style='color: brown;'><b>Order Detail</b></font></td>
+                            <td>&nbsp;</td>
+                            <td colspan='3'></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px;">Create Source</td><td style="padding: 2px;">:</td><td><%=r.createSource%></td>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px;">RunID</td><td style="padding: 2px;">:</td><td><%=r.runID%></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td>Ordered</td><td style="padding: 2px;">:</td><td><%=r.createDate%></td>
+                            <td>&nbsp;</td>
+                            <td>Asigned</td><td style="padding: 2px;">:</td><td><%=r.assignedDate%></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td>Taken</td><td style="padding: 2px;">:</td><td><%=r.takenDate%></td>
+                            <td>&nbsp;</td>
+                            <td>Done</td><td style="padding: 2px;">:</td><td><%=r.doneDate%></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px;">DirLoc</td><td style="padding: 2px;">:</td><td><%=r.dirLoc%></td>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px;">BinLoc</td><td style="padding: 2px;">:</td><td><%=r.remark%></td>
+                        </tr>
+                        <tr><td colspan='7>'>&nbsp;</td></tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td colspan='3'><font style='color: brown;'><b>Order Status</b></font></td>
+                            <td>&nbsp;</td>
+                            <td colspan='3'></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px;">Driver </td><td>:</td><td colspan="4"><%=r.vehicleRemark%></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px;">Plan Start</td><td style="padding: 2px;">:</td><td><%=r.planStart%></td>
+                            <td>&nbsp;</td>
+                            <td>Actual Start</td><td style="padding: 2px;">:</td><td style="padding: 2px; width: 50px;"><%=r.actualStart%></td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px;">Plan End</td><td style="padding: 2px;">:</td><td><%=r.planEnd%></td>
+                            <td>&nbsp;</td>
+                            <td>Actual End</td><td style="padding: 2px;">:</td><td style="padding: 2px;"><%=r.actualEnd%></td>
+                        </tr>
+			<tr>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px;">Estm Kg</td><td style="padding: 2px;">:</td><td><%=df.format(r.size)%></td>
+                            <td>&nbsp;</td>
+                            <td>Actual Kg</td><td style="padding: 2px;">:</td><td style="padding: 2px;"><%=df.format(r.ActualKg)%></td>
+                        </tr>
+			<tr>
+                            <td>&nbsp;</td>
+                            <td>Remaining Bin</td><td style="padding: 2px;">:</td><td width="50px"><%=r.LastOrders%></td>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px;">Restan</td><td style="padding: 2px;">:</td><td><%=r.restanKg%></td>
+                        </tr>
+			<tr>
+                            <td>&nbsp;</td>
+                            <td style="padding: 2px;">Reason</td><td style="padding: 2px;">:</td><td colspan="5"><%=r.Task2ReasonName%></td>
+                        </tr>
+                        <tr><td colspan='7>'>&nbsp;</td></tr>
+			<tr>
+                            <td>&nbsp;</td>
+                            <td colspan="3" style='text-align: left;'><%=reorderCode%></td>
+							<td></td>
+                            <td colspan="3" style='text-align: right; padding-right: 10px;'><%=cancelCode%></td>
+                        </tr>
+                        <tr>
+                            <td colspan="100%" style="text-align: center;">
+                                <a href="javascript:toggle_more('<%=r.jobID%>');" id="tgl<%=r.jobID%>">
+                                <img src="../img/hline.png"/><br/>Close
+                                </a>
+                        </tr>
+                    </table>
+                </td>
+                </td>
+            </tr>
+            </div>
         <%} // for Order2Record %>
         
         </table>

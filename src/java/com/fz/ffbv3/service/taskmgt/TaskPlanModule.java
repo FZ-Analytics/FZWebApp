@@ -159,6 +159,4 @@ public class TaskPlanModule
   public void setBinEmpty(String BinEmpty) {
     this.BinEmpty = BinEmpty;
   }
-  
-  
  }

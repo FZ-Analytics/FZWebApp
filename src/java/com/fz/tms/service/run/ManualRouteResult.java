@@ -320,7 +320,7 @@ public class ManualRouteResult implements BusinessLogic {
                 }
             }
             catch(Exception e) {
-                d.dbNull = true;
+                
             }
             
             if(!timeMoreThanEndTime(d.depart, endTime)) {

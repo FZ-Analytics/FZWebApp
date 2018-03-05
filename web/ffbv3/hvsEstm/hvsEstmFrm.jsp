@@ -2,6 +2,9 @@
     Document   : hvsEstmList
     Created on : Sep 23, 2017, 5:07:33 AM
 --%>
+<%@page import="org.json.JSONObject"%>
+<%@page import="org.json.JSONArray"%>
+<%@page import="com.fz.ffbv3.service.division.divisionDAO"%>
 <%@page import="com.fz.ffbv3.service.hvsEstm.HvsEstm"%>
 <%@page import="com.fz.ffbv3.service.hvsEstm.HvsEstmDtl"%>
 <%@page import="java.util.List"%>
@@ -16,6 +19,10 @@
     </head>
     <body>
   <%@include file="../appGlobal/bodyTop.jsp"%>
+  <%
+      JSONArray oDiv = divisionDAO.lstDivisions("", "");
+      JSONArray oMill = divisionDAO.lstMill();
+  %>
   <script>
   $( function() {
     var v = $( "#hvsDt" ).val();
@@ -24,6 +31,17 @@
     //$( "#hvsDt" ).val(yyyymmddDate(new Date()));
     $( "#hvsDt" ).val(v);
   } );
+  
+  function pilihDiv() {
+      var odiv = <%=oDiv%>;
+      var divid = $("#divID").val();
+      var millID = "";
+      $.each(odiv,function(k,v){
+          if (divid == v.divID) millID=v.millID;
+      });
+      $("#millID options[value=millID]").attr("selected","selected");
+      $("#millID").val(millID);
+    }
   </script>
         <h3>Estimation / Restan Form</h3>
             <div class="fzErrMsg" id="errMsg">
@@ -37,17 +55,56 @@
             
             <br><br>
             <label class="fzLabel">Estate + Division</label>
-            <input class="fzInput" type="text" id="divID" 
-                   name="divID" value="<%=get("divID")%>">
+            <!--input class="fzInput" type="text" id="divID" 
+                   name="divID" value="< %=get("divID")%>"-->
+            <select class="fzInput" id="divID" name="divID" onchange="pilihDiv()">
+                <%
+                    String divID = get("divID");
+                    String selected = (divID == null || divID.isEmpty())?"selected":"";
+                %>
+                <option value="" <%=selected%>>--</option>
+                <%
+                    JSONObject o ;
+                    for (int i=0; i < oDiv.length(); i++) { 
+                        o = oDiv.getJSONObject(i);
+                        selected = (divID.equals(o.getString("divID")))?"selected":"";
+                %>
+                <option value='<%=o.getString("divID")%>' <%=selected%>><%=o.getString("divID")%></option>
+                <%
+                    }
+                %>
+            </select>
 
             <br>
             <label class="fzLabel"></label>
             <span class="fzLabelBottom">e.g. "BINE1"</span>
             
             <br><br>
-            <label class="fzLabel">Remark / 1st empty bin location</label>
+            <label class="fzLabel">Mill</label>
+            <select class="fzInput" id="millID" name="millID">
+                <option value="LWSM">LWSM</option>
+                <option value="BPRM">BPRM</option>
+            </select>
+
+            <br><br>
+            <label class="fzLabel">Bin location</label>
             <input class="fzInput" type="text" id="remark" 
                    name="remark" value="<%=get("remark")%>">
+
+            <br><br>
+            <label class="fzLabel">Grabber Condition</label>
+            <select class="fzInput" id="grabbercondition" name="grabbercondition"
+                    value="<%=get("grabbercondition")%>">>
+                <option value="0">Ready</option>
+                <option value="1">Break Down</option>
+            </select>
+
+            <div hidden>
+            <br><br>
+            <label class="fzLabel">Note</label>
+            <input class="fzInput" type="text" id="note" 
+                   name="note" value="<%=get("note")%>">
+            </div>
 
             <br><br>
             <label class="fzLabel">Status</label>
@@ -58,12 +115,14 @@
             
             <br><br>
             <div id="tbData" class="table-editable">
-              <table class="table" border1="1">
+              <table class="table" border1="1" width="100%">
                   <tr>
                       <th width="100px" class="fzCol">Type</th>
                       <th width="100px" class="fzCol">Block</th>
                       <th width="100px" class="fzCol">Kg</th>
-                      <th></th>
+                      <th width="50px">&nbsp;</th>
+                      <th width="50px">&nbsp;</th>
+                      <th width="50px">&nbsp;</th>
                   </tr>
                   <%for (HvsEstmDtl hd : (List<HvsEstmDtl>) getList("hvsEstmDtlList")) { %>
                   
@@ -76,13 +135,13 @@
                         </td>
                         <td contenteditable="true" class="fzCell celVal"><%=hd.getBlock()%></td>
                         <td contenteditable="true" class="fzCell celVal"><%=hd.getSizeString()%></td>
-                        <td class="fzCell">
-                            <span class="table-up fzTextButton">Up</span>
-                            <span class="table-down fzTextButton">Down</span>
+                        <!--td class="fzCell"-->
+                        <td><span class="table-up fzTextButton">Up</span></td>
+                        <td><span class="table-down fzTextButton">Down</span></td>
 
                             <%if (!get("status").equals("FNAL")) { %>
 
-                                <span class="table-remove ">Del</span>
+                            <td><span class="table-remove ">Del</span></td>
 
                             <% } /* if get status */ %>
 
@@ -101,11 +160,9 @@
                       </td>
                       <td contenteditable="true" class="fzCell celVal">A01</td>
                       <td contenteditable="true" class="fzCell celVal">10000</td>
-                      <td class="fzCell">
-                        <span class="table-up fzTextButton">Up</span>
-                        <span class="table-down fzTextButton">Down</span>
-                        <span class="table-remove fzTextButton">Del</span>
-                      </td>
+                      <td class="fzCell"><span class="table-up fzTextButton">Up</span></td>
+                      <td class="fzCell"><span class="table-down fzTextButton">Down</span></td>
+                      <td class="fzCell"><span class="table-remove fzTextButton">Del</span></td>
                   </tr>
               </table>
                   

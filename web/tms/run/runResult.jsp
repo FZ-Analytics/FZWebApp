@@ -41,7 +41,7 @@
                     //Some code
                     //alert( $("#runID").text()+"&vCode="+$(this).text() ); 
                     if ($(this).text().length > 0) {
-                        window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text(), null,
+                        window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text() + "&oriRunID=" + $("#RunIdClick").text(), null,
                                 "scrollbars=1,resizable=1,height=500,width=850");
                         return true;
                     }
@@ -57,148 +57,138 @@
                 });
 
                 $('#reRun').click(function () {
-                    //setTimeout(function () {
-                        //Some code
-                        //alert( $("#runID").text()+"&vCode="+$(this).text() ); 
-                        //if ($(this).text().length > 0) {
-                        //window.open("../Params/map/GoogleDirMapAllVehi.jsp?runID=" + $("#RunIdClick").text(), null,
-                        // "scrollbars=1,resizable=1,height=530,width=530");
-                        //return true;
-                        //}
-                        //var currentDate = new Date();
-                        //currentDate.setDate(currentDate.getDate() + 1);
-                        var dateNow = $.datepicker.formatDate('yy-mm-dd', new Date());//currentDate.getFullYear()+"-"+(currentDate.getMonth()+1)+"-"+currentDate.getDate();
+                    var dateNow = $.datepicker.formatDate('yy-mm-dd', new Date());//currentDate.getFullYear()+"-"+(currentDate.getMonth()+1)+"-"+currentDate.getDate();
 
-                        var win = window.open('runProcess.jsp?shift=1&dateDeliv=' + dateNow + '&branch=' + $('#branch').text() + '&runId=' + $("#RunIdClick").text() + '&oriRunID=' + $("#OriRunID").val()  + '&reRun=A' + '&channel=' + $('#channel').text(), '_blank');
-                        if (win) {
-                            //Browser has allowed it to be opened
-                            win.focus();
-                        }
+                    var win = window.open('runProcess.jsp?shift=1&dateDeliv=' + dateNow + '&branch=' + $('#branch').text() + '&runId=' + $("#RunIdClick").text() + '&oriRunID=' + $("#OriRunID").val() + '&reRun=A' + '&channel=' + $('#channel').text(), '_blank');
+                    if (win) {
+                        //Browser has allowed it to be opened
+                        win.focus();
+                    }
                     //}, 3000);
                 });
-                /*
-                $('#branch').click(function () {
-                    var $apiAddress = '../../api/customerAttrView/submitTest';
-                    var jsonForServer = '{\"flag\": \"flag\"}';
-                    var data = [];
-                    //alert(jsonForServer);
-                    $.post($apiAddress, {json: jsonForServer}).done(function (data) {
-                        if(data == 'OK'){
-                            alert( 'sukses' );
-                            location.reload()
-                        }else{
-                            alert( data ); 
-                        }
-                    });
-                });
-                */
             });
-            
-            function openEditRoutePage() {            
+
+            function openEditRoutePage() {
                 var table = document.getElementById("table");
-                
+
                 var tableArr = [];
-                for (var i = 1; i < table.rows.length; i++ ) {
+                for (var i = 1; i < table.rows.length; i++) {
                     var no = table.rows[i].cells[0].innerHTML; //no
                     var truck = table.rows[i].cells[1].innerHTML; //truck
                     var custId = "";
-                     if((table.rows[i].cells[1].innerHTML !== "") && (table.rows[i].cells[2].innerHTML === "") && (table.rows[i].cells[4].innerHTML !== "")) {
-                            custId = "start" + "split";
-                        }
-                        else {
-                            custId = table.rows[i].cells[2].innerHTML + "split"; //custId
-                        }
+                    if ((table.rows[i].cells[1].innerHTML !== "") && (table.rows[i].cells[2].innerHTML === "") && (table.rows[i].cells[4].innerHTML !== "")) {
+                        custId = "start" + "split";
+                    } else {
+                        custId = table.rows[i].cells[2].innerHTML + "split"; //custId
+                    }
                     tableArr.push(
-                        no,
-                        truck,
-                        custId
-                    );
+                            no,
+                            truck,
+                            custId
+                            );
                 }
-                
-                 var win = window.open('runResultEdit.jsp?&OriRunID='+$('#RunIdClick').text()+'&runId='+$('#nextRunId').text()+'&channel='+$('#channel').text()+
-                        '&branch='+$('#branch').text()+'&shift='+$('#shift').text()+'&vehicles='+$('#vehicles').text()+'&tableArr='+tableArr);
-                 
+
+                var win = window.open('runResultEdit.jsp?&OriRunID=' + $('#RunIdClick').text() + '&runId=' + $('#nextRunId').text() + '&channel=' + $('#channel').text() +
+                        '&branch=' + $('#branch').text() + '&shift=' + $('#shift').text() + '&vehicles=' + $('#vehicles').text() + '&tableArr=' + tableArr);
+
                 if (win) {
                     //Browser has allowed it to be opened
                     win.focus();
                 }
             }
-            
-//            function openEditRoutePage() {
-//                var table = document.getElementById( "table" );
-//                
-//                var tableArr = [];
-//                for (var i = 1; i < table.rows.length; i++ ) {
-//                    tableArr.push(
-//                        table.rows[i].cells[0].innerHTML, //no
-//                        table.rows[i].cells[1].innerHTML, //truck
-//                        table.rows[i].cells[2].innerHTML + "split"//custId 
-//                        table.rows[i].cells[3].innerHTML, //arrive
-//                        table.rows[i].cells[4].innerHTML, //depart
-//                        table.rows[i].cells[5].innerHTML, //do count
-//                        table.rows[i].cells[6].innerHTML, //service time
-//                        table.rows[i].cells[8].innerHTML, //priority
-//                        table.rows[i].cells[9].innerHTML, //dist channel
-//                        table.rows[i].cells[11].innerHTML, //weight
-//                        table.rows[i].cells[12].innerHTML, //volume
-//                        table.rows[i].cells[13].innerHTML, //rdd
-//                        table.rows[i].cells[14].innerHTML, //transport cost
-//                        table.rows[i].cells[15].innerHTML + "split" // dist
-//                    );
-//                }
-
-//                var win = window.open('runResultEdit.jsp?&OriRunID='+$('#RunIdClick').text()+'&runId='+$('#nextRunId').text()+'&channel='+$('#channel').text()+
-//                        '&branch='+$('#branch').text()+'&shift='+$('#shift').text()+'&vehicles='+$('#vehicles').text()+'&tableArr='+tableArr);
-//                if (win) {
-//                    //Browser has allowed it to be opened
-//                    win.focus();
-//                }
-//            }
 
             function klik(kode) {
                 //alert('tes : ' + kode);
                 window.open("../Params/PopUp/popupEditCust.jsp?runId=" + $("#RunIdClick").text() + "&custId=" + kode, null,
                         "scrollbars=1,resizable=1,height=500,width=750");
             }
+
+            function sendSAP(kode, kd) {
+                if(kd == 'DELL'){
+                    deletes(kode);
+                }else{
+                    send(kode);
+                }                               
+                //var data = [];
+                
+            }
             
+            function deletes(kode){
+                var $apiAddress = '';
+                var jsonForServer = '';
+                
+                $apiAddress = '../../api/runResult/DeleteShipmentPlan';
+                jsonForServer = '{\"RunId\": \"' + $("#RunIdClick").text() + '\",\"vehicle_code\":\"' + kode + '\"}';
+                $.post($apiAddress, {json: jsonForServer}).done(function (data) {
+                    if (data == 'OK') {                            
+                        send(kode);
+                    }else {
+                        alert('submit Status error');
+                    }
+                });
+            }
+            
+            function send(kode){
+                $apiAddress = '../../api/submitToSap/submitToSap';
+                jsonForServer = '{\"RunId\": \"' + $("#RunIdClick").text() + 'split' + $("#RunIdClick").text() + '\",\"vehicle_no\":\"' + kode + '\"}';
+                $.post($apiAddress, {json: jsonForServer}).done(function (data) {
+                    if(data == 'OK'){
+                        //alert('data: ' + data + 'stat: ' + stat);
+                        $apiAddress = '../../api/runResult/SubmitShipmentPlan';
+                        jsonForServer = '{\"RunId\": \"' + $("#RunIdClick").text() + '\",\"vehicle_code\":\"' + kode + '\"}';
+
+                        $.post($apiAddress, {json: jsonForServer}).done(function (data) {
+                            if (data == 'OK') {
+                                alert('sukses');
+                                location.reload();
+                            } else {
+                                alert('submit Status error');
+                            }
+                        });
+                    }else{
+                        alert( 'submit SAP error' ); 
+                    }
+                }); 
+            }
+
             function fnExcelReport()
             {
                 //var t = document.getElementById('btnHi');
                 //t.hidden = true;
-                var tab_text="<table border='2px'><tr bgcolor='#87AFC6'>";
-                var textRange; var j=0;
+                var tab_text = "<table border='2px'><tr bgcolor='#87AFC6'>";
+                var textRange;
+                var j = 0;
                 tab = document.getElementById('t_table'); // id of table
 
-                for(j = 0 ; j < tab.rows.length ; j++) 
-                {     
-                    tab_text=tab_text+tab.rows[j].innerHTML+"</tr>";
+                for (j = 0; j < tab.rows.length; j++)
+                {
+                    tab_text = tab_text + tab.rows[j].innerHTML + "</tr>";
                     //tab_text=tab_text+"</tr>";
                 }
 
-                tab_text=tab_text+"</table>";
-                tab_text= tab_text.replace(/<A[^>]*>|<\/A>/g, "");//remove if u want links in your table
-                tab_text= tab_text.replace(/<img[^>]*>/gi,""); // remove if u want images in your table
-                tab_text= tab_text.replace(/<input[^>]*>|<\/input>/gi, ""); // reomves input params
+                tab_text = tab_text + "</table>";
+                tab_text = tab_text.replace(/<A[^>]*>|<\/A>/g, "");//remove if u want links in your table
+                tab_text = tab_text.replace(/<img[^>]*>/gi, ""); // remove if u want images in your table
+                tab_text = tab_text.replace(/<input[^>]*>|<\/input>/gi, ""); // reomves input params
 
                 var ua = window.navigator.userAgent;
-                var msie = ua.indexOf("MSIE "); 
+                var msie = ua.indexOf("MSIE ");
 
                 if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))      // If Internet Explorer
                 {
-                    txtArea1.document.open("txt/html","replace");
+                    txtArea1.document.open("txt/html", "replace");
                     txtArea1.document.write(tab_text);
                     txtArea1.document.close();
-                    txtArea1.focus(); 
-                    sa=txtArea1.document.execCommand("SaveAs",true,"Say Thanks to Sumit.xls");
-                }  
-                else                 //other browser not tested on IE 11
-                    sa = window.open('data:application/vnd.ms-excel,' + encodeURIComponent(tab_text));  
+                    txtArea1.focus();
+                    sa = txtArea1.document.execCommand("SaveAs", true, "Say Thanks to Sumit.xls");
+                } else                 //other browser not tested on IE 11
+                    sa = window.open('data:application/vnd.ms-excel,' + encodeURIComponent(tab_text));
 
                 return (sa);
             }
         </script>
         <h3>Runs</h3>
-        
+
         <label class="fzInput" id="nextRunId" hidden="true"><%=get("nextRunId")%></label>
 
         <input class="fzInput" id="OriRunID" 
@@ -211,7 +201,7 @@
         <br>
         <label class="fzLabel">Shift:</label> 
         <label class="fzLabel" id="shift"><%=get("shift")%></label>
-        
+
         <br>
         <label class="fzLabel">Channel:</label> 
         <label class="fzLabel" id="channel"><%=get("channel")%></label> 
@@ -228,7 +218,7 @@
         <label class="fzLabel" id="mapAll" style="color: blue;">Map</label> 
         <label class="fzLabel" id="reRun" style="color: blue;">Re-Routing</label>
         <label class="fzLabel" id="test" style="color: blue;" onclick="fnExcelReport()">Convert Excel</label>
-        
+
         <input id="clickMe" class="btn fzButton" type="button" value="Edit Route Manually" onclick="openEditRoutePage();" />
 
         <br><br>
@@ -251,6 +241,7 @@
                     <th width="100px" class="fzCol">RDD</th>
                     <th width="100px" class="fzCol">Transport Cost</th>
                     <th width="100px" class="fzCol">Dist</th>
+<!--                    <th width="100px" class="fzCol">Send SAP</th>-->
                     <th width="100px" class="fzCol">Edit</th>
                 </tr>
             </thead>
@@ -263,6 +254,8 @@
                     style="background-color: lightyellow"
                     <%} else if (j.arrive.length() == 0 && j.name1.length() == 0) {%>
                     style="background-color: #e6ffe6"
+                    <%} else if (j.bat == "1" ) {%>
+                    style="background-color: #ffe6e6"
                     <%}%> >
                     <td class="fzCell"><%=j.no%></td>
                     <td class="vCodeClick" style="color: blue;"><%=j.vehicleCode%></td>
@@ -283,13 +276,17 @@
                     <td class="fzCell"><%=j.rdd%></td>
                     <td class="fzCell"><%=j.transportCost%></td>
                     <td class="fzCell"><%=j.dist%></td>
+<!--                    <td class="fzCell" 
+                        <%if (j.send != null && (j.send.equalsIgnoreCase("OK") || j.send.equalsIgnoreCase("DELL"))) {%>
+                        onclick="sendSAP('<%=j.vehicleCode%>','<%=j.send%>')" style="color: green;"
+                        <%}%> ><%=j.send%></td>-->
                     <td class="editCust" onclick="klik(<%=j.custID%>)" style="color: blue;"><%=j.edit%></td>
                 </tr>
 
                 <%} // for ProgressRecord %>
             </tbody>
         </table>
-            
+
         <br><br>
         <iframe id="txtArea1" style="display:none"></iframe>
         <table id="t_table" border1="1" style="border-color: lightgray;" hidden="true">
@@ -329,7 +326,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <%for (RouteJob j : (List<RouteJob>) getList("JobList")) { %> 
+                            <%for (RouteJob j : (List<RouteJob>) getList("JobList")) {%> 
                             <tr>
                                 <td class="fzCell"><%=j.no%></td>
                                 <td class="vCodeClick" style="color: blue;"><%=j.vehicleCode%></td>

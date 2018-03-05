@@ -37,6 +37,8 @@ public class HvsEstmDAO {
                 + "\n, m.lon"
                 + "\n, m.lat"
                 + "\n, h.remark"
+                + "\n, (case when h.millID is null or h.millID='' then d.millID else h.millID end) millID"
+                + "\n, h.note "
                 + "\n from fbHvsEstm h"
                 + "\n     left outer join fbDiv d"
                 + "\n         on h.divID = d.divID"
@@ -209,8 +211,8 @@ public class HvsEstmDAO {
     private void add(HvsEstm he) throws Exception {
         
         // open db connection and 1 statement to insert header
-        String sql = "insert into fbHvsEstm(hvsDt, status, divID, createdBy, remark)"
-                + " values(?,?,?,?,?)";
+        String sql = "insert into fbHvsEstm(hvsDt, status, divID, createdBy, remark, millID, grabbercondition)"
+                + " values(?,?,?,?,?,?,?)";
         try (
             Connection con = (new Db()).getConnection("jdbc/fz");
             PreparedStatement psHdr = con.prepareStatement(sql
@@ -224,6 +226,8 @@ public class HvsEstmDAO {
             psHdr.setString(3, he.divID);
             psHdr.setString(4, "");
             psHdr.setString(5, he.remark);
+            psHdr.setString(6, he.millID);
+            psHdr.setString(7, he.grabbercondition);
             
             // transaction needed because we have several sql 
             con.setAutoCommit(false);
@@ -237,6 +241,10 @@ public class HvsEstmDAO {
                 he.hvsEstmID = rs.getString(1);
             }
 
+            String sDiv = "update fbdiv set millID='" + he.millID + "' where divID='" + he.divID + "'";
+            try (PreparedStatement psDiv = con.prepareStatement(sDiv)) {
+                psDiv.executeUpdate();
+            }
             insertNewChildren(he, con);
             checkChildrenBelongToDiv(he, con);
             
@@ -338,6 +346,11 @@ public class HvsEstmDAO {
                 + "\n, a.status, a.divID"
                 + "\n, a.hvsEstmID"
                 + "\n, sum(b.size1) kg "
+                + "\n, a.millID "
+                + "\n, (case a.grabbercondition " 
+                + "\n      when 0 then 'Ready' " 
+                + "\n      when 1 then 'Break Down' "
+                + "        else '?' end) grabberCondition"
                 + "\n from fbHvsEstm a"
                 + "\n inner join fbHvsEstmDtl b"
                 + "\n     on a.hvsEstmID = b.hvsEstmID"
@@ -375,7 +388,8 @@ public class HvsEstmDAO {
                     he.divID = rs.getString(3);
                     he.hvsEstmID = rs.getString(4);
                     he.kg = rs.getDouble(5);
-                    
+                    he.millID = rs.getString(6);
+                    he.grabbercondition = rs.getString(7);
                     // add to list
                     heList.add(he);
                 }
@@ -478,12 +492,12 @@ public class HvsEstmDAO {
             
             hed.block = hed.block.trim().toUpperCase();
             
-            if (ss.contains(hed.block)){
+            if (ss.contains(hed.block+':'+hed.taskType)){
                 
                 throw new Exception("Duplicate block " + hed.block);
             }
             else {
-                ss.add(hed.block);
+                ss.add(hed.block+':'+hed.taskType);
             }
         }
     }
@@ -498,6 +512,12 @@ public class HvsEstmDAO {
                 + "\n, a.status, a.divID"
                 + "\n, a.hvsEstmID"
                 + "\n, sum(b.size1) kg "
+                + "\n, a.MillID "
+                + "\n, (case a.grabbercondition "
+                + "\n        when '0' then 'Ready' "
+                + "\n        when '1' then 'Break Down' "
+                + "\n        else '?'"
+                + "\n   end) grabbercondition "
                 + "\n from fbHvsEstm a"
                 + "\n   inner join fbHvsEstmDtl b"
                 + "\n     on a.hvsEstmID = b.hvsEstmID"
@@ -532,6 +552,8 @@ public class HvsEstmDAO {
                     he.divID = rs.getString(3);
                     he.hvsEstmID = rs.getString(4);
                     he.kg = rs.getDouble(5);
+                    he.millID = rs.getString(6);
+                    he.grabbercondition = rs.getString(7);
                     
                     // add to list
                     heList.add(he);

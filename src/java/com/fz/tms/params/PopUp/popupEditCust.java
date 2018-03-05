@@ -52,6 +52,9 @@ public class popupEditCust implements BusinessLogic {
             request.setAttribute("Name1", pl.get("Name1"));
             request.setAttribute("Street", pl.get("Street"));
             request.setAttribute("Distribution_Channel", pl.get("Distribution_Channel"));
+            request.setAttribute("Desa_Kelurahan", pl.get("Desa_Kelurahan"));
+            request.setAttribute("Kecamatan", pl.get("Kecamatan"));
+            request.setAttribute("Kodya_Kabupaten", pl.get("Kodya_Kabupaten"));
         } catch (Exception e) {
             HashMap<String, String> pl = new HashMap<String, String>();
             pl.put("ID", runId);
@@ -85,7 +88,10 @@ public class popupEditCust implements BusinessLogic {
                         + "	a.vehicle_type_list,\n"
                         + "	a.Name1,\n"
                         + "	a.Street,\n"
-                        + "	a.Distribution_Channel\n"
+                        + "	a.Distribution_Channel,\n"
+                        + "	a.Desa_Kelurahan,\n"
+                        + "	a.Kecamatan,\n"
+                        + "	a.Kodya_Kabupaten\n"
                         + " from\n"
                         + "	bosnet1.dbo.TMS_PreRouteJob a left outer join\n"
                         + "	(\n"
@@ -116,6 +122,9 @@ public class popupEditCust implements BusinessLogic {
                         pl.put("Name1", FZUtil.getRsString(rs, i++, ""));
                         pl.put("Street", FZUtil.getRsString(rs, i++, ""));
                         pl.put("Distribution_Channel", FZUtil.getRsString(rs, i++, ""));
+                        pl.put("Desa_Kelurahan", FZUtil.getRsString(rs, i++, ""));
+                        pl.put("Kecamatan", FZUtil.getRsString(rs, i++, ""));
+                        pl.put("Kodya_Kabupaten", FZUtil.getRsString(rs, i++, ""));
                     }
                 }
             }

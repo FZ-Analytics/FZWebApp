@@ -6,6 +6,7 @@
 <%@include file="../appGlobal/pageTop.jsp"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%run(new com.fz.tms.params.PopUp.popupEditPreRouteVehicle());%>
+<%@page import="com.fz.tms.params.model.Vehicle"%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -34,7 +35,9 @@
                             '\",\"endLon\":\"' + $("#endLon").val() + '\",\"endLat\":\"' + $("#endLat").val() + 
                             '\",\"startTime\":\"' + $("#startTime").val() + '\",\"endTime\":\"' + $("#endTime").val() +
                             '\",\"source1\":\"' + $("#source1").val() + '\",\"costPerM\":\"' + $("#costPerM").val() +
-                            '\",\"fixedCost\":\"' + $("#fixedCost").val() + '\",\"isActive\":\"' + $("#isActive").val() +'\"}';
+                            '\",\"fixedCost\":\"' + $("#fixedCost").val() + '\",\"IdDriver\":\"' + $("#FixIdDriver").val() + 
+                            '\",\"NamaDriver\":\"' + $("#NamaDriver").val() + '\",\"agent_priority\":\"' + $("#agent_priority").val() + 
+                            '\",\"max_cust\":\"' + $("#max_cust").val() + '\",\"isActive\":\"' + $("#isActive").val() +'\"}';
                     var data = [];
                     
                     $.post($apiAddress, {json: jsonForServer}).done(function (data) {
@@ -44,6 +47,22 @@
                         }else{
                             alert( 'submit error' ); 
                         }
+                    });
+                });
+                
+                $('#IdDriver').on('change', function () {
+                    var $apiAddress = '../../../api/vehicleAttrView/getNamaDriver';
+                    var jsonForServer = '{\"branch\":\"' + $("#branch").val()  + 
+                            '\",\"IdDriver\":\"' + $("#IdDriver").val() + '\"}';
+                    var data = [];
+                    //alert(jsonForServer);
+                    $.post($apiAddress, {json: jsonForServer}).done(function (data) {
+                        
+                        $.each(data, function(index, item) {
+                            $('#FixIdDriver').val(item.Value);
+                            $('#NamaDriver').val(item.Display);
+                            //$("#vVehicleId").get(0).options[$("#vVehicleId").get(0).options.length] = new Option(item.Display, item.Value);
+                        });
                     });
                 });
             });
@@ -60,6 +79,7 @@
         </div>
         
         <input class="fzInput" type="text" id="runId" name="runId" value='<%=get("runId")%>' hidden="true">
+        <input class="fzInput" type="text" id="branch" name="branch" value='<%=get("branch")%>' hidden="true">
         <br>
         <label class="fzLabel">Vehicle code:</label> 
         <input class="fzInput" type="text" id="vehicle_code" name="vehicle_code" value='<%=get("vehicle_code")%>' readonly="true">
@@ -131,6 +151,27 @@
         <br>
         <label class="fzLabel">fixedCost:</label> 
         <input class="fzInput" type="text" id="fixedCost" name="fixedCost" value='<%=get("fixedCost")%>'>
+        
+        <br>
+        <label class="fzLabel">Id Driver:</label> 
+        <input class="fzInput" type="text" id="FixIdDriver" name="FixIdDriver" value='<%=get("IdDriver")%>' readonly="true">
+        <select id="IdDriver" name="IdDriver" >
+            <%for (Vehicle hd : (List<Vehicle>) getList("ListDriver")) { %>
+                <%= makeOption(hd.IdDriver, hd.IdDriver, hd.IdDriver)%>
+            <% } /* end for Branch Id */ %>
+        </select>
+        
+        <br>
+        <label class="fzLabel">Driver name:</label> 
+        <input class="fzInput" type="text" id="NamaDriver" name="NamaDriver" value='<%=get("NamaDriver")%>'readonly="true">
+        
+        <br>
+        <label class="fzLabel">agent priority:</label> 
+        <input class="fzInput" type="text" id="agent_priority" name="agent_priority" value='<%=get("agent_priority")%>'>
+        
+        <br>
+        <label class="fzLabel">max cust:</label> 
+        <input class="fzInput" type="text" id="max_cust" name="max_cust" value='<%=get("max_cust")%>'>
         
         <br>
         <label class="fzLabel">isActive:</label> 

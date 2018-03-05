@@ -8,9 +8,11 @@ package com.fz.ffbv3.api;
 import com.fz.ffbv3.service.taskmgt.TaskLogic;
 import com.fz.ffbv3.service.taskmgt.TaskPlanModel;
 import com.fz.ffbv3.service.taskmgt.UploadModel;
+import com.fz.ffbv3.service.taskmgt.UploadPlanData;
 import com.fz.ffbv3.service.usermgt.UserLogic;
 import com.fz.ffbv3.service.usermgt.UserModel;
 import com.fz.generic.DBConnector;
+import com.fz.generic.Db;
 import com.fz.generic.ResponseMessege;
 import com.fz.generic.StatusHolder;
 import com.fz.util.FixMessege;
@@ -21,6 +23,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Random;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,12 +44,13 @@ import javax.ws.rs.core.Response;
  *
  * @author Ignat
  */
-@Path("tasks")
+@Path("v1/tasks")
 public class TaskApi
 {
   private final Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
-  FileHandler fh = null;
-  final String DATE_FORMAT = "yyyyMMdd";
+//  FileHandler fh = null;
+//  final String DATE_FORMAT = "yyyyMMdd.HHmm";
+//  Random rand = new Random();
 
   @Context
   private UriInfo context;
@@ -56,12 +60,14 @@ public class TaskApi
    */
   public TaskApi()
   {
+/*    
     try 
     {
       DateTimeFormatter dateTimeformatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
       LocalDateTime localDateTime = LocalDateTime.now();
 
-      this.fh = new FileHandler("D:\\fza\\log\\TaskApi." + dateTimeformatter.format(localDateTime) + ".log", true);
+      this.fh = new FileHandler(FixValue.strLogPath + "TaskApi." + dateTimeformatter.format(localDateTime) +
+              "." + String.format("%04d", rand.nextInt(1000)) + ".log", true);
     }
     catch (IOException ex)
     {
@@ -74,7 +80,8 @@ public class TaskApi
 
    fh.setFormatter(new SimpleFormatter());
    logger.addHandler(fh);
-  }
+*/    
+	}
 
   /**
    * Retrieves representation of an instance of com.fz.ffbv3.api.TaskApi
@@ -111,14 +118,11 @@ public class TaskApi
     TaskPlanModel taskModel = gson.fromJson(content, TaskPlanModel.class);
     logger.severe("[Parsing] -> Parsing request with GSON done");
 
-    DBConnector dBConnector = new DBConnector();
-    Connection conn = dBConnector.ConnectToDatabase();
-    logger.severe("[Open] -> Open database done");
-
     StatusHolder statusHolder = new StatusHolder();
-    
-    if(conn != null)
-    {
+
+		try(Connection conn = (new Db()).getConnection("jdbc/fz"))
+		{
+	    logger.severe("[Open] -> Open database done");
       TaskLogic taskLogic = new TaskLogic(conn, taskModel.getTaskListData().getVehicleID(), logger);
       Integer JobID = taskLogic.getJobID();
       
@@ -135,17 +139,17 @@ public class TaskApi
       }
       else
         statusHolder = taskLogic.TaskList(JobID);
-    }
-    else
-    {
+		}
+		catch (Exception ex)
+		{
       statusHolder.setCode(FixValue.intResponError);
       statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strTaskFailed));
-    }   
-   
-    dBConnector.CloseDatabase(conn);
+      logger.log(Level.SEVERE, "[Stack Trace] -> {0}", ex.toString());
+		}
+    
     logger.severe("[Close] -> Close database done");
     logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
-    fh.close();
+//    fh.close();
     return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build(); 
   }
 
@@ -161,27 +165,90 @@ public class TaskApi
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
     UploadModel uploadModel = gson.fromJson(content, UploadModel.class);
 
-    DBConnector dBConnector = new DBConnector();
-    Connection conn = dBConnector.ConnectToDatabase();
-    logger.severe("[Open] -> Open database done");
+    StatusHolder statusHolder = new StatusHolder();
+
+		try(Connection conn = (new Db()).getConnection("jdbc/fz"))
+		{
+	    logger.severe("[Open] -> Open database done");
+      TaskLogic taskLogic = new TaskLogic(conn, 0, logger);
+      statusHolder = taskLogic.TaskListUpload(uploadModel);
+		}
+		catch (Exception ex)
+		{
+      statusHolder.setCode(FixValue.intResponError);
+      statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strUploadFailed));
+      logger.log(Level.SEVERE, "[Stack Trace] -> {0}", ex.toString());
+		}
+    
+    logger.severe("[Close] -> Close database done");
+    logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
+//    fh.close();
+    return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build(); 
+  }
+
+  @POST
+  @Path("jobstate")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response postJobState(String content)
+  {
+    logger.severe("[Path] -> /tasks/jobstate");
+    
+    // Get Gson object and parse json string to object
+    logger.severe("[JSON] -> " + content);
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    TaskPlanModel taskPlanModel = gson.fromJson(content, TaskPlanModel.class);
+
+    StatusHolder statusHolder = new StatusHolder();
+
+		try(Connection conn = (new Db()).getConnection("jdbc/fz"))
+		{
+	    logger.severe("[Open] -> Open database done");
+      TaskLogic taskLogic = new TaskLogic(conn, 0, logger);
+      statusHolder = taskLogic.MobileJobState(taskPlanModel);
+		}
+		catch (Exception ex)
+		{
+      statusHolder.setCode(FixValue.intResponError);
+      statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strMobileJobStateFailed));
+      logger.log(Level.SEVERE, "[Stack Trace] -> {0}", ex.toString());
+		}
+    
+    logger.severe("[Close] -> Close database done");
+    logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
+//    fh.close();
+    return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build(); 
+  }
+
+  @POST
+  @Path("jobhistory")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response postJobHistory(String content)
+  {
+    logger.severe("[Path] -> /tasks/jobhistory");
+    
+    // Get Gson object and parse json string to object
+    logger.severe("[JSON] -> " + content);
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    TaskPlanModel taskPlanModel = gson.fromJson(content, TaskPlanModel.class);
 
     StatusHolder statusHolder = new StatusHolder();
     
-    if(conn != null)
-    {
+		try(Connection conn = (new Db()).getConnection("jdbc/fz"))
+		{
+	    logger.severe("[Open] -> Open database done");
       TaskLogic taskLogic = new TaskLogic(conn, 0, logger);
-      statusHolder = taskLogic.TaskListUpload(uploadModel);
-    }
-    else
-    {
+      statusHolder = taskLogic.MobileHistoryState(taskPlanModel);
+		}
+		catch (Exception ex)
+		{
       statusHolder.setCode(FixValue.intResponError);
-      statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strUploadFailed));
-    }   
-    
-    dBConnector.CloseDatabase(conn);    
+      statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strMobileHistoryStateFailed));
+      logger.log(Level.SEVERE, "[Stack Trace] -> {0}", ex.toString());
+		}
+
     logger.severe("[Close] -> Close database done");
     logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
-    fh.close();
+//    fh.close();
     return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build(); 
   }
 }

@@ -26,9 +26,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 
-/**
- *
- */
+
 public class AlgoRunner implements BusinessLogic {
 
     @Override
@@ -85,6 +83,8 @@ public class AlgoRunner implements BusinessLogic {
                 + "Channel) values(?,?,?,?,?,?,?,?,?,?,?)";
 
         boolean success = false;
+        
+        String errMsg = "";
 
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
                 PreparedStatement ps = con.prepareStatement(sql)) {
@@ -119,44 +119,68 @@ public class AlgoRunner implements BusinessLogic {
             String resp = "";
             if (success) {     
                 if (reRun.equals("A")) {
+                    errMsg = "Update Prev PreRouteJob Error";
                     resp = updatePrevPreRouteJob(runID, runId);
-                    if (resp.equalsIgnoreCase("OK"))    
+                    if (resp.equalsIgnoreCase("OK")){
+                        errMsg = "Insert PreRouteJob Copy ori Error";
                         resp = insertPreRouteJobCopy(runID, runId, branchCode, dateDeliv, "ori");
-                    if (resp.equalsIgnoreCase("OK"))    
+                    }
+                    if (resp.equalsIgnoreCase("OK")){
+                        errMsg = "Insert PreRouteJob Copy edit Error";
                         resp = insertPreRouteJobCopy(runID, runId, branchCode, dateDeliv, "edit");
-                    if (resp.equalsIgnoreCase("OK"))    
+                    }
+                    if (resp.equalsIgnoreCase("OK")){
+                        errMsg = "Insert PreRouteVehicle Copy Error";
                         resp = insertPreVehicleCopy(runID, runId, branchCode, dateDeliv, "ori");
+                    }
                     if (resp.equalsIgnoreCase("OK") && reRun.equals("A")) {
+                        errMsg = "TMSAlgo Error";
                         resp = UrlResponseGetter.getURLResponse(url.toString());
                         if (resp.equals("OK")) {
+                            errMsg = "runProgress Error";
                             response.sendRedirect("runProgress.jsp?runId=" + runID + "&dateDeliv=" + dateDeliv + "&oriRunID=" + oriRunID + "&channel=" + channel);
-                        } else {
+                        } /*else {
                             HashMap<String, String> pl = new HashMap<String, String>();
                             pl.put("ID", runId);
                             pl.put("fileNmethod", "AlgoRunner&run");
                             pl.put("datas", "");
-                            pl.put("msg", resp);
+                            pl.put("msg", errMsg +" | "+ resp);
                             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
                             Date date = new Date();
                             pl.put("dates", dateFormat.format(date).toString());
                             Other.insertLog(pl);
                             response.sendRedirect("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
-                                    + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel + "&error=N");
-                        }
+                                    + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel + "&error=N" + "&errMsg=" + errMsg);
+                        }*/
+                    }
+                    if (!resp.equalsIgnoreCase("OK")){
+                        throw new Exception(); 
                     }
 
                 } else if (reRun.equals("N")) {
+                    errMsg = "TMS_GetCustLongLat Error";
                     prepareCustTable(branchCode);
+                    errMsg = "Insert PreRouteVehicle Error";
                     resp = insertPreRouteVehicle(runID, branchCode, dateDeliv, chn);
-                    if (resp.equalsIgnoreCase("OK"))    
+                    if (resp.equalsIgnoreCase("OK")){
+                        errMsg = "Insert PreRouteJob ori Error";
                         resp = QueryCust(runID, branchCode, channel, dateDeliv, "ori");
+                    }
                     //resp = insertPreRouteJob(runID, branchCode, dateDeliv, "ori", chn);
-                    if (resp.equalsIgnoreCase("OK"))    
+                    if (resp.equalsIgnoreCase("OK")){
+                        errMsg = "Insert PreRouteJob edit Error";
                         resp = QueryCust(runID, branchCode, channel, dateDeliv, "edit");
+                    }
                     //resp = insertPreRouteJob(runID, branchCode, dateDeliv, "edit", chn);
-                    if (resp.equalsIgnoreCase("OK"))    
+                    if (resp.equalsIgnoreCase("OK")){
+                        errMsg = "";
                         response.sendRedirect("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
                             + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel + "&error=N");
+                    }
+                    
+                    if (!resp.equalsIgnoreCase("OK")){
+                        throw new Exception(); 
+                    }
 
                 }
                 
@@ -166,14 +190,21 @@ public class AlgoRunner implements BusinessLogic {
             pl.put("ID", runId);
             pl.put("fileNmethod", "AlgoRunner&run Exc");
             pl.put("datas", "");
-            pl.put("msg", e.getMessage());
+            pl.put("msg", errMsg +" | "+ e.getMessage());
             System.out.println("e.getMessage() " + e.getMessage());
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
             Date date = new Date();
             pl.put("dates", dateFormat.format(date).toString());
             Other.insertLog(pl);
+            /*
+            request.setAttribute("errMsg"
+                   , errMsg);
+            request.getRequestDispatcher("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
+                    + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel  + "&error=Y")
+                    .forward(pc.getRequest(), pc.getResponse());
+            */
             response.sendRedirect("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
-                    + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel  + "&error=Y");
+                    + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel  + "&error=Y" + "&errMsg=" + errMsg);
         }
     }
 
@@ -667,86 +698,116 @@ public class AlgoRunner implements BusinessLogic {
 
         String cds = "ERROR insertPreRouteJob";
 
-        String sql = "insert\n"
-                + "	into\n"
-                + "		bosnet1.dbo.TMS_PreRouteJob(\n"
-                + "			RunId,\n"
-                + "			Customer_ID,\n"
-                + "			DO_Number,\n"
-                + "			Long,\n"
-                + "			Lat,\n"
-                + "			Customer_priority,\n"
-                + "			Service_time,\n"
-                + "			deliv_start,\n"
-                + "			deliv_end,\n"
-                + "			vehicle_type_list,\n"
-                + "			total_kg,\n"
-                + "			total_cubication,\n"
-                + "			DeliveryDeadline,\n"
-                + "			DayWinStart,\n"
-                + "			DayWinEnd,\n"
-                + "			UpdatevDate,\n"
-                + "			CreateDate,\n"
-                + "			isActive,\n"
-                + "			Is_Exclude,\n"
-                + "			Is_Edit\n,"
-                + "			Product_Description,\n"
-                + "			Gross_Amount,\n"
-                + "			DOQty,\n"
-                + "			DOQtyUOM,\n"
-                + "			Name1,\n"
-                + "			Street,\n"
-                + "			Distribution_Channel,\n"
-                + "			Customer_Order_Block_all,\n"
-                + "			Customer_Order_Block,\n"
-                + "			Request_Delivery_Date\n"
-                + "		) select\n"
-                + "			'" + runID + "' as RunId,\n"
-                + "			Customer_ID,\n"
-                + "			DO_Number,\n"
-                + "			Long,\n"
-                + "			Lat,\n"
-                + "			Customer_priority,\n"
-                + "			Service_time,\n"
-                + "			deliv_start,\n"
-                + "			deliv_end,\n"
-                + "			vehicle_type_list,\n"
-                + "			total_kg,\n"
-                + "			total_cubication,\n"
-                + "			DeliveryDeadline,\n"
-                + "			DayWinStart,\n"
-                + "			DayWinEnd,\n"
-                + "			cast(\n"
-                + "				FORMAT(\n"
-                + "					getdate(),\n"
-                + "					'yyyy-MM-dd hh-mm'\n"
-                + "				) as varchar\n"
-                + "			) as UpdatevDate,\n"
-                + "			cast(\n"
-                + "				FORMAT(\n"
-                + "					getdate(),\n"
-                + "					'yyyy-MM-dd hh-mm'\n"
-                + "				) as varchar\n"
-                + "			) as CreateDate,\n"
-                + "			isActive,\n"
-                + "			Is_Exclude,\n"
-                + "			'" + str + "'Is_Edit,\n"
-                + "			Product_Description,\n"
-                + "			Gross_Amount,\n"
-                + "			DOQty,\n"
-                + "			DOQtyUOM,\n"
-                + "			Name1,\n"
-                + "			Street,\n"
-                + "			Distribution_Channel,\n"
-                + "			Customer_Order_Block_all,\n"
-                + "			Customer_Order_Block,\n"
-                + "			Request_Delivery_Date\n"
-                + "		from\n"
-                + "			bosnet1.dbo.TMS_PreRouteJob\n"
-                + "		where\n"
-                + "			RunId = '" + prevRunID + "'\n"
-                + "			and Is_Exclude = 'inc'\n"
-                + "			and Is_Edit = 'edit'";
+        String sql = "INSERT\n" +
+                "	INTO\n" +
+                "		bosnet1.dbo.TMS_PreRouteJob(\n" +
+                "			RunId,\n" +
+                "			Customer_ID,\n" +
+                "			DO_Number,\n" +
+                "			Long,\n" +
+                "			Lat,\n" +
+                "			Customer_priority,\n" +
+                "			Service_time,\n" +
+                "			deliv_start,\n" +
+                "			deliv_end,\n" +
+                "			vehicle_type_list,\n" +
+                "			total_kg,\n" +
+                "			total_cubication,\n" +
+                "			DeliveryDeadline,\n" +
+                "			DayWinStart,\n" +
+                "			DayWinEnd,\n" +
+                "			UpdatevDate,\n" +
+                "			CreateDate,\n" +
+                "			isActive,\n" +
+                "			Is_Exclude,\n" +
+                "			Is_Edit,\n" +
+                "			Product_Description,\n" +
+                "			Gross_Amount,\n" +
+                "			DOQty,\n" +
+                "			DOQtyUOM,\n" +
+                "			Name1,\n" +
+                "			Street,\n" +
+                "			Distribution_Channel,\n" +
+                "			Customer_Order_Block_all,\n" +
+                "			Customer_Order_Block,\n" +
+                "			Request_Delivery_Date,\n" +
+                "			Desa_Kelurahan,\n" +
+                "			Kecamatan,\n" +
+                "			Kodya_Kabupaten,\n" +
+                "			Batch,\n" +
+                "			Ket_DO\n" +
+                "		) SELECT\n" +
+                "			'"+runID+"' AS RunId,\n" +
+                "			jb.Customer_ID,\n" +
+                "			jb.DO_Number,\n" +
+                "			jb.Long,\n" +
+                "			jb.Lat,\n" +
+                "			jb.Customer_priority,\n" +
+                "			jb.Service_time,\n" +
+                "			jb.deliv_start,\n" +
+                "			jb.deliv_end,\n" +
+                "			jb.vehicle_type_list,\n" +
+                "			jb.total_kg,\n" +
+                "			jb.total_cubication,\n" +
+                "			jb.DeliveryDeadline,\n" +
+                "			jb.DayWinStart,\n" +
+                "			jb.DayWinEnd,\n" +
+                "			CAST(\n" +
+                "				FORMAT(\n" +
+                "					getdate(),\n" +
+                "					'yyyy-MM-dd hh-mm'\n" +
+                "				) AS VARCHAR\n" +
+                "			) AS UpdatevDate,\n" +
+                "			CAST(\n" +
+                "				FORMAT(\n" +
+                "					getdate(),\n" +
+                "					'yyyy-MM-dd hh-mm'\n" +
+                "				) AS VARCHAR\n" +
+                "			) AS CreateDate,\n" +
+                "			jb.isActive,\n" +
+                "			jb.Is_Exclude,\n" +
+                "			'"+str+"' Is_Edit,\n" +
+                "			jb.Product_Description,\n" +
+                "			jb.Gross_Amount,\n" +
+                "			jb.DOQty,\n" +
+                "			jb.DOQtyUOM,\n" +
+                "			jb.Name1,\n" +
+                "			jb.Street,\n" +
+                "			jb.Distribution_Channel,\n" +
+                "			jb.Customer_Order_Block_all,\n" +
+                "			jb.Customer_Order_Block,\n" +
+                "			jb.Request_Delivery_Date,\n" +
+                "			jb.Desa_Kelurahan,\n" +
+                "			jb.Kecamatan,\n" +
+                "			jb.Kodya_Kabupaten,\n" +
+                "			jb.Batch,\n" +
+                "			jb.Ket_DO\n" +
+                "		FROM\n" +
+                "			bosnet1.dbo.TMS_PreRouteJob jb\n" +
+                "		INNER JOIN(\n" +
+                "				SELECT\n" +
+                "					DISTINCT DO_Number\n" +
+                "				FROM\n" +
+                "					bosnet1.dbo.TMS_ShipmentPlan\n" +
+                "				WHERE\n" +
+                "					already_shipment = 'N'\n" +
+                "					AND notused_flag IS NULL\n" +
+                "					AND incoterm = 'FCO'\n" +
+                "					AND(\n" +
+                "						Order_Type = 'ZDCO'\n" +
+                "						OR Order_Type = 'ZDTO'\n" +
+                "					)\n" +
+                "					AND create_date >= DATEADD(\n" +
+                "						DAY,\n" +
+                "						- 7,\n" +
+                "						GETDATE()\n" +
+                "					)\n" +
+                "			) sp ON\n" +
+                "			jb.DO_Number = sp.DO_Number\n" +
+                "		WHERE\n" +
+                "			jb.RunId = '"+prevRunID+"'\n" +
+                "			AND jb.Is_Exclude = 'inc'\n" +
+                "			AND jb.Is_Edit = 'edit'";
 
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
                 PreparedStatement ps = con.prepareStatement(sql)) {
@@ -800,7 +861,11 @@ public class AlgoRunner implements BusinessLogic {
                 "			fixedCost,\n" +
                 "			costPerM,\n" +
                 "			costPerServiceMin,\n" +
-                "			costPerTravelMin\n" +
+                "			costPerTravelMin,\n" +
+                "			IdDriver,\n" +
+                "			NamaDriver,\n" +
+                "			agent_priority,\n" +
+                "			max_cust\n" +
                 "		FROM\n" +
                 "			BOSNET1.dbo.TMS_PreRouteVehicle\n" +
                 "		WHERE\n" +
@@ -858,7 +923,11 @@ public class AlgoRunner implements BusinessLogic {
                 "			fixedCost,\n" +
                 "			costPerM,\n" +
                 "			costPerServiceMin,\n" +
-                "			costPerTravelMin\n" +
+                "			costPerTravelMin,\n" +
+                "			IdDriver,\n" +
+                "			NamaDriver,\n" +
+                "			agent_priority,\n" +
+                "			max_cust\n" +
                 "		) SELECT\n" +
                 "			'"+runID+"' AS RunId,\n" +
                 "			v.vehicle_code,\n" +
@@ -907,7 +976,17 @@ public class AlgoRunner implements BusinessLogic {
                 "				va.costPerM * 1000\n" +
                 "			) AS costPerM,\n" +
                 "			0 AS costPerServiceMin,\n" +
-                "			0 AS costPerTravelMin\n" +
+                "			0 AS costPerTravelMin,\n" +
+                "			va.IdDriver,\n" +
+                "			va.NamaDriver,\n" +
+                "			CASE\n" +
+                "				WHEN va.agent_priority is null THEN rt.value\n" +
+                "				ELSE va.agent_priority\n" +
+                "			END AS agent_priority,\n" +
+                "			CASE\n" +
+                "				WHEN va.max_cust is null THEN ry.value\n" +
+                "				ELSE va.max_cust\n" +
+                "			END AS max_cust\n" +
                 "		FROM\n" +
                 "			(\n" +
                 "				SELECT\n" +
@@ -929,14 +1008,18 @@ public class AlgoRunner implements BusinessLogic {
                 "							AND included = 1\n" +
                 "					) vi\n" +
                 "			) v\n" +
-                "		INNER JOIN bosnet1.dbo.vehicle vh ON\n" +
+                "		LEFT OUTER JOIN bosnet1.dbo.vehicle vh ON\n" +
                 "			v.vehicle_code = vh.vehicle_code\n" +
-                "		INNER JOIN bosnet1.dbo.TMS_vehicleAtr va ON\n" +
+                "		LEFT OUTER JOIN bosnet1.dbo.TMS_vehicleAtr va ON\n" +
                 "			v.vehicle_code = va.vehicle_code\n" +
                 "		LEFT OUTER JOIN bosnet1.dbo.TMS_Params pr ON\n" +
                 "			pr.param = 'HargaSolar'\n" +
                 "		LEFT OUTER JOIN bosnet1.dbo.TMS_Params bm ON\n" +
                 "			bm.param = 'DefaultKonsumsiBBm'\n" +
+                "		LEFT OUTER JOIN bosnet1.dbo.TMS_Params rt ON\n" +
+                "			rt.param = 'Defaultagentpriority'\n" +
+                "		LEFT OUTER JOIN bosnet1.dbo.TMS_Params ry ON\n" +
+                "			ry.param = 'DefaultMaxCust'\n" +
                 "		WHERE\n" +
                 "			va.included = 1\n" +
                 "			and va.Channel in (" + shn + ");";
@@ -1112,7 +1195,12 @@ public class AlgoRunner implements BusinessLogic {
                 "			'yyyy-MM-dd hh-mm'\n" +
                 "		) AS VARCHAR\n" +
                 "	) AS CreateDate,\n" +
-                "	sp.Request_Delivery_Date,\n" +
+                "	CAST(\n" +
+                "		FORMAT(\n" +
+                "			sp.Request_Delivery_Date,\n" +
+                "			'yyyy-MM-dd'\n" +
+                "		) AS VARCHAR\n" +
+                "	) AS Request_Delivery_Date,\n" +
                 "	sp.Product_Description,\n" +
                 "	sp.Gross_Amount,\n" +
                 "	sp.DOQty,\n" +
@@ -1131,7 +1219,11 @@ public class AlgoRunner implements BusinessLogic {
                 "	df.value AS Priority_value,\n" +
                 "	dn.value AS BufferEndDefault,\n" +
                 "	dj.value AS SatDelivDefault,\n" +
-                "	du.value AS ChannelNullDefault\n" +
+                "	du.value AS ChannelNullDefault,\n" +
+                "	cs.Desa_Kelurahan,\n" +
+                "	cs.Kecamatan,\n" +
+                "	cs.Kodya_Kabupaten,\n" +
+                "	sp.Batch\n" +
                 "FROM\n" +
                 "	bosnet1.dbo.TMS_ShipmentPlan sp\n" +
                 "LEFT OUTER JOIN(\n" +
@@ -1181,6 +1273,17 @@ public class AlgoRunner implements BusinessLogic {
                 "			a.noid = 1\n" +
                 "	) cl ON\n" +
                 "	sp.customer_id = cl.custID\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			ty.Delivery_Number\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_Result_Shipment ty\n" +
+                "		INNER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
+                "			ty.Delivery_Number = tu.Delivery_Number\n" +
+                "		WHERE\n" +
+                "			tu.SAP_Status IS NULL\n" +
+                "	) ss ON\n" +
+                "	sp.DO_Number = ss.Delivery_Number\n" +
                 "LEFT OUTER JOIN bosnet1.dbo.TMS_CustAtr ca ON\n" +
                 "	sp.customer_id = ca.customer_id\n" +
                 "LEFT OUTER JOIN bosnet1.dbo.TMS_Params dd ON\n" +
@@ -1221,6 +1324,7 @@ public class AlgoRunner implements BusinessLogic {
                 "		- 7,\n" +
                 "		GETDATE()\n" +
                 "	)\n" +
+                "	AND ss.Delivery_Number IS NULL\n" +
                 query + "\n" +
                 "ORDER BY\n" +
                 "	sp.Customer_ID ASC\n";
@@ -1228,6 +1332,7 @@ public class AlgoRunner implements BusinessLogic {
         //select
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
                 PreparedStatement ps = con.prepareStatement(sql)) {
+            System.out.println(sql);
             try (ResultSet rs = ps.executeQuery()){
                 while (rs.next()) {
                     pl = new HashMap<String, String>();
@@ -1260,8 +1365,18 @@ public class AlgoRunner implements BusinessLogic {
                     pl.put("SatDelivDefault", rs.getString("SatDelivDefault"));
                     pl.put("ChannelNullDefault", rs.getString("ChannelNullDefault"));
                     pl.put("marketId", rs.getString("marketId"));
-                    //pl.put("DOCreationDate", rs.getString("DOCreationDate"));
+                    pl.put("Desa_Kelurahan", rs.getString("Desa_Kelurahan"));
+                    pl.put("Kecamatan", rs.getString("Kecamatan"));
+                    pl.put("Kodya_Kabupaten", rs.getString("Kodya_Kabupaten"));
+                    pl.put("Batch", rs.getString("Batch"));
+                    //pl.put("DOCreationDate", rs.getString("DOCreationDate"));                    
                     asd.add(pl);
+                    if(pl.get("DO_Number").equals("8020089252")){
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); 
+                        Date rdd = sdf.parse(rs.getString("Request_Delivery_Date"));
+                        System.out.println(rdd.toString());
+                        System.out.println(pl.toString());
+                    }
                     str = "OK";
                 }
             }
@@ -1302,8 +1417,13 @@ public class AlgoRunner implements BusinessLogic {
                 "			Customer_Order_Block_all,\n" +
                 "			Customer_Order_Block,\n" +
                 "			Request_Delivery_Date,\n" +
-                "			MarketId\n" +
-                "		) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                "			MarketId,\n" +
+                "			Desa_Kelurahan,\n" +
+                "			Kecamatan,\n" +
+                "			Kodya_Kabupaten,\n" +
+                    "			Batch,\n" +
+                    "			Ket_DO\n" +
+                "		) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         
             List<HashMap<String, String>> ins = new ArrayList<HashMap<String, String>>();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");            
@@ -1319,8 +1439,9 @@ public class AlgoRunner implements BusinessLogic {
                 //cek hari buka
                 int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
                 //System.out.println(dayOfWeek);
-                if(pl.get("Customer_ID").equals("5820002148")){
-                    //System.out.println(edt);
+                if(pl.get("DO_Number").equals("8020089252")){
+                    System.out.println(rdd);
+                    String g = edt;
                     //System.out.println(dayOfWeek + "()" + Integer.parseInt(asd.get(a).get("DayWinStart")));
                     //System.out.println(pl.get("5820002148"));
                 }
@@ -1364,6 +1485,8 @@ public class AlgoRunner implements BusinessLogic {
                 }                
             }
             
+            asd = treeSAP(asd);
+            
             try (Connection con = (new Db()).getConnection("jdbc/fztms")){
                 try (PreparedStatement ps = con.prepareStatement(sql) ){
                     ps.clearParameters();                    
@@ -1401,6 +1524,11 @@ public class AlgoRunner implements BusinessLogic {
                             ps.setString(i++, ins.get(a).get("Customer_Order_Block"));   
                             ps.setString(i++, ins.get(a).get("Request_Delivery_Date")); 
                             ps.setString(i++, ins.get(a).get("marketId")); 
+                            ps.setString(i++, ins.get(a).get("Desa_Kelurahan"));   
+                            ps.setString(i++, ins.get(a).get("Kecamatan")); 
+                            ps.setString(i++, ins.get(a).get("Kodya_Kabupaten")); 
+                            ps.setString(i++, ins.get(a).get("Batch")); 
+                            ps.setString(i++, ins.get(a).get("Ket_DO")); 
 
                             ps.addBatch();
                         }
@@ -1415,6 +1543,7 @@ public class AlgoRunner implements BusinessLogic {
     public HashMap<String, String> tree(HashMap<String, String> pl, Date dateDeliv, String DDl, String chn) throws Exception {
         pl = time(pl, dateDeliv);
         pl = priority(pl, dateDeliv, DDl, chn);
+        pl = other(pl);
         return pl;
     }
 
@@ -1470,12 +1599,13 @@ public class AlgoRunner implements BusinessLogic {
                 //System.out.println(pl.get("Distribution_Channel"));
                 pl.replace("Distribution_Channel", "GT");
                 if(pl.get("DeliveryDeadline").equalsIgnoreCase("BFOR")){
-                    if(str == 0)            pl.replace("Customer_priority", String.valueOf(1));
-                    else if(str == 1)       pl.replace("Customer_priority", String.valueOf(3));
-                    else if(str >= 2)       pl.replace("Customer_priority", String.valueOf(4));
+                    if(str == 0)                    pl.replace("Customer_priority", String.valueOf(1));
+                    else if(str > 0)                pl.replace("Customer_priority", String.valueOf(3));
+                    else if(str < 0)                pl.replace("Customer_priority",  String.valueOf(10));
                 }else if(pl.get("DeliveryDeadline").equalsIgnoreCase("AFTR")){
-                    if(str < 0 && str > -7) pl.replace("Customer_priority", String.valueOf(2));
-                    else                    pl.replace("Customer_priority", String.valueOf(10));
+                    if(str == 0)                    pl.replace("Customer_priority", String.valueOf(1));
+                    else if(str > 0)                pl.replace("Customer_priority", String.valueOf(3));
+                    else if(str < 0)                pl.replace("Customer_priority", String.valueOf(2));
                 }else if(pl.get("DeliveryDeadline").equalsIgnoreCase("ONDL")){
                     if(str == 0)            pl.replace("Customer_priority", String.valueOf(1));
                     else                    pl.replace("Customer_priority", String.valueOf(10));
@@ -1483,13 +1613,13 @@ public class AlgoRunner implements BusinessLogic {
             }//System.out.println(pl.get("Customer_ID"));
 
             if(pl.get("Customer_ID").equals("5820001001") || pl.get("Customer_ID").equals("5820000348")){
-                System.out.println(pl.get("Customer_ID"));
+                /*System.out.println(pl.get("Customer_ID"));
                 System.out.println("DeliveryDeadline " + pl.get("DeliveryDeadline"));
                 System.out.println("Distribution_Channel "+pl.get("Distribution_Channel"));
                 System.out.println("dateDeliv "+dateDeliv);
                 System.out.println("Request_Delivery_Date "+pl.get("Request_Delivery_Date"));
                 System.out.println("Customer_priority :" + pl.get("Customer_priority"));
-                System.out.println("str :" + str);
+                System.out.println("str :" + str);*/
             }
         }catch(Exception e){
             throw new Exception(pl.toString() + ";" + e);
@@ -1516,7 +1646,7 @@ public class AlgoRunner implements BusinessLogic {
         if(day == 7){
             c.setTime(shf.parse(pl.get("deliv_end")));
             deliv.setTime(shf.parse(reference));
-            if(c.after(deliv)){
+            if(c.after(deliv) && pl.get("Distribution_Channel").equalsIgnoreCase("MT")){
                 pl.replace("deliv_end", reference);
             }           
         }
@@ -1527,8 +1657,8 @@ public class AlgoRunner implements BusinessLogic {
         //-1 > 12:00 deliv_start
         if (c.after(date2)) {
             System.out.println("bfr" + pl.toString());
-            c.add(Calendar.HOUR, -1);
-            pl.replace("deliv_start", shf.format(c.getTime()).toString());
+            //c.add(Calendar.HOUR, -1);
+            //pl.replace("deliv_start", shf.format(c.getTime()).toString());
             //System.out.println("afr" + pl.toString());
         }
         
@@ -1536,8 +1666,8 @@ public class AlgoRunner implements BusinessLogic {
         //-1 > 12:00 deliv_end
         if (c.after(date2)) {
             //System.out.println("bfr" + pl.toString());
-            c.add(Calendar.HOUR, -1);
-            pl.replace("deliv_end", shf.format(c.getTime()).toString());
+            //c.add(Calendar.HOUR, -1);
+            //pl.replace("deliv_end", shf.format(c.getTime()).toString());
             //System.out.println("afr" + pl.toString());
         }
         
@@ -1549,4 +1679,89 @@ public class AlgoRunner implements BusinessLogic {
         return pl;
     }
 
+    public HashMap<String, String> other(HashMap<String, String> pl){
+        
+        if(pl.get("Batch") == null){
+            pl.put("Ket_DO", "Batch null tidak masuk SAP");
+        }else{
+            pl.put("Ket_DO", "-");
+        }
+        return pl;
+    }
+    
+    public String cekRunId(String runId) throws Exception{
+        String err = "ERROR";
+        String sql = "select count(*) as num from bosnet1.dbo.TMS_progress where runID = '"+runId+"'";
+        
+        int num = 0;
+        try (Connection con = (new Db()).getConnection("jdbc/fztms");
+                PreparedStatement ps = con.prepareStatement(sql)){
+            try (ResultSet rs = ps.executeQuery()){
+                if (rs.next()) 
+                    num = rs.getInt("num");
+                
+                if(num == 0)
+                    err = "OK";
+                
+            }
+        }
+        return err;
+    }
+    
+    public List<HashMap<String, String>> treeSAP(List<HashMap<String, String>> px) throws Exception{
+        callPI_DeliveryOrder(px);
+        
+        return px;
+    }
+    
+    public List<HashMap<String, String>> callPI_DeliveryOrder(List<HashMap<String, String>> py) throws Exception{
+        HashMap<String, String> px = new HashMap<String, String>();
+        
+        String s = "";
+        for(int a = 0;a<py.size();a++){
+            px = new HashMap<String, String>();
+            px = py.get(a);
+            
+            if(s.length() > 0)  s = s + ",'" + px.get("DO_Number") + "'";
+            else    s = s + "'" + px.get("DO_Number") + "'";            
+        }
+        
+        String sql = "SELECT distinct DONumber, GoodsMovementStat, PODStatus\n" +
+                "  FROM PICONSOL.dbo.PI_DeliveryOrder where DONumber in ("+s+")"
+                + " and (GoodsMovementStat = 'C' or PODStatus = 'C')";
+        
+        //System.out.println(sql); 
+        List<HashMap<String, String>> pl = new ArrayList<HashMap<String, String>>();        
+        try (Connection con = (new Db()).getConnection("jdbc/sapDB");
+                PreparedStatement ps = con.prepareStatement(sql)) {
+            //System.out.println(sql);
+            try (ResultSet rs = ps.executeQuery()){
+                while (rs.next()) {
+                    px = new HashMap<String, String>();
+                    px.put("DONumber", rs.getString("DONumber"));
+                    px.put("GoodsMovementStat", rs.getString("GoodsMovementStat"));
+                    px.put("PODStatus", rs.getString("PODStatus"));
+                    
+                    pl.add(px);
+                }
+            }
+        }
+        
+        //do diexclude
+        for(int a = 0;a<py.size();a++){
+            px = new HashMap<String, String>();
+            px = py.get(a);
+            if(pl.size() > 0){
+                for (HashMap<String, String> pl1 : pl) {                    
+                    if(px.get("DO_Number").equalsIgnoreCase(pl1.get("DONumber"))){
+                       //px.replace("Customer_priority", String.valueOf(10));
+                       System.out.println(px.get("DO_Number") + "()" + pl1.get("GoodsMovementStat") + "()" + pl1.get("PODStatus"));
+                       py.get(a).replace("Customer_priority", String.valueOf(10));                           
+                    }
+                }
+            }           
+        }
+        
+        return py;
+    }
 }

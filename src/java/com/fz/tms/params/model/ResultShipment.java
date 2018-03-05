@@ -41,4 +41,6 @@ public class ResultShipment {
     public String Shipment_Number_SAP;
     public String I_Status;
     public String Shipment_Flag;
+    public String distance;
+    public String distanceUnit;
 }

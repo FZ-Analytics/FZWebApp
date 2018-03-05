@@ -46,8 +46,8 @@ public class popupEditCustBfror implements BusinessLogic {
         String oriRunID = FZUtil.getHttpParam(request, "oriRunID");
         String err = FZUtil.getHttpParam(request, "errMsg");
         String channel = FZUtil.getHttpParam(request, "channel");
-        request.getSession().setAttribute("errMsg"
-                        , err);        
+        request.setAttribute("errMsg", err.length() > 0 ? err : "");
+        //request.getSession().setAttribute("errMsg", err);        
         
         String cds = "ERROR insertPreRouteJob";
 

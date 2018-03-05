@@ -22,5 +22,6 @@ public class Order {
     public String blockId2 = "";
     public String estTime = "";
     public String DoneStatus="";
+    public String rundID = "";
     public List<Task> tasks = new ArrayList<Task>();
 }

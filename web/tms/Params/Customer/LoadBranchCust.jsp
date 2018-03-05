@@ -5,7 +5,7 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@include file="../appGlobal/pageTop.jsp"%>
+<%@include file="../../appGlobal/pageTop.jsp"%>
 <%@page import="com.fz.tms.params.model.Customer"%>
 <%run(new com.fz.tms.params.Customer.LoadBranchCust());%>
 <!DOCTYPE html>
@@ -15,7 +15,7 @@
         <title>JSP Page</title>
     </head>
     <body>
-        <%@include file="../appGlobal/bodyTop.jsp"%>        
+        <%@include file="../../appGlobal/bodyTop.jsp"%>        
         <div class="fzErrMsg">
             <%=get("errMsg")%>
         </div>
@@ -44,9 +44,9 @@
                 </table>
             </div>
         </div>
-        <script src="../appGlobal/jquery.dataTables.min.js"></script>
-        <script src="../appGlobal/datatables.min.js"></script>
-        <script src="../appGlobal/datatables.js"></script>
+        <script src="../../appGlobal/jquery.dataTables.min.js"></script>
+        <script src="../../appGlobal/datatables.min.js"></script>
+        <script src="../../appGlobal/datatables.js"></script>
         <script type="text/javascript">
             $(document).ready(function () {
                 $('.fzCellClikck').click(function () {
@@ -75,6 +75,6 @@
                 
             });
         </script>
-        <%@include file="../appGlobal/bodyBottom.jsp"%>
+        <%@include file="../../appGlobal/bodyBottom.jsp"%>
     </body>
 </html>
