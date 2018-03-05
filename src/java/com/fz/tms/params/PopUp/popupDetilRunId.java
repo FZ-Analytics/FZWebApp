@@ -59,7 +59,7 @@ public class popupDetilRunId implements BusinessLogic {
         try {
             List<SummaryVehicle> asd = getSummary(runID);
             for (int i = 0; i < asd.size(); i++) {
-                System.out.println(asd.get(i).truckid);
+                //System.out.println(asd.get(i).truckid);
             }
             request.setAttribute("oriRunID", oriRunID);
             request.setAttribute("runID", runID);
@@ -272,6 +272,7 @@ public class popupDetilRunId implements BusinessLogic {
                     ArrayList<String> alDo = getDo(runID, sq.truckid);
                     for (int j = 0; j < alDo.size(); j++) {
                         String doNum = alDo.get(j);
+                        System.out.println(doNum);
                         //This try is for EXT vehicle
                         try {
                             int checkResultShipment = checkResultShipment(doNum, oriRunID.replace("_", "") + getVendorId(sq.truckid));
@@ -321,16 +322,16 @@ public class popupDetilRunId implements BusinessLogic {
                     //volume
                     if(Integer.parseInt(sq.capacityPer) > 100) {
                         sq.isFix = "er";
-                        sq.error = "Volume overload";
+                        sq.error = "Capacity overload";
                     }
                     //weight
                     if(Integer.parseInt(sq.kubikasiPer) > 100) {
                         sq.isFix = "er";
-                        sq.error = "Weight overload";
+                        sq.error = "Kubikasi overload";
                     }
                     if(Integer.parseInt(sq.kubikasiPer) > 100 && Integer.parseInt(sq.capacityPer) > 100) {
                         sq.isFix = "er";
-                        sq.error = "Volume and weight overload";
+                        sq.error = "Capacity and kubikasi overload";
                     }
 
                     asd.add(sq);

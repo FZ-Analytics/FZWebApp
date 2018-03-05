@@ -119,7 +119,7 @@
                 <tr style="background-color:orange">
                     <th width="100px" class="fzCol">Truck id</th>
                     <th width="100px" class="fzCol">Truck type</th>
-                    <th width="100px" class="fzCol">capacity(KG)</th>
+                    <th width="100px" class="fzCol">Capacity(KG)</th>
                     <th width="100px" class="fzCol">(%)</th>
                     <th width="100px" class="fzCol">Kubikasi(M3)</th>
                     <th width="100px" class="fzCol">(%)</th>
@@ -127,8 +127,8 @@
                     <th width="100px" class="fzCol">Jarak tempuh (km)</th>
                     <th width="100px" class="fzCol">Waktu travel</th>
                     <th width="100px" class="fzCol">Waktu service</th>
-                    <th width="100px" class="fzCol">Cust Visit</th>
-                    <th width="100px" class="fzCol">Transport Cost</th>
+                    <th width="100px" class="fzCol">Cust visit</th>
+                    <th width="100px" class="fzCol">Transport cost</th>
                     <th width="100px" class="fzCol">Submit to SAP</th>
                     <th width="100px" class="fzCol">Error msg.</th>
                 </tr>

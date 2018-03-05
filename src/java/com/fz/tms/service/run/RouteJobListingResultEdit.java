@@ -129,36 +129,52 @@ public class RouteJobListingResultEdit implements BusinessLogic {
 
             //This try is for EXT vehicle
             try {
-                int checkResultShipment = checkResultShipment(d.doNum, oriRunId.replace("_", "") + getVendorId(d.vehicleCode));
+                String[] doSplit = d.doNum.split(";");
+                int checkResultShipment = checkResultShipment(doSplit[0], oriRunId.replace("_", "") + getVendorId(d.vehicleCode));
+                //Already in Result_Shipment table
                 if (checkResultShipment > 0) {
-                    String check = checkStatusShipment(d.doNum, oriRunId.replace("_", "") + getVendorId(d.vehicleCode));
+                    String check = checkStatusShipment(doSplit[0], oriRunId.replace("_", "") + getVendorId(d.vehicleCode));
+                    //Already in Shipment_Status and error
                     if (check.length() > 1) {
                         d.isFix = "null";
                         d.error = check;
+                    //Already in Shipment_Status and success 
                     } else {
                         d.isFix = check;
                     }
-                } else {
+                } 
+                //Not in Result_Shipment yet
+                else {
                     d.isFix = "null";
                 }
             } //This catch is for INT vehicle
             catch (Exception e) {
-                int checkResultShipment = checkResultShipment(d.doNum, oriRunId.replace("_", "") + d.vehicleCode);
+                String[] doSplit = d.doNum.split(";");
+                if(d.vehicleCode.equals("B9103TCH")) {
+                    System.out.println(doSplit[0]);
+                }
+                int checkResultShipment = checkResultShipment(doSplit[0], oriRunId.replace("_", "") + d.vehicleCode);
+                //Already in Result_Shipment table
                 if (checkResultShipment > 0) {
-                    String check = checkStatusShipment(d.doNum, oriRunId.replace("_", "") + d.vehicleCode);
+                    String check = checkStatusShipment(doSplit[0], oriRunId.replace("_", "") + d.vehicleCode);
+                    //Already in Shipment_Status and error
                     if (check.length() > 1) {
                         d.isFix = "null";
                         d.error = check;
-                    } else {
+                    }
+                    //Already in Shipment_Status and success
+                    else {
                         d.isFix = check;
                     }
-                } else {
+                } 
+                //Not in Result_Shipment yet
+                else {
                     d.isFix = "null";
                 }
             }
 
             try {
-                d.volume = "" + Math.round(Double.parseDouble(getVolume(custId, oriRunId)) * 10) / 10.0;
+                d.volume = "" + Math.round(Double.parseDouble(getVolume(custId, oriRunId)) * 10) / 10.0/1000;
             } catch (Exception e) {
             }
             d.rdd = aSplit[8];
@@ -390,9 +406,9 @@ public class RouteJobListingResultEdit implements BusinessLogic {
 
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     if (rs.next()) {
-                        rowNum = rs.getInt("rowNum");
+                        rowNum = rs.getInt("rowNum"); // Already in Result_Shipment
                     } else {
-                        rowNum = 0; //Submitting
+                        rowNum = 0;
                     }
                 }
             }

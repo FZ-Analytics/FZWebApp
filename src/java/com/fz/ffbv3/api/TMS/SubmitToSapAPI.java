@@ -89,65 +89,78 @@ public class SubmitToSapAPI {
             Timestamp time = getTimeID();
             String route = getLongestRoute(alCustId, he.vehicle_no, runId);
             boolean isAlreadyOnce = false;
+
+            //check if any route is null
+            boolean isRouteNull = false;
             for (int i = 0; i < alCustId.size(); i++) {
-                ArrayList<HashMap<String, String>> alSP = getFromShipmentPlan(runId, alCustId.get(i));
-
-                for (int j = 0; j < alSP.size(); j++) {
-                    HashMap<String, String> hmSP = alSP.get(j); //HashMap Shipment Plan
-
-                    rs.Shipment_Type = hmPRV.get("source1");
-                    rs.Plant = hmSP.get("Plant");
-                    if (route == null) {
-                        ret = "Aborted: Route empty on Customer ID: " + alCustId.get(i);
-                        break;
-                    } else {
-                        rs.Shipment_Route = route;
-                    }
-                    rs.Description = "";
-                    rs.Status_Plan = parseRunId(oriRunId, true);
-                    rs.Status_Check_In = null;
-                    rs.Status_Load_Start = null;
-                    rs.Status_Load_End = null;
-                    rs.Status_Complete = null;
-                    rs.Status_Shipment_Start = parseRunId(oriRunId, false) + " " + alStartAndEndTime.get(0);
-                    rs.Status_Shipment_End = parseRunId(oriRunId, false) + " " + alStartAndEndTime.get(1);
-                    rs.Service_Agent_Id = hmPRV.get("IdDriver");
-                    if (rs.Shipment_Type.equals("ZDSI")) {
-                        rs.Shipment_Number_Dummy = oriRunId.replace("_", "") + he.vehicle_no;
-                        rs.No_Pol = he.vehicle_no;
-                        rs.Driver_Name = hmPRV.get("NamaDriver");
-                        rs.Vehicle_Number = he.vehicle_no;
-                    } else {
-                        rs.Shipment_Number_Dummy = oriRunId.replace("_", "") + getVendorId(he.vehicle_no);
-                        rs.No_Pol = hmPRV.get("vehicle_type");
-                        rs.Driver_Name = getVendorName(he.vehicle_no);
-                        rs.Vehicle_Number = hmPRV.get("vehicle_type");
-                    }
-
-                    rs.Delivery_Number = hmSP.get("DO_Number");
-                    rs.Delivery_Item = hmSP.get("Item_Number");
-                    rs.Delivery_Quantity_Split = 0.000;
-                    rs.Delivery_Quantity = Double.parseDouble(hmSP.get("DOQty"));
-                    rs.Delivery_Flag_Split = "";
-                    rs.Material = hmSP.get("Product_ID");
-                    rs.Vehicle_Type = hmPRV.get("vehicle_type");
-                    rs.Batch = hmSP.get("Batch");
-                    rs.Time_Stamp = time;
-                    rs.Shipment_Number_SAP = "";
-                    rs.I_Status = "0";
-                    rs.Shipment_Flag = "";
-                    if (isAlreadyOnce == false) {
-                        rs.distance = "" + getTotalDist(runId, he.vehicle_no);
-                        isAlreadyOnce = true;
-                    } else {
-                        rs.distance = null;
-                    }
-                    rs.distanceUnit = "M";
-
-                    insertResultShipment(rs);
-                }
-                if (!ret.equals("OK")) {
+                if (getRoute(alCustId.get(i)) == null) {
+                    ret = "Aborted: One of route is empty on Customer ID: " + alCustId.get(i);
+                    isRouteNull = true;
                     break;
+                }
+            }
+
+            if (isRouteNull == false) {
+                for (int i = 0; i < alCustId.size(); i++) {
+                    ArrayList<HashMap<String, String>> alSP = getFromShipmentPlan(runId, alCustId.get(i));
+
+                    for (int j = 0; j < alSP.size(); j++) {
+                        HashMap<String, String> hmSP = alSP.get(j); //HashMap Shipment Plan
+
+                        rs.Shipment_Type = hmPRV.get("source1");
+                        rs.Plant = hmSP.get("Plant");
+                        if (route == null) {
+                            ret = "Aborted: Can't submit, route empty on Customer ID: " + alCustId.get(i);
+                            break;
+                        } else {
+                            rs.Shipment_Route = route;
+                        }
+                        rs.Description = "";
+                        rs.Status_Plan = parseRunId(oriRunId, true);
+                        rs.Status_Check_In = null;
+                        rs.Status_Load_Start = null;
+                        rs.Status_Load_End = null;
+                        rs.Status_Complete = null;
+                        rs.Status_Shipment_Start = parseRunId(oriRunId, false) + " " + alStartAndEndTime.get(0);
+                        rs.Status_Shipment_End = parseRunId(oriRunId, false) + " " + alStartAndEndTime.get(1);
+                        rs.Service_Agent_Id = hmPRV.get("IdDriver");
+                        if (rs.Shipment_Type.equals("ZDSI")) {
+                            rs.Shipment_Number_Dummy = oriRunId.replace("_", "") + he.vehicle_no;
+                            rs.No_Pol = he.vehicle_no;
+                            rs.Driver_Name = hmPRV.get("NamaDriver");
+                            rs.Vehicle_Number = he.vehicle_no;
+                        } else {
+                            rs.Shipment_Number_Dummy = oriRunId.replace("_", "") + getVendorId(he.vehicle_no);
+                            rs.No_Pol = hmPRV.get("vehicle_type");
+                            rs.Driver_Name = getVendorName(he.vehicle_no);
+                            rs.Vehicle_Number = hmPRV.get("vehicle_type");
+                        }
+
+                        rs.Delivery_Number = hmSP.get("DO_Number");
+                        rs.Delivery_Item = hmSP.get("Item_Number");
+                        rs.Delivery_Quantity_Split = 0.000;
+                        rs.Delivery_Quantity = Double.parseDouble(hmSP.get("DOQty"));
+                        rs.Delivery_Flag_Split = "";
+                        rs.Material = hmSP.get("Product_ID");
+                        rs.Vehicle_Type = hmPRV.get("vehicle_type");
+                        rs.Batch = hmSP.get("Batch");
+                        rs.Time_Stamp = time;
+                        rs.Shipment_Number_SAP = "";
+                        rs.I_Status = "0";
+                        rs.Shipment_Flag = "";
+                        if (isAlreadyOnce == false) {
+                            rs.distance = "" + getTotalDist(runId, he.vehicle_no);
+                            isAlreadyOnce = true;
+                        } else {
+                            rs.distance = null;
+                        }
+                        rs.distanceUnit = "M";
+
+                        insertResultShipment(rs);
+                    }
+                    if (!ret.equals("OK")) {
+                        break;
+                    }
                 }
             }
         } catch (Exception e) {
