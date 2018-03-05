@@ -45,7 +45,6 @@ public class RouteJobListingResultEdit implements BusinessLogic {
     String prevVehiCode = "";
     int routeNb = 0;
     int jobNb = 1;
-    boolean oneVehicle = false;
 
     String oriRunId, runId, branch, shift;
 
@@ -305,11 +304,6 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                 RouteJobLog r = new RouteJobLog();
                 String[] doSplit = d.doNum.split(";");
                 if (!d.vehicleCode.equals("") && !d.vehicleCode.equals("NA") && d.custId.equals("")) {
-                    if (oneVehicle == false) {
-                        oneVehicle = true;
-                    } else {
-                        oneVehicle = false;
-                    }
                     r.jobId = "DEPO";
                 } else {
                     r.jobId = d.custId + "-" + doSplit.length;
@@ -322,11 +316,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                 if (!r.vehicleCode.equals("NA")) {
                     r.activity = "start";
                     r.routeNb = routeNb;
-                    if (oneVehicle) {
-                        r.jobNb = jobNb;
-                    } else {
-                        r.jobNb = jobNb - 1;
-                    }
+                    r.jobNb = jobNb;
                 } else {
                     r.routeNb = 0;
                     r.jobNb = 0;

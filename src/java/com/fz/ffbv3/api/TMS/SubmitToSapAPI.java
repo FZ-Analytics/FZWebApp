@@ -94,7 +94,7 @@ public class SubmitToSapAPI {
             boolean isRouteNull = false;
             for (int i = 0; i < alCustId.size(); i++) {
                 if (getRoute(alCustId.get(i)) == null) {
-                    ret = "Aborted: One of route is empty on Customer ID: " + alCustId.get(i);
+                    ret = "Aborted: One of the route is empty on Customer ID: " + alCustId.get(i);
                     isRouteNull = true;
                     break;
                 }
@@ -109,12 +109,7 @@ public class SubmitToSapAPI {
 
                         rs.Shipment_Type = hmPRV.get("source1");
                         rs.Plant = hmSP.get("Plant");
-                        if (route == null) {
-                            ret = "Aborted: Can't submit, route empty on Customer ID: " + alCustId.get(i);
-                            break;
-                        } else {
-                            rs.Shipment_Route = route;
-                        }
+                        rs.Shipment_Route = route;
                         rs.Description = "";
                         rs.Status_Plan = parseRunId(oriRunId, true);
                         rs.Status_Check_In = null;
