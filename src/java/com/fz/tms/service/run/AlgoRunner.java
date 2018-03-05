@@ -1638,7 +1638,7 @@ public class AlgoRunner implements BusinessLogic {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String reference = pl.get("SatDelivDefault");
         
-        //saturday 12:00
+        //dateDeliv saturday 12:00
         Calendar deliv = Calendar.getInstance();
         deliv.setTime(dateDeliv);
         int day = deliv.get(Calendar.DAY_OF_WEEK);
@@ -1649,6 +1649,18 @@ public class AlgoRunner implements BusinessLogic {
             if(c.after(deliv) && pl.get("Distribution_Channel").equalsIgnoreCase("MT")){
                 pl.replace("deliv_end", reference);
             }           
+        } 
+        
+        //rdd sunday
+        Calendar rdd = Calendar.getInstance();
+        rdd.setTime(sdf.parse(pl.get("Request_Delivery_Date")));
+        day = rdd.get(Calendar.DAY_OF_WEEK);
+        if(day == 1){
+            //System.out.println(pl.toString());
+            //pl.replace("deliv_end", reference);
+            rdd.add(Calendar.DATE, -1);
+            //System.out.println(sdf.format(rdd.getTime()));
+            pl.replace("Request_Delivery_Date", sdf.format(rdd.getTime()));
         }
         
         Calendar date2 = Calendar.getInstance();
@@ -1755,7 +1767,7 @@ public class AlgoRunner implements BusinessLogic {
                 for (HashMap<String, String> pl1 : pl) {                    
                     if(px.get("DO_Number").equalsIgnoreCase(pl1.get("DONumber"))){
                        //px.replace("Customer_priority", String.valueOf(10));
-                       System.out.println(px.get("DO_Number") + "()" + pl1.get("GoodsMovementStat") + "()" + pl1.get("PODStatus"));
+                       //System.out.println(px.get("DO_Number") + "()" + pl1.get("GoodsMovementStat") + "()" + pl1.get("PODStatus"));
                        py.get(a).replace("Customer_priority", String.valueOf(10));                           
                     }
                 }
