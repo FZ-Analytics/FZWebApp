@@ -1,3 +1,4 @@
+<%@page import="com.fz.util.FixValue"%>
 <%@page import="java.text.SimpleDateFormat"%>
 <%@page import="java.util.Date"%>
 <%@page import="com.fz.ffbv3.service.order2.Order2Record"%>
@@ -16,6 +17,7 @@
 
         // get input
         Date now = new java.util.Date();
+        int maxOrderTime = 15;
         String hvsDate = (new java.text.SimpleDateFormat("yyyy-MM-dd").format(
                         new java.util.Date()));
         
@@ -53,7 +55,7 @@
         if (lastOrders.equals("2")) isLast2Order = "yes";
         if (lastOrders.equals("1")) isLastOrder = "yes";
         int nLstOrd = Integer.parseInt(lastOrders);
-        if (now.getHours()>=15) 
+        if (now.getHours()>=maxOrderTime) 
             if (nLstOrd > 10 || nLstOrd < 0) throw new Exception("Please input Bin Remaining");
         if (nLstOrd == 0 && Integer.parseInt(restanKg) < 0 )
             throw new Exception("Please input Restan Size");
@@ -67,7 +69,7 @@
         Auth.check(pc, "Div_" + divID + ";Order_Edit", true);
         
         String block2Criteria = "";
-        String curTimeStamp = (new SimpleDateFormat("HH:mm")).format(new Date());
+//        String curTimeStamp = (new SimpleDateFormat("HH:mm")).format(new Date());
 //        if (block2.length() > 0){
 //            block2Criteria = " and betweenBlock2 = '" + block2 + "'";
 //        }
@@ -186,7 +188,7 @@
 //                if (isLast2Order.equals("yes"))  incrementLastOdrCnt(con, runID);
                 }
                 //diganti if > jam 3 & remaining order-nya diisi
-                if ((curTimeStamp.compareTo("15:00")>0) && !runID.equals(null) && !runID.isEmpty()) {
+                if ((now.getHours() >= maxOrderTime) && !runID.equals(null) && !runID.isEmpty()) {
                     sql = "select * from fbremainBin" 
                         + " where runID='" + runID 
                         + "' and divID='" + divID + "'";

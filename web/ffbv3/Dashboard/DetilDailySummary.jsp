@@ -214,7 +214,8 @@
                     <th width="100px" class="fzCol" style="border-right: 2px solid lightgray; text-align: right; padding: 2px">Avg. Kg/Trip</th>
                     <th width="100px" class="fzCol" style="border-right: 2px solid lightgray; text-align: right; padding: 2px">Total Kg Actual</th>
                     <th width="100px" class="fzCol" style="border-right: 2px solid lightgray; text-align: right; padding: 2px">Estimation Kg</th>
-                    <th width="100px" class="fzCol" style="text-align: right; padding: 2px">Actual vs Estimation (%)</th>
+                    <th width="100px" class="fzCol" style="border-right: 2px solid lightgray; text-align: right; padding: 2px">Actual vs Estimation (%)</th>
+                    <th width="100px" class="fzCol" style="text-align: right; padding: 2px">Restan (Kgs)</th>
                     <!--th width="100px" class="fzCol">Restan Kg</th-->
                 </tr>
             </thead>
@@ -236,7 +237,7 @@
                                 AvgTrip = AvgTrip + x.getDouble("avgTrip");
                                 TaxKgs = TaxKgs + x.getDouble("KgsTax");
                                 AktKgs = AktKgs + x.getDouble("avgTax");
-//                                ResKgs = ResKgs + x.getDouble("kgsRestan");
+                                ResKgs = ResKgs + x.getDouble("restanKg");
                 %>
                 <tr>                    
                     <td class="fzCell"><%=x.getString("divID")%></td>
@@ -245,7 +246,7 @@
                     <td class="fzCell" align="right"><%=df.format(x.getDouble("ActualKgs"))%></td>
                     <td class="fzCell" align="right"><%=df.format(x.getDouble("KgsTax"))%></td>                    
                     <td class="fzCell" align="right"><%=df.format(x.getDouble("avgTax"))%> %</td>
-                    <!--td class="fzCell" align="right">< %=df.format(x.getDouble("kgsRestan"))%></td-->
+                    <td class="fzCell" align="right"><%=df.format(x.getDouble("restanKg"))%></td>
                 </tr>
                 <%
                             }
@@ -259,7 +260,7 @@
                     <td class="fzCell" align="right"><%=df.format(AvgKgs)%></td>
                     <td class="fzCell" align="right"><%=df.format(TaxKgs)%></td>
                     <td class="fzCell" align="right"><%=df.format((AvgKgs)*100 / TaxKgs)%> %</td>
-                    <!--td class="fzCell" align="right">< %=df.format(ResKgs)%></td-->
+                    <td class="fzCell" align="right"><%=df.format(ResKgs)%></td>
                 </tr>
             </tfoot>
                 <% 
