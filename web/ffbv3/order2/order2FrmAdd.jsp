@@ -196,7 +196,7 @@
                     try {
                         PreparedStatement ps = con.prepareStatement(sql);
                         ResultSet rs = ps.executeQuery() ;
-                        if (lastOrders.equals("0")) lastOrders = "9999";
+                        if (lastOrders == null || lastOrders.isEmpty()) lastOrders = "999";
                         if (rs.next()) {
                             String id = rs.getString("id");
                             sql = "update fbremainBin set remainingBin=" + lastOrders

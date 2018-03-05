@@ -44,7 +44,7 @@
   
   function showRemainingBin() {
       var d = new Date();
-      if (d.getHours() >= 10) 
+      if (d.getHours() >= 15) 
         $("#dLastOrder").show();
       else 
         $("#dLastOrder").hide();

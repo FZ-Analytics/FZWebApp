@@ -87,7 +87,7 @@
             </select>
 
             <br><br>
-            <label class="fzLabel">Bin location</label>
+            <label class="fzLabel">Empty Bin location</label>
             <input class="fzInput" type="text" id="remark" 
                    name="remark" value="<%=get("remark")%>">
 
