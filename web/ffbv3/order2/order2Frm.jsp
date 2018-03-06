@@ -125,7 +125,7 @@
             <br><br>
             <label class="fzLabel">Bin Ready Estimate</label>
             <input class="fzInput" type="text" id="readyTime" name="readyTime" 
-                   value="" required>
+                   value="" required data-inputmask="'mask' : '99:99'">
             
             <br>
             <label class="fzLabel"></label>
