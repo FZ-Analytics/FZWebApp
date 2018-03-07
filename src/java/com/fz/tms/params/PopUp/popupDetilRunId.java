@@ -47,6 +47,7 @@ public class popupDetilRunId implements BusinessLogic {
 
     String runID = "";
     String oriRunID = "";
+    String flag = "";
 
     @Override
     public void run(HttpServletRequest request, HttpServletResponse response,
@@ -54,8 +55,10 @@ public class popupDetilRunId implements BusinessLogic {
     ) throws Exception {
         //AccessGoogleDirection w = new AccessGoogleDirection();
         //w.renderLngLat();
+        flag = FZUtil.getHttpParam(request, "flag");
         runID = FZUtil.getHttpParam(request, "runID");
         oriRunID = FZUtil.getHttpParam(request, "oriRunID");
+
         try {
             List<SummaryVehicle> asd = getSummary(runID);
             for (int i = 0; i < asd.size(); i++) {
@@ -63,6 +66,7 @@ public class popupDetilRunId implements BusinessLogic {
             }
             request.setAttribute("oriRunID", oriRunID);
             request.setAttribute("runID", runID);
+            request.setAttribute("flag", flag);
             request.setAttribute("cap", df.format(tcap).toString());
             request.setAttribute("kub", df.format(tkub).toString());
             request.setAttribute("ttravel", df.format(ttravel).toString());
@@ -272,43 +276,90 @@ public class popupDetilRunId implements BusinessLogic {
                     ArrayList<String> alDo = getDo(runID, sq.truckid);
                     for (int j = 0; j < alDo.size(); j++) {
                         String doNum = alDo.get(j);
-                        System.out.println(doNum);
                         //This try is for EXT vehicle
                         try {
-                            int checkResultShipment = checkResultShipment(doNum, oriRunID.replace("_", "") + getVendorId(sq.truckid));
+                            int checkResultShipmentRunResult = 0;
+                            int checkResultShipmentWhatIf = 0;
+                            if (flag.equals("runResult")) {
+                                checkResultShipmentRunResult = checkResultShipment(doNum, runID.replace("_", "") + getVendorId(sq.truckid));
+                                checkResultShipmentWhatIf = checkResultShipment(doNum, oriRunID.replace("_", "") + getVendorId(sq.truckid));
+                            } else if (flag.equals("whatIf")) {
+                                checkResultShipmentWhatIf = checkResultShipment(doNum, runID.replace("_", "") + getVendorId(sq.truckid));
+                                checkResultShipmentRunResult = checkResultShipment(doNum, oriRunID.replace("_", "") + getVendorId(sq.truckid));
+                            }
+
                             //Submitted to Result_Shipment
-                            if (checkResultShipment > 0) {
-                                String check = checkStatusShipment(doNum, oriRunID.replace("_", "") + getVendorId(sq.truckid));
-                                //Success to be submitted to Status_Shipment
-                                try {
-                                    long isNumber = Long.parseLong(check);
-                                    sq.isFix = "" + isNumber;
-                                } //Failed to be submitted to Status_Shipment
-                                catch (Exception e) {
-                                    sq.isFix = "null";
-                                    sq.error = check;
-                                    break;
+                            if (checkResultShipmentRunResult + checkResultShipmentWhatIf > 0) {
+                                String check1 = checkStatusShipment(doNum, runID.replace("_", "") + getVendorId(sq.truckid));
+                                String check2 = checkStatusShipment(doNum, oriRunID.replace("_", "") + getVendorId(sq.truckid));
+                                System.out.println(check1 + " " + check2);
+                                if (check1.length() > check2.length()) {
+                                    //Success to be submitted to Status_Shipment
+                                    try {
+                                        long isNumber = Long.parseLong(check1);
+                                        sq.isFix = "" + isNumber;
+                                    } // Failed to be submitted to Status_Shipment
+                                    catch (Exception er) {
+                                        sq.isFix = "null";
+                                        sq.error = check1;
+                                        break;
+                                    }
+                                } else {
+                                    //Success to be submitted to Status_Shipment
+                                    try {
+                                        long isNumber = Long.parseLong(check2);
+                                        sq.isFix = "" + isNumber;
+                                    } // Failed to be submitted to Status_Shipment
+                                    catch (Exception er) {
+                                        sq.isFix = "null";
+                                        sq.error = check2;
+                                        break;
+                                    }
                                 }
-                            } //Failed to be submitted to Result_Shipment
+                            }//Failed to be submitted to Result_Shipment
                             else {
                                 sq.isFix = "null";
                                 break;
                             }
                         } //This catch is for INT vehicle
                         catch (Exception e) {
-                            int checkResultShipment = checkResultShipment(doNum, oriRunID.replace("_", "") + sq.truckid);
+                            int checkResultShipmentRunResult = 0;
+                            int checkResultShipmentWhatIf = 0;
+                            if (flag.equals("runResult")) {
+                                checkResultShipmentRunResult = checkResultShipment(doNum, runID.replace("_", "") + sq.truckid);
+                                checkResultShipmentWhatIf = checkResultShipment(doNum, oriRunID.replace("_", "") + sq.truckid);
+                            } else if (flag.equals("whatIf")) {
+                                checkResultShipmentWhatIf = checkResultShipment(doNum, runID.replace("_", "") + sq.truckid);
+                                checkResultShipmentRunResult = checkResultShipment(doNum, oriRunID.replace("_", "") + sq.truckid);
+                            }
+
                             //Submitted to Result_Shipment
-                            if (checkResultShipment > 0) {
-                                String check = checkStatusShipment(doNum, oriRunID.replace("_", "") + sq.truckid);
-                                //Success to be submitted to Status_Shipment
-                                try {
-                                    long isNumber = Long.parseLong(check);
-                                    sq.isFix = "" + isNumber;
-                                } // Failed to be submitted to Status_Shipment
-                                catch (Exception er) {
-                                    sq.isFix = "null";
-                                    sq.error = check;
-                                    break;
+                            if (checkResultShipmentRunResult + checkResultShipmentWhatIf > 0) {
+                                String check1 = checkStatusShipment(doNum, runID.replace("_", "") + sq.truckid);
+                                String check2 = checkStatusShipment(doNum, oriRunID.replace("_", "") + sq.truckid);
+                                System.out.println(check1 + " " + check2);
+                                if (check1.length() > check2.length()) {
+                                    //Success to be submitted to Status_Shipment
+                                    try {
+                                        long isNumber = Long.parseLong(check1);
+                                        sq.isFix = "" + isNumber;
+                                    } // Failed to be submitted to Status_Shipment
+                                    catch (Exception er) {
+                                        sq.isFix = "null";
+                                        sq.error = check1;
+                                        break;
+                                    }
+                                } else {
+                                    //Success to be submitted to Status_Shipment
+                                    try {
+                                        long isNumber = Long.parseLong(check2);
+                                        sq.isFix = "" + isNumber;
+                                    } // Failed to be submitted to Status_Shipment
+                                    catch (Exception er) {
+                                        sq.isFix = "null";
+                                        sq.error = check2;
+                                        break;
+                                    }
                                 }
                             }//Failed to be submitted to Result_Shipment
                             else {
@@ -317,19 +368,19 @@ public class popupDetilRunId implements BusinessLogic {
                             }
                         }
                     }
-                    
+
                     //Check if volume or weight is overload
                     //volume
-                    if(Integer.parseInt(sq.capacityPer) > 100) {
+                    if (Integer.parseInt(sq.capacityPer) > 100) {
                         sq.isFix = "er";
                         sq.error = "Capacity overload";
                     }
                     //weight
-                    if(Integer.parseInt(sq.kubikasiPer) > 100) {
+                    if (Integer.parseInt(sq.kubikasiPer) > 100) {
                         sq.isFix = "er";
                         sq.error = "Kubikasi overload";
                     }
-                    if(Integer.parseInt(sq.kubikasiPer) > 100 && Integer.parseInt(sq.capacityPer) > 100) {
+                    if (Integer.parseInt(sq.kubikasiPer) > 100 && Integer.parseInt(sq.capacityPer) > 100) {
                         sq.isFix = "er";
                         sq.error = "Capacity and kubikasi overload";
                     }

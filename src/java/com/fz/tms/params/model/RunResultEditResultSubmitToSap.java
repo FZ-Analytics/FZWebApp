@@ -13,9 +13,17 @@ import com.google.gson.annotations.SerializedName;
  * @author Administrator
  */
 public class RunResultEditResultSubmitToSap {
-    @SerializedName("RunId")
+    @SerializedName("runId")
     @Expose
-    public String RunId;
+    public String runId;
+    
+    @SerializedName("oriRunId")
+    @Expose
+    public String oriRunId;
+    
+    @SerializedName("flag")
+    @Expose
+    public String flag;
     
     @SerializedName("vehicle_no")
     @Expose

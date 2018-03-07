@@ -41,7 +41,7 @@
                     //Some code
                     //alert( $("#runID").text()+"&vCode="+$(this).text() ); 
                     if ($(this).text().length > 0) {
-                        window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text() + "&oriRunID=" + $("#RunIdClick").text(), null,
+                        window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text() + "&oriRunID=" + $("#nextRunId").text() + "&flag=runResult", null,
                                 "scrollbars=1,resizable=1,height=500,width=850");
                         return true;
                     }
@@ -236,8 +236,8 @@
                     <th width="100px" class="fzCol">Priority</th>
                     <th width="100px" class="fzCol">Dist Chl</th>
                     <th width="100px" class="fzCol">Street</th>
-                    <th width="100px" class="fzCol">Weight KG</th>
-                    <th width="100px" class="fzCol">Volume M</th>
+                    <th width="100px" class="fzCol">Weight</th>
+                    <th width="100px" class="fzCol">Volume</th>
                     <th width="100px" class="fzCol">RDD</th>
                     <th width="100px" class="fzCol">Transport Cost</th>
                     <th width="100px" class="fzCol">Dist</th>

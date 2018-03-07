@@ -47,7 +47,7 @@
                 });
                 $('#RunIdClick').click(function () {
                     if ($(this).text().length > 0) {
-                        window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text() + "&oriRunID=" + $("#OriRunID").val(), null,
+                        window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text() + "&oriRunID=" + $("#OriRunID").val() + "&flag=whatIf", null,
                                 "scrollbars=1,resizable=1,height=500,width=850");
                         return true;
                     }

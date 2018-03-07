@@ -128,7 +128,7 @@ public class LoadDelivery implements BusinessLogic {
             String[] doNumSplit = d.doNum.split(";");
 
             try {
-                d.volume = "" + Math.round(Double.parseDouble(getVolume(custId, oriRunId)) * 10) / 10.0/1000;
+                d.volume = "" + Math.round(Double.parseDouble(getVolume(custId, oriRunId)) * 1) / 1000000.0;
             } catch (Exception e) {
             }
             d.rdd = aSplit[8];
