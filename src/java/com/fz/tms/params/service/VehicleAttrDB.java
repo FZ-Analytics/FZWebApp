@@ -466,7 +466,7 @@ public class VehicleAttrDB {
                         "FROM\n" +
                         "	BOSNET1.dbo.Driver\n" +
                         "WHERE\n" +
-                        "	Driver_ID LIKE '000008%'\n" +
+                        "	Driver_ID LIKE '0008%'\n" +
                         //"	AND Workplace = '"+str+"'\n" +
                          nt;
                 
