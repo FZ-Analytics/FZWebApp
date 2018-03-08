@@ -121,6 +121,7 @@ public class ResponseMessege
       userRsp.setBrand(res.getString("Brand"));
       userRsp.setTipe(res.getString("Tipe"));
       userRsp.setTimeTrackLocation(FixValue.intTrackingTimeout);
+      userRsp.setTimeSyncJob(FixValue.intSyncJobTimeout);
       
       if(VehicleID == 0)
       {
