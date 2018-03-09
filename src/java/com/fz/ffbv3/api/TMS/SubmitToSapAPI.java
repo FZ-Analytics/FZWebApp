@@ -39,7 +39,6 @@ import javax.ws.rs.core.MediaType;
 @Path("submitToSap")
 public class SubmitToSapAPI {
 
-    String flag = "";
     String runId = "";
     String oriRunId = "";
     String vNo = "";
@@ -84,7 +83,6 @@ public class SubmitToSapAPI {
         ResultShipment rs = new ResultShipment();
         try {
             RunResultEditResultSubmitToSap he = gson.fromJson(content.contains("json") ? decodeContent(content) : content, RunResultEditResultSubmitToSap.class);
-            flag = he.flag;
             vNo = he.vehicle_no;
             runId = he.runId;
             oriRunId = he.oriRunId;
@@ -498,29 +496,13 @@ public class SubmitToSapAPI {
         int rowNum = 0;
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
-                String sql = "";
-                sql = "SELECT "
+                String sql = "SELECT "
                         + "   COUNT(*) total "
                         + "FROM "
                         + "   bosnet1.dbo.TMS_Result_Shipment "
                         + "WHERE "
-                        + "   Shipment_Number_Dummy = '" + runId.replace("_", "") + vNo + "'"
-                        + "   AND Delivery_Number = '" + rs.Delivery_Number + "'"
+                        + "   Delivery_Number = '" + rs.Delivery_Number + "'"
                         + "   AND Delivery_Item = '" + rs.Delivery_Item + "';";
-                try (ResultSet rst = stm.executeQuery(sql)) {
-                    while (rst.next()) {
-                        rowNum += rst.getInt("total");
-                    }
-                }
-                sql = "SELECT "
-                        + "   COUNT(*) total "
-                        + "FROM "
-                        + "   bosnet1.dbo.TMS_Result_Shipment "
-                        + "WHERE "
-                        + "   Shipment_Number_Dummy = '" + oriRunId.replace("_", "") + vNo + "'"
-                        + "   AND Delivery_Number = '" + rs.Delivery_Number + "'"
-                        + "   AND Delivery_Item = '" + rs.Delivery_Item + "';";
-
                 try (ResultSet rst = stm.executeQuery(sql)) {
                     while (rst.next()) {
                         rowNum += rst.getInt("total");
@@ -530,13 +512,12 @@ public class SubmitToSapAPI {
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
+        //It means current DO is failed to be submitted to SAP, the row at Result Shipment and Status Shipment will be deleted
         if (rowNum > 0) {
-            deleteFromResultShipment(rs, oriRunId.replace("_", "") + vNo);
-            deleteFromResultShipment(rs, runId.replace("_", "") + vNo);
-            deleteFromStatusShipment(rs, oriRunId.replace("_", "") + vNo);
-            deleteFromStatusShipment(rs, runId.replace("_", "") + vNo);
-            
+            deleteFromResultShipment(rs);
+            deleteFromStatusShipment(rs);
         }
+
         String ret = "error";
         String sql = "INSERT INTO bosnet1.dbo.TMS_Result_Shipment "
                 + "(Shipment_Type, Plant, Shipping_Type, Shipment_Route, Shipment_Number_Dummy, Description, Status_Plan, Status_Check_In, Status_Load_Start, Status_Load_End, "
@@ -584,7 +565,7 @@ public class SubmitToSapAPI {
         return ret;
     }
 
-    public int deleteFromStatusShipment(ResultShipment rs, String shipmentNumberDummy) {
+    public int deleteFromStatusShipment(ResultShipment rs) {
         int ret = 0;
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
@@ -593,8 +574,7 @@ public class SubmitToSapAPI {
                         + "FROM "
                         + "   bosnet1.dbo.TMS_Status_Shipment "
                         + "WHERE "
-                        + "   Shipment_Number_Dummy = '" + shipmentNumberDummy + "'"
-                        + "   AND Delivery_Number = '" + rs.Delivery_Number + "'"
+                        + "   Delivery_Number = '" + rs.Delivery_Number + "'"
                         + "   AND Delivery_Item = '" + rs.Delivery_Item + "';";
                 ret = stm.executeUpdate(sql);
             }
@@ -604,7 +584,7 @@ public class SubmitToSapAPI {
         return ret;
     }
 
-    public int deleteFromResultShipment(ResultShipment rs, String shipmentNumberDummy) {
+    public int deleteFromResultShipment(ResultShipment rs) {
         int ret = 0;
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
@@ -613,8 +593,7 @@ public class SubmitToSapAPI {
                         + "FROM "
                         + "   bosnet1.dbo.TMS_Result_Shipment "
                         + "WHERE "
-                        + "   Shipment_Number_Dummy = '" + shipmentNumberDummy + "'"
-                        + "   AND Delivery_Number = '" + rs.Delivery_Number + "'"
+                        + "   Delivery_Number = '" + rs.Delivery_Number + "'"
                         + "   AND Delivery_Item = '" + rs.Delivery_Item + "';";
                 stm.executeQuery(sql);
             }

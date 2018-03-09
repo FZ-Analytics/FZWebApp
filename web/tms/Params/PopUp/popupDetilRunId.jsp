@@ -83,7 +83,7 @@
 
                     //if opened from runResult, runID is run id and oriRunID is next run id
                     //if opened from whatIf, runID is run id and ori run id is ori run id
-                    var jsonForServer = '{\"runId\": \"' + $("#runID").text() + '\", \"oriRunId\":\"' + $("#oriRunID").val() + '\", \"vehicle_no\":\"' + vNo + '\", \"flag\":\"' + $("#flag").val() + '\"}';
+                    var jsonForServer = '{\"runId\": \"' + $("#runID").text() + '\", \"oriRunId\":\"' + $("#oriRunID").val() + '\", \"vehicle_no\":\"' + vNo + '\"}';
 
                     $("#body").fadeOut();
                     $("#loader").fadeIn();
@@ -113,7 +113,6 @@
 
             <br>
             <input class="fzInput" id="oriRunID" name="oriRunID" value="<%=get("oriRunID")%>" hidden="true"/>
-            <input class="fzInput" id="flag" name="flag" value="<%=get("flag")%>" hidden="true"/>
             <label class="fzLabel">RunID:</label> 
             <label class="fzLabel" id="runID"><%=get("runID")%></label> 
 

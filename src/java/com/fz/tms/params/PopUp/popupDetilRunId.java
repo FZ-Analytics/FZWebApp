@@ -47,7 +47,6 @@ public class popupDetilRunId implements BusinessLogic {
 
     String runID = "";
     String oriRunID = "";
-    String flag = "";
 
     @Override
     public void run(HttpServletRequest request, HttpServletResponse response,
@@ -55,18 +54,13 @@ public class popupDetilRunId implements BusinessLogic {
     ) throws Exception {
         //AccessGoogleDirection w = new AccessGoogleDirection();
         //w.renderLngLat();
-        flag = FZUtil.getHttpParam(request, "flag");
         runID = FZUtil.getHttpParam(request, "runID");
         oriRunID = FZUtil.getHttpParam(request, "oriRunID");
 
         try {
             List<SummaryVehicle> asd = getSummary(runID);
-            for (int i = 0; i < asd.size(); i++) {
-                //System.out.println(asd.get(i).truckid);
-            }
             request.setAttribute("oriRunID", oriRunID);
             request.setAttribute("runID", runID);
-            request.setAttribute("flag", flag);
             request.setAttribute("cap", df.format(tcap).toString());
             request.setAttribute("kub", df.format(tkub).toString());
             request.setAttribute("ttravel", df.format(ttravel).toString());
@@ -276,96 +270,25 @@ public class popupDetilRunId implements BusinessLogic {
                     ArrayList<String> alDo = getDo(runID, sq.truckid);
                     for (int j = 0; j < alDo.size(); j++) {
                         String doNum = alDo.get(j);
-                        //This try is for EXT vehicle
-                        try {
-                            int checkResultShipmentRunResult = 0;
-                            int checkResultShipmentWhatIf = 0;
-                            if (flag.equals("runResult")) {
-                                checkResultShipmentRunResult = checkResultShipment(doNum, runID.replace("_", "") + getVendorId(sq.truckid));
-                                checkResultShipmentWhatIf = checkResultShipment(doNum, oriRunID.replace("_", "") + getVendorId(sq.truckid));
-                            } else if (flag.equals("whatIf")) {
-                                checkResultShipmentWhatIf = checkResultShipment(doNum, runID.replace("_", "") + getVendorId(sq.truckid));
-                                checkResultShipmentRunResult = checkResultShipment(doNum, oriRunID.replace("_", "") + getVendorId(sq.truckid));
-                            }
 
-                            //Submitted to Result_Shipment
-                            if (checkResultShipmentRunResult + checkResultShipmentWhatIf > 0) {
-                                String check1 = checkStatusShipment(doNum, runID.replace("_", "") + getVendorId(sq.truckid));
-                                String check2 = checkStatusShipment(doNum, oriRunID.replace("_", "") + getVendorId(sq.truckid));
-                                System.out.println(check1 + " " + check2);
-                                if (check1.length() > check2.length()) {
-                                    //Success to be submitted to Status_Shipment
-                                    try {
-                                        long isNumber = Long.parseLong(check1);
-                                        sq.isFix = "" + isNumber;
-                                    } // Failed to be submitted to Status_Shipment
-                                    catch (Exception er) {
-                                        sq.isFix = "null";
-                                        sq.error = check1;
-                                        break;
-                                    }
-                                } else {
-                                    //Success to be submitted to Status_Shipment
-                                    try {
-                                        long isNumber = Long.parseLong(check2);
-                                        sq.isFix = "" + isNumber;
-                                    } // Failed to be submitted to Status_Shipment
-                                    catch (Exception er) {
-                                        sq.isFix = "null";
-                                        sq.error = check2;
-                                        break;
-                                    }
-                                }
-                            }//Failed to be submitted to Result_Shipment
-                            else {
+                        int checkResultShiment = checkResultShipment(doNum);
+                        //If submitted to Result_Shipment
+                        if (checkResultShiment > 0) {
+                            String checkStatusShipment = checkStatusShipment(doNum);
+                            //If submitted to Status_Shipment
+                            try {
+                                long isNumber = Long.parseLong(checkStatusShipment);
+                                sq.isFix = "" + isNumber;
+                            } //If failed to be submitted to Status_Shipment
+                            catch (Exception er) {
                                 sq.isFix = "null";
+                                sq.error = checkStatusShipment;
                                 break;
                             }
-                        } //This catch is for INT vehicle
-                        catch (Exception e) {
-                            int checkResultShipmentRunResult = 0;
-                            int checkResultShipmentWhatIf = 0;
-                            if (flag.equals("runResult")) {
-                                checkResultShipmentRunResult = checkResultShipment(doNum, runID.replace("_", "") + sq.truckid);
-                                checkResultShipmentWhatIf = checkResultShipment(doNum, oriRunID.replace("_", "") + sq.truckid);
-                            } else if (flag.equals("whatIf")) {
-                                checkResultShipmentWhatIf = checkResultShipment(doNum, runID.replace("_", "") + sq.truckid);
-                                checkResultShipmentRunResult = checkResultShipment(doNum, oriRunID.replace("_", "") + sq.truckid);
-                            }
-
-                            //Submitted to Result_Shipment
-                            if (checkResultShipmentRunResult + checkResultShipmentWhatIf > 0) {
-                                String check1 = checkStatusShipment(doNum, runID.replace("_", "") + sq.truckid);
-                                String check2 = checkStatusShipment(doNum, oriRunID.replace("_", "") + sq.truckid);
-                                System.out.println(check1 + " " + check2);
-                                if (check1.length() > check2.length()) {
-                                    //Success to be submitted to Status_Shipment
-                                    try {
-                                        long isNumber = Long.parseLong(check1);
-                                        sq.isFix = "" + isNumber;
-                                    } // Failed to be submitted to Status_Shipment
-                                    catch (Exception er) {
-                                        sq.isFix = "null";
-                                        sq.error = check1;
-                                        break;
-                                    }
-                                } else {
-                                    //Success to be submitted to Status_Shipment
-                                    try {
-                                        long isNumber = Long.parseLong(check2);
-                                        sq.isFix = "" + isNumber;
-                                    } // Failed to be submitted to Status_Shipment
-                                    catch (Exception er) {
-                                        sq.isFix = "null";
-                                        sq.error = check2;
-                                        break;
-                                    }
-                                }
-                            }//Failed to be submitted to Result_Shipment
-                            else {
-                                sq.isFix = "null";
-                                break;
-                            }
+                        }//If failed to be submitted to Result_Shipment
+                        else {
+                            sq.isFix = "null";
+                            break;
                         }
                     }
 
@@ -471,12 +394,12 @@ public class popupDetilRunId implements BusinessLogic {
         return all;
     }
 
-    public int checkResultShipment(String doNum, String shipmentNo) throws Exception {
+    public int checkResultShipment(String doNum) throws Exception {
         int rowNum = 0;
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
                 String sql;
-                sql = "SELECT COUNT(*) rowNum FROM BOSNET1.dbo.TMS_Result_Shipment WHERE Delivery_Number = '" + doNum + "' and Shipment_Number_Dummy = '" + shipmentNo + "'";
+                sql = "SELECT COUNT(*) rowNum FROM BOSNET1.dbo.TMS_Result_Shipment WHERE Delivery_Number = '" + doNum + "'";
 
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     if (rs.next()) {
@@ -492,12 +415,12 @@ public class popupDetilRunId implements BusinessLogic {
         return rowNum;
     }
 
-    public String checkStatusShipment(String doNum, String shipmentNo) throws Exception {
+    public String checkStatusShipment(String doNum) throws Exception {
         String msg = "";
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
                 String sql;
-                sql = "SELECT TOP 1 SAP_Message, Ship_No_SAP FROM BOSNET1.dbo.TMS_Status_Shipment WHERE Delivery_Number = '" + doNum + "' and Shipment_Number_Dummy = '" + shipmentNo + "'";
+                sql = "SELECT TOP 1 SAP_Message, Ship_No_SAP FROM BOSNET1.dbo.TMS_Status_Shipment WHERE Delivery_Number = '" + doNum + "'";
 
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     if (rs.next()) {

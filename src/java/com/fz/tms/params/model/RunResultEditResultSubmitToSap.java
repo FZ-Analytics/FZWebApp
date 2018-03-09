@@ -21,10 +21,6 @@ public class RunResultEditResultSubmitToSap {
     @Expose
     public String oriRunId;
     
-    @SerializedName("flag")
-    @Expose
-    public String flag;
-    
     @SerializedName("vehicle_no")
     @Expose
     public String vehicle_no;
