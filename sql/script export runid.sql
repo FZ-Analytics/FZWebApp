@@ -1,5 +1,5 @@
 BEGIN
-	DECLARE @RunId Varchar(50) = '20180222_142519695';
+	DECLARE @RunId Varchar(50) = '20180308_141305767';
 	DECLARE @Insert AS TABLE 
 		(sc Varchar(2000) NOT NULL);
 	DECLARE @CustT AS TABLE 
@@ -10,13 +10,13 @@ BEGIN
 		WHERE runid =  @RunId;
 		
 	insert into @Insert
-	select 'delete from BOSNET1.dbo.TMS_PreRouteJob;';
+	select 'delete from BOSNET1.dbo.TMS_PreRouteJob where RunId = ''' + @RunId + ''';';
 	insert into @Insert
-	select 'delete from BOSNET1.dbo.TMS_PreRouteVehicle;';
+	select 'delete from BOSNET1.dbo.TMS_PreRouteVehicle where RunId = ''' + @RunId + ''';';
 	insert into @Insert
 	select 'delete from BOSNET1.dbo.TMS_CustLongLat;';
 	insert into @Insert
-	select 'delete from BOSNET1.dbo.TMS_Progress;';
+	select 'delete from BOSNET1.dbo.TMS_Progress where RunId = ''' + @RunId + ''';';
 	
 	insert into @Insert
 	SELECT
@@ -64,7 +64,7 @@ BEGIN
       ,',''',isActive,'''',',',fixedCost
       ,',',costPerM,',',costPerServiceMin
       ,',',costPerTravelMin,',''',IdDriver,''''
-      ,',''',NamaDriver,''');') as sc 
+      ,',''',NamaDriver,''',',agent_priority,',',max_cust,');') as sc 
 	FROM BOSNET1.dbo.TMS_PreRouteVehicle where runid = @RunId;
 
 	insert into @Insert
