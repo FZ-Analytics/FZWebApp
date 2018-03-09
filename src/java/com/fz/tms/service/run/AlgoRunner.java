@@ -766,19 +766,31 @@ public class AlgoRunner implements BusinessLogic {
                 "					)\n" +
                 "			) sp ON\n" +
                 "			jb.DO_Number = sp.DO_Number\n" +
-                "		LEFT OUTER JOIN(\n" +
-                "				SELECT\n" +
-                "					ty.Delivery_Number\n" +
-                "				FROM\n" +
-                "					BOSNET1.dbo.TMS_Result_Shipment ty\n" +
-                "				INNER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
-                "					ty.Delivery_Number = tu.Delivery_Number\n" +
-                "				WHERE\n" +
-                "					tu.SAP_Status IS NULL\n" +
-                "			) ss ON\n" +
-                "			jb.DO_Number = ss.Delivery_Number\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			tu.Delivery_Number\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_Result_Shipment ty\n" +
+                "		INNER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
+                "			ty.Delivery_Number = tu.Delivery_Number\n" +
+                "		WHERE\n" +
+                "			tu.SAP_Status IS NULL\n" +
+                "	) ss ON\n" +
+                "	sp.DO_Number = ss.Delivery_Number\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			ty.Delivery_Number\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_Result_Shipment ty\n" +
+                "		LEFT OUTER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
+                "			ty.Delivery_Number = tu.Delivery_Number\n" +
+                "		WHERE\n" +
+                "			tu.Delivery_Number IS NULL\n" +
+                "	) sn ON\n" +
+                "	sp.DO_Number = sn.Delivery_Number\n" +
                 "		WHERE\n" +
                 "			ss.Delivery_Number IS NULL\n" +
+                "			AND sn.Delivery_Number IS NULL\n" +
                 "			AND jb.RunId = '"+prevRunID+"'\n" +
                 "			AND jb.Is_Exclude = 'inc'\n" +
                 "			AND jb.Is_Edit = 'edit'";
@@ -1374,7 +1386,7 @@ public class AlgoRunner implements BusinessLogic {
                 "	sp.customer_id = cl.custID\n" +
                 "LEFT OUTER JOIN(\n" +
                 "		SELECT\n" +
-                "			ty.Delivery_Number\n" +
+                "			tu.Delivery_Number\n" +
                 "		FROM\n" +
                 "			BOSNET1.dbo.TMS_Result_Shipment ty\n" +
                 "		INNER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
@@ -1383,6 +1395,17 @@ public class AlgoRunner implements BusinessLogic {
                 "			tu.SAP_Status IS NULL\n" +
                 "	) ss ON\n" +
                 "	sp.DO_Number = ss.Delivery_Number\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			ty.Delivery_Number\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_Result_Shipment ty\n" +
+                "		LEFT OUTER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
+                "			ty.Delivery_Number = tu.Delivery_Number\n" +
+                "		WHERE\n" +
+                "			tu.Delivery_Number IS NULL\n" +
+                "	) sn ON\n" +
+                "	sp.DO_Number = sn.Delivery_Number\n" +
                 "LEFT OUTER JOIN bosnet1.dbo.TMS_CustAtr ca ON\n" +
                 "	sp.customer_id = ca.customer_id\n" +
                 "LEFT OUTER JOIN bosnet1.dbo.TMS_Params dd ON\n" +
@@ -1424,6 +1447,7 @@ public class AlgoRunner implements BusinessLogic {
                 "		GETDATE()\n" +
                 "	)\n" +
                 "	AND ss.Delivery_Number IS NULL\n" +
+                "	AND sn.Delivery_Number IS NULL\n" +
                 query + "\n" +
                 "ORDER BY\n" +
                 "	sp.Customer_ID ASC\n";
