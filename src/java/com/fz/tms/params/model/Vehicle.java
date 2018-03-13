@@ -37,4 +37,5 @@ public class Vehicle {
     public String agent_priority;
     public String max_cust;
     public String DriverDates;    
+    public String addNew;    
 }

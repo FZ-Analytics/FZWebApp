@@ -1176,11 +1176,11 @@ public class AlgoRunner implements BusinessLogic {
                 "		ELSE ca.DeliveryDeadline\n" +
                 "	END DeliveryDeadline,\n" +
                 "	CASE\n" +
-                "		WHEN ca.DayWinStart IS NULL THEN ds.value\n" +
+                "		WHEN ca.DayWinStart IS NULL or ca.DayWinStart = '' THEN ds.value\n" +
                 "		ELSE ca.DayWinStart\n" +
                 "	END DayWinStart,\n" +
                 "	CASE\n" +
-                "		WHEN ca.DayWinEnd IS NULL THEN de.value\n" +
+                "		WHEN ca.DayWinEnd IS NULL or ca.DayWinEnd = '' THEN de.value\n" +
                 "		ELSE ca.DayWinEnd\n" +
                 "	END DayWinEnd,\n" +
                 "	CAST(\n" +
@@ -1371,11 +1371,12 @@ public class AlgoRunner implements BusinessLogic {
                     pl.put("Batch", rs.getString("Batch"));
                     //pl.put("DOCreationDate", rs.getString("DOCreationDate"));                    
                     asd.add(pl);
-                    if(pl.get("DO_Number").equals("8020089252")){
+                    //System.out.println(pl.toString());
+                    if(pl.get("DO_Number").equals("8020098809")){                        
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); 
                         Date rdd = sdf.parse(rs.getString("Request_Delivery_Date"));
-                        System.out.println(rdd.toString());
-                        System.out.println(pl.toString());
+                        //System.out.println(rdd.toString());
+                        //System.out.println(pl.toString());
                     }
                     str = "OK";
                 }
@@ -1434,9 +1435,11 @@ public class AlgoRunner implements BusinessLogic {
                 c = Calendar.getInstance();
                 pl = new HashMap<String, String>();
                 Date rdd = sdf.parse(asd.get(a).get("Request_Delivery_Date"));
-                pl = asd.get(a);                
+                pl = asd.get(a);      
+                System.out.println(pl.toString());
                 
                 //cek hari buka
+                
                 int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
                 //System.out.println(dayOfWeek);
                 if(pl.get("DO_Number").equals("8020089252")){
@@ -1489,7 +1492,7 @@ public class AlgoRunner implements BusinessLogic {
             
             try (Connection con = (new Db()).getConnection("jdbc/fztms")){
                 try (PreparedStatement ps = con.prepareStatement(sql) ){
-                    ps.clearParameters();                    
+                        ps.clearParameters();                    
                     for(int a = 0;a<ins.size();a++){ 
                         if(ins.get(a).size() > 0 && Integer.valueOf(ins.get(a).get("Customer_priority")) < 10){
                             int i = 1;
