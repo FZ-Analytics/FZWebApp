@@ -50,7 +50,7 @@ public class DriverAttrAddView implements BusinessLogic {
                 "	d.Driver_ID,\n" +
                 "	d.Driver_Name,\n" +
                 "	case when da.Branch is null then 'D000' else da.Branch end Branch,\n" +
-                "	case when da.Inc is null then '0' else '1' end Inc\n" +
+                "	case when da.Inc is null or da.Inc = '0' then '0' else '1' end Inc\n" +
                 "FROM\n" +
                 "	BOSNET1.dbo.Driver d\n" +
                 "	left outer join BOSNET1.dbo.tms_DriverAtr da\n" +

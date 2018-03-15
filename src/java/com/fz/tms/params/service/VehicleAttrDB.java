@@ -469,7 +469,8 @@ public class VehicleAttrDB {
                         "	on d.Driver_ID = da.Id\n" +
                         "WHERE\n" +
                         "	d.Driver_ID LIKE '0008%'\n" +
-                        "	AND Branch = '"+str+"'\n" +
+                        "	AND da.Branch = '"+str+"'\n" +
+                        "	AND da.Inc = '1'\n" +
                          nt;
                 
                 // query
