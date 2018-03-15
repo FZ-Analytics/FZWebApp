@@ -20,9 +20,9 @@
         </div>
         <br>
         <br>
-        <div id="wrap">
-            <div class="container">
-                <table class="table" border1="1" style="border-color: lightgray;font-size: 12; font-family: Courier New;">
+        <div>
+            <div>
+                <table cellpadding="0" cellspacing="0" border="0" class="datatable table table-striped table-bordered">
                     <thead>
                         <tr>
                             <th>vehicle code</th>
@@ -75,7 +75,7 @@
                         return true;
                     }
                 });
-                /*
+                
                  $('.datatable').dataTable({
                  "sPaginationType": "bs_four_button"
                  });
@@ -89,7 +89,7 @@
                  var length_sel = datatable.closest('.dataTables_wrapper').find('div[id$=_length] select');
                  length_sel.addClass('form-control input-sm');
                  });
-                 */
+                 
             });
         </script>
         <%@include file="../appGlobal/bodyBottom.jsp"%>
