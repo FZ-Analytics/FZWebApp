@@ -38,7 +38,38 @@
             function klik(kode) {
                 window.open('popupEditPreRouteVehicle.jsp?runId=' + $('#runId').text() + '&vCode=' + kode, null,
                         'scrollbars=1,resizable=1,height=500,width=750');
-
+            }
+            
+            function add(kode) {
+                var $apiAddress = '../../../api/ShowPreRouteVehicle/AddVehicle';
+                var jsonForServer = '{\"vehicle_code\": \"' + kode + '\",\"RunId\":\"' + $("#runId").text() + 
+                        '\",\"branch\":\"' + $("#branch").text() + '\"}';
+                var data = [];
+                //alert(jsonForServer);
+                $.post($apiAddress, {json: jsonForServer}).done(function (data) {
+                    if(data == 'OK'){
+                        alert( 'sukses' );
+                        location.reload()
+                    }else{
+                        alert( 'submit error' ); 
+                    }
+                });
+            }
+            
+            function addNew(kode) {
+                var $apiAddress = '../../../api/ShowPreRouteVehicle/AddVehicleEx';
+                var jsonForServer = '{\"vehicle_code\": \"' + kode + '\",\"RunId\":\"' + $("#runId").text() + 
+                        '\",\"branch\":\"' + $("#branch").text() + '\"}';
+                var data = [];
+                //alert(jsonForServer);
+                $.post($apiAddress, {json: jsonForServer}).done(function (data) {
+                    if(data == 'OK'){
+                        alert( 'sukses' );
+                        location.reload()
+                    }else{
+                        alert( 'submit error' ); 
+                    }
+                });
             }
         </script>
         <br>
@@ -67,8 +98,10 @@
                     <th width="100px" class="fzCol">Id Driver</th>
                     <th width="100px" class="fzCol">Nama Driver</th>
                     <th width="100px" class="fzCol">agent priority</th>
+                    <th width="100px" class="fzCol">Channel</th>
                     <th width="100px" class="fzCol">inc</th>
                     <th width="100px" class="fzCol">Edit</th>
+                    <th width="100px" class="fzCol">Add</th>
                 </tr>
             </thead>
             <tbody>
@@ -87,10 +120,24 @@
                     <td class="fzCell"><%=j.IdDriver%></td>
                     <td class="fzCell"><%=j.NamaDriver%></td>
                     <td class="fzCell"><%=j.agent_priority%></td>
-                    <td class="fzCell" ><%=j.isActive%></td>
+                    <td class="fzCell"><%=j.Channel%></td>
+                    <td class="fzCell"><%=j.isActive%></td>
+                    <%if (j.isActive.equalsIgnoreCase("1")) {%>
                     <td class="fzCell"onclick="klik('<%=j.vehicle_code%>')" >
                         <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                     </td>
+                    <%} else {%>
+                    <td class="fzCell"onclick="add('<%=j.vehicle_code%>')" >
+                        <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                    </td>
+                    <%}%>
+                    <%if (j.source1.equalsIgnoreCase("EXT") && j.addNew.equalsIgnoreCase("1")) {%>
+                    <td class="fzCell"onclick="addNew('<%=j.vehicle_code%>')" >
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                    </td>
+                    <%} else {%>
+                    <td class="fzCell"></td>
+                    <%}%>
                 </tr>
 
                 <%} // for ProgressRecord %>

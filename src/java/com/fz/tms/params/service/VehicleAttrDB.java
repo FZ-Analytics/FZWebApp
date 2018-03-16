@@ -447,7 +447,7 @@ public class VehicleAttrDB {
         return c;
     }
     
-        public List<Vehicle> getDriver(String str, String id) throws Exception{
+    public List<Vehicle> getDriver(String str, String id) throws Exception{
         Vehicle c = new Vehicle();
         List<Vehicle> ar = new ArrayList<Vehicle>();
         
@@ -460,14 +460,17 @@ public class VehicleAttrDB {
             try (Statement stm = con.createStatement()){            
                 // create sql
                 String sql = "SELECT\n" +
-                        "	Workplace COLLATE DATABASE_DEFAULT AS workplaceid,\n" +
-                        "	Driver_ID COLLATE DATABASE_DEFAULT AS salesid,\n" +
-                        "	Driver_Name COLLATE DATABASE_DEFAULT AS salesname\n" +
+                        "	d.Workplace COLLATE DATABASE_DEFAULT AS workplaceid,\n" +
+                        "	d.Driver_ID COLLATE DATABASE_DEFAULT AS salesid,\n" +
+                        "	d.Driver_Name COLLATE DATABASE_DEFAULT AS salesname\n" +
                         "FROM\n" +
-                        "	BOSNET1.dbo.Driver\n" +
+                        "	BOSNET1.dbo.Driver d\n" +
+                        "	inner join BOSNET1.dbo.tms_DriverAtr da\n" +
+                        "	on d.Driver_ID = da.Id\n" +
                         "WHERE\n" +
-                        "	Driver_ID LIKE '0008%'\n" +
-                        //"	AND Workplace = '"+str+"'\n" +
+                        "	d.Driver_ID LIKE '0008%'\n" +
+                        "	AND da.Branch = '"+str+"'\n" +
+                        "	AND da.Inc = '1'\n" +
                          nt;
                 
                 // query

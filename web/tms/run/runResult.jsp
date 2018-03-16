@@ -186,6 +186,12 @@
 
                 return (sa);
             }
+            
+            function Vklik() {
+                window.open('../Params/PopUp/ShowPreRouteVehicle.jsp?runId=' + $('#RunIdClick').text() + '&stat=run', null,
+                        'scrollbars=1,resizable=1,height=500,width=950');
+
+            }
         </script>
         <h3>Runs</h3>
 
@@ -216,6 +222,7 @@
 
         <br>
         <label class="fzLabel" id="mapAll" style="color: blue;">Map</label> 
+        <label class="fzLabel" id="Vehicle" style="color: blue;" onclick="Vklik();">Vehicle</label>
         <label class="fzLabel" id="reRun" style="color: blue;">Re-Routing</label>
         <label class="fzLabel" id="test" style="color: blue;" onclick="fnExcelReport()">Convert Excel</label>
 
