@@ -123,7 +123,7 @@
                     <th width="100px" class="fzCol">Truck type</th>
                     <th width="100px" class="fzCol">Capacity(KG)</th>
                     <th width="100px" class="fzCol">(%)</th>
-                    <th width="100px" class="fzCol">Kubikasi(M3)</th>
+                    <th width="100px" class="fzCol">Kubikasi(CM3)</th>
                     <th width="100px" class="fzCol">(%)</th>
                     <th width="100px" class="fzCol">Amount</th>
                     <th width="100px" class="fzCol">Jarak tempuh (km)</th>
