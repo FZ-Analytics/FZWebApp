@@ -39,6 +39,9 @@ import javax.ws.rs.core.MediaType;
 @Path("submitToSap")
 public class SubmitToSapAPI {
 
+    String runId = "";
+    String oriRunId = "";
+    String vNo = "";
     @Context
     private UriInfo context;
 
@@ -80,74 +83,84 @@ public class SubmitToSapAPI {
         ResultShipment rs = new ResultShipment();
         try {
             RunResultEditResultSubmitToSap he = gson.fromJson(content.contains("json") ? decodeContent(content) : content, RunResultEditResultSubmitToSap.class);
-            String[] runIdArr = he.RunId.split("split");
-            String oriRunId = runIdArr[0];
-            String runId = runIdArr[1];
+            vNo = he.vehicle_no;
+            runId = he.runId;
+            oriRunId = he.oriRunId;
+
             HashMap<String, String> hmPRV = getFromPreRouteVehicle(runId, he.vehicle_no);
             ArrayList<String> alCustId = getCustomerId(runId, he.vehicle_no);
             ArrayList<String> alStartAndEndTime = getStartAndEndTime(runId, he.vehicle_no);
             Timestamp time = getTimeID();
             String route = getLongestRoute(alCustId, he.vehicle_no, runId);
             boolean isAlreadyOnce = false;
+
+            //check if any route is null
+            boolean isRouteNull = false;
             for (int i = 0; i < alCustId.size(); i++) {
-                ArrayList<HashMap<String, String>> alSP = getFromShipmentPlan(runId, alCustId.get(i));
-
-                for (int j = 0; j < alSP.size(); j++) {
-                    HashMap<String, String> hmSP = alSP.get(j); //HashMap Shipment Plan
-
-                    rs.Shipment_Type = hmPRV.get("source1");
-                    rs.Plant = hmSP.get("Plant");
-                    if (route == null) {
-                        ret = "Aborted: Route empty on Customer ID: " + alCustId.get(i);
-                        break;
-                    } else {
-                        rs.Shipment_Route = route;
-                    }
-                    rs.Description = "";
-                    rs.Status_Plan = parseRunId(oriRunId, true);
-                    rs.Status_Check_In = null;
-                    rs.Status_Load_Start = null;
-                    rs.Status_Load_End = null;
-                    rs.Status_Complete = null;
-                    rs.Status_Shipment_Start = parseRunId(oriRunId, false) + " " + alStartAndEndTime.get(0);
-                    rs.Status_Shipment_End = parseRunId(oriRunId, false) + " " + alStartAndEndTime.get(1);
-                    rs.Service_Agent_Id = hmPRV.get("IdDriver");
-                    if (rs.Shipment_Type.equals("ZDSI")) {
-                        rs.Shipment_Number_Dummy = oriRunId.replace("_", "") + he.vehicle_no;
-                        rs.No_Pol = he.vehicle_no;
-                        rs.Driver_Name = hmPRV.get("NamaDriver");
-                        rs.Vehicle_Number = he.vehicle_no;
-                    } else {
-                        rs.Shipment_Number_Dummy = oriRunId.replace("_", "") + getVendorId(he.vehicle_no);
-                        rs.No_Pol = hmPRV.get("vehicle_type");
-                        rs.Driver_Name = getVendorName(he.vehicle_no);
-                        rs.Vehicle_Number = hmPRV.get("vehicle_type");
-                    }
-
-                    rs.Delivery_Number = hmSP.get("DO_Number");
-                    rs.Delivery_Item = hmSP.get("Item_Number");
-                    rs.Delivery_Quantity_Split = 0.000;
-                    rs.Delivery_Quantity = Double.parseDouble(hmSP.get("DOQty"));
-                    rs.Delivery_Flag_Split = "";
-                    rs.Material = hmSP.get("Product_ID");
-                    rs.Vehicle_Type = hmPRV.get("vehicle_type");
-                    rs.Batch = hmSP.get("Batch");
-                    rs.Time_Stamp = time;
-                    rs.Shipment_Number_SAP = "";
-                    rs.I_Status = "0";
-                    rs.Shipment_Flag = "";
-                    if (isAlreadyOnce == false) {
-                        rs.distance = "" + getTotalDist(runId, he.vehicle_no);
-                        isAlreadyOnce = true;
-                    } else {
-                        rs.distance = null;
-                    }
-                    rs.distanceUnit = "M";
-
-                    insertResultShipment(rs);
-                }
-                if (!ret.equals("OK")) {
+                if (getRoute(alCustId.get(i)) == null) {
+                    ret = "Aborted: One of the route is empty on Customer ID: " + alCustId.get(i);
+                    isRouteNull = true;
                     break;
+                }
+            }
+
+            if (isRouteNull == false) {
+                for (int i = 0; i < alCustId.size(); i++) {
+                    ArrayList<HashMap<String, String>> alSP = getFromShipmentPlan(runId, alCustId.get(i));
+
+                    for (int j = 0; j < alSP.size(); j++) {
+                        HashMap<String, String> hmSP = alSP.get(j); //HashMap Shipment Plan
+
+                        rs.Shipment_Type = hmPRV.get("source1");
+                        rs.Plant = hmSP.get("Plant");
+                        rs.Shipment_Route = route;
+                        rs.Description = "";
+                        rs.Status_Plan = parseRunId(runId, true);
+                        rs.Status_Check_In = null;
+                        rs.Status_Load_Start = null;
+                        rs.Status_Load_End = null;
+                        rs.Status_Complete = null;
+                        rs.Status_Shipment_Start = parseRunId(runId, false) + " " + alStartAndEndTime.get(0);
+                        rs.Status_Shipment_End = parseRunId(runId, false) + " " + alStartAndEndTime.get(1);
+                        rs.Service_Agent_Id = hmPRV.get("IdDriver");
+                        if (rs.Shipment_Type.equals("ZDSI")) {
+                            rs.Shipment_Number_Dummy = runId.replace("_", "") + he.vehicle_no;
+                            rs.No_Pol = he.vehicle_no;
+                            rs.Driver_Name = hmPRV.get("NamaDriver");
+                            rs.Vehicle_Number = he.vehicle_no;
+                        } else {
+                            rs.Shipment_Number_Dummy = runId.replace("_", "") + getVendorId(he.vehicle_no);
+                            rs.No_Pol = getExtVehicleType(he.vehicle_no);
+                            rs.Driver_Name = getVendorName(he.vehicle_no);
+                            rs.Vehicle_Number = getExtVehicleType(he.vehicle_no);
+                            vNo = getVendorId(he.vehicle_no);
+                        }
+
+                        rs.Delivery_Number = hmSP.get("DO_Number");
+                        rs.Delivery_Item = hmSP.get("Item_Number");
+                        rs.Delivery_Quantity_Split = 0.000;
+                        rs.Delivery_Quantity = Double.parseDouble(hmSP.get("DOQty"));
+                        rs.Delivery_Flag_Split = "";
+                        rs.Material = hmSP.get("Product_ID");
+                        rs.Vehicle_Type = hmPRV.get("vehicle_type");
+                        rs.Batch = hmSP.get("Batch");
+                        rs.Time_Stamp = time;
+                        rs.Shipment_Number_SAP = "";
+                        rs.I_Status = "0";
+                        rs.Shipment_Flag = "";
+                        if (isAlreadyOnce == false) {
+                            rs.distance = "" + getTotalDist(runId, he.vehicle_no);
+                            isAlreadyOnce = true;
+                        } else {
+                            rs.distance = null;
+                        }
+                        rs.distanceUnit = "M";
+
+                        insertResultShipment(rs);
+                    }
+                    if (!ret.equals("OK")) {
+                        break;
+                    }
                 }
             }
         } catch (Exception e) {
@@ -167,6 +180,11 @@ public class SubmitToSapAPI {
     public String getVendorId(String v) {
         String[] vSplit = v.split("_");
         return vSplit[1] + vSplit[3];
+    }
+
+    public String getExtVehicleType(String v) {
+        String[] vSplit = v.split("_");
+        return vSplit[2];
     }
 
     public String getVendorName(String v) {
@@ -478,56 +496,28 @@ public class SubmitToSapAPI {
         int rowNum = 0;
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
-                String sql
-                        = "SELECT "
+                String sql = "SELECT "
                         + "   COUNT(*) total "
                         + "FROM "
                         + "   bosnet1.dbo.TMS_Result_Shipment "
                         + "WHERE "
-                        + "   Shipment_Number_Dummy = '" + rs.Shipment_Number_Dummy + "'"
-                        + "   AND Delivery_Number = '" + rs.Delivery_Number + "'"
+                        + "   Delivery_Number = '" + rs.Delivery_Number + "'"
                         + "   AND Delivery_Item = '" + rs.Delivery_Item + "';";
                 try (ResultSet rst = stm.executeQuery(sql)) {
                     while (rst.next()) {
-                        rowNum = rst.getInt("total");
+                        rowNum += rst.getInt("total");
                     }
                 }
             }
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
+        //It means current DO is failed to be submitted to SAP, the row at Result Shipment and Status Shipment will be deleted
         if (rowNum > 0) {
-            try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-                try (Statement stm = con.createStatement()) {
-                    String sql
-                            = "DELETE "
-                            + "FROM "
-                            + "   bosnet1.dbo.TMS_Result_Shipment "
-                            + "WHERE "
-                            + "   Shipment_Number_Dummy = '" + rs.Shipment_Number_Dummy + "'"
-                            + "   AND Delivery_Number = '" + rs.Delivery_Number + "'"
-                            + "   AND Delivery_Item = '" + rs.Delivery_Item + "';";
-                    stm.executeQuery(sql);
-                }
-            } catch (Exception e) {
-
-            }
-            try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-                try (Statement stm = con.createStatement()) {
-                    String sql
-                            = "DELETE "
-                            + "FROM "
-                            + "   bosnet1.dbo.TMS_Status_Shipment "
-                            + "WHERE "
-                            + "   Shipment_Number_Dummy = '" + rs.Shipment_Number_Dummy + "'"
-                            + "   AND Delivery_Number = '" + rs.Delivery_Number + "'"
-                            + "   AND Delivery_Item = '" + rs.Delivery_Item + "';";
-                    stm.executeQuery(sql);
-                }
-            } catch (Exception e) {
-
-            }
+            deleteFromResultShipment(rs);
+            deleteFromStatusShipment(rs);
         }
+
         String ret = "error";
         String sql = "INSERT INTO bosnet1.dbo.TMS_Result_Shipment "
                 + "(Shipment_Type, Plant, Shipping_Type, Shipment_Route, Shipment_Number_Dummy, Description, Status_Plan, Status_Check_In, Status_Load_Start, Status_Load_End, "
@@ -571,6 +561,44 @@ public class SubmitToSapAPI {
             psHdr.executeUpdate();
 
             ret = "ok";
+        }
+        return ret;
+    }
+
+    public int deleteFromStatusShipment(ResultShipment rs) {
+        int ret = 0;
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql
+                        = "DELETE "
+                        + "FROM "
+                        + "   bosnet1.dbo.TMS_Status_Shipment "
+                        + "WHERE "
+                        + "   Delivery_Number = '" + rs.Delivery_Number + "'"
+                        + "   AND Delivery_Item = '" + rs.Delivery_Item + "';";
+                ret = stm.executeUpdate(sql);
+            }
+        } catch (Exception e) {
+
+        }
+        return ret;
+    }
+
+    public int deleteFromResultShipment(ResultShipment rs) {
+        int ret = 0;
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql
+                        = "DELETE "
+                        + "FROM "
+                        + "   bosnet1.dbo.TMS_Result_Shipment "
+                        + "WHERE "
+                        + "   Delivery_Number = '" + rs.Delivery_Number + "'"
+                        + "   AND Delivery_Item = '" + rs.Delivery_Item + "';";
+                stm.executeQuery(sql);
+            }
+        } catch (Exception e) {
+
         }
         return ret;
     }

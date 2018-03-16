@@ -81,21 +81,34 @@
             
             <br><br>
             <label class="fzLabel">Mill</label>
-            <select class="fzInput" id="millID" name="millID">
-                <option value="LWSM">LWSM</option>
-                <option value="BPRM">BPRM</option>
+            <% 
+                String millID = get("millID");
+                String sMill = "";
+            %>
+            <select class="fzInput" id="millID" name="millID" value="<%=millID%>">
+                <% for (int i = 0; i < oMill.length(); i++) {
+                    o = oMill.getJSONObject(i);
+                    sMill = o.getString("millID");
+                    selected = (millID.equals(sMill))?"selected":"";
+                %>
+                <option value="<%=sMill%>" <%=selected%>><%=sMill%></option>
+                <% } %>
             </select>
 
             <br><br>
-            <label class="fzLabel">Bin location</label>
+            <label class="fzLabel">Empty Bin location</label>
             <input class="fzInput" type="text" id="remark" 
                    name="remark" value="<%=get("remark")%>">
 
             <br><br>
             <label class="fzLabel">Grabber Condition</label>
+            <%
+                String sgc = get("grabbercondition");
+                if (sgc == null || sgc.isEmpty()) sgc = "0";
+                %>
             <select class="fzInput" id="grabbercondition" name="grabbercondition"
-                    value="<%=get("grabbercondition")%>">>
-                <option value="0">Ready</option>
+                    value="<%=sgc%>">>
+                <option value="0" selected>Ready</option>
                 <option value="1">Break Down</option>
             </select>
 

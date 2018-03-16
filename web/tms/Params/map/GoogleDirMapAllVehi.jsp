@@ -184,7 +184,7 @@
                     });
                 }
                 console.log("detikakhira" + new Date().getTime());
-                google.maps.event.addDomListener(window, 'load', initialize);
+                google.maps.event.addDomListener(window, 'load', initialize());
                 console.log("detikakhirb" + new Date().getTime());
             });
         </script>        

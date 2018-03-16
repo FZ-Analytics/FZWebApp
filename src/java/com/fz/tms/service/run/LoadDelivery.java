@@ -46,7 +46,6 @@ public class LoadDelivery implements BusinessLogic {
     String prevVehiCode = "";
     int routeNb = 0;
     int jobNb = 1;
-    boolean oneVehicle = false;
 
     String oriRunId, runId, branch, shift;
 
@@ -129,7 +128,7 @@ public class LoadDelivery implements BusinessLogic {
             String[] doNumSplit = d.doNum.split(";");
 
             try {
-                d.volume = "" + Math.round(Double.parseDouble(getVolume(custId, oriRunId)) * 10) / 10.0;
+                d.volume = "" + Math.round(Double.parseDouble(getVolume(custId, oriRunId)) * 1) / 1000000.0;
             } catch (Exception e) {
             }
             d.rdd = aSplit[8];
@@ -296,11 +295,6 @@ public class LoadDelivery implements BusinessLogic {
                 RouteJobLog r = new RouteJobLog();
                 String[] doSplit = d.doNum.split(";");
                 if (!d.vehicleCode.equals("") && !d.vehicleCode.equals("NA") && d.custId.equals("")) {
-                    if (oneVehicle == false) {
-                        oneVehicle = true;
-                    } else {
-                        oneVehicle = false;
-                    }
                     r.jobId = "DEPO";
                 } else {
                     r.jobId = d.custId + "-" + doSplit.length;
@@ -313,11 +307,7 @@ public class LoadDelivery implements BusinessLogic {
                 if (!r.vehicleCode.equals("NA")) {
                     r.activity = "start";
                     r.routeNb = routeNb;
-                    if (oneVehicle) {
-                        r.jobNb = jobNb;
-                    } else {
-                        r.jobNb = jobNb - 1;
-                    }
+                    r.jobNb = jobNb;
                 } else {
                     r.routeNb = 0;
                     r.jobNb = 0;

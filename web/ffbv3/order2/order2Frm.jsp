@@ -11,6 +11,7 @@
 <%@page import="java.sql.Connection"%>
 <%@page import="com.fz.ffbv3.service.order2.Order2Record"%>
 <%@page import="com.fz.util.FZUtil"%>
+<%@page import="com.fz.util.FixValue"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@include file="../appGlobal/pageTop.jsp"%>
 <!DOCTYPE html>
@@ -124,7 +125,7 @@
             <br><br>
             <label class="fzLabel">Bin Ready Estimate</label>
             <input class="fzInput" type="text" id="readyTime" name="readyTime" 
-                   value="" required>
+                   value="" required data-inputmask="'mask' : '99:99'">
             
             <br>
             <label class="fzLabel"></label>

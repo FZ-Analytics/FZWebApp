@@ -100,6 +100,8 @@ public class Order2FilterLogic implements BusinessLogic {
                 + "\n, j.dirLoc"
                 + "\n, j.estmFfb"
                 + "\n, j.ActualKg"
+                + "\n, j.LastOrders"
+                + "\n, j.restanKg"
                 + "\n from fbJob j"
                 + "\n   left outer join fbTask2 t"
                 + "\n       on j.jobId = t.jobID"
@@ -166,6 +168,8 @@ public class Order2FilterLogic implements BusinessLogic {
                     or.dirLoc = FZUtil.getRsString(rs, i++, "");
                     or.estmFfb = FZUtil.getRsString(rs, i++, "");
                     or.ActualKg = (double) FZUtil.getRsDouble(rs, i++, 0);
+                    or.LastOrders = FZUtil.getRsInt(rs,i++,0);
+                    or.restanKg = FZUtil.getRsInt(rs, i++, 0);
                     
 //                    or.from1 = FZUtil.getRsString(rs, i++, "");
 //                    or.to1 = FZUtil.getRsString(rs, i++, "");

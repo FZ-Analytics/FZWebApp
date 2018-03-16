@@ -248,7 +248,7 @@
                             <td>&nbsp;</td>
                             <td>Remaining Bin</td><td style="padding: 2px;">:</td><td width="50px"><%=r.LastOrders%></td>
                             <td>&nbsp;</td>
-                            <td style="padding: 2px;">Restan</td><td style="padding: 2px;">:</td><td><%=r.restanKg%></td>
+                            <td style="padding: 2px;">Restan</td><td style="padding: 2px;">:</td><td><%=df.format(r.restanKg)%></td>
                         </tr>
 			<tr>
                             <td>&nbsp;</td>

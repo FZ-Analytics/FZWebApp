@@ -26,6 +26,7 @@ public class UserModule
   private String MillID;
   private String Description;
   private String Type;
+  private long TimeSyncJob;
 
   public Integer getUserID()
   {
@@ -164,6 +165,12 @@ public class UserModule
   public void setTipe(String Tipe) {
     this.Tipe = Tipe;
   }
-  
-  
+
+  public long getTimeSyncJob() {
+    return TimeSyncJob;
+  }
+
+  public void setTimeSyncJob(long TimeSyncJob) {
+    this.TimeSyncJob = TimeSyncJob;
+  }
 }

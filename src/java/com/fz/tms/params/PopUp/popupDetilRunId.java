@@ -56,11 +56,9 @@ public class popupDetilRunId implements BusinessLogic {
         //w.renderLngLat();
         runID = FZUtil.getHttpParam(request, "runID");
         oriRunID = FZUtil.getHttpParam(request, "oriRunID");
+
         try {
             List<SummaryVehicle> asd = getSummary(runID);
-            for (int i = 0; i < asd.size(); i++) {
-                System.out.println(asd.get(i).truckid);
-            }
             request.setAttribute("oriRunID", oriRunID);
             request.setAttribute("runID", runID);
             request.setAttribute("cap", df.format(tcap).toString());
@@ -272,65 +270,42 @@ public class popupDetilRunId implements BusinessLogic {
                     ArrayList<String> alDo = getDo(runID, sq.truckid);
                     for (int j = 0; j < alDo.size(); j++) {
                         String doNum = alDo.get(j);
-                        //This try is for EXT vehicle
-                        try {
-                            int checkResultShipment = checkResultShipment(doNum, oriRunID.replace("_", "") + getVendorId(sq.truckid));
-                            //Submitted to Result_Shipment
-                            if (checkResultShipment > 0) {
-                                String check = checkStatusShipment(doNum, oriRunID.replace("_", "") + getVendorId(sq.truckid));
-                                //Success to be submitted to Status_Shipment
-                                try {
-                                    long isNumber = Long.parseLong(check);
-                                    sq.isFix = "" + isNumber;
-                                } //Failed to be submitted to Status_Shipment
-                                catch (Exception e) {
-                                    sq.isFix = "null";
-                                    sq.error = check;
-                                    break;
-                                }
-                            } //Failed to be submitted to Result_Shipment
-                            else {
+
+                        int checkResultShiment = checkResultShipment(doNum);
+                        //If submitted to Result_Shipment
+                        if (checkResultShiment > 0) {
+                            String checkStatusShipment = checkStatusShipment(doNum);
+                            //If submitted to Status_Shipment
+                            try {
+                                long isNumber = Long.parseLong(checkStatusShipment);
+                                sq.isFix = "" + isNumber;
+                            } //If failed to be submitted to Status_Shipment
+                            catch (Exception er) {
                                 sq.isFix = "null";
+                                sq.error = checkStatusShipment;
                                 break;
                             }
-                        } //This catch is for INT vehicle
-                        catch (Exception e) {
-                            int checkResultShipment = checkResultShipment(doNum, oriRunID.replace("_", "") + sq.truckid);
-                            //Submitted to Result_Shipment
-                            if (checkResultShipment > 0) {
-                                String check = checkStatusShipment(doNum, oriRunID.replace("_", "") + sq.truckid);
-                                //Success to be submitted to Status_Shipment
-                                try {
-                                    long isNumber = Long.parseLong(check);
-                                    sq.isFix = "" + isNumber;
-                                } // Failed to be submitted to Status_Shipment
-                                catch (Exception er) {
-                                    sq.isFix = "null";
-                                    sq.error = check;
-                                    break;
-                                }
-                            }//Failed to be submitted to Result_Shipment
-                            else {
-                                sq.isFix = "null";
-                                break;
-                            }
+                        }//If failed to be submitted to Result_Shipment
+                        else {
+                            sq.isFix = "null";
+                            break;
                         }
                     }
-                    
+
                     //Check if volume or weight is overload
                     //volume
-                    if(Integer.parseInt(sq.capacityPer) > 100) {
+                    if (Integer.parseInt(sq.capacityPer) > 100) {
                         sq.isFix = "er";
-                        sq.error = "Volume overload";
+                        sq.error = "Capacity overload";
                     }
                     //weight
-                    if(Integer.parseInt(sq.kubikasiPer) > 100) {
+                    if (Integer.parseInt(sq.kubikasiPer) > 100) {
                         sq.isFix = "er";
-                        sq.error = "Weight overload";
+                        sq.error = "Kubikasi overload";
                     }
-                    if(Integer.parseInt(sq.kubikasiPer) > 100 && Integer.parseInt(sq.capacityPer) > 100) {
+                    if (Integer.parseInt(sq.kubikasiPer) > 100 && Integer.parseInt(sq.capacityPer) > 100) {
                         sq.isFix = "er";
-                        sq.error = "Volume and weight overload";
+                        sq.error = "Capacity and kubikasi overload";
                     }
 
                     asd.add(sq);
@@ -419,12 +394,12 @@ public class popupDetilRunId implements BusinessLogic {
         return all;
     }
 
-    public int checkResultShipment(String doNum, String shipmentNo) throws Exception {
+    public int checkResultShipment(String doNum) throws Exception {
         int rowNum = 0;
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
                 String sql;
-                sql = "SELECT COUNT(*) rowNum FROM BOSNET1.dbo.TMS_Result_Shipment WHERE Delivery_Number = '" + doNum + "' and Shipment_Number_Dummy = '" + shipmentNo + "'";
+                sql = "SELECT COUNT(*) rowNum FROM BOSNET1.dbo.TMS_Result_Shipment WHERE Delivery_Number = '" + doNum + "'";
 
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     if (rs.next()) {
@@ -440,12 +415,12 @@ public class popupDetilRunId implements BusinessLogic {
         return rowNum;
     }
 
-    public String checkStatusShipment(String doNum, String shipmentNo) throws Exception {
+    public String checkStatusShipment(String doNum) throws Exception {
         String msg = "";
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
                 String sql;
-                sql = "SELECT TOP 1 SAP_Message, Ship_No_SAP FROM BOSNET1.dbo.TMS_Status_Shipment WHERE Delivery_Number = '" + doNum + "' and Shipment_Number_Dummy = '" + shipmentNo + "'";
+                sql = "SELECT TOP 1 SAP_Message, Ship_No_SAP FROM BOSNET1.dbo.TMS_Status_Shipment WHERE Delivery_Number = '" + doNum + "'";
 
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     if (rs.next()) {

@@ -83,16 +83,20 @@
                     <select class="fzInput" id="estateId" name="estateId">
                 <%
                     slct = (estateId.equals("<All>"))?"selected":"";
+                    List<String> ss = new ArrayList<String>();
                 %>
                         <option value ="<All>" <%=slct%>>--All--</option>
                 <%
                     for(int i=0; i<aEst.length(); i++) {
                         JSONObject o = aEst.getJSONObject(i);
                         s = o.getString("estateID");
-                        slct = (s.equals(estateId))?"selected":"";
+                        if (!ss.contains(s)) {
+                            ss.add(s);
+                            slct = (s.equals(estateId))?"selected":"";
                 %>
                         <option value="<%=s%>" <%=slct%>><%=s%></option>
                 <%
+                        }
                     }
                 %>
                     </select>

@@ -92,13 +92,13 @@ public class DetilSummary {
             whr = whr + ((whr.isEmpty())?" where ":" and ") + " a.estateId='" + estateId + "'";
         String sql = "select \n" +
 "		a.millID,a.estateID,a.divID,b.*,c.Kgs KgsTax, \n" +
-"               ifnull(d.remainingBin,9999) remainingBin, \n" +
+"               ifnull(d.remainingBin,9999) remainingBin, ifnull(b.restanKg,0) restanKg, \n" +
 "               (case when ifnull(b.TripsCount,0)=0 then 0.00 else ifnull(b.ActualKgs,0)/ifnull(b.TripsCount,0) end) avgTrip, \n" +
 "               (case when ifnull(c.Kgs,0)=0 then 0 else ifnull(b.ActualKgs,0)/c.Kgs end)*100 avgTax \n" + 
 "	from fbdiv a\n" +
 "	left join ( \n" +
 "		select \n" +
-"                       ba.divID, COUNT(*) TripsCount, sum(ba.ActualKg) ActualKgs, \n" +
+"                       ba.divID, COUNT(*) TripsCount, sum(ba.ActualKg) ActualKgs, sum(ba.restanKg) restanKg, \n" +
 "          		SUM( CASE WHEN CONVERT( bb.ActualEnd, TIME )< '10:00:00' THEN ifnull(ba.ActualKg,0) ELSE 0 END ) kg1,     \n" +
 "          		SUM( CASE WHEN CONVERT( bb.ActualEnd, TIME )>= '10:00:00' and CONVERT( bb.ActualEnd, TIME )< '14:00:00' THEN ifnull(ba.ActualKg,0) ELSE 0 END ) kg2,     \n" +
 "          		SUM( CASE WHEN CONVERT( bb.ActualEnd, TIME )>= '14:00:00' and CONVERT( bb.ActualEnd, TIME )< '18:00:00' THEN ifnull(ba.ActualKg,0) ELSE 0 END ) kg3,\n" +
@@ -131,57 +131,7 @@ public class DetilSummary {
 "                  ) d on a.divID=d.divID \n" +
 "       " + whr + "\n" +
 "	order by a.millID,a.estateID,a.divID";
-/*
-        String sql = "SELECT\n" +
-                "	w.*,\n" +
-                "	w.ActualKgs /(\n" +
-                "		CASE\n" +
-                "			WHEN w.TripsCount = 0 THEN 1\n" +
-                "			ELSE w.TripsCount\n" +
-                "		END\n" +
-                "	) avgTrip,\n" +
-                "	e.Kgs KgsTax,\n" +
-                "	(w.ActualKgs - ifnull(e.Kgs,0)\n" +
-                "	)/(\n" +
-                "		CASE\n" +
-                "			WHEN ifnull(w.ActualKgs,0)= 0 THEN ifnull(e.kgs,1)\n" +
-                "			ELSE w.ActualKgs\n" +
-                "		END\n" +
-                "	)* 100 avgTax,\n" +
-                "	r.Qty kgsRestan\n" +
-                "FROM\n" +
-                "	(\n" +
-                "		SELECT\n" +
-                "			a.divID, COUNT(*) TripsCount, sum(ifnull(a.ActualKg,0)) ActualKgs, \n" +
-                "			SUM( CASE WHEN CONVERT( b.ActualEnd, TIME )< '10:00:00' THEN 1 ELSE 0 END ) trip1,\n" +
-                "			SUM( CASE WHEN CONVERT( b.ActualEnd, TIME )< '13:00:00' THEN 1 ELSE 0 END ) trip2,\n" +
-                "			SUM( CASE WHEN CONVERT( b.ActualEnd, TIME )< '18:00:00' THEN 1 ELSE 0 END ) trip3\n" +
-                "		FROM fbjob a\n" +
-                "		LEFT JOIN fbtask2 b ON a.JobID = b.JobID\n" +
-                "		WHERE\n" +
-                "			CONVERT(a.hvsDt, DATE)= '"+tgl+"'\n" +
-                "			AND a.DoneStatus = 'DONE'\n" +
-                "			AND b.TaskSeq = 2\n" +
-                "		GROUP BY a.divID\n" +
-                "	) w\n" +
-                "LEFT JOIN(\n" +
-                "		SELECT\n" +
-                "			a.divID, SUM( b.size1 ) Kgs\n" +
-                "		FROM fbhvsestm a\n" +
-                "		LEFT JOIN fbhvsestmdtl b ON a.HvsEstmID = b.hvsEstmID\n" +
-                "		WHERE\n" +
-                "			CONVERT(a.hvsDt,DATE)= '"+tgl+"'\n" +
-                "			AND a.status = 'FNAL'\n" +
-                "		GROUP BY a.divID\n" +
-                "	) e ON w.divID = e.divID\n" +
-                "LEFT JOIN(\n" +
-                "		SELECT\n" +
-                "			ra.divID, SUM( ra.qty ) Qty\n" +
-                "		FROM fbleftover ra\n" +
-                "		WHERE ra.PostgDate = '"+tgl+"'\n" +
-                "		GROUP BY ra.divID\n" +
-                "	) r ON w.divID = r.divID";
-*/
+
         try (Connection con = (new Db()).getConnection("jdbc/fz");) {
             try (Statement stm = con.createStatement()) {
                 ResultSet rs = stm.executeQuery(sql);
@@ -203,7 +153,7 @@ public class DetilSummary {
                     o.put("KgsTax", rs.getDouble("KgsTax"));
                     o.put("avgTax", rs.getDouble("avgTax"));
                     o.put("remainingBin",rs.getInt("remainingBin"));
-//                    o.put("kgsRestan", rs.getDouble("kgsRestan"));
+                    o.put("restanKg", rs.getDouble("restanKg"));
                     result.put(o);
                 }
             } catch (Exception e) {
@@ -218,72 +168,7 @@ public class DetilSummary {
     public static JSONArray rdbTrip3(String fromDate, String toDate) {
         DecimalFormat df = new DecimalFormat("##.0");
         JSONArray result = new JSONArray();
-/*
-        String sql = "SELECT\n" +
-                "	t.*,\n" +
-                "	x.KgsTrip ActualKgs,\n" +
-                "	x.KgsTrip /(\n" +
-                "		CASE\n" +
-                "			WHEN ifnull(\n" +
-                "				t.DaysCount,\n" +
-                "				0\n" +
-                "			)= 0 THEN 1\n" +
-                "			ELSE t.avgTrip\n" +
-                "		END\n" +
-                "	) avgKgs\n" +
-                "FROM\n" +
-                "	(\n" +
-                "		SELECT\n" +
-                "			v.VehicleName,\n" +
-                "			COUNT(*) DaysCount,\n" +
-                "			SUM( t1.TripCount ) TripCount,\n" +
-                "			AVG( t1.TripCount ) avgTrip\n" +
-                "		FROM\n" +
-                "			(\n" +
-                "				SELECT\n" +
-                "					a.ActualTruckID,\n" +
-                "					CONVERT(\n" +
-                "						a.hvsDt,\n" +
-                "						DATE\n" +
-                "					) Tgl,\n" +
-                "					COUNT(*) TripCount\n" +
-                "				FROM\n" +
-                "					fbjob a\n" +
-                "				LEFT JOIN fbtask2 b ON\n" +
-                "					a.jobid = b.JobID\n" +
-                "				WHERE\n" +
-                "					CONVERT(\n" +
-                "						a.hvsDt,\n" +
-                "						DATE\n" +
-                "					) BETWEEN '"+fromDate+"' AND '"+toDate+"'\n" +
-                "					AND a.DoneStatus = 'DONE'\n" +
-                "					AND b.TaskSeq = 2\n" +
-                "				GROUP BY\n" +
-                "					a.ActualTruckID,\n" +
-                "					CONVERT(\n" +
-                "						a.hvsDt,\n" +
-                "						DATE\n" +
-                "					)\n" +
-                "			) t1\n" +
-                "		LEFT JOIN fbvehicle v ON\n" +
-                "			t1.ActualTruckID = v.VehicleID\n" +
-                "		GROUP BY\n" +
-                "			v.VehicleName\n" +
-                "	) t\n" +
-                "LEFT JOIN(\n" +
-                "		SELECT\n" +
-                "			x1.VehicleID,\n" +
-                "			SUM( x1.QtyTerima ) KgsTrip\n" +
-                "		FROM\n" +
-                "			fbtransport x1\n" +
-                "		WHERE\n" +
-                "			x1.tgl BETWEEN '"+fromDate+"' AND '"+toDate+"'\n" +
-                "		GROUP BY\n" +
-                "			x1.VehicleID\n" +
-                "	) x ON\n" +
-                "	t.VehicleName = x.vehicleID \n" +
-                "  order by t.VehicleName";
-*/
+
         String sql = "SELECT\n" +
                 "	t.*,\n" +
                 "	t.ActualKgs /(\n" +

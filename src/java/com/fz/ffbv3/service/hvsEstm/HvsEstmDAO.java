@@ -74,6 +74,8 @@ public class HvsEstmDAO {
                 + "\n, m.lon"
                 + "\n, m.lat"
                 + "\n, h.status"
+                + "\n, (case when h.millID is null or h.millID='' then d.millID else h.millID end) millID"
+                + "\n, h.note "
                 + "\n from fbHvsEstm h"
                 + "\n     left outer join fbDiv d"
                 + "\n         on h.divID = d.divID"
@@ -114,6 +116,8 @@ public class HvsEstmDAO {
                 he.millLoc.x = rs.getString(5);
                 he.millLoc.y = rs.getString(6);
                 he.remark = rs.getString(7);
+                he.millID = rs.getString("millID");
+                he.note = rs.getString("note");
 
                 // get the details
                 loadChildren(he, con);

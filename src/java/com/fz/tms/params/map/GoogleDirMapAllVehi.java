@@ -125,6 +125,7 @@ public class GoogleDirMapAllVehi implements BusinessLogic {
                 "	AND aq.vehicle_code <> 'NA'\n" +
                 "ORDER BY\n" +
                 "	aq.vehicle_code,\n" +
+                //"	aq.jobNb";
                 "	aq.jobNb,\n" +
                 "	aw.Distribution_Channel desc;";
         //GooAPICaller go = new GooAPICaller();
