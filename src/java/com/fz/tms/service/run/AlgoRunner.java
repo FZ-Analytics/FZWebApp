@@ -21,6 +21,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -119,8 +120,11 @@ public class AlgoRunner implements BusinessLogic {
             String resp = "";
             if (success) {     
                 if (reRun.equals("A")) {
-                    errMsg = "Update Prev PreRouteJob Error";
-                    resp = updatePrevPreRouteJob(runID, runId);
+                    errMsg = cekData(runID, runId, "ori");
+                    if (resp.equalsIgnoreCase("OK")){
+                        errMsg = "Update Prev PreRouteJob Error";
+                        resp = updatePrevPreRouteJob(runID, runId);
+                    }
                     if (resp.equalsIgnoreCase("OK")){
                         errMsg = "Insert PreRouteJob Copy ori Error";
                         resp = insertPreRouteJobCopy(runID, runId, branchCode, dateDeliv, "ori");
@@ -191,6 +195,7 @@ public class AlgoRunner implements BusinessLogic {
             pl.put("fileNmethod", "AlgoRunner&run Exc");
             pl.put("datas", "");
             pl.put("msg", errMsg +" | "+ e.getMessage());
+            String str = Arrays.toString(e.getStackTrace());;
             System.out.println("e.getMessage() " + e.getMessage());
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
             Date date = new Date();
@@ -1559,7 +1564,7 @@ public class AlgoRunner implements BusinessLogic {
                 pl = new HashMap<String, String>();
                 Date rdd = sdf.parse(asd.get(a).get("Request_Delivery_Date"));
                 pl = asd.get(a);      
-                System.out.println(pl.toString());
+                //System.out.println(pl.toString());
                 
                 //cek hari buka
                 
@@ -1612,6 +1617,7 @@ public class AlgoRunner implements BusinessLogic {
             }
             
             ins = treeSAP(asd);
+            //cekData(ins);
             
             try (Connection con = (new Db()).getConnection("jdbc/fztms")){
                 try (PreparedStatement ps = con.prepareStatement(sql) ){
@@ -1901,5 +1907,217 @@ public class AlgoRunner implements BusinessLogic {
         }
         
         return py;
+    }
+    
+    public String cekData(String runID, String prevRunID, String str) throws Exception{
+        String err = "";
+        HashMap<String, String> py = new HashMap<String, String>();
+        
+        String sql = "SELECT\n" +
+                "			'"+runID+"' AS RunId,\n" +
+                "			jb.Customer_ID,\n" +
+                "			jb.DO_Number,\n" +
+                "			jb.Long,\n" +
+                "			jb.Lat,\n" +
+                "			jb.Customer_priority,\n" +
+                "			jb.Service_time,\n" +
+                "			jb.deliv_start,\n" +
+                "			jb.deliv_end,\n" +
+                "			jb.vehicle_type_list,\n" +
+                "			jb.total_kg,\n" +
+                "			jb.total_cubication,\n" +
+                "			jb.DeliveryDeadline,\n" +
+                "			jb.DayWinStart,\n" +
+                "			jb.DayWinEnd,\n" +
+                "			CAST(\n" +
+                "				FORMAT(\n" +
+                "					getdate(),\n" +
+                "					'yyyy-MM-dd hh-mm'\n" +
+                "				) AS VARCHAR\n" +
+                "			) AS UpdatevDate,\n" +
+                "			CAST(\n" +
+                "				FORMAT(\n" +
+                "					getdate(),\n" +
+                "					'yyyy-MM-dd hh-mm'\n" +
+                "				) AS VARCHAR\n" +
+                "			) AS CreateDate,\n" +
+                "			jb.isActive,\n" +
+                "			jb.Is_Exclude,\n" +
+                "			'"+str+"' Is_Edit,\n" +
+                "			jb.Product_Description,\n" +
+                "			jb.Gross_Amount,\n" +
+                "			jb.DOQty,\n" +
+                "			jb.DOQtyUOM,\n" +
+                "			jb.Name1,\n" +
+                "			jb.Street,\n" +
+                "			jb.Distribution_Channel,\n" +
+                "			jb.Customer_Order_Block_all,\n" +
+                "			jb.Customer_Order_Block,\n" +
+                "			jb.Request_Delivery_Date,\n" +
+                "			jb.Desa_Kelurahan,\n" +
+                "			jb.Kecamatan,\n" +
+                "			jb.Kodya_Kabupaten,\n" +
+                "			jb.Batch,\n" +
+                "			jb.Ket_DO\n" +
+                "		FROM\n" +
+                "			bosnet1.dbo.TMS_PreRouteJob jb\n" +
+                "		INNER JOIN(\n" +
+                "				SELECT\n" +
+                "					DISTINCT DO_Number\n" +
+                "				FROM\n" +
+                "					bosnet1.dbo.TMS_ShipmentPlan\n" +
+                "				WHERE\n" +
+                "					already_shipment = 'N'\n" +
+                "					AND notused_flag IS NULL\n" +
+                "					AND incoterm = 'FCO'\n" +
+                "					AND(\n" +
+                "						Order_Type = 'ZDCO'\n" +
+                "						OR Order_Type = 'ZDTO'\n" +
+                "					)\n" +
+                "					AND create_date >= DATEADD(\n" +
+                "						DAY,\n" +
+                "						- 7,\n" +
+                "						GETDATE()\n" +
+                "					)\n" +
+                "			) sp ON\n" +
+                "			jb.DO_Number = sp.DO_Number\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			tu.Delivery_Number\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_Result_Shipment ty\n" +
+                "		INNER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
+                "			ty.Delivery_Number = tu.Delivery_Number\n" +
+                "		WHERE\n" +
+                "			tu.SAP_Status IS NULL\n" +
+                "	) ss ON\n" +
+                "	sp.DO_Number = ss.Delivery_Number\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			ty.Delivery_Number\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_Result_Shipment ty\n" +
+                "		LEFT OUTER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
+                "			ty.Delivery_Number = tu.Delivery_Number\n" +
+                "		WHERE\n" +
+                "			tu.Delivery_Number IS NULL\n" +
+                "	) sn ON\n" +
+                "	sp.DO_Number = sn.Delivery_Number\n" +
+                "		WHERE\n" +
+                "			ss.Delivery_Number IS NULL\n" +
+                "			AND sn.Delivery_Number IS NULL\n" +
+                "			AND jb.RunId = '"+prevRunID+"'\n" +
+                "			AND jb.Is_Exclude = 'inc'\n" +
+                "			AND jb.Is_Edit = 'edit'";
+
+        List<HashMap<String, String>> asd = new ArrayList<HashMap<String, String>>();
+        HashMap<String, String> pl = new HashMap<String, String>();
+        try (Connection con = (new Db()).getConnection("jdbc/fztms");
+                PreparedStatement ps = con.prepareStatement(sql)) {
+            //System.out.println(sql);
+            try (ResultSet rs = ps.executeQuery()){
+                while (rs.next()) {
+                    pl = new HashMap<String, String>();
+                    pl.put("RunId", rs.getString("RunId"));
+                    pl.put("Customer_ID", rs.getString("Customer_ID"));
+                    pl.put("DO_Number", rs.getString("DO_Number"));
+                    pl.put("Long", rs.getString("Long"));
+                    pl.put("Lat", rs.getString("Lat"));
+                    pl.put("Customer_priority", rs.getString("Customer_priority"));
+                    pl.put("Service_time", rs.getString("Service_time"));
+                    pl.put("deliv_start", rs.getString("deliv_start"));
+                    pl.put("deliv_end", rs.getString("deliv_end"));
+                    pl.put("vehicle_type_list", rs.getString("vehicle_type_list"));
+                    pl.put("total_kg", rs.getString("total_kg"));
+                    pl.put("total_cubication", rs.getString("total_cubication"));
+                    pl.put("DeliveryDeadline", rs.getString("DeliveryDeadline"));
+                    pl.put("DayWinStart", rs.getString("DayWinStart"));
+                    pl.put("DayWinEnd", rs.getString("DayWinEnd"));
+                    pl.put("UpdatevDate", rs.getString("UpdatevDate"));
+                    pl.put("CreateDate", rs.getString("CreateDate"));
+                    pl.put("isActive", rs.getString("isActive"));
+                    pl.put("Is_Exclude", rs.getString("Is_Exclude"));
+                    pl.put("Is_Edit", rs.getString("Is_Edit"));
+                    pl.put("Product_Description", rs.getString("Product_Description"));
+                    pl.put("Gross_Amount", rs.getString("Gross_Amount"));
+                    pl.put("DOQty", rs.getString("DOQty"));
+                    pl.put("DOQtyUOM", rs.getString("DOQtyUOM"));
+                    pl.put("Name1", rs.getString("Name1"));
+                    pl.put("Street", rs.getString("Street"));
+                    pl.put("Distribution_Channel", rs.getString("Distribution_Channel"));
+                    pl.put("Customer_Order_Block_all", rs.getString("Customer_Order_Block_all"));
+                    pl.put("Customer_Order_Block", rs.getString("Customer_Order_Block"));
+                    pl.put("Request_Delivery_Date", rs.getString("Request_Delivery_Date"));
+                    pl.put("Desa_Kelurahan", rs.getString("Desa_Kelurahan"));
+                    pl.put("Kecamatan", rs.getString("Kecamatan"));
+                    pl.put("Kodya_Kabupaten", rs.getString("Kodya_Kabupaten"));
+                    pl.put("Batch", rs.getString("Batch"));
+                    pl.put("Ket_DO", rs.getString("Ket_DO"));
+                    asd.add(pl);
+
+                    //con.setAutoCommit(false);
+                    //ps.executeUpdate();
+                    //con.setAutoCommit(true);
+                }
+            }            
+        }
+        
+        int i = 0;
+        while(i < asd.size()){
+            py = asd.get(i);
+            
+            int j = 0;
+            String CustId = py.get("Customer_ID");
+            String DO = py.get("DO_Number");
+            
+            Object[] keys = py.keySet().toArray();
+            
+            if(py.get("Customer_ID").equalsIgnoreCase("5810002739")){
+                System.out.println("com.fz.tms.service.run.AlgoRunner.cekData()");
+            }
+            
+            while(j <py.size()){
+                String tmp = py.get(keys[j]) == null ? "-" : py.get(keys[j]);
+                //System.out.print(j + str);
+                
+                if(tmp.contains("n/a")){
+                    err += "n/a ";
+                }
+                
+                if(keys[j].equals("Long") || keys[j].equals("Lat")){
+                    if(py.get("Customer_ID").equalsIgnoreCase("5810002739")){
+                        System.out.println("com.fz.tms.service.run.AlgoRunner.cekData()");
+                    }
+                    if(tmp.replaceAll("[^.]", "").length() > 1){
+                        err += ". ";
+                    }
+                    if(tmp.contains(",")){
+                        err += ", ";
+                    }
+                }
+                
+                if(tmp.contains("\"")){
+                    err += "\" ";
+                }
+
+                if(tmp.contains("'")){
+                    err += "' ";
+                }
+                
+                if(!err.equalsIgnoreCase(""))
+                    break;
+                
+                j++;
+            }
+            if(!err.equalsIgnoreCase("")){
+                err = "Error " + err + "CustomerId " + CustId;
+                break;
+            }
+            //System.out.println();
+            i++;
+        }
+        
+        if(err.equalsIgnoreCase(""))    err = "OK";
+        return err;
     }
 }
