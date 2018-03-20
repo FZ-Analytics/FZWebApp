@@ -5,7 +5,7 @@
  */
 package com.fz.ffbv3.api.TMS;
 
-import com.fz.tms.params.model.Vehicle;
+import com.fz.tms.params.model.ExportType;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.UnsupportedEncodingException;
@@ -59,13 +59,18 @@ public class ExportDb {
     @POST
     @Path("ExportDb")
     @Produces(MediaType.APPLICATION_JSON)
-    public String submitShipmentPlan(String content) {
-        System.out.println("MASUK");
+    public String ExportDb(String content) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String ret = "";
         try{
-            String type = "" + gson.fromJson(content.contains("json") ? decodeContent(content) : content, Vehicle.class);
-            System.out.println(type);
+            if(decodeContent(content).equals("truck")) {
+                exportTruck();
+            } else if(decodeContent(content).equals("customer")) {
+                exportCustomer();
+            } else if(decodeContent(content).equals("salesman")) {
+                exportSalesman();
+            }
+
         }catch(Exception e){
             System.out.println(e.getMessage()); 
         }
@@ -75,8 +80,21 @@ public class ExportDb {
     
     public static String decodeContent(String content) throws UnsupportedEncodingException{
         content = java.net.URLDecoder.decode(content, "UTF-8");
-        content = content.substring(5);
-        
+        String[] contentSplit = content.split(":");
+        System.out.println(contentSplit[1].replaceAll("\"", "").replace(" ", "").replace("}", ""));
+
         return content;
+    }
+
+    private void exportTruck() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private void exportCustomer() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private void exportSalesman() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

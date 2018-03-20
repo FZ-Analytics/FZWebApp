@@ -115,13 +115,13 @@ public class SubmitToSapAPI {
                         rs.Plant = hmSP.get("Plant");
                         rs.Shipment_Route = route;
                         rs.Description = "";
-                        rs.Status_Plan = parseRunId(runId, true);
+                        rs.Status_Plan = plus1Day(parseRunId(runId, true));
                         rs.Status_Check_In = null;
                         rs.Status_Load_Start = null;
                         rs.Status_Load_End = null;
                         rs.Status_Complete = null;
-                        rs.Status_Shipment_Start = parseRunId(runId, false) + " " + alStartAndEndTime.get(0);
-                        rs.Status_Shipment_End = parseRunId(runId, false) + " " + alStartAndEndTime.get(1);
+                        rs.Status_Shipment_Start = plus1Day(parseRunId(runId, false) + " " + alStartAndEndTime.get(0));
+                        rs.Status_Shipment_End = plus1Day(parseRunId(runId, false) + " " + alStartAndEndTime.get(1));
                         rs.Service_Agent_Id = hmPRV.get("IdDriver");
                         if (rs.Shipment_Type.equals("ZDSI")) {
                             rs.Shipment_Number_Dummy = runId.replace("_", "") + he.vehicle_no;
@@ -175,6 +175,25 @@ public class SubmitToSapAPI {
         content = content.substring(5);
 
         return content;
+    }
+    
+    public String plus1Day(String parsedRunId) {
+        String[] parsedRunIdSplit = parsedRunId.split(" ");
+        String date = parsedRunIdSplit[0];
+        String time = parsedRunIdSplit[1];
+        
+        String[] dateSplit = date.split("-");
+        String year = dateSplit[0];
+        String month = dateSplit[1];
+        int day = Integer.parseInt(dateSplit[2]) + 1;
+        String hari = "";
+        if(day < 10) {
+            hari = "0" + day;
+        } else {
+            hari = "" + day;
+        }
+        
+        return year + "-" + month + "-" + hari + " " + time;
     }
 
     public String getVendorId(String v) {
