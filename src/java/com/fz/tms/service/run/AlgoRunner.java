@@ -121,6 +121,9 @@ public class AlgoRunner implements BusinessLogic {
             if (success) {     
                 if (reRun.equals("A")) {
                     errMsg = cekData(runID, runId, "ori");
+                    resp = errMsg;
+                    
+                    //cluster(runId);
                     if (resp.equalsIgnoreCase("OK")){
                         errMsg = "Update Prev PreRouteJob Error";
                         resp = updatePrevPreRouteJob(runID, runId);
@@ -143,24 +146,12 @@ public class AlgoRunner implements BusinessLogic {
                         if (resp.equals("OK")) {
                             errMsg = "runProgress Error";
                             response.sendRedirect("runProgress.jsp?runId=" + runID + "&dateDeliv=" + dateDeliv + "&oriRunID=" + oriRunID + "&channel=" + channel);
-                        } /*else {
-                            HashMap<String, String> pl = new HashMap<String, String>();
-                            pl.put("ID", runId);
-                            pl.put("fileNmethod", "AlgoRunner&run");
-                            pl.put("datas", "");
-                            pl.put("msg", errMsg +" | "+ resp);
-                            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-                            Date date = new Date();
-                            pl.put("dates", dateFormat.format(date).toString());
-                            Other.insertLog(pl);
-                            response.sendRedirect("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
-                                    + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel + "&error=N" + "&errMsg=" + errMsg);
-                        }*/
+                        } 
                     }
                     if (!resp.equalsIgnoreCase("OK")){
                         throw new Exception(); 
                     }
-
+                    
                 } else if (reRun.equals("N")) {
                     errMsg = "TMS_GetCustLongLat Error";
                     prepareCustTable(branchCode);
@@ -2085,7 +2076,7 @@ public class AlgoRunner implements BusinessLogic {
                 }
                 
                 if(keys[j].equals("Long") || keys[j].equals("Lat")){
-                    if(py.get("Customer_ID").equalsIgnoreCase("5810002739")){
+                    if(py.get("Customer_ID").equalsIgnoreCase("5810110214")){
                         System.out.println("com.fz.tms.service.run.AlgoRunner.cekData()");
                     }
                     if(tmp.replaceAll("[^.]", "").length() > 1){
@@ -2093,6 +2084,9 @@ public class AlgoRunner implements BusinessLogic {
                     }
                     if(tmp.contains(",")){
                         err += ", ";
+                    }
+                    if(tmp.equalsIgnoreCase("0")){
+                        err += "0 ";
                     }
                 }
                 
@@ -2119,5 +2113,275 @@ public class AlgoRunner implements BusinessLogic {
         
         if(err.equalsIgnoreCase(""))    err = "OK";
         return err;
+    }
+    
+    public void cluster(String runId) throws Exception{
+        int x = 2;
+        int y = 3;
+        Double corA = new Double(0);
+        Double corB = new Double(0);
+        
+        String sql = "SELECT\n" +
+                "			distinct jb.Customer_ID,\n" +
+                "			jb.Long,\n" +
+                "			jb.Lat\n" +
+                "		FROM\n" +
+                "			bosnet1.dbo.TMS_PreRouteJob jb\n" +
+                "		INNER JOIN(\n" +
+                "				SELECT\n" +
+                "					DISTINCT DO_Number\n" +
+                "				FROM\n" +
+                "					bosnet1.dbo.TMS_ShipmentPlan\n" +
+                "				WHERE\n" +
+                "					already_shipment = 'N'\n" +
+                "					AND notused_flag IS NULL\n" +
+                "					AND incoterm = 'FCO'\n" +
+                "					AND(\n" +
+                "						Order_Type = 'ZDCO'\n" +
+                "						OR Order_Type = 'ZDTO'\n" +
+                "					)\n" +
+                "					AND create_date >= DATEADD(\n" +
+                "						DAY,\n" +
+                "						- 7,\n" +
+                "						GETDATE()\n" +
+                "					)\n" +
+                "			) sp ON\n" +
+                "			jb.DO_Number = sp.DO_Number\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			tu.Delivery_Number\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_Result_Shipment ty\n" +
+                "		INNER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
+                "			ty.Delivery_Number = tu.Delivery_Number\n" +
+                "		WHERE\n" +
+                "			tu.SAP_Status IS NULL\n" +
+                "	) ss ON\n" +
+                "	sp.DO_Number = ss.Delivery_Number\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			ty.Delivery_Number\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_Result_Shipment ty\n" +
+                "		LEFT OUTER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
+                "			ty.Delivery_Number = tu.Delivery_Number\n" +
+                "		WHERE\n" +
+                "			tu.Delivery_Number IS NULL\n" +
+                "	) sn ON\n" +
+                "	sp.DO_Number = sn.Delivery_Number\n" +
+                "		WHERE\n" +
+                "			ss.Delivery_Number IS NULL\n" +
+                "			AND sn.Delivery_Number IS NULL\n" +
+                "			AND jb.RunId = '"+runId+"'\n" +
+                "			AND jb.Is_Exclude = 'inc'\n" +
+                "			AND jb.Is_Edit = 'edit'";
+
+        List<HashMap<String, String>> asd = new ArrayList<HashMap<String, String>>();
+        HashMap<String, String> pl = new HashMap<String, String>();
+        try (Connection con = (new Db()).getConnection("jdbc/fztms");
+                PreparedStatement ps = con.prepareStatement(sql)) {
+            //System.out.println(sql);
+            try (ResultSet rs = ps.executeQuery()){
+                while (rs.next()) {
+                    pl = new HashMap<String, String>();
+                    pl.put("Customer_ID", rs.getString("Customer_ID"));
+                    pl.put("Long", rs.getString("Long"));
+                    pl.put("Lat", rs.getString("Lat"));
+                    asd.add(pl);
+                }
+            }            
+        }
+        
+        if(asd.size() > 0){            
+            
+            int i = 0;
+            
+            Double d = Double.parseDouble(asd.get(i).get("Long"));
+            Boolean dd = false;
+            Double g = Double.parseDouble(asd.get(i).get("Long"));
+            Boolean dg = false;
+            Double r = Double.parseDouble(asd.get(i).get("Lat"));
+            Boolean dr = false;
+            Double f = Double.parseDouble(asd.get(i).get("Lat"));
+            Boolean df = false;
+            
+            String cust = "";
+            //ambil titik pojok-pojok
+            while(i < asd.size()){
+                pl = asd.get(i);
+                cust = pl.get("Customer_ID");
+                //System.out.print(cust);
+                if(Double.parseDouble(pl.get("Long")) < d
+                        || Double.parseDouble(pl.get("Long")) > g
+                        || Double.parseDouble(pl.get("Lat")) > r
+                        || Double.parseDouble(pl.get("Lat")) < f){                    
+                    //X----
+                    if(Double.parseDouble(pl.get("Long")) < d)
+                        d = Double.parseDouble(pl.get("Long"));
+                    //----X
+                    if(Double.parseDouble(pl.get("Long")) > g)
+                        g = Double.parseDouble(pl.get("Long"));
+                    //-Y---
+                    if(Double.parseDouble(pl.get("Lat")) > r)
+                        r = Double.parseDouble(pl.get("Lat"));
+                    //---Y-
+                    if(Double.parseDouble(pl.get("Lat")) < f)
+                        f = Double.parseDouble(pl.get("Lat"));
+                    
+                    i = 0;
+                    dd = false;
+                    dg = false;
+                    dr = false;
+                    df = false;
+                }else{
+                    //System.out.println(d + " | " + Double.parseDouble(pl.get("Long")));
+                    //X----
+                    if(d <= Double.parseDouble(pl.get("Long")))
+                        dd = true;
+                    //----X
+                    if(g >= Double.parseDouble(pl.get("Long")))
+                        dg = true;
+                    //-Y---
+                    if(r >= Double.parseDouble(pl.get("Lat")))
+                        dr = true;
+                    //---Y-
+                    if(f <= Double.parseDouble(pl.get("Lat")))
+                        df = true;
+                    
+                    
+                    if(dd && dg && dr && df)    i++;
+                }   
+                //System.out.println(" x " + i);
+                //System.out.println(cust + " | " + i + " || " + d + " | " + g + " | " + r + " | " + f);
+            }
+            
+            //mapping area
+            corA = (g - d) / x;
+            corB = (f - r) / y;
+            
+            List<HashMap<String, String>> px = new ArrayList<HashMap<String, String>>();
+            int z = 1;
+            Double td = d;
+            Double tr = r;
+            i = 0;
+            while(z <= (x * y)){
+                
+                //System.out.println(z);
+                //System.out.println(td + "()" + (td + corA));
+                //System.out.println(tr + "()" + (tr + corB));                
+                
+                i = 0;
+                while(i < asd.size()){
+                    pl = asd.get(i);
+                    cust = pl.get("Customer_ID");
+                    Double ty = Double.parseDouble(pl.get("Long"));
+                    Double tx = Double.parseDouble(pl.get("Lat"));     
+                    
+                    if(z == 4 && cust.equals("5810003533")){
+                        //System.out.println("com.fz.tms.service.run.AlgoRunner.cluster()");
+                        if(td < ty && ty <= (td + corA)){
+                            //System.out.println("com.fz.tms.service.run.AlgoRunner.cluster()");
+                        }
+                        if(tr > tx && tx >= (tr + corB)){
+                            //System.out.println("com.fz.tms.service.run.AlgoRunner.cluster()");
+                        }
+                    }
+                    //System.out.println();
+                    if(z == 1){
+                        if(td <= ty && ty <= (td + corA)
+                                && tr >= tx && tx >= (tr + corB)){
+                            pl.put("AreaId", String.valueOf(z));
+                            //System.out.println(td + "|"+ (td + corA) + "<>" + tr + "|" + (tr + corB));
+                            System.out.println(pl.toString());
+                            px.add(pl);
+                            asd.remove(i);
+                            i = 0;
+                        }else{
+                            i++;
+                        }
+                    }else if(z == (x * y)){
+                        pl.put("AreaId", String.valueOf(z));
+                        //System.out.println(td + "|"+ (td + corA) + "<>" + tr + "|" + (tr + corB));
+                        System.out.println(pl.toString());
+                        px.add(pl);
+                        asd.remove(i);
+                        i = 0;
+                    }else{
+                        if(td < ty && ty <= (td + corA)
+                                && tr > tx && tx >= (tr + corB)){
+                            pl.put("AreaId", String.valueOf(z));
+                            //System.out.println(td + "|"+ (td + corA) + "<>" + tr + "|" + (tr + corB));
+                            System.out.println(pl.toString());
+                            px.add(pl);
+                            asd.remove(i);
+                            i = 0;
+                        }else{
+                            i++;
+                        }
+                    }
+                    
+                    
+                    //if(asd.size() > 1)i++;
+                }
+                //System.out.println(z);
+                //System.out.println(td + "|" + tr);
+                
+                if(z % x == 0){
+                    
+                    td = d;
+                    tr += corB;  
+                    //tr = r;                    
+                }else{                    
+                    td += corA;                                      
+                }
+                z++;
+            }
+            
+            //i = 0;
+            //String json = "[";
+            //System.out.println("[");
+            //while(i < asd.size()){
+                //pl = asd.get(i);
+                //System.out.println(pl.toString());
+                //{Customer_ID=5810108065, Long=106.977485, AreaId=4, Lat=-6.228626}
+                //json += "{\"title\": '"+pl.get("Customer_ID")+"',\"lat\": '"+pl.get("Lat")+"',\"lng\": '"+pl.get("Long")+"',\"description\": '"+pl.get("AreaId")+"'},";
+                
+                //System.out.println("{\"title\": '"+pl.get("Customer_ID")+"',\"lat\": '"+pl.get("Lat")+"',\"lng\": '"+pl.get("Long")+"',\"description\": '"+pl.get("AreaId")+"'},");
+                
+                //i++;
+            //}
+            //System.out.println("]");
+            //json += "]";
+            System.out.println("json");
+            
+            sql = "INSERT\n" +
+                "	INTO\n" +
+                "		bosnet1.dbo.TMS_PreRouteCluster(\n" +
+                "			runID,\n" +
+                "			Customer_ID,\n" +
+                "			Long,\n" +
+                "			Lat,\n" +
+                "			AreaId\n" +
+                "		) values(?,?,?,?,?)";
+            
+            if(px.size() > 0){
+                try (Connection con = (new Db()).getConnection("jdbc/fztms")){
+                    try (PreparedStatement ps = con.prepareStatement(sql) ){
+                            ps.clearParameters();                    
+                        for(int a = 0;a<px.size();a++){ 
+                            i = 1;
+                            ps.setString(i++, runId);
+                            ps.setString(i++, px.get(a).get("Customer_ID"));
+                            ps.setString(i++, px.get(a).get("Long"));
+                            ps.setString(i++, px.get(a).get("Lat"));   
+                            ps.setString(i++, px.get(a).get("AreaId")); 
+                            ps.addBatch();
+                        }
+                        ps.executeBatch();
+                    }            
+                }
+            }
+            
+        }
     }
 }
