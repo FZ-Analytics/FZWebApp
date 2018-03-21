@@ -120,21 +120,27 @@ public class AlgoRunner implements BusinessLogic {
             String resp = "";
             if (success) {     
                 if (reRun.equals("A")) {
-                    errMsg = cekData(runID, runId, "ori");
+                    List<HashMap<String, String>> px = selectCust(runId, runID);
+                    
+                    errMsg = cekData(runID, runId, "ori", px);
                     resp = errMsg;
                     
-                    //cluster(runId);
+                    if (resp.equalsIgnoreCase("OK")){
+                        errMsg = cluster(runId, runID, px);
+                        resp = errMsg;
+                    }
                     if (resp.equalsIgnoreCase("OK")){
                         errMsg = "Update Prev PreRouteJob Error";
                         resp = updatePrevPreRouteJob(runID, runId);
                     }
                     if (resp.equalsIgnoreCase("OK")){
+                        px = selectCust(runId, runID);
                         errMsg = "Insert PreRouteJob Copy ori Error";
-                        resp = insertPreRouteJobCopy(runID, runId, branchCode, dateDeliv, "ori");
+                        resp = insertPreRouteJobCopy(runID, runId, branchCode, dateDeliv, "ori", px);
                     }
                     if (resp.equalsIgnoreCase("OK")){
                         errMsg = "Insert PreRouteJob Copy edit Error";
-                        resp = insertPreRouteJobCopy(runID, runId, branchCode, dateDeliv, "edit");
+                        resp = insertPreRouteJobCopy(runID, runId, branchCode, dateDeliv, "edit", px);
                     }
                     if (resp.equalsIgnoreCase("OK")){
                         errMsg = "Insert PreRouteVehicle Copy Error";
@@ -204,645 +210,15 @@ public class AlgoRunner implements BusinessLogic {
         }
     }
 
-    public String insertPreRouteJob(String runID, String branchCode,
-            String dateDeliv, String str, String chn)
-            throws Exception {
-
-        String cds = "ERROR insertPreRouteJob";
-
-        String sql = "INSERT\n" +
-                "	INTO\n" +
-                "		bosnet1.dbo.TMS_PreRouteJob(\n" +
-                "			RunId,\n" +
-                "			Customer_ID,\n" +
-                "			DO_Number,\n" +
-                "			Long,\n" +
-                "			Lat,\n" +
-                "			Customer_priority,\n" +
-                "			Service_time,\n" +
-                "			deliv_start,\n" +
-                "			deliv_end,\n" +
-                "			vehicle_type_list,\n" +
-                "			total_kg,\n" +
-                "			total_cubication,\n" +
-                "			DeliveryDeadline,\n" +
-                "			DayWinStart,\n" +
-                "			DayWinEnd,\n" +
-                "			UpdatevDate,\n" +
-                "			CreateDate,\n" +
-                "			isActive,\n" +
-                "			Is_Exclude,\n" +
-                "			Is_Edit,\n" +
-                "			Product_Description,\n" +
-                "			Gross_Amount,\n" +
-                "			DOQty,\n" +
-                "			DOQtyUOM,\n" +
-                "			Name1,\n" +
-                "			Street,\n" +
-                "			Distribution_Channel,\n" +
-                "			Customer_Order_Block_all,\n" +
-                "			Customer_Order_Block,\n" +
-                "			Request_Delivery_Date\n" +
-                "		) SELECT\n" +
-                "			aq.RunId,\n" +
-                "			aq.Customer_ID,\n" +
-                "			aq.DO_Number,\n" +
-                "			aq.Long,\n" +
-                "			aq.Lat,\n" +
-                "			aq.Customer_Priority,\n" +
-                "			aq.service_time,\n" +
-                "			CONVERT(\n" +
-                "				VARCHAR(5),\n" +
-                "				(\n" +
-                "					CASE\n" +
-                "						WHEN DATEDIFF(\n" +
-                "							HOUR,\n" +
-                "							CAST(\n" +
-                "								aq.deliv_start AS TIME\n" +
-                "							),\n" +
-                "							CAST(\n" +
-                "								'12:00' AS TIME\n" +
-                "							)\n" +
-                "						)< 1 THEN DATEADD(\n" +
-                "							HOUR,\n" +
-                "							- 1,\n" +
-                "							CAST(\n" +
-                "								aq.deliv_start AS TIME\n" +
-                "							)\n" +
-                "						)\n" +
-                "						ELSE CAST(\n" +
-                "							aq.deliv_start AS TIME\n" +
-                "						)\n" +
-                "					END\n" +
-                "				),\n" +
-                "				108\n" +
-                "			),\n" +
-                "			CONVERT(\n" +
-                "				VARCHAR(5),\n" +
-                "				(\n" +
-                "					CASE\n" +
-                "						WHEN DATEDIFF(\n" +
-                "							HOUR,\n" +
-                "							CAST(\n" +
-                "								aq.deliv_end AS TIME\n" +
-                "							),\n" +
-                "							CAST(\n" +
-                "								'12:00' AS TIME\n" +
-                "							)\n" +
-                "						)< 1 THEN DATEADD(\n" +
-                "							HOUR,\n" +
-                "							- 1,\n" +
-                "							CAST(\n" +
-                "								aq.deliv_end AS TIME\n" +
-                "							)\n" +
-                "						)\n" +
-                "						ELSE CAST(\n" +
-                "							aq.deliv_end AS TIME\n" +
-                "						)\n" +
-                "					END\n" +
-                "				),\n" +
-                "				108\n" +
-                "			),\n" +
-                "			aq.vehicle_type_list,\n" +
-                "			aq.total_kg,\n" +
-                "			aq.total_cubication,\n" +
-                "			aq.DeliveryDeadline,\n" +
-                "			aq.DayWinStart,\n" +
-                "			aq.DayWinEnd,\n" +
-                "			aq.UpdatevDate,\n" +
-                "			aq.CreateDate,\n" +
-                "			aq.isActive,\n" +
-                "			aq.Is_Exclude,\n" +
-                "			aq.Is_Edit,\n" +
-                "			aq.Product_Description,\n" +
-                "			aq.Gross_Amount,\n" +
-                "			aq.DOQty,\n" +
-                "			aq.DOQtyUOM,\n" +
-                "			aq.Name1,\n" +
-                "			aq.Street,\n" +
-                "			aq.Distribution_Channel,\n" +
-                "			aq.Customer_Order_Block_all,\n" +
-                "			aq.Customer_Order_Block,\n" +
-                "			aq.Request_Delivery_Date\n" +
-                "		FROM\n" +
-                "			(\n" +
-                "				SELECT\n" +
-                "					c.RunId,\n" +
-                "					c.Customer_ID,\n" +
-                "					c.DO_Number,\n" +
-                "					c.Long,\n" +
-                "					c.Lat,\n" +
-                "					CASE\n" +
-                "						WHEN priority < 4 THEN(\n" +
-                "							CASE\n" +
-                "								WHEN c.priority < 1 THEN c.priority + 1\n" +
-                "								ELSE c.priority\n" +
-                "							END\n" +
-                "						)\n" +
-                "						ELSE c.Customer_Priority\n" +
-                "					END AS Customer_Priority,\n" +
-                "					CASE\n" +
-                "						WHEN c.service_time IS NULL THEN st.value\n" +
-                "						ELSE c.service_time\n" +
-                "					END AS service_time,\n" +
-                "					CASE\n" +
-                "						WHEN c.deliv_start IS NULL THEN ds.value\n" +
-                "						ELSE c.deliv_start\n" +
-                "					END AS deliv_start,\n" +
-                "					CASE\n" +
-                "						WHEN c.deliv_end IS NULL THEN de.value\n" +
-                "						ELSE c.deliv_end\n" +
-                "					END AS deliv_end,\n" +
-                "					CASE\n" +
-                "						WHEN c.vehicle_type_list IS NULL THEN vt.value\n" +
-                "						ELSE c.vehicle_type_list\n" +
-                "					END AS vehicle_type_list,\n" +
-                "					c.total_kg,\n" +
-                "					c.total_cubication,\n" +
-                "					c.DeliveryDeadline,\n" +
-                "					c.DayWinStart,\n" +
-                "					c.DayWinEnd,\n" +
-                "					c.UpdatevDate,\n" +
-                "					c.CreateDate,\n" +
-                "					c.isActive,\n" +
-                "					c.Is_Exclude,\n" +
-                "					c.Is_Edit,\n" +
-                "					c.Product_Description,\n" +
-                "					c.Gross_Amount,\n" +
-                "					c.DOQty,\n" +
-                "					c.DOQtyUOM,\n" +
-                "					c.Name1,\n" +
-                "					c.Street,\n" +
-                "					c.Distribution_Channel,\n" +
-                "					c.Customer_Order_Block_all,\n" +
-                "					c.Customer_Order_Block,\n" +
-                "					CAST(\n" +
-                "						FORMAT(\n" +
-                "							c.Request_Delivery_Date,\n" +
-                "							'yyyy-MM-dd'\n" +
-                "						) AS VARCHAR\n" +
-                "					) AS Request_Delivery_Date\n" +
-                "				FROM\n" +
-                "					(\n" +
-                "						SELECT\n" +
-                "							b.*,\n" +
-                "							CASE\n" +
-                "								WHEN DeliveryDeadline = 'AFTR' THEN DATEDIFF(\n" +
-                "									DAY,\n" +
-                "									delivDate,\n" +
-                "									FORMAT(\n" +
-                "										DATEADD(\n" +
-                "											DAY,\n" +
-                "											7,\n" +
-                "											b.Request_Delivery_Date\n" +
-                "										),\n" +
-                "										'yyyy-MM-dd'\n" +
-                "									)\n" +
-                "								)\n" +
-                "								ELSE DATEDIFF(\n" +
-                "									DAY,\n" +
-                "									delivDate,\n" +
-                "									b.Request_Delivery_Date\n" +
-                "								)\n" +
-                "							END AS priority\n" +
-                "						FROM\n" +
-                "							(\n" +
-                "								SELECT\n" +
-                "									'"+runID+"' AS RunId,\n" +
-                "									a.Customer_ID,\n" +
-                "									a.DO_Number,\n" +
-                "									a.Long,\n" +
-                "									a.Lat,\n" +
-                "									CASE\n" +
-                "										WHEN a.Customer_priority > 50 THEN SUBSTRING( CAST( a.Customer_priority AS VARCHAR ), 2, 1 )\n" +
-                "										WHEN a.Customer_priority = 0 THEN a.value\n" +
-                "										WHEN a.Customer_priority IS NULL THEN a.value\n" +
-                "										ELSE a.Customer_priority\n" +
-                "									END AS Customer_priority,\n" +
-                "									a.Service_time,\n" +
-                "									a.deliv_start,\n" +
-                "									a.deliv_end,\n" +
-                "									a.vehicle_type_list,\n" +
-                "									SUM( a.total_kg_item ) total_kg,\n" +
-                "									SUM( a.total_cubication ) total_cubication,\n" +
-                "									a.DeliveryDeadline,\n" +
-                "									a.DayWinStart,\n" +
-                "									a.DayWinEnd,\n" +
-                "									CAST(\n" +
-                "										FORMAT(\n" +
-                "											getdate(),\n" +
-                "											'yyyy-MM-dd hh-mm'\n" +
-                "										) AS VARCHAR\n" +
-                "									) AS UpdatevDate,\n" +
-                "									CAST(\n" +
-                "										FORMAT(\n" +
-                "											getdate(),\n" +
-                "											'yyyy-MM-dd hh-mm'\n" +
-                "										) AS VARCHAR\n" +
-                "									) AS CreateDate,\n" +
-                "									'1' AS isActive,\n" +
-                "									'inc' AS Is_Exclude,\n" +
-                "									'"+str+"' AS Is_Edit,\n" +
-                "									a.Request_Delivery_Date,\n" +
-                "									'"+dateDeliv+"' AS delivDate,\n" +
-                "									a.Product_Description,\n" +
-                "									a.Gross_Amount,\n" +
-                "									a.DOQty,\n" +
-                "									a.DOQtyUOM,\n" +
-                "									a.Name1,\n" +
-                "									a.Street,\n" +
-                "									a.Distribution_Channel,\n" +
-                "									a.Customer_Order_Block_all,\n" +
-                "									a.Customer_Order_Block\n" +
-                "								FROM\n" +
-                "									(\n" +
-                "										SELECT\n" +
-                "											sp.Customer_ID,\n" +
-                "											sp.DO_Number,\n" +
-                "											CASE\n" +
-                "												WHEN cl.Long IS NULL\n" +
-                "												OR cl.Long = '' THEN 'n/a'\n" +
-                "												ELSE cl.Long\n" +
-                "											END AS Long,\n" +
-                "											CASE\n" +
-                "												WHEN cl.Lat IS NULL\n" +
-                "												OR cl.Lat = '' THEN 'n/a'\n" +
-                "												ELSE cl.Lat\n" +
-                "											END AS Lat,\n" +
-                "											cs.Customer_priority,\n" +
-                "											ca.Service_time,\n" +
-                "											ca.deliv_start,\n" +
-                "											ca.deliv_end,\n" +
-                "											ca.vehicle_type_list,\n" +
-                "											sp.total_kg_item,\n" +
-                "											sp.total_cubication,\n" +
-                "											CASE\n" +
-                "												WHEN ca.DeliveryDeadline IS NULL THEN dd.value\n" +
-                "												ELSE ca.DeliveryDeadline\n" +
-                "											END DeliveryDeadline,\n" +
-                "											CASE\n" +
-                "												WHEN ca.DayWinStart IS NULL THEN ds.value\n" +
-                "												ELSE ca.DayWinStart\n" +
-                "											END DayWinStart,\n" +
-                "											CASE\n" +
-                "												WHEN ca.DayWinEnd IS NULL THEN de.value\n" +
-                "												ELSE ca.DayWinEnd\n" +
-                "											END DayWinEnd,\n" +
-                "											sp.Request_Delivery_Date,\n" +
-                "											sp.Product_Description,\n" +
-                "											sp.Gross_Amount,\n" +
-                "											sp.DOQty,\n" +
-                "											sp.DOQtyUOM,\n" +
-                "											cs.Name1,\n" +
-                "											cs.Street,\n" +
-                "											cs.Distribution_Channel,\n" +
-                "											cs.Customer_Order_Block_all,\n" +
-                "											cs.Customer_Order_Block,\n" +
-                "											df.value\n" +
-                "										FROM\n" +
-                "											bosnet1.dbo.TMS_ShipmentPlan sp\n" +
-                "										LEFT OUTER JOIN(\n" +
-                "												SELECT\n" +
-                "													a.*\n" +
-                "												FROM\n" +
-                "													(\n" +
-                "														SELECT\n" +
-                "															ROW_NUMBER() OVER(\n" +
-                "																PARTITION BY Customer_ID\n" +
-                "															ORDER BY\n" +
-                "																Customer_ID\n" +
-                "															) AS noId,\n" +
-                "															*\n" +
-                "														FROM\n" +
-                "															bosnet1.dbo.customer\n" +
-                "														WHERE\n" +
-                "															(\n" +
-                "																Customer_Order_Block IS NULL\n" +
-                "																OR Customer_Order_Block = ''\n" +
-                "															)\n" +
-                "															AND(\n" +
-                "																Customer_Order_Block_all IS NULL\n" +
-                "																OR Customer_Order_Block_all = ''\n" +
-                "															)\n" +
-                "													) a\n" +
-                "												WHERE\n" +
-                "													a.noid = 1\n" +
-                "											) cs ON\n" +
-                "											sp.customer_id = cs.customer_id\n" +
-                "										LEFT JOIN(\n" +
-                "												SELECT\n" +
-                "													*\n" +
-                "												FROM\n" +
-                "													(\n" +
-                "														SELECT\n" +
-                "															ROW_NUMBER() OVER(\n" +
-                "																PARTITION BY custid\n" +
-                "															ORDER BY\n" +
-                "																custid\n" +
-                "															) AS noId,\n" +
-                "															*\n" +
-                "														FROM\n" +
-                "															bosnet1.dbo.TMS_CustLongLat\n" +
-                "													) a\n" +
-                "												WHERE\n" +
-                "													a.noid = 1\n" +
-                "											) cl ON\n" +
-                "											sp.customer_id = cl.custID\n" +
-                "										LEFT OUTER JOIN bosnet1.dbo.TMS_CustAtr ca ON\n" +
-                "											sp.customer_id = ca.customer_id\n" +
-                "										LEFT OUTER JOIN bosnet1.dbo.TMS_Params dd ON\n" +
-                "											dd.param = 'DeliveryDeadLine'\n" +
-                "										LEFT OUTER JOIN bosnet1.dbo.TMS_Params ds ON\n" +
-                "											ds.param = 'DayWinStart'\n" +
-                "										LEFT OUTER JOIN bosnet1.dbo.TMS_Params de ON\n" +
-                "											de.param = 'DayWinEnd'\n" +
-                "										LEFT OUTER JOIN bosnet1.dbo.TMS_Params df ON\n" +
-                "											df.param = 'DefaultCustPriority'\n" +
-                "										WHERE\n" +
-                "											sp.plant = '"+branchCode+"'\n" +
-                "											AND sp.already_shipment = 'N'\n" +
-                "											AND sp.notused_flag IS NULL\n" +
-                "											AND sp.incoterm = 'FCO'\n" +
-                "											AND(\n" +
-                "												sp.Order_Type = 'ZDCO'\n" +
-                "												OR sp.Order_Type = 'ZDTO'\n" +
-                "											)\n" +
-                "											AND sp.create_date >= DATEADD(\n" +
-                "												DAY,\n" +
-                "												- 7,\n" +
-                "												GETDATE()\n" +
-                "											)\n" +
-                "											AND cs.Distribution_Channel IN("+chn+")\n" +
-                "									) a\n" +
-                "								WHERE\n" +
-                "									datepart(\n" +
-                "										dw,\n" +
-                "										'"+dateDeliv+"'\n" +
-                "									) BETWEEN DayWinStart AND DayWinEnd\n" +
-                "									AND(\n" +
-                "										(\n" +
-                "											DeliveryDeadLine = 'ONDL'\n" +
-                "											AND '"+dateDeliv+"' = Request_Delivery_Date\n" +
-                "										)\n" +
-                "										OR(\n" +
-                "											DeliveryDeadLine = 'BFOR'\n" +
-                "											AND '"+dateDeliv+"' <= Request_Delivery_Date\n" +
-                "										)\n" +
-                "										OR(\n" +
-                "											DeliveryDeadLine = 'AFTR'\n" +
-                "											AND '"+dateDeliv+"' < FORMAT(\n" +
-                "												DATEADD(\n" +
-                "													DAY,\n" +
-                "													7,\n" +
-                "													Request_Delivery_Date\n" +
-                "												),\n" +
-                "												'yyyy-MM-dd'\n" +
-                "											)\n" +
-                "										)\n" +
-                "									)\n" +
-                "								GROUP BY\n" +
-                "									a.Customer_ID,\n" +
-                "									a.DO_Number,\n" +
-                "									a.Long,\n" +
-                "									a.Lat,\n" +
-                "									a.Customer_priority,\n" +
-                "									a.Service_time,\n" +
-                "									a.deliv_start,\n" +
-                "									a.deliv_end,\n" +
-                "									a.vehicle_type_list,\n" +
-                "									a.DeliveryDeadline,\n" +
-                "									a.DayWinStart,\n" +
-                "									a.DayWinEnd,\n" +
-                "									a.Request_Delivery_Date,\n" +
-                "									a.Product_Description,\n" +
-                "									a.Gross_Amount,\n" +
-                "									a.DOQty,\n" +
-                "									a.DOQtyUOM,\n" +
-                "									a.Name1,\n" +
-                "									a.Street,\n" +
-                "									a.Distribution_Channel,\n" +
-                "									a.Customer_Order_Block_all,\n" +
-                "									a.Customer_Order_Block,\n" +
-                "									a.value\n" +
-                "							) b\n" +
-                "					) c,\n" +
-                "					(\n" +
-                "						SELECT\n" +
-                "							value\n" +
-                "						FROM\n" +
-                "							BOSNET1.dbo.TMS_Params\n" +
-                "						WHERE\n" +
-                "							param = 'DefaultCustServiceTime'\n" +
-                "					) st,\n" +
-                "					(\n" +
-                "						SELECT\n" +
-                "							value\n" +
-                "						FROM\n" +
-                "							BOSNET1.dbo.TMS_Params\n" +
-                "						WHERE\n" +
-                "							param = 'DefaultCustStartTime'\n" +
-                "					) ds,\n" +
-                "					(\n" +
-                "						SELECT\n" +
-                "							value\n" +
-                "						FROM\n" +
-                "							BOSNET1.dbo.TMS_Params\n" +
-                "						WHERE\n" +
-                "							param = 'DefaultCustEndTime'\n" +
-                "					) de,\n" +
-                "					(\n" +
-                "						SELECT\n" +
-                "							value\n" +
-                "						FROM\n" +
-                "							BOSNET1.dbo.TMS_Params\n" +
-                "						WHERE\n" +
-                "							param = 'DefaultCustVehicleTypes'\n" +
-                "					) vt\n" +
-                "				WHERE\n" +
-                "					c.priority >= 0\n" +
-                "			) aq\n" +
-                "		ORDER BY\n" +
-                "			aq.Customer_Priority";
-
-        try (Connection con = (new Db()).getConnection("jdbc/fztms");
-                PreparedStatement ps = con.prepareStatement(sql)) {
-
-            con.setAutoCommit(false);
-            ps.executeUpdate();
-            con.setAutoCommit(true);
-
-            cds = "OK";
-        }catch (Exception e) {            
-            HashMap<String, String> pl = new HashMap<String, String>();
-            pl.put("ID", runID);
-            pl.put("fileNmethod", "AlgoRunner&insertPreRouteJob Exc");
-            pl.put("datas", "");
-            pl.put("msg", e.getMessage());
-            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-            Date date = new Date();
-            pl.put("dates", dateFormat.format(date).toString());
-            Other.insertLog(pl);
-            throw e;
-        }
-
-        return cds;
-    }
-
+    
     public String insertPreRouteJobCopy(String runID, String prevRunID, String branchCode,
-            String dateDeliv, String str)
+            String dateDeliv, String str, List<HashMap<String, String>> zx)
             throws Exception {
 
         String cds = "ERROR insertPreRouteJob";
-
-        String sql = "SELECT\n" +
-                "			'"+runID+"' AS RunId,\n" +
-                "			jb.Customer_ID,\n" +
-                "			jb.DO_Number,\n" +
-                "			jb.Long,\n" +
-                "			jb.Lat,\n" +
-                "			jb.Customer_priority,\n" +
-                "			jb.Service_time,\n" +
-                "			jb.deliv_start,\n" +
-                "			jb.deliv_end,\n" +
-                "			jb.vehicle_type_list,\n" +
-                "			jb.total_kg,\n" +
-                "			jb.total_cubication,\n" +
-                "			jb.DeliveryDeadline,\n" +
-                "			jb.DayWinStart,\n" +
-                "			jb.DayWinEnd,\n" +
-                "			CAST(\n" +
-                "				FORMAT(\n" +
-                "					getdate(),\n" +
-                "					'yyyy-MM-dd hh-mm'\n" +
-                "				) AS VARCHAR\n" +
-                "			) AS UpdatevDate,\n" +
-                "			CAST(\n" +
-                "				FORMAT(\n" +
-                "					getdate(),\n" +
-                "					'yyyy-MM-dd hh-mm'\n" +
-                "				) AS VARCHAR\n" +
-                "			) AS CreateDate,\n" +
-                "			jb.isActive,\n" +
-                "			jb.Is_Exclude,\n" +
-                "			'"+str+"' Is_Edit,\n" +
-                "			jb.Product_Description,\n" +
-                "			jb.Gross_Amount,\n" +
-                "			jb.DOQty,\n" +
-                "			jb.DOQtyUOM,\n" +
-                "			jb.Name1,\n" +
-                "			jb.Street,\n" +
-                "			jb.Distribution_Channel,\n" +
-                "			jb.Customer_Order_Block_all,\n" +
-                "			jb.Customer_Order_Block,\n" +
-                "			jb.Request_Delivery_Date,\n" +
-                "			jb.Desa_Kelurahan,\n" +
-                "			jb.Kecamatan,\n" +
-                "			jb.Kodya_Kabupaten,\n" +
-                "			jb.Batch,\n" +
-                "			jb.Ket_DO\n" +
-                "		FROM\n" +
-                "			bosnet1.dbo.TMS_PreRouteJob jb\n" +
-                "		INNER JOIN(\n" +
-                "				SELECT\n" +
-                "					DISTINCT DO_Number\n" +
-                "				FROM\n" +
-                "					bosnet1.dbo.TMS_ShipmentPlan\n" +
-                "				WHERE\n" +
-                "					already_shipment = 'N'\n" +
-                "					AND notused_flag IS NULL\n" +
-                "					AND incoterm = 'FCO'\n" +
-                "					AND(\n" +
-                "						Order_Type = 'ZDCO'\n" +
-                "						OR Order_Type = 'ZDTO'\n" +
-                "					)\n" +
-                "					AND create_date >= DATEADD(\n" +
-                "						DAY,\n" +
-                "						- 7,\n" +
-                "						GETDATE()\n" +
-                "					)\n" +
-                "			) sp ON\n" +
-                "			jb.DO_Number = sp.DO_Number\n" +
-                "LEFT OUTER JOIN(\n" +
-                "		SELECT\n" +
-                "			tu.Delivery_Number\n" +
-                "		FROM\n" +
-                "			BOSNET1.dbo.TMS_Result_Shipment ty\n" +
-                "		INNER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
-                "			ty.Delivery_Number = tu.Delivery_Number\n" +
-                "		WHERE\n" +
-                "			tu.SAP_Status IS NULL\n" +
-                "	) ss ON\n" +
-                "	sp.DO_Number = ss.Delivery_Number\n" +
-                "LEFT OUTER JOIN(\n" +
-                "		SELECT\n" +
-                "			ty.Delivery_Number\n" +
-                "		FROM\n" +
-                "			BOSNET1.dbo.TMS_Result_Shipment ty\n" +
-                "		LEFT OUTER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
-                "			ty.Delivery_Number = tu.Delivery_Number\n" +
-                "		WHERE\n" +
-                "			tu.Delivery_Number IS NULL\n" +
-                "	) sn ON\n" +
-                "	sp.DO_Number = sn.Delivery_Number\n" +
-                "		WHERE\n" +
-                "			ss.Delivery_Number IS NULL\n" +
-                "			AND sn.Delivery_Number IS NULL\n" +
-                "			AND jb.RunId = '"+prevRunID+"'\n" +
-                "			AND jb.Is_Exclude = 'inc'\n" +
-                "			AND jb.Is_Edit = 'edit'";
-
-        List<HashMap<String, String>> asd = new ArrayList<HashMap<String, String>>();
+        List<HashMap<String, String>> asd = zx;
         HashMap<String, String> pl = new HashMap<String, String>();
-        try (Connection con = (new Db()).getConnection("jdbc/fztms");
-                PreparedStatement ps = con.prepareStatement(sql)) {
-            //System.out.println(sql);
-            try (ResultSet rs = ps.executeQuery()){
-                while (rs.next()) {
-                    pl = new HashMap<String, String>();
-                    pl.put("RunId", rs.getString("RunId"));
-                    pl.put("Customer_ID", rs.getString("Customer_ID"));
-                    pl.put("DO_Number", rs.getString("DO_Number"));
-                    pl.put("Long", rs.getString("Long"));
-                    pl.put("Lat", rs.getString("Lat"));
-                    pl.put("Customer_priority", rs.getString("Customer_priority"));
-                    pl.put("Service_time", rs.getString("Service_time"));
-                    pl.put("deliv_start", rs.getString("deliv_start"));
-                    pl.put("deliv_end", rs.getString("deliv_end"));
-                    pl.put("vehicle_type_list", rs.getString("vehicle_type_list"));
-                    pl.put("total_kg", rs.getString("total_kg"));
-                    pl.put("total_cubication", rs.getString("total_cubication"));
-                    pl.put("DeliveryDeadline", rs.getString("DeliveryDeadline"));
-                    pl.put("DayWinStart", rs.getString("DayWinStart"));
-                    pl.put("DayWinEnd", rs.getString("DayWinEnd"));
-                    pl.put("UpdatevDate", rs.getString("UpdatevDate"));
-                    pl.put("CreateDate", rs.getString("CreateDate"));
-                    pl.put("isActive", rs.getString("isActive"));
-                    pl.put("Is_Exclude", rs.getString("Is_Exclude"));
-                    pl.put("Is_Edit", rs.getString("Is_Edit"));
-                    pl.put("Product_Description", rs.getString("Product_Description"));
-                    pl.put("Gross_Amount", rs.getString("Gross_Amount"));
-                    pl.put("DOQty", rs.getString("DOQty"));
-                    pl.put("DOQtyUOM", rs.getString("DOQtyUOM"));
-                    pl.put("Name1", rs.getString("Name1"));
-                    pl.put("Street", rs.getString("Street"));
-                    pl.put("Distribution_Channel", rs.getString("Distribution_Channel"));
-                    pl.put("Customer_Order_Block_all", rs.getString("Customer_Order_Block_all"));
-                    pl.put("Customer_Order_Block", rs.getString("Customer_Order_Block"));
-                    pl.put("Request_Delivery_Date", rs.getString("Request_Delivery_Date"));
-                    pl.put("Desa_Kelurahan", rs.getString("Desa_Kelurahan"));
-                    pl.put("Kecamatan", rs.getString("Kecamatan"));
-                    pl.put("Kodya_Kabupaten", rs.getString("Kodya_Kabupaten"));
-                    pl.put("Batch", rs.getString("Batch"));
-                    pl.put("Ket_DO", rs.getString("Ket_DO"));
-                    asd.add(pl);
-
-                    //con.setAutoCommit(false);
-                    //ps.executeUpdate();
-                    //con.setAutoCommit(true);
-                }
-            }            
-            
-        }
+        String sql = "";
         
         if(asd.size() > 0){
             sql = "INSERT\n" +
@@ -911,7 +287,7 @@ public class AlgoRunner implements BusinessLogic {
                             ps.setString(i++, asd.get(a).get("CreateDate"));   
                             ps.setString(i++, "1");
                             ps.setString(i++, "inc");
-                            ps.setString(i++, asd.get(a).get("Is_Edit"));
+                            ps.setString(i++, str);
                             ps.setString(i++, asd.get(a).get("Product_Description"));
                             ps.setDouble(i++, Double.valueOf(asd.get(a).get("Gross_Amount")));
                             ps.setDouble(i++, Double.valueOf(asd.get(a).get("DOQty")));
@@ -1448,6 +824,7 @@ public class AlgoRunner implements BusinessLogic {
                 "ORDER BY\n" +
                 "	sp.Customer_ID ASC\n";
         
+        System.out.println("QueryCust()" + sql);
         //select
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
                 PreparedStatement ps = con.prepareStatement(sql)) {
@@ -1900,158 +1277,10 @@ public class AlgoRunner implements BusinessLogic {
         return py;
     }
     
-    public String cekData(String runID, String prevRunID, String str) throws Exception{
+    public String cekData(String runID, String prevRunID, String str, List<HashMap<String, String>> zx) throws Exception{
         String err = "";
+        List<HashMap<String, String>> asd = zx;
         HashMap<String, String> py = new HashMap<String, String>();
-        
-        String sql = "SELECT\n" +
-                "			'"+runID+"' AS RunId,\n" +
-                "			jb.Customer_ID,\n" +
-                "			jb.DO_Number,\n" +
-                "			jb.Long,\n" +
-                "			jb.Lat,\n" +
-                "			jb.Customer_priority,\n" +
-                "			jb.Service_time,\n" +
-                "			jb.deliv_start,\n" +
-                "			jb.deliv_end,\n" +
-                "			jb.vehicle_type_list,\n" +
-                "			jb.total_kg,\n" +
-                "			jb.total_cubication,\n" +
-                "			jb.DeliveryDeadline,\n" +
-                "			jb.DayWinStart,\n" +
-                "			jb.DayWinEnd,\n" +
-                "			CAST(\n" +
-                "				FORMAT(\n" +
-                "					getdate(),\n" +
-                "					'yyyy-MM-dd hh-mm'\n" +
-                "				) AS VARCHAR\n" +
-                "			) AS UpdatevDate,\n" +
-                "			CAST(\n" +
-                "				FORMAT(\n" +
-                "					getdate(),\n" +
-                "					'yyyy-MM-dd hh-mm'\n" +
-                "				) AS VARCHAR\n" +
-                "			) AS CreateDate,\n" +
-                "			jb.isActive,\n" +
-                "			jb.Is_Exclude,\n" +
-                "			'"+str+"' Is_Edit,\n" +
-                "			jb.Product_Description,\n" +
-                "			jb.Gross_Amount,\n" +
-                "			jb.DOQty,\n" +
-                "			jb.DOQtyUOM,\n" +
-                "			jb.Name1,\n" +
-                "			jb.Street,\n" +
-                "			jb.Distribution_Channel,\n" +
-                "			jb.Customer_Order_Block_all,\n" +
-                "			jb.Customer_Order_Block,\n" +
-                "			jb.Request_Delivery_Date,\n" +
-                "			jb.Desa_Kelurahan,\n" +
-                "			jb.Kecamatan,\n" +
-                "			jb.Kodya_Kabupaten,\n" +
-                "			jb.Batch,\n" +
-                "			jb.Ket_DO\n" +
-                "		FROM\n" +
-                "			bosnet1.dbo.TMS_PreRouteJob jb\n" +
-                "		INNER JOIN(\n" +
-                "				SELECT\n" +
-                "					DISTINCT DO_Number\n" +
-                "				FROM\n" +
-                "					bosnet1.dbo.TMS_ShipmentPlan\n" +
-                "				WHERE\n" +
-                "					already_shipment = 'N'\n" +
-                "					AND notused_flag IS NULL\n" +
-                "					AND incoterm = 'FCO'\n" +
-                "					AND(\n" +
-                "						Order_Type = 'ZDCO'\n" +
-                "						OR Order_Type = 'ZDTO'\n" +
-                "					)\n" +
-                "					AND create_date >= DATEADD(\n" +
-                "						DAY,\n" +
-                "						- 7,\n" +
-                "						GETDATE()\n" +
-                "					)\n" +
-                "			) sp ON\n" +
-                "			jb.DO_Number = sp.DO_Number\n" +
-                "LEFT OUTER JOIN(\n" +
-                "		SELECT\n" +
-                "			tu.Delivery_Number\n" +
-                "		FROM\n" +
-                "			BOSNET1.dbo.TMS_Result_Shipment ty\n" +
-                "		INNER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
-                "			ty.Delivery_Number = tu.Delivery_Number\n" +
-                "		WHERE\n" +
-                "			tu.SAP_Status IS NULL\n" +
-                "	) ss ON\n" +
-                "	sp.DO_Number = ss.Delivery_Number\n" +
-                "LEFT OUTER JOIN(\n" +
-                "		SELECT\n" +
-                "			ty.Delivery_Number\n" +
-                "		FROM\n" +
-                "			BOSNET1.dbo.TMS_Result_Shipment ty\n" +
-                "		LEFT OUTER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
-                "			ty.Delivery_Number = tu.Delivery_Number\n" +
-                "		WHERE\n" +
-                "			tu.Delivery_Number IS NULL\n" +
-                "	) sn ON\n" +
-                "	sp.DO_Number = sn.Delivery_Number\n" +
-                "		WHERE\n" +
-                "			ss.Delivery_Number IS NULL\n" +
-                "			AND sn.Delivery_Number IS NULL\n" +
-                "			AND jb.RunId = '"+prevRunID+"'\n" +
-                "			AND jb.Is_Exclude = 'inc'\n" +
-                "			AND jb.Is_Edit = 'edit'";
-
-        List<HashMap<String, String>> asd = new ArrayList<HashMap<String, String>>();
-        HashMap<String, String> pl = new HashMap<String, String>();
-        try (Connection con = (new Db()).getConnection("jdbc/fztms");
-                PreparedStatement ps = con.prepareStatement(sql)) {
-            //System.out.println(sql);
-            try (ResultSet rs = ps.executeQuery()){
-                while (rs.next()) {
-                    pl = new HashMap<String, String>();
-                    pl.put("RunId", rs.getString("RunId"));
-                    pl.put("Customer_ID", rs.getString("Customer_ID"));
-                    pl.put("DO_Number", rs.getString("DO_Number"));
-                    pl.put("Long", rs.getString("Long"));
-                    pl.put("Lat", rs.getString("Lat"));
-                    pl.put("Customer_priority", rs.getString("Customer_priority"));
-                    pl.put("Service_time", rs.getString("Service_time"));
-                    pl.put("deliv_start", rs.getString("deliv_start"));
-                    pl.put("deliv_end", rs.getString("deliv_end"));
-                    pl.put("vehicle_type_list", rs.getString("vehicle_type_list"));
-                    pl.put("total_kg", rs.getString("total_kg"));
-                    pl.put("total_cubication", rs.getString("total_cubication"));
-                    pl.put("DeliveryDeadline", rs.getString("DeliveryDeadline"));
-                    pl.put("DayWinStart", rs.getString("DayWinStart"));
-                    pl.put("DayWinEnd", rs.getString("DayWinEnd"));
-                    pl.put("UpdatevDate", rs.getString("UpdatevDate"));
-                    pl.put("CreateDate", rs.getString("CreateDate"));
-                    pl.put("isActive", rs.getString("isActive"));
-                    pl.put("Is_Exclude", rs.getString("Is_Exclude"));
-                    pl.put("Is_Edit", rs.getString("Is_Edit"));
-                    pl.put("Product_Description", rs.getString("Product_Description"));
-                    pl.put("Gross_Amount", rs.getString("Gross_Amount"));
-                    pl.put("DOQty", rs.getString("DOQty"));
-                    pl.put("DOQtyUOM", rs.getString("DOQtyUOM"));
-                    pl.put("Name1", rs.getString("Name1"));
-                    pl.put("Street", rs.getString("Street"));
-                    pl.put("Distribution_Channel", rs.getString("Distribution_Channel"));
-                    pl.put("Customer_Order_Block_all", rs.getString("Customer_Order_Block_all"));
-                    pl.put("Customer_Order_Block", rs.getString("Customer_Order_Block"));
-                    pl.put("Request_Delivery_Date", rs.getString("Request_Delivery_Date"));
-                    pl.put("Desa_Kelurahan", rs.getString("Desa_Kelurahan"));
-                    pl.put("Kecamatan", rs.getString("Kecamatan"));
-                    pl.put("Kodya_Kabupaten", rs.getString("Kodya_Kabupaten"));
-                    pl.put("Batch", rs.getString("Batch"));
-                    pl.put("Ket_DO", rs.getString("Ket_DO"));
-                    asd.add(pl);
-
-                    //con.setAutoCommit(false);
-                    //ps.executeUpdate();
-                    //con.setAutoCommit(true);
-                }
-            }            
-        }
         
         int i = 0;
         while(i < asd.size()){
@@ -2115,82 +1344,18 @@ public class AlgoRunner implements BusinessLogic {
         return err;
     }
     
-    public void cluster(String runId) throws Exception{
+    public String cluster(String runId, String nextRunID, List<HashMap<String, String>> zx) throws Exception{
         int x = 2;
         int y = 3;
         Double corA = new Double(0);
         Double corB = new Double(0);
+        String str = "Error Cluster";
         
-        String sql = "SELECT\n" +
-                "			distinct jb.Customer_ID,\n" +
-                "			jb.Long,\n" +
-                "			jb.Lat\n" +
-                "		FROM\n" +
-                "			bosnet1.dbo.TMS_PreRouteJob jb\n" +
-                "		INNER JOIN(\n" +
-                "				SELECT\n" +
-                "					DISTINCT DO_Number\n" +
-                "				FROM\n" +
-                "					bosnet1.dbo.TMS_ShipmentPlan\n" +
-                "				WHERE\n" +
-                "					already_shipment = 'N'\n" +
-                "					AND notused_flag IS NULL\n" +
-                "					AND incoterm = 'FCO'\n" +
-                "					AND(\n" +
-                "						Order_Type = 'ZDCO'\n" +
-                "						OR Order_Type = 'ZDTO'\n" +
-                "					)\n" +
-                "					AND create_date >= DATEADD(\n" +
-                "						DAY,\n" +
-                "						- 7,\n" +
-                "						GETDATE()\n" +
-                "					)\n" +
-                "			) sp ON\n" +
-                "			jb.DO_Number = sp.DO_Number\n" +
-                "LEFT OUTER JOIN(\n" +
-                "		SELECT\n" +
-                "			tu.Delivery_Number\n" +
-                "		FROM\n" +
-                "			BOSNET1.dbo.TMS_Result_Shipment ty\n" +
-                "		INNER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
-                "			ty.Delivery_Number = tu.Delivery_Number\n" +
-                "		WHERE\n" +
-                "			tu.SAP_Status IS NULL\n" +
-                "	) ss ON\n" +
-                "	sp.DO_Number = ss.Delivery_Number\n" +
-                "LEFT OUTER JOIN(\n" +
-                "		SELECT\n" +
-                "			ty.Delivery_Number\n" +
-                "		FROM\n" +
-                "			BOSNET1.dbo.TMS_Result_Shipment ty\n" +
-                "		LEFT OUTER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
-                "			ty.Delivery_Number = tu.Delivery_Number\n" +
-                "		WHERE\n" +
-                "			tu.Delivery_Number IS NULL\n" +
-                "	) sn ON\n" +
-                "	sp.DO_Number = sn.Delivery_Number\n" +
-                "		WHERE\n" +
-                "			ss.Delivery_Number IS NULL\n" +
-                "			AND sn.Delivery_Number IS NULL\n" +
-                "			AND jb.RunId = '"+runId+"'\n" +
-                "			AND jb.Is_Exclude = 'inc'\n" +
-                "			AND jb.Is_Edit = 'edit'";
-
-        List<HashMap<String, String>> asd = new ArrayList<HashMap<String, String>>();
+        
+        List<HashMap<String, String>> asd = zx;
         HashMap<String, String> pl = new HashMap<String, String>();
-        try (Connection con = (new Db()).getConnection("jdbc/fztms");
-                PreparedStatement ps = con.prepareStatement(sql)) {
-            //System.out.println(sql);
-            try (ResultSet rs = ps.executeQuery()){
-                while (rs.next()) {
-                    pl = new HashMap<String, String>();
-                    pl.put("Customer_ID", rs.getString("Customer_ID"));
-                    pl.put("Long", rs.getString("Long"));
-                    pl.put("Lat", rs.getString("Lat"));
-                    asd.add(pl);
-                }
-            }            
-        }
+        
+        String sql = "";
         
         if(asd.size() > 0){            
             
@@ -2292,7 +1457,7 @@ public class AlgoRunner implements BusinessLogic {
                                 && tr >= tx && tx >= (tr + corB)){
                             pl.put("AreaId", String.valueOf(z));
                             //System.out.println(td + "|"+ (td + corA) + "<>" + tr + "|" + (tr + corB));
-                            System.out.println(pl.toString());
+                            //System.out.println(pl.toString());
                             px.add(pl);
                             asd.remove(i);
                             i = 0;
@@ -2302,7 +1467,7 @@ public class AlgoRunner implements BusinessLogic {
                     }else if(z == (x * y)){
                         pl.put("AreaId", String.valueOf(z));
                         //System.out.println(td + "|"+ (td + corA) + "<>" + tr + "|" + (tr + corB));
-                        System.out.println(pl.toString());
+                        //System.out.println(pl.toString());
                         px.add(pl);
                         asd.remove(i);
                         i = 0;
@@ -2311,7 +1476,7 @@ public class AlgoRunner implements BusinessLogic {
                                 && tr > tx && tx >= (tr + corB)){
                             pl.put("AreaId", String.valueOf(z));
                             //System.out.println(td + "|"+ (td + corA) + "<>" + tr + "|" + (tr + corB));
-                            System.out.println(pl.toString());
+                            //System.out.println(pl.toString());
                             px.add(pl);
                             asd.remove(i);
                             i = 0;
@@ -2370,7 +1535,7 @@ public class AlgoRunner implements BusinessLogic {
                             ps.clearParameters();                    
                         for(int a = 0;a<px.size();a++){ 
                             i = 1;
-                            ps.setString(i++, runId);
+                            ps.setString(i++, nextRunID);
                             ps.setString(i++, px.get(a).get("Customer_ID"));
                             ps.setString(i++, px.get(a).get("Long"));
                             ps.setString(i++, px.get(a).get("Lat"));   
@@ -2378,10 +1543,165 @@ public class AlgoRunner implements BusinessLogic {
                             ps.addBatch();
                         }
                         ps.executeBatch();
+                        
+                        str = "OK";
                     }            
                 }
             }
             
         }
+        asd = zx;
+        return str;
+    }
+    
+    public List<HashMap<String, String>> selectCust(String prev, String next) throws Exception{
+        List<HashMap<String, String>> px = new ArrayList<HashMap<String, String>>();
+        String sql = "SELECT\n" +
+                "	'"+next+"' AS RunId,\n" +
+                "	jb.Customer_ID,\n" +
+                "	jb.DO_Number,\n" +
+                "	jb.Long,\n" +
+                "	jb.Lat,\n" +
+                "	jb.Customer_priority,\n" +
+                "	jb.Service_time,\n" +
+                "	jb.deliv_start,\n" +
+                "	jb.deliv_end,\n" +
+                "	jb.vehicle_type_list,\n" +
+                "	jb.total_kg,\n" +
+                "	jb.total_cubication,\n" +
+                "	jb.DeliveryDeadline,\n" +
+                "	jb.DayWinStart,\n" +
+                "	jb.DayWinEnd,\n" +
+                "	CAST(\n" +
+                "		FORMAT(\n" +
+                "			getdate(),\n" +
+                "			'yyyy-MM-dd hh-mm'\n" +
+                "		) AS VARCHAR\n" +
+                "	) AS UpdatevDate,\n" +
+                "	CAST(\n" +
+                "		FORMAT(\n" +
+                "			getdate(),\n" +
+                "			'yyyy-MM-dd hh-mm'\n" +
+                "		) AS VARCHAR\n" +
+                "	) AS CreateDate,\n" +
+                "	jb.isActive,\n" +
+                "	jb.Is_Exclude,\n" +
+                "	jb.Product_Description,\n" +
+                "	jb.Gross_Amount,\n" +
+                "	jb.DOQty,\n" +
+                "	jb.DOQtyUOM,\n" +
+                "	jb.Name1,\n" +
+                "	jb.Street,\n" +
+                "	jb.Distribution_Channel,\n" +
+                "	jb.Customer_Order_Block_all,\n" +
+                "	jb.Customer_Order_Block,\n" +
+                "	jb.Request_Delivery_Date,\n" +
+                "	jb.Desa_Kelurahan,\n" +
+                "	jb.Kecamatan,\n" +
+                "	jb.Kodya_Kabupaten,\n" +
+                "	jb.Batch,\n" +
+                "	jb.Ket_DO\n" +
+                "FROM\n" +
+                "	bosnet1.dbo.TMS_PreRouteJob jb\n" +
+                "INNER JOIN(\n" +
+                "		SELECT\n" +
+                "			DISTINCT DO_Number\n" +
+                "		FROM\n" +
+                "			bosnet1.dbo.TMS_ShipmentPlan\n" +
+                "		WHERE\n" +
+                "			already_shipment = 'N'\n" +
+                "			AND notused_flag IS NULL\n" +
+                "			AND incoterm = 'FCO'\n" +
+                "			AND(\n" +
+                "				Order_Type = 'ZDCO'\n" +
+                "				OR Order_Type = 'ZDTO'\n" +
+                "			)\n" +
+                "			AND create_date >= DATEADD(\n" +
+                "				DAY,\n" +
+                "				- 7,\n" +
+                "				GETDATE()\n" +
+                "			)\n" +
+                "	) sp ON\n" +
+                "	jb.DO_Number = sp.DO_Number\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			tu.Delivery_Number\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_Result_Shipment ty\n" +
+                "		INNER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
+                "			ty.Delivery_Number = tu.Delivery_Number\n" +
+                "		WHERE\n" +
+                "			tu.SAP_Status IS NULL\n" +
+                "	) ss ON\n" +
+                "	sp.DO_Number = ss.Delivery_Number\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			ty.Delivery_Number\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_Result_Shipment ty\n" +
+                "		LEFT OUTER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
+                "			ty.Delivery_Number = tu.Delivery_Number\n" +
+                "		WHERE\n" +
+                "			tu.Delivery_Number IS NULL\n" +
+                "	) sn ON\n" +
+                "	sp.DO_Number = sn.Delivery_Number\n" +
+                "WHERE\n" +
+                "	ss.Delivery_Number IS NULL\n" +
+                "	AND sn.Delivery_Number IS NULL\n" +
+                "	AND jb.RunId = '"+prev+"'\n" +
+                "	AND jb.Is_Exclude = 'inc'\n" +
+                "	AND jb.Is_Edit = 'edit';";
+
+        HashMap<String, String> pl = new HashMap<String, String>();
+        try (Connection con = (new Db()).getConnection("jdbc/fztms");
+                PreparedStatement ps = con.prepareStatement(sql)) {
+            //System.out.println(sql);
+            try (ResultSet rs = ps.executeQuery()){
+                while (rs.next()) {
+                    pl = new HashMap<String, String>();
+                    pl.put("RunId", rs.getString("RunId"));
+                    pl.put("Customer_ID", rs.getString("Customer_ID"));
+                    pl.put("DO_Number", rs.getString("DO_Number"));
+                    pl.put("Long", rs.getString("Long"));
+                    pl.put("Lat", rs.getString("Lat"));
+                    pl.put("Customer_priority", rs.getString("Customer_priority"));
+                    pl.put("Service_time", rs.getString("Service_time"));
+                    pl.put("deliv_start", rs.getString("deliv_start"));
+                    pl.put("deliv_end", rs.getString("deliv_end"));
+                    pl.put("vehicle_type_list", rs.getString("vehicle_type_list"));
+                    pl.put("total_kg", rs.getString("total_kg"));
+                    pl.put("total_cubication", rs.getString("total_cubication"));
+                    pl.put("DeliveryDeadline", rs.getString("DeliveryDeadline"));
+                    pl.put("DayWinStart", rs.getString("DayWinStart"));
+                    pl.put("DayWinEnd", rs.getString("DayWinEnd"));
+                    pl.put("UpdatevDate", rs.getString("UpdatevDate"));
+                    pl.put("CreateDate", rs.getString("CreateDate"));
+                    pl.put("isActive", rs.getString("isActive"));
+                    pl.put("Is_Exclude", rs.getString("Is_Exclude"));
+                    pl.put("Product_Description", rs.getString("Product_Description"));
+                    pl.put("Gross_Amount", rs.getString("Gross_Amount"));
+                    pl.put("DOQty", rs.getString("DOQty"));
+                    pl.put("DOQtyUOM", rs.getString("DOQtyUOM"));
+                    pl.put("Name1", rs.getString("Name1"));
+                    pl.put("Street", rs.getString("Street"));
+                    pl.put("Distribution_Channel", rs.getString("Distribution_Channel"));
+                    pl.put("Customer_Order_Block_all", rs.getString("Customer_Order_Block_all"));
+                    pl.put("Customer_Order_Block", rs.getString("Customer_Order_Block"));
+                    pl.put("Request_Delivery_Date", rs.getString("Request_Delivery_Date"));
+                    pl.put("Desa_Kelurahan", rs.getString("Desa_Kelurahan"));
+                    pl.put("Kecamatan", rs.getString("Kecamatan"));
+                    pl.put("Kodya_Kabupaten", rs.getString("Kodya_Kabupaten"));
+                    pl.put("Batch", rs.getString("Batch"));
+                    pl.put("Ket_DO", rs.getString("Ket_DO"));
+                    px.add(pl);
+
+                    //con.setAutoCommit(false);
+                    //ps.executeUpdate();
+                    //con.setAutoCommit(true);
+                }
+            }    
+        }
+        
+        return px;
     }
 }
