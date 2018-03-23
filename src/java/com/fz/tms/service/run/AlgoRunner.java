@@ -122,56 +122,76 @@ public class AlgoRunner implements BusinessLogic {
                 if (reRun.equals("A")) {
                     List<HashMap<String, String>> px = selectCust(runId, runID);
                     
-                    errMsg = cekData(runID, runId, "ori", px);
-                    resp = errMsg;
+                    if(px.size() == 0){
+                        errMsg = "Error Select cust algorunner";
+                        resp = errMsg;
+                    }else   resp = "OK";
+                    
+                    if (resp.equalsIgnoreCase("OK")){
+                        errMsg = cekData(runID, runId, "ori", px);
+                        resp = errMsg;
+                    }
                     
                     if (resp.equalsIgnoreCase("OK")){
                         errMsg = cluster(runId, runID, px);
                         resp = errMsg;
                     }
+                    
                     if (resp.equalsIgnoreCase("OK")){
                         errMsg = "Update Prev PreRouteJob Error";
                         resp = updatePrevPreRouteJob(runID, runId);
                     }
+                    
                     if (resp.equalsIgnoreCase("OK")){
                         px = selectCust(runId, runID);
                         errMsg = "Insert PreRouteJob Copy ori Error";
                         resp = insertPreRouteJobCopy(runID, runId, branchCode, dateDeliv, "ori", px);
                     }
+                    
                     if (resp.equalsIgnoreCase("OK")){
                         errMsg = "Insert PreRouteJob Copy edit Error";
                         resp = insertPreRouteJobCopy(runID, runId, branchCode, dateDeliv, "edit", px);
                     }
+                    
                     if (resp.equalsIgnoreCase("OK")){
                         errMsg = "Insert PreRouteVehicle Copy Error";
                         resp = insertPreVehicleCopy(runID, runId, branchCode, dateDeliv, "ori");
                     }
+                    
                     if (resp.equalsIgnoreCase("OK") && reRun.equals("A")) {
-                        errMsg = "TMSAlgo Error";
+                        errMsg = "TMSAlgo Error" + url;
                         resp = UrlResponseGetter.getURLResponse(url.toString());
-                        if (resp.equals("OK")) {
-                            errMsg = "runProgress Error";
-                            response.sendRedirect("runProgress.jsp?runId=" + runID + "&dateDeliv=" + dateDeliv + "&oriRunID=" + oriRunID + "&channel=" + channel);
-                        } 
                     }
+                    
+                    if (resp.equals("OK")) {
+                        errMsg = "runProgress Error";
+                        response.sendRedirect("runProgress.jsp?runId=" + runID + "&dateDeliv=" + dateDeliv + "&oriRunID=" + oriRunID + "&channel=" + channel);
+                    } 
+                    
                     if (!resp.equalsIgnoreCase("OK")){
                         throw new Exception(); 
                     }
                     
                 } else if (reRun.equals("N")) {
                     errMsg = "TMS_GetCustLongLat Error";
-                    prepareCustTable(branchCode);
-                    errMsg = "Insert PreRouteVehicle Error";
-                    resp = insertPreRouteVehicle(runID, branchCode, dateDeliv, chn);
+                    resp = prepareCustTable(branchCode);
+                    
+                    if (resp.equalsIgnoreCase("OK")){
+                        errMsg = "Insert PreRouteVehicle Error";
+                        resp = insertPreRouteVehicle(runID, branchCode, dateDeliv, chn);
+                    }
+                    
                     if (resp.equalsIgnoreCase("OK")){
                         errMsg = "Insert PreRouteJob ori Error";
-                        resp = QueryCust(runID, branchCode, channel, dateDeliv, "ori");
+                        resp = QueryCust(runID, branchCode, chn, dateDeliv, "ori");
                     }
+                    
                     //resp = insertPreRouteJob(runID, branchCode, dateDeliv, "ori", chn);
                     if (resp.equalsIgnoreCase("OK")){
                         errMsg = "Insert PreRouteJob edit Error";
-                        resp = QueryCust(runID, branchCode, channel, dateDeliv, "edit");
+                        resp = QueryCust(runID, branchCode, chn, dateDeliv, "edit");
                     }
+                    
                     //resp = insertPreRouteJob(runID, branchCode, dateDeliv, "edit", chn);
                     if (resp.equalsIgnoreCase("OK")){
                         errMsg = "";
@@ -560,8 +580,9 @@ public class AlgoRunner implements BusinessLogic {
         return str;
     }
     
-    private static void prepareCustTable(String branchCode) 
+    private static String prepareCustTable(String branchCode) 
         throws Exception {
+        String str = "ERROR";
         String sql = "EXEC bosnet1.dbo.TMS_GetCustLongLat ?";
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
                 PreparedStatement ps = con.prepareStatement(sql)) {
@@ -569,18 +590,21 @@ public class AlgoRunner implements BusinessLogic {
             ps.setQueryTimeout(15);
             ps.setString(1, branchCode);
             ps.execute();
+            str = "OK";
         }catch (Exception e) {
-            HashMap<String, String> pl = new HashMap<String, String>();
-            pl.put("ID", "");
-            pl.put("fileNmethod", "AlgoRunner&prepareCustTable Exc");
-            pl.put("datas", "");
-            pl.put("msg", e.getMessage());
-            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-            Date date = new Date();
-            pl.put("dates", dateFormat.format(date).toString());
-            Other.insertLog(pl);
-            throw e;
+            //HashMap<String, String> pl = new HashMap<String, String>();
+            //pl.put("ID", "");
+            //pl.put("fileNmethod", "AlgoRunner&prepareCustTable Exc");
+            //pl.put("datas", "");
+            //pl.put("msg", e.getMessage());
+            //DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+            //Date date = new Date();
+            //pl.put("dates", dateFormat.format(date).toString());
+            //Other.insertLog(pl);
+            //throw e;
+            str = e.getMessage();
         }
+        return str;
     }
     
     public String tripCalc(String OriRunId) throws Exception{
@@ -607,13 +631,15 @@ public class AlgoRunner implements BusinessLogic {
         HashMap<String, String> pl = new HashMap<String, String>();
         
         String query = "";
+        query = "	AND cs.Distribution_Channel IN('"+chn+"')";
+        /*
         if(chn.equals("GT")){
             query = "	AND cs.Distribution_Channel NOT IN('MT')";
         }else if(chn.equals("MT")){
             query = "	AND cs.Distribution_Channel IN('MT')";
         }else if(chn.equals("ALL")){
             query = "";
-        }
+        }*/
         
         String sql = "SELECT\n" +
                 "	sp.Customer_ID,\n" +
@@ -1097,7 +1123,8 @@ public class AlgoRunner implements BusinessLogic {
                 }
             }else{
                 //System.out.println(pl.get("Distribution_Channel"));
-                pl.replace("Distribution_Channel", "GT");
+                //repale channel to GT
+                //pl.replace("Distribution_Channel", "GT");
                 if(pl.get("DeliveryDeadline").equalsIgnoreCase("BFOR")){
                     if(str == 0)                    pl.replace("Customer_priority", String.valueOf(1));
                     else if(str > 0)                pl.replace("Customer_priority", String.valueOf(3));

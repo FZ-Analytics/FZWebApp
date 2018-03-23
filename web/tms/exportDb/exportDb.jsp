@@ -83,7 +83,7 @@
                         if (data == 'OK') {
                             $("#body").fadeIn();
                             $("#loader").fadeOut();
-                            location.reload()
+                            location.reload();
                         } else {
                             $("#body").fadeIn();
                             $("#loader").fadeOut();

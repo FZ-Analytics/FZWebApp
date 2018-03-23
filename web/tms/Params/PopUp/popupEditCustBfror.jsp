@@ -59,6 +59,7 @@
                     <th width="100px" class="fzCol">long</th>
                     <th width="100px" class="fzCol">lat</th>
                     <th width="100px" class="fzCol">customer priority</th>
+                    <th width="100px" class="fzCol">Channel</th>
                     <th width="100px" class="fzCol">RDD</th>
                     <th width="100px" class="fzCol">service time</th>
                     <th width="100px" class="fzCol">deliv start</th>
@@ -66,6 +67,7 @@
                     <th width="100px" class="fzCol">vehicle type list</th>
                     <th width="100px" class="fzCol">inc</th>
                     <th width="100px" class="fzCol">Edit</th>
+                    <th width="100px" class="fzCol">remove</th>
                 </tr>
             </thead>
             <tbody>
@@ -76,14 +78,18 @@
                     <td class="fzCell" ><%=j.lng%></td>
                     <td class="fzCell" ><%=j.lat%></td>
                     <td class="fzCell" ><%=j.customer_priority%></td>
+                    <td class="fzCell" ><%=j.channel%></td>
                     <td class="fzCell" ><%=j.rdd%></td>
                     <td class="fzCell" ><%=j.service_time%></td>
                     <td class="fzCell" ><%=j.deliv_start%></td>
                     <td class="fzCell" ><%=j.deliv_end%></td>
                     <td class="fzCell" ><%=j.vehicle_type_list%></td>
                     <td class="fzCell" ><%=j.isInc%></td>
-                    <td class="fzCell"onclick="klik('<%=j.customer_id%>')" >
+                    <td class="fzCell" onclick="klik('<%=j.customer_id%>')" >
                         <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                    </td>
+                    <td class="fzCell" onclick="exclude('<%=j.customer_id%>','<%=j.do_number%>')">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                     </td>
                 </tr>
 
@@ -142,6 +148,23 @@
                     //Browser has allowed it to be opened
                     win.focus();
                 }
+            }
+            
+            function exclude(custId, kode) {
+                var $apiAddress = '../../../api/popupEditCustBfror/excludeDO';
+                var jsonForServer = '{\"RunId\": \"' + $("#runId").text() + '\",\"Customer_ID\":\"' + 
+                        custId + '\",\"DO_Number\":\"' + kode  + '\",\"ExcInc\":\"exc\"}';
+                var data = [];
+
+                $.post($apiAddress, {json: jsonForServer}).done(function (data) {
+                    if(data == 'OK'){
+                        alert( 'sukses' );
+                        //location.reload();
+                    }else{
+                        alert( 'submit error' ); 
+                    }
+                });
+
             }
         </script>
         <%@include file="../appGlobal/bodyBottom.jsp"%>
