@@ -337,17 +337,21 @@ public class RouteJobListing implements BusinessLogic {
                 while(x < js.size()){
                     int y = 0;
                     Boolean cek = false;
-                    while(y < px.size()){
-                        
-                        if(js.get(x).DONum.equalsIgnoreCase(px.get(y).get("DOPR"))){
-                            System.out.println(js.get(x).DONum + "()" + px.get(y).get("DOPR"));
-                            cek = true;
-                        }else{
-                            cek = false;
+                    if(js.get(x).DONum.length() > 0){
+                        while(y < px.size()){                            
+                            if(js.get(x).DONum.equalsIgnoreCase(px.get(y).get("DOPR"))){
+                                System.out.println(js.get(x).DONum + "()" + px.get(y).get("DOPR"));
+                                cek = true;
+                                break;
+                            }else{
+                                cek = false;
+                            }
+                            y++;
                         }
-                        y++;
+                        if(!cek)    js.get(x).bat = "1";
+                        System.out.println(js.get(x).DONum + "()" + js.get(x).bat);
                     }
-                    if(!cek)    js.get(x).bat = "1";
+                    
                     x++;
                 }
                 request.setAttribute("vehicleCount"

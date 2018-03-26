@@ -112,6 +112,7 @@ public class PopupDetilDo  implements BusinessLogic {
                         if(ar.get(x).DO_Number.equalsIgnoreCase(px.get(y).get("DOPR"))){
                             //System.out.println(ar.get(x).DO_Number + "()" + px.get(y).get("DOPR"));
                             cek = true;
+                            break;
                         }else{
                             cek = false;
                         }
