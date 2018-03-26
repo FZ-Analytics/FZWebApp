@@ -106,8 +106,9 @@ public class SubmitToSapAPI {
 
             if (isRouteNull == false) {
                 for (int i = 0; i < alCustId.size(); i++) {
+                    System.out.println(alCustId.get(i));
                     ArrayList<HashMap<String, String>> alSP = getFromShipmentPlan(runId, alCustId.get(i));
-
+                    System.out.println(alSP.size());
                     for (int j = 0; j < alSP.size(); j++) {
                         HashMap<String, String> hmSP = alSP.get(j); //HashMap Shipment Plan
 
@@ -176,23 +177,23 @@ public class SubmitToSapAPI {
 
         return content;
     }
-    
+
     public String plus1Day(String parsedRunId) {
         String[] parsedRunIdSplit = parsedRunId.split(" ");
         String date = parsedRunIdSplit[0];
         String time = parsedRunIdSplit[1];
-        
+
         String[] dateSplit = date.split("-");
         String year = dateSplit[0];
         String month = dateSplit[1];
         int day = Integer.parseInt(dateSplit[2]) + 1;
         String hari = "";
-        if(day < 10) {
+        if (day < 10) {
             hari = "0" + day;
         } else {
             hari = "" + day;
         }
-        
+
         return year + "-" + month + "-" + hari + " " + time;
     }
 
@@ -333,7 +334,17 @@ public class SubmitToSapAPI {
                         + "		[BOSNET1].[dbo].[TMS_PreRouteJob] prj\n"
                         + "	WHERE \n"
                         + "		prj.runId = '" + runId + "'\n"
-                        + "             AND prj.Customer_ID = '" + custId + "') prj ON sp.Request_Delivery_Date = prj.Request_Delivery_Date\n"
+                        + "             AND prj.Customer_ID = '" + custId + "') prj "
+                        + "     ON \n"
+                        + "             prj.Request_Delivery_Date = \n"
+                        + "             CASE \n"
+                        + "			WHEN \n"
+                        + "				DATENAME(dw, sp.Request_Delivery_Date) = 'Sunday'\n"
+                        + "			THEN \n"
+                        + "				DATEADD(day, -1, sp.Request_Delivery_Date)\n"
+                        + "			ELSE\n"
+                        + "				sp.Request_Delivery_Date\n"
+                        + "		END\n"
                         + "WHERE\n"
                         + "         sp.Customer_ID = '" + custId + "'\n"
                         + "         AND sp.Already_Shipment <> 'Y'\n"
