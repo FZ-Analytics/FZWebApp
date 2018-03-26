@@ -127,6 +127,7 @@ public class AlgoRunner implements BusinessLogic {
                         resp = errMsg;
                     }else   resp = "OK";
                     
+                    //cek error data
                     if (resp.equalsIgnoreCase("OK")){
                         errMsg = cekData(runID, runId, "ori", px);
                         resp = errMsg;
@@ -208,28 +209,32 @@ public class AlgoRunner implements BusinessLogic {
             }
         } catch (Exception e) {
             HashMap<String, String> pl = new HashMap<String, String>();
+            
             pl.put("ID", runId);
             pl.put("fileNmethod", "AlgoRunner&run Exc");
             pl.put("datas", "");
-            pl.put("msg", errMsg +" | "+ e.getMessage());
-            String str = Arrays.toString(e.getStackTrace());;
-            System.out.println("e.getMessage() " + e.getMessage());
+            String str = getStackTrace(e);
+            pl.put("msg", errMsg +" | "+ str);
+            System.out.println("Exception " + str);
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
             Date date = new Date();
             pl.put("dates", dateFormat.format(date).toString());
-            Other.insertLog(pl);
-            /*
-            request.setAttribute("errMsg"
-                   , errMsg);
-            request.getRequestDispatcher("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
-                    + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel  + "&error=Y")
-                    .forward(pc.getRequest(), pc.getResponse());
-            */
+            Other.insertLog(pl);            
+            
             response.sendRedirect("../Params/PopUp/popupEditCustBfror.jsp?oriRunID=" + oriRunID + "&dateDeliv="
                     + dateDeliv + "&shift=" + shift + "&reRun=A" + "&branchCode=" + branchCode + "&runId=" + runId + "&channel=" + channel  + "&error=Y" + "&errMsg=" + errMsg);
         }
     }
 
+    private static String getStackTrace(Exception ex) {
+        StringBuffer sb = new StringBuffer(500);
+        StackTraceElement[] st = ex.getStackTrace();
+        sb.append(ex.getClass().getName() + ": " + ex.getMessage() + "\n");
+        for (int i = 0; i < st.length; i++) {
+          sb.append("\t at " + st[i].toString() + "\n");
+        }
+        return sb.toString();
+    }
     
     public String insertPreRouteJobCopy(String runID, String prevRunID, String branchCode,
             String dateDeliv, String str, List<HashMap<String, String>> zx)
@@ -631,7 +636,7 @@ public class AlgoRunner implements BusinessLogic {
         HashMap<String, String> pl = new HashMap<String, String>();
         
         String query = "";
-        query = "	AND cs.Distribution_Channel IN('"+chn+"')";
+        query = "	AND cs.Distribution_Channel IN("+chn+")";
         /*
         if(chn.equals("GT")){
             query = "	AND cs.Distribution_Channel NOT IN('MT')";
