@@ -17,12 +17,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.PageContext;
@@ -47,7 +51,7 @@ public class LoadDelivery implements BusinessLogic {
     int routeNb = 0;
     int jobNb = 1;
 
-    String oriRunId, runId, branch, shift;
+    String oriRunId, runId, branch, shift, dateDeliv;
 
     boolean hasBreak = false;
 
@@ -59,6 +63,7 @@ public class LoadDelivery implements BusinessLogic {
         runId = FZUtil.getHttpParam(request, "runId");
         branch = FZUtil.getHttpParam(request, "branchId");
         shift = FZUtil.getHttpParam(request, "shift");
+        dateDeliv = FZUtil.getHttpParam(request, "dateDeliv");
         String channel = FZUtil.getHttpParam(request, "channel");
         String vehicle = FZUtil.getHttpParam(request, "vehicle");
         oriRunId = FZUtil.getHttpParam(request, "oriRunId");
@@ -117,8 +122,6 @@ public class LoadDelivery implements BusinessLogic {
             d.custId = custId;
             d.doNum = aSplit[0];
             d.serviceTime = aSplit[4];
-            System.out.println("serv time: " + d.serviceTime);
-            System.out.println("doNum: " + d.doNum);
             d.storeName = aSplit[5];
             d.priority = aSplit[1];
             d.distChannel = aSplit[7];
@@ -279,7 +282,7 @@ public class LoadDelivery implements BusinessLogic {
             ld.add(d);
             if (dl.dist.equals("null")) {
                 ld.add(dl);
-                prevDepart = addTime(prevDepart, 60);
+                prevDepart = addTime(prevDepart, getBreakTime(getDayByDate(dateDeliv)));
             }
 
             /**
@@ -384,6 +387,23 @@ public class LoadDelivery implements BusinessLogic {
         }
         return newTime;
     }
+    
+    public String getDayByDate(String dates) throws ParseException {
+        String[] dateParse = dates.split("-");
+
+        int year = Integer.parseInt(dateParse[0]);
+        int month = Integer.parseInt(dateParse[1]);
+        int day = Integer.parseInt(dateParse[2]);
+
+        // First convert to Date. This is one of the many ways.
+        String dateString = String.format("%d-%d-%d", year, month, day);
+        Date date = new SimpleDateFormat("yyyy-M-d").parse(dateString);
+
+        // Then get the day of week from the Date based on specific locale.
+        String dayOfWeek = new SimpleDateFormat("EEEE", Locale.ENGLISH).format(date);
+
+        return dayOfWeek;
+    }
 
     public static double calcMeterDist(double lon1, double lat1, double lon2, double lat2) {
         double el1 = 0; // was in function param
@@ -455,6 +475,30 @@ public class LoadDelivery implements BusinessLogic {
 
         }
         return moreThan;
+    }
+    
+    public int getBreakTime(String day) throws Exception {
+        System.out.println(day);
+        int breakTime = 0;
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql = "";
+                if (day.equals("Friday")) {
+                    sql = "SELECT value FROM BOSNET1.dbo.TMS_Params WHERE param = 'fridayBreak'";
+                } else {
+                    sql = "SELECT value FROM BOSNET1.dbo.TMS_Params WHERE param = 'defaultBreak'";
+                }
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    while (rs.next()) {
+                        breakTime = rs.getInt("value");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        System.out.println(breakTime);
+        return breakTime;
     }
 
     public int checkResultShipment(String doNum, String shipmentNo) throws Exception {

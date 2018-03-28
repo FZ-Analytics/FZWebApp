@@ -69,6 +69,7 @@
             });
 
             function openEditRoutePage() {
+                var dateNow = $.datepicker.formatDate('yy-mm-dd', new Date());
                 var table = document.getElementById("table");
 
                 var tableArr = [];
@@ -88,7 +89,7 @@
                             );
                 }
 
-                var win = window.open('runResultEdit.jsp?&OriRunID=' + $('#RunIdClick').text() + '&runId=' + $('#nextRunId').text() + '&channel=' + $('#channel').text() +
+                var win = window.open('runResultEdit.jsp?&OriRunID=' + $('#RunIdClick').text() + '&runId=' + $('#nextRunId').text() + '&dateDeliv=' + dateNow + '&channel=' + $('#channel').text() +
                         '&branch=' + $('#branch').text() + '&shift=' + $('#shift').text() + '&vehicles=' + $('#vehicles').text() + '&tableArr=' + tableArr);
 
                 if (win) {

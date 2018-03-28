@@ -20,6 +20,8 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
@@ -30,6 +32,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PUT;
 import javax.ws.rs.core.MediaType;
+import org.eclipse.persistence.jpa.jpql.parser.DateTime;
 
 /**
  * REST Web Service
@@ -106,23 +109,23 @@ public class SubmitToSapAPI {
 
             if (isRouteNull == false) {
                 for (int i = 0; i < alCustId.size(); i++) {
-                    System.out.println(alCustId.get(i));
-                    ArrayList<HashMap<String, String>> alSP = getFromShipmentPlan(runId, alCustId.get(i));
-                    System.out.println(alSP.size());
-                    for (int j = 0; j < alSP.size(); j++) {
-                        HashMap<String, String> hmSP = alSP.get(j); //HashMap Shipment Plan
 
+                    ArrayList<HashMap<String, String>> alSP = getFromShipmentPlan(runId, alCustId.get(i));
+                    for (int j = 0; j < alSP.size(); j++) {
+                        System.out.println("alcust size: " + alCustId.size());
+
+                        HashMap<String, String> hmSP = alSP.get(j); //HashMap Shipment Plan
                         rs.Shipment_Type = hmPRV.get("source1");
                         rs.Plant = hmSP.get("Plant");
                         rs.Shipment_Route = route;
                         rs.Description = "";
-                        rs.Status_Plan = plus1Day(parseRunId(runId, true));
+                        rs.Status_Plan = getNextDate(parseRunId(runId, true), true);
                         rs.Status_Check_In = null;
                         rs.Status_Load_Start = null;
                         rs.Status_Load_End = null;
                         rs.Status_Complete = null;
-                        rs.Status_Shipment_Start = plus1Day(parseRunId(runId, false) + " " + alStartAndEndTime.get(0));
-                        rs.Status_Shipment_End = plus1Day(parseRunId(runId, false) + " " + alStartAndEndTime.get(1));
+                        rs.Status_Shipment_Start = getNextDate(parseRunId(runId, false), false) + " " + alStartAndEndTime.get(0);
+                        rs.Status_Shipment_End = getNextDate(parseRunId(runId, false), false) + " " + alStartAndEndTime.get(1);
                         rs.Service_Agent_Id = hmPRV.get("IdDriver");
                         if (rs.Shipment_Type.equals("ZDSI")) {
                             rs.Shipment_Number_Dummy = runId.replace("_", "") + he.vehicle_no;
@@ -167,6 +170,7 @@ public class SubmitToSapAPI {
         } catch (Exception e) {
             System.out.println("ERROR: " + e.getMessage());
         }
+
         String jsonOutput = gson.toJson(ret);
         return jsonOutput;
     }
@@ -178,23 +182,19 @@ public class SubmitToSapAPI {
         return content;
     }
 
-    public String plus1Day(String parsedRunId) {
-        String[] parsedRunIdSplit = parsedRunId.split(" ");
-        String date = parsedRunIdSplit[0];
-        String time = parsedRunIdSplit[1];
-
-        String[] dateSplit = date.split("-");
-        String year = dateSplit[0];
-        String month = dateSplit[1];
-        int day = Integer.parseInt(dateSplit[2]) + 1;
-        String hari = "";
-        if (day < 10) {
-            hari = "0" + day;
+    public String getNextDate(String date, boolean full) throws ParseException {
+        SimpleDateFormat dateFormat;
+        if (full) {
+            dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss:sss");
         } else {
-            hari = "" + day;
+            dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         }
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dateFormat.parse(date));
+        cal.add(Calendar.DATE, 1);
+        String convertedDate = dateFormat.format(cal.getTime());
 
-        return year + "-" + month + "-" + hari + " " + time;
+        return "" + convertedDate;
     }
 
     public String getVendorId(String v) {

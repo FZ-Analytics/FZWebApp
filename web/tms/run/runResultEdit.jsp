@@ -340,7 +340,7 @@
                     );
                 }
                 
-                var win = window.open('runResultEditResult.jsp?runId='+$('#RunIdClick').text()+'&oriRunId='+$('#OriRunID').val()+'&branchId='+$('#branch').text()+
+                var win = window.open('runResultEditResult.jsp?runId='+$('#RunIdClick').text()+'&oriRunId='+$('#OriRunID').val()+'&dateDeliv='+$('#dateDeliv').val()+'&branchId='+$('#branch').text()+
                         '&shift='+$('#shift').text()+'&channel='+$('#channel').text()+'&vehicle='+$('#vehicles').text()+'&array='+tableArr2);
                 if (win) {
                     //Browser has allowed it to be opened
@@ -355,6 +355,7 @@
         </script>
         <h3>Runs</h3>
         <input class="fzInput" id="OriRunID" name="OriRunID" value="<%=get("oriRunId")%>" hidden="true"/>
+        <input class="fzInput" id="dateDeliv" name="dateDeliv" value="<%=get("dateDeliv")%>" hidden="true"/>
         
         <br>
         <label class="fzLabel">Branch:</label> 
