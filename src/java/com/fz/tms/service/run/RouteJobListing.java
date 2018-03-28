@@ -48,11 +48,13 @@ public class RouteJobListing implements BusinessLogic {
         String runID = FZUtil.getHttpParam(request, "runID");
         String OriRunID = FZUtil.getHttpParam(request, "OriRunID");
         String channel = FZUtil.getHttpParam(request, "channel");
+        String dateDeliv = FZUtil.getHttpParam(request, "dateDeliv");
         request.setAttribute("channel", channel);
         List<RouteJob> js = new ArrayList<RouteJob>();
         request.setAttribute("JobList", js);
         request.setAttribute("OriRunID", OriRunID);
         request.setAttribute("nextRunId", getTimeID());
+        request.setAttribute("dateDeliv", dateDeliv);
         
         String sql = "SELECT\n" +
                 "	j.customer_ID,\n" +

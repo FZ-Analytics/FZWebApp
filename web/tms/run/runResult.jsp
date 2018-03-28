@@ -69,7 +69,6 @@
             });
 
             function openEditRoutePage() {
-                var dateNow = $.datepicker.formatDate('yy-mm-dd', new Date());
                 var table = document.getElementById("table");
 
                 var tableArr = [];
@@ -89,8 +88,9 @@
                             );
                 }
 
-                var win = window.open('runResultEdit.jsp?&OriRunID=' + $('#RunIdClick').text() + '&runId=' + $('#nextRunId').text() + '&dateDeliv=' + dateNow + '&channel=' + $('#channel').text() +
-                        '&branch=' + $('#branch').text() + '&shift=' + $('#shift').text() + '&vehicles=' + $('#vehicles').text() + '&tableArr=' + tableArr);
+                var win = window.open('runResultEdit.jsp?&OriRunID=' + $('#RunIdClick').text() + '&runId=' + $('#nextRunId').text() + '&channel=' + $('#channel').text() +
+                        '&branch=' + $('#branch').text() + '&shift=' + $('#shift').text() + '&vehicles=' + $('#vehicles').text() + '&dateDeliv=' + $('#dateDeliv').text() + 
+                        '&tableArr=' + tableArr);
 
                 if (win) {
                     //Browser has allowed it to be opened
@@ -197,6 +197,7 @@
         <h3>Runs</h3>
 
         <label class="fzInput" id="nextRunId" hidden="true"><%=get("nextRunId")%></label>
+        <label class="fzInput" id="dateDeliv" hidden="true"><%=get("dateDeliv")%></label>
 
         <input class="fzInput" id="OriRunID" 
                name="OriRunID" value="<%=get("OriRunID")%>" hidden="true"/>
