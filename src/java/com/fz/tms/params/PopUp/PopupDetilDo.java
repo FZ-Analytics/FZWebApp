@@ -104,21 +104,29 @@ public class PopupDetilDo  implements BusinessLogic {
                 RouteJobListing rj = new RouteJobListing();
                 List<HashMap<String, String>> px = rj.cekData(runId, custId);
                 int x = 0;
+                String str = "no";
                 while(x < ar.size()){
                     int y = 0;
-                    Boolean cek = false;
+                    Boolean cek = true;
                     while(y < px.size()){
-                        
-                        if(ar.get(x).DO_Number.equalsIgnoreCase(px.get(y).get("DOPR"))){
-                            //System.out.println(ar.get(x).DO_Number + "()" + px.get(y).get("DOPR"));
-                            cek = true;
-                            break;
-                        }else{
-                            cek = false;
+                        //cek jika do sama
+                        if(ar.get(x).DO_Number.equalsIgnoreCase(px.get(y).get("DOPR"))){                                                        
+                            if(px.get(y).get("DOSP") == null)           str = "cek data ShipmentPlant";
+                            else if(px.get(y).get("DOSS") != null)      str = "cek data StatusShipment";
+                            else if(px.get(y).get("DORS") != null)      str = "cek data ResultShipment";
+                            
+                            if(!str.equalsIgnoreCase("no")){
+                                cek = false;
+                                break;
+                            }else{
+                                cek = true;
+                                break;
+                            }
                         }
                         y++;
                     }
-                    if(!cek)    ar.get(x).sap = "no";
+                    
+                    if(!cek)    ar.get(x).sap = str;
                     else        ar.get(x).sap = "yes";
                     x++;
                 }

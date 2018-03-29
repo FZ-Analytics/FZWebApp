@@ -338,22 +338,30 @@ public class RouteJobListing implements BusinessLogic {
                 int x = 0;
                 while(x < js.size()){
                     int y = 0;
-                    Boolean cek = false;
+                    Boolean cek = true;
                     if(js.get(x).DONum.length() > 0){
-                        while(y < px.size()){                            
+                        while(y < px.size()){  
+                            //cek jika do sama
                             if(js.get(x).DONum.equalsIgnoreCase(px.get(y).get("DOPR"))){
-                                System.out.println(js.get(x).DONum + "()" + px.get(y).get("DOPR"));
-                                cek = true;
-                                break;
-                            }else{
-                                cek = false;
+                                //cek shipmentplsn 
+                                if(js.get(x).DONum.equalsIgnoreCase("8020102726")){
+                                    System.out.println("com.fz.tms.service.run.RouteJobListing.run()");
+                                }
+                                if(px.get(y).get("DOSP") == null
+                                        || px.get(y).get("DOSS") != null
+                                        || px.get(y).get("DORS") != null){
+                                    cek = false;
+                                    break;
+                                }else{
+                                    cek = true;
+                                }
+                                //System.out.println(js.get(x).DONum + "()" + px.get(y).get("DOPR"));                                
                             }
                             y++;
                         }
-                        if(!cek)    js.get(x).bat = "1";
-                        System.out.println(js.get(x).DONum + "()" + js.get(x).bat);
-                    }
-                    
+                        if(!cek)    js.get(x).bat = "1";//merah
+                        //System.out.println(js.get(x).DONum + "()" + js.get(x).bat);
+                    }                    
                     x++;
                 }
                 request.setAttribute("vehicleCount"
@@ -446,59 +454,58 @@ public class RouteJobListing implements BusinessLogic {
             sub = "	AND prj.Customer_ID = '"+custId+"'\n";
         }
         String sql = "SELECT\n" +
-            "	prj.DO_Number as DOPR, sp.DO_Number as DOSP,\n" +
-            "	ss.Delivery_Number as DOSS,\n" +
-            "	sn.Delivery_Number as DORS\n" +
-            "FROM\n" +
-            "(select distinct RunId, DO_Number, Customer_ID from BOSNET1.dbo.TMS_PreRouteJob) prj\n" +
-            "left outer join\n" +
-            "	(\n" +
-            "		SELECT\n" +
-            "			DISTINCT DO_Number\n" +
-            "		FROM\n" +
-            "			bosnet1.dbo.TMS_ShipmentPlan\n" +
-            "		WHERE\n" +
-            "			already_shipment = 'N'\n" +
-            "			AND notused_flag IS NULL\n" +
-            "			AND incoterm = 'FCO'\n" +
-            "			AND(\n" +
-            "				Order_Type = 'ZDCO'\n" +
-            "				OR Order_Type = 'ZDTO'\n" +
-            "			)\n" +
-            "			AND create_date >= DATEADD(\n" +
-            "				DAY,\n" +
-            "				- 7,\n" +
-            "				GETDATE()\n" +
-            "			)\n" +
-            "			and batch IS NOT NULL\n" +
-            "	) sp on prj.DO_Number = sp.DO_Number\n" +
-            "LEFT OUTER JOIN(\n" +
-            "		SELECT\n" +
-            "			distinct tu.Delivery_Number\n" +
-            "		FROM\n" +
-            "			BOSNET1.dbo.TMS_Result_Shipment ty\n" +
-            "		INNER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
-            "			ty.Delivery_Number = tu.Delivery_Number\n" +
-            "		WHERE\n" +
-            "			tu.SAP_Status IS NULL\n" +
-            "	) ss ON\n" +
-            "	prj.DO_Number = ss.Delivery_Number\n" +
-            "LEFT OUTER JOIN(\n" +
-            "		SELECT\n" +
-            "			distinct ty.Delivery_Number\n" +
-            "		FROM\n" +
-            "			BOSNET1.dbo.TMS_Result_Shipment ty\n" +
-            "		LEFT OUTER JOIN BOSNET1.dbo.TMS_Status_Shipment tu ON\n" +
-            "			ty.Delivery_Number = tu.Delivery_Number\n" +
-            "		WHERE\n" +
-            "			tu.Delivery_Number IS NULL\n" +
-            "	) sn ON\n" +
-            "	prj.DO_Number = sn.Delivery_Number\n" +
-            "WHERE\n" +
-            "	sp.DO_Number is not null\n" +
-            "	AND ss.Delivery_Number IS NULL\n" +
-            "	AND sn.Delivery_Number IS NULL\n" +
-            "	AND prj.RunId = '"+runID+"'\n" + sub;
+                "	prj.DO_Number AS DOPR,\n" +
+                "	sp.DO_Number AS DOSP,\n" +
+                "	ss.Delivery_Number AS DOSS,\n" +
+                "	sn.Delivery_Number AS DORS\n" +
+                "FROM\n" +
+                "	(\n" +
+                "		SELECT\n" +
+                "			DISTINCT RunId,\n" +
+                "			DO_Number,\n" +
+                "			Customer_ID\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_PreRouteJob\n" +
+                "	) prj\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			DISTINCT DO_Number\n" +
+                "		FROM\n" +
+                "			bosnet1.dbo.TMS_ShipmentPlan\n" +
+                "		WHERE\n" +
+                "			already_shipment = 'N'\n" +
+                "			AND notused_flag IS NULL\n" +
+                "			AND incoterm = 'FCO'\n" +
+                "			AND Order_Type IN(\n" +
+                "				'ZDCO',\n" +
+                "				'ZDTO'\n" +
+                "			)\n" +
+                "			AND create_date >= DATEADD(\n" +
+                "				DAY,\n" +
+                "				- 7,\n" +
+                "				GETDATE()\n" +
+                "			)\n" +
+                "			AND batch IS NOT NULL\n" +
+                "	) sp ON\n" +
+                "	prj.DO_Number = sp.DO_Number\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			DISTINCT Delivery_Number\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_Status_Shipment\n" +
+                "		WHERE\n" +
+                "			SAP_Message IS NULL\n" +
+                "	) ss ON\n" +
+                "	prj.DO_Number = ss.Delivery_Number\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			DISTINCT Delivery_Number\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_Result_Shipment\n" +
+                "	) sn ON\n" +
+                "	prj.DO_Number = sn.Delivery_Number\n" +
+                "WHERE\n" +
+                "	prj.RunId ='"+runID+"'\n" + sub;
         List<HashMap<String, String>> px = new ArrayList<HashMap<String, String>>();
         HashMap<String, String> pl = new HashMap<String, String>();
         try (Connection con = (new Db()).getConnection("jdbc/fztms");

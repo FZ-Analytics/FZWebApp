@@ -1127,9 +1127,10 @@ public class AlgoRunner implements BusinessLogic {
                     else                            pl.replace("Customer_priority", String.valueOf(10));
                 }
             }else{
-                //System.out.println(pl.get("Distribution_Channel"));
+                pl.replace("Customer_priority", String.valueOf(2));
                 //repale channel to GT
                 //pl.replace("Distribution_Channel", "GT");
+                /*
                 if(pl.get("DeliveryDeadline").equalsIgnoreCase("BFOR")){
                     if(str == 0)                    pl.replace("Customer_priority", String.valueOf(1));
                     else if(str > 0)                pl.replace("Customer_priority", String.valueOf(3));
@@ -1141,7 +1142,7 @@ public class AlgoRunner implements BusinessLogic {
                 }else if(pl.get("DeliveryDeadline").equalsIgnoreCase("ONDL")){
                     if(str == 0)            pl.replace("Customer_priority", String.valueOf(1));
                     else                    pl.replace("Customer_priority", String.valueOf(10));
-                }
+                }*/
             }//System.out.println(pl.get("Customer_ID"));
 
             if(pl.get("Customer_ID").equals("5820001001") || pl.get("Customer_ID").equals("5820000348")){
