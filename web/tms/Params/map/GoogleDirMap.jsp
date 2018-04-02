@@ -214,7 +214,7 @@
                         infowindow.open(map, this);
                     });
                 }
-                google.maps.event.addDomListener(window, 'load', initialize);
+                google.maps.event.addDomListener(window, 'load', initialize());
             });
         </script>        
         <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyB_lu1GKTDK0Lc08lT6p1f4WFZaFvILIGY"></script>

@@ -31,7 +31,9 @@ public class ProgressListing implements BusinessLogic {
         String runID = FZUtil.getHttpParam(request, "runId");
         String OriRunID = FZUtil.getHttpParam(request, "oriRunID");
         String channel = FZUtil.getHttpParam(request, "channel");
+        String dateDeliv = FZUtil.getHttpParam(request, "dateDeliv");
         List<ProgressRecord> prs = new ArrayList<ProgressRecord>();
+        
         // keep in attrib
         request.setAttribute("ProgressList", prs);
         request.setAttribute("channel", channel);
@@ -82,9 +84,8 @@ public class ProgressListing implements BusinessLogic {
                 
                 request.setAttribute("runId", runID);
                 request.setAttribute("oriRunID", OriRunID);
-                
+                request.setAttribute("dateDeliv", dateDeliv);
             }
         }
     }
-
 }

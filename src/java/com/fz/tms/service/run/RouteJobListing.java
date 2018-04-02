@@ -10,6 +10,7 @@ import com.fz.generic.BusinessLogic;
 import com.fz.generic.Db;
 import com.fz.tms.params.model.DODetil;
 import com.fz.tms.params.model.SummaryVehicle;
+import com.fz.tms.params.model.Vehicle;
 import com.fz.tms.params.service.Other;
 import com.fz.tms.params.service.VehicleAttrDB;
 import com.fz.util.FZUtil;
@@ -18,6 +19,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -46,11 +48,13 @@ public class RouteJobListing implements BusinessLogic {
         String runID = FZUtil.getHttpParam(request, "runID");
         String OriRunID = FZUtil.getHttpParam(request, "OriRunID");
         String channel = FZUtil.getHttpParam(request, "channel");
+        String dateDeliv = FZUtil.getHttpParam(request, "dateDeliv");
         request.setAttribute("channel", channel);
         List<RouteJob> js = new ArrayList<RouteJob>();
         request.setAttribute("JobList", js);
         request.setAttribute("OriRunID", OriRunID);
         request.setAttribute("nextRunId", getTimeID());
+        request.setAttribute("dateDeliv", dateDeliv);
         
         String sql = "SELECT\n" +
                 "	j.customer_ID,\n" +
@@ -98,7 +102,7 @@ public class RouteJobListing implements BusinessLogic {
                 "					j.weight AS FLOAT\n" +
                 "				)\n" +
                 "			) AS NUMERIC(\n" +
-                "				9,\n" +
+                "				15,\n" +
                 "				1\n" +
                 "			)\n" +
                 "		) AS VARCHAR\n" +
@@ -106,11 +110,13 @@ public class RouteJobListing implements BusinessLogic {
                 "	CAST(\n" +
                 "		CAST(\n" +
                 "			(\n" +
-                "				CAST(\n" +
-                "					j.volume AS FLOAT\n" +
+                "				(\n" +
+                "					CAST(\n" +
+                "						j.volume AS FLOAT\n" +
+                "					)/ 1000000\n" +
                 "				)\n" +
                 "			) AS NUMERIC(\n" +
-                "				9,\n" +
+                "				15,\n" +
                 "				1\n" +
                 "			)\n" +
                 "		) AS VARCHAR\n" +
@@ -124,10 +130,29 @@ public class RouteJobListing implements BusinessLogic {
                 "			j.transportCost AS NUMERIC(9)\n" +
                 "		) AS VARCHAR\n" +
                 "	) AS transportCost,\n" +
-                "	cast(Dist / 1000 as Numeric(9,1)) as Dist,\n" +
-                "	Request_Delivery_Date\n" +
+                "	CAST(\n" +
+                "		Dist / 1000 AS NUMERIC(\n" +
+                "			9,\n" +
+                "			1\n" +
+                "		)\n" +
+                "	) AS Dist,\n" +
+                "	Request_Delivery_Date,\n" +
+                "	rt.batch\n" +
                 "FROM\n" +
-                "	bosnet1.dbo.tms_RouteJob j\n" +
+                "	(\n" +
+                "		SELECT\n" +
+                "			*,\n" +
+                "			concat(\n" +
+                "				REPLACE(\n" +
+                "					runID,\n" +
+                "					'_',\n" +
+                "					''\n" +
+                "				),\n" +
+                "				(select concat(substring(vehicle_code,charindex('_',vehicle_code)+1,2), RIGHT(vehicle_code, 1)) as vehicle_code)\n" +
+                "			) AS Shipment_Number_Dummy\n" +
+                "		FROM\n" +
+                "			bosnet1.dbo.tms_RouteJob\n" +
+                "	) j\n" +
                 "LEFT OUTER JOIN(\n" +
                 "		SELECT\n" +
                 "			RunId,\n" +
@@ -138,7 +163,7 @@ public class RouteJobListing implements BusinessLogic {
                 "			name1,\n" +
                 "			street,\n" +
                 "			distribution_channel,\n" +
-                "			MIN(Request_Delivery_Date) Request_Delivery_Date\n" +
+                "			MIN( Request_Delivery_Date ) Request_Delivery_Date\n" +
                 "		FROM\n" +
                 "			(\n" +
                 "				SELECT\n" +
@@ -167,6 +192,22 @@ public class RouteJobListing implements BusinessLogic {
                 "	) d ON\n" +
                 "	j.runID = d.RunId\n" +
                 "	AND j.customer_id = d.Customer_ID\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			COUNT( CASE WHEN batch IS NULL THEN 1 ELSE 0 END ) AS batch,\n" +
+                "			Customer_ID,\n" +
+                "			runID\n" +
+                "		FROM\n" +
+                "			bosnet1.dbo.TMS_PreRouteJob\n" +
+                "		WHERE\n" +
+                "			Is_Edit = 'ori'\n" +
+                "			AND batch IS NULL\n" +
+                "		GROUP BY\n" +
+                "			Customer_ID,\n" +
+                "			runID\n" +
+                "	) rt ON\n" +
+                "	j.runID = rt.runID\n" +
+                "	AND j.customer_id = rt.Customer_ID\n" +
                 "WHERE\n" +
                 "	j.runID = '"+runID+"'\n" +
                 "ORDER BY\n" +
@@ -226,18 +267,28 @@ public class RouteJobListing implements BusinessLogic {
                     j.transportCost = FZUtil.getRsString(rs, i++, "");
                     j.dist = FZUtil.getRsString(rs, i++, "");
                     j.rdd = FZUtil.getRsString(rs, i++, "");
+                    //j.send = FZUtil.getRsString(rs, i++, "");
+                    //j.bat = FZUtil.getRsString(rs, i++, "").length() > 0 ? "1" : "0";
+                    //System.out.println(j.custID +"_"+j.bat);
                     
                     js.add(j);
                     
+                    if(j.custID.equalsIgnoreCase("5820001166")){
+                        //System.out.println("com.fz.tms.service.run.RouteJobListing.run()");
+                    }
+                    
                     //System.out.println(j.toString());
+                    //add break row
                     if(j.arrive != ""){
                         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
                         Date arv12 = sdf.parse("12:00");
                         Date arvA = sdf.parse(j.arrive);
+                        RouteJob temp = null;
                         if(js.get((js.size()-2)).arrive != ""){
                             Date arvB = sdf.parse(js.get((js.size()-2)).arrive);
                             if(arvA.after(arv12) && arvB.before(arv12)){
                                 //System.out.println(arvA + " " + arvB);
+                                temp = j;
                                 j = new RouteJob();
                                 j.name1 = "";
                                 j.custPriority = "";
@@ -245,8 +296,13 @@ public class RouteJobListing implements BusinessLogic {
                                 j.street = "";
                                 j.weight = "";
                                 j.volume = "";
-                                j.edit = "";                                
+                                j.edit = "";     
+                                j.rdd = "";
+                                j.transportCost = "";
+                                j.dist = "";
+                                j.send = "";  
                                 js.add((js.size()-1), j);
+                                j = temp;
                             }
                         }
                     }
@@ -261,7 +317,6 @@ public class RouteJobListing implements BusinessLogic {
                         request.setAttribute("shift", j.shift);
                         request.setAttribute("OriRunID", OriRunID);
                     }
-                    
                     // else if has prev job within same route
                     else if (prevJ.routeNb == j.routeNb){
                         
@@ -269,6 +324,7 @@ public class RouteJobListing implements BusinessLogic {
                     }
                     
                     //5 =-> 7 
+                    //link google map setelah break
                     if(js.get(js.size() - 1).prevJob == null && js.get(js.size() - 1).vehicleCode.length() > 2 && js.size() >= 3){
                         RouteJob pJ = new RouteJob();
                         pJ = (RouteJob) js.get(js.size() - 1);
@@ -278,15 +334,45 @@ public class RouteJobListing implements BusinessLogic {
                     // for next round
                     prevJ = j;
                 }
+                List<HashMap<String, String>> px = cekData(runID, "");
+                int x = 0;
+                while(x < js.size()){
+                    int y = 0;
+                    Boolean cek = true;
+                    if(js.get(x).DONum.length() > 0){
+                        while(y < px.size()){  
+                            //cek jika do sama
+                            if(js.get(x).DONum.equalsIgnoreCase(px.get(y).get("DOPR"))){
+                                //cek shipmentplsn 
+                                if(js.get(x).DONum.equalsIgnoreCase("8020102726")){
+                                    System.out.println("com.fz.tms.service.run.RouteJobListing.run()");
+                                }
+                                if(px.get(y).get("DOSP") == null
+                                        || px.get(y).get("DOSS") != null
+                                        || px.get(y).get("DORS") != null){
+                                    cek = false;
+                                    break;
+                                }else{
+                                    cek = true;
+                                }
+                                //System.out.println(js.get(x).DONum + "()" + px.get(y).get("DOPR"));                                
+                            }
+                            y++;
+                        }
+                        if(!cek)    js.get(x).bat = "1";//merah
+                        //System.out.println(js.get(x).DONum + "()" + js.get(x).bat);
+                    }                    
+                    x++;
+                }
                 request.setAttribute("vehicleCount"
                         , String.valueOf(vehicles.size()));
                 
             }
         }catch(Exception e){
             HashMap<String, String> pl = new HashMap<String, String>();
-            pl.put("ID", runID);
+            pl.put("ID", OriRunID+ "_" +runID);
             pl.put("fileNmethod", "RouteJobListing&run Exc");
-            pl.put("datas", "");
+            pl.put("datas", sql);
             pl.put("msg", e.getMessage());
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
             Date date = new Date();
@@ -298,5 +384,149 @@ public class RouteJobListing implements BusinessLogic {
         String id = (new SimpleDateFormat("yyyyMMdd_HHmmssSSS").format(
                         new java.util.Date()));
         return id;
+    }
+
+    public String sendSAP(Vehicle he) throws Exception{
+        String str = "ERROR";
+        
+        String sql = "update\n"
+                + "	bosnet1.dbo.TMS_RouteJob\n"
+                + " set\n"
+                + "	isFix = '1'\n"
+                + " where\n"
+                + "	runID = '" + he.RunId + "'\n"
+                + "	and vehicle_code = '" + he.vehicle_code + "'\n"
+                + "	and isFix is null";
+        try (
+            Connection con = (new Db()).getConnection("jdbc/fztms");
+            PreparedStatement psHdr = con.prepareStatement(sql
+                    , Statement.RETURN_GENERATED_KEYS);
+            )  {
+            con.setAutoCommit(false);
+
+            psHdr.executeUpdate();
+            
+             con.setAutoCommit(true);
+             str = "OK";
+        }
+        return str;
+    }
+    
+    public String DeleteResultShipment(Vehicle he) throws Exception{
+        String str = "ERROR";
+        
+        String sql = "DELETE\n" +
+                "FROM\n" +
+                "	BOSNET1.dbo.TMS_Result_Shipment\n" +
+                "WHERE\n" +
+                "	Shipment_Number_Dummy = (SELECT\n" +
+                "		DISTINCT concat(\n" +
+                "			REPLACE(\n" +
+                "				runID,\n" +
+                "				'_',\n" +
+                "				''\n" +
+                "			),\n" +
+                "			vehicle_code\n" +
+                "		)\n" +
+                "	FROM\n" +
+                "		bosnet1.dbo.tms_RouteJob\n" +
+                "	WHERE\n" +
+                "		runID = '" + he.RunId + "'\n" +
+                "		AND vehicle_code = '" + he.vehicle_code + "')";
+        try (
+            Connection con = (new Db()).getConnection("jdbc/fztms");
+            PreparedStatement psHdr = con.prepareStatement(sql
+                    , Statement.RETURN_GENERATED_KEYS);
+            )  {
+            con.setAutoCommit(false);
+
+            psHdr.executeUpdate();
+            
+             con.setAutoCommit(true);
+             str = "OK";
+        }
+        return str;
+    }
+    
+    public List<HashMap<String, String>> cekData(String runID, String custId) throws Exception{
+        String sub = "";
+        if(custId.length() > 0){
+            sub = "	AND prj.Customer_ID = '"+custId+"'\n";
+        }
+        String sql = "SELECT\n" +
+                "	prj.DO_Number AS DOPR,\n" +
+                "	sp.DO_Number AS DOSP,\n" +
+                "	ss.Delivery_Number AS DOSS,\n" +
+                "	sn.Delivery_Number AS DORS\n" +
+                "FROM\n" +
+                "	(\n" +
+                "		SELECT\n" +
+                "			DISTINCT RunId,\n" +
+                "			DO_Number,\n" +
+                "			Customer_ID\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_PreRouteJob\n" +
+                "	) prj\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			DISTINCT DO_Number\n" +
+                "		FROM\n" +
+                "			bosnet1.dbo.TMS_ShipmentPlan\n" +
+                "		WHERE\n" +
+                "			already_shipment = 'N'\n" +
+                "			AND notused_flag IS NULL\n" +
+                "			AND incoterm = 'FCO'\n" +
+                "			AND Order_Type IN(\n" +
+                "				'ZDCO',\n" +
+                "				'ZDTO'\n" +
+                "			)\n" +
+                "			AND create_date >= DATEADD(\n" +
+                "				DAY,\n" +
+                "				- 7,\n" +
+                "				GETDATE()\n" +
+                "			)\n" +
+                "			AND batch IS NOT NULL\n" +
+                "	) sp ON\n" +
+                "	prj.DO_Number = sp.DO_Number\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			DISTINCT Delivery_Number\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_Status_Shipment\n" +
+                "		WHERE\n" +
+                "			SAP_Message IS NULL\n" +
+                "	) ss ON\n" +
+                "	prj.DO_Number = ss.Delivery_Number\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			DISTINCT Delivery_Number\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_Result_Shipment\n" +
+                "	) sn ON\n" +
+                "	prj.DO_Number = sn.Delivery_Number\n" +
+                "WHERE\n" +
+                "	prj.RunId ='"+runID+"'\n" + sub;
+        List<HashMap<String, String>> px = new ArrayList<HashMap<String, String>>();
+        HashMap<String, String> pl = new HashMap<String, String>();
+        try (Connection con = (new Db()).getConnection("jdbc/fztms");
+                PreparedStatement ps = con.prepareStatement(sql)) {
+            //System.out.println(sql);
+            try (ResultSet rs = ps.executeQuery()){
+                while (rs.next()) {
+                    pl = new HashMap<String, String>();
+                    pl.put("DOPR", rs.getString("DOPR"));
+                    pl.put("DOSP", rs.getString("DOSP"));
+                    pl.put("DOSS", rs.getString("DOSS"));
+                    pl.put("DORS", rs.getString("DORS"));                    
+                    px.add(pl);
+
+                    //con.setAutoCommit(false);
+                    //ps.executeUpdate();
+                    //con.setAutoCommit(true);
+                }
+            }    
+        }
+        
+        return px;
     }
 }

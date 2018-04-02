@@ -18,6 +18,9 @@ public class TaskPlanModel
   @SerializedName("TaskListData")
   @Expose
   private TaskPlanData taskListData;
+  @SerializedName("JobStateData")
+  @Expose
+  private UploadPlanData JobStateData;
 
   public TaskPlanData getTaskListData()
   {
@@ -28,4 +31,16 @@ public class TaskPlanModel
   {
     this.taskListData = taskListData;
   }
+
+	public UploadPlanData getJobStateData()
+	{
+		return JobStateData;
+	}
+
+	public void setJobStateData(UploadPlanData JobStateData)
+	{
+		this.JobStateData = JobStateData;
+	}
+	
+	
 }

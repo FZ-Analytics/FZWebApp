@@ -122,8 +122,6 @@ public class TaskLogic
       {
         sendRsp.setCode(FixValue.intResponFail);
         sendRsp.setRsp(rspMsg.CoreMsgResponse(FixValue.intFail, FixMessege.strTaskEmpty));
-				
-			
       }
       else
       {			
@@ -228,9 +226,7 @@ public class TaskLogic
       strQuery += uploadModel.getUploadData().get(1).getReasonID() + " END) ";
 
 			strQuery += "WHERE TaskID IN (" + uploadModel.getUploadData().get(0).getTaskID() + ", " + uploadModel.getUploadData().get(1).getTaskID() + 
-                   ") AND JobID=" + mJobID + ";";
-
-			strQuery += "UPDATE fbjob SET ActualKg=" + uploadModel.getActualKg() + " WHERE JobID=" + uploadModel.getUploadData().get(0).getJobID();
+                   ") AND JobID=" + mJobID;
 
 			logger.severe("[Query Update fbtask2] -> " + strQuery);
 
@@ -256,10 +252,27 @@ public class TaskLogic
 
       if(success)
       {
-        if(UpdateJobByJobID("UPDATE fbjob SET doneDt=CURRENT_TIMESTAMP(), DoneStatus=\"DONE\" WHERE JobID=" + mJobID))
+        if(UpdateJobByJobID("UPDATE fbjob SET doneDt=CURRENT_TIMESTAMP(), DoneStatus=\"DONE\", ActualKg=" + uploadModel.getActualKg() + " WHERE JobID=" + mJobID))
         {
+          String strStatus;
+          Integer intStatus = uploadModel.getUploadData().get(1).getReasonState();
+          
+          if(intStatus == -1)
+            strStatus = "Unknown";
+          else
+          if(intStatus == 0)
+            strStatus = "DONE";
+          else
+          if(intStatus == 1)
+            strStatus = "STOP";
+          else
+          if(intStatus == 2)
+            strStatus = "LATE";
+          else
+            strStatus = FixMessege.strStatusUploadDataSuccess;
+          
           sendRsp.setCode(FixValue.intResponSuccess);
-          sendRsp.setRsp(rspMsg.CoreMsgResponse(FixValue.intSuccess, FixMessege.strUploadSuccess));
+					sendRsp.setRsp(rspMsg.CoreMsgResponse(FixValue.intSuccess, strStatus));
           UpdateVehicleByVehicleID(VehicleID, "AVLB");
         }
         else
@@ -300,4 +313,102 @@ public class TaskLogic
       logger.severe("[UpdateVehicleByVehicleID] -> " + ex.getMessage());
     }
   }
+	
+  public StatusHolder MobileJobState(TaskPlanModel taskPlanModel)
+  {
+    Integer rows;
+    rspMsg = new ResponseMessege();
+    sendRsp = new StatusHolder();
+   
+    strQuery = "SELECT b.ReasonState FROM fbjob a, fbtask2 b WHERE a.JobID=b.JobID AND TaskSeq=2 AND a.JobID=" +
+							 taskPlanModel.getJobStateData().getJobID() + " AND a.ActualTruckID=" +
+               taskPlanModel.getJobStateData().getVehicleID();
+
+    logger.severe("[Query fbjob] -> " + strQuery);
+
+    try
+    {
+      st = conn.createStatement();
+  	  res = st.executeQuery(strQuery);
+      logger.severe("[Execute] -> Execute done");
+
+      res.last();
+      rows = res.getRow();
+      logger.severe("[Rows] -> " + rows);
+      
+      if(rows == 0)
+      {
+        sendRsp.setCode(FixValue.intResponFail);
+        sendRsp.setRsp(rspMsg.CoreMsgResponse(FixValue.intFail, FixMessege.strMobileJobStateFailed));
+      }
+      else
+      {			
+        sendRsp.setCode(FixValue.intResponSuccess);
+        sendRsp.setRsp(rspMsg.MobileJobStateMsgResponse(conn, FixValue.intSuccess, FixMessege.strMobileJobStateSuccess, res, rows));
+      }
+    }
+    catch (SQLException ex)
+    {
+      sendRsp.setCode(FixValue.intResponFail);
+      sendRsp.setRsp(rspMsg.CoreMsgResponse(FixValue.intFail, FixMessege.strMobileJobStateFailed));
+    }
+
+    return sendRsp;
+  }  
+
+  public StatusHolder MobileHistoryState(TaskPlanModel taskPlanModel)
+  {
+    Integer rows;
+    rspMsg = new ResponseMessege();
+    sendRsp = new StatusHolder();
+   
+		strQuery = "SELECT CONCAT(\"[\", GROUP_CONCAT(JSON_OBJECT(\n" +
+							 "	\"JobSeq\", a.JobSeq,\n" +
+							 "	\"divID\", a.divID,\n" +
+							 "	\"EstmKg\", a.EstmKg,\n" +
+							 "	\"ActualKg\", a.ActualKg,\n" +
+							 "	\"takenDt\", a.takenDt,\n" +
+							 "	\"ActualEnd\", b.ActualEnd,\n" +
+							 "	\"Blocks\", b.Blocks\n" +
+							 ")), \"]\") AS History\n" +
+							 "FROM fbjob a\n" +
+							 "LEFT JOIN fbtask2 b ON a.JobID = b.JobID\n" +
+							 "WHERE\n" +
+							 "a.DoneStatus = \"DONE\"\n" +
+							 "AND TaskSeq = 2\n" +
+							 "AND a.ActualTruckID = " + taskPlanModel.getJobStateData().getVehicleID() + "\n" +
+							 "AND convert(b.ActualEnd,Date) = \"" + taskPlanModel.getJobStateData().getActualEnd() + "\"";
+
+    logger.severe("[Query fbjob] -> " + strQuery);
+
+    try
+    {
+      st = conn.createStatement();
+  	  res = st.executeQuery(strQuery);
+      logger.severe("[Execute] -> Execute done");
+
+      res.last();
+      rows = res.getRow();
+      logger.severe("[Rows] -> " + rows);
+      
+      if((rows == 0) || (res.getString("History") == null))
+      {
+        sendRsp.setCode(FixValue.intResponFail);
+        sendRsp.setRsp(rspMsg.CoreMsgResponse(FixValue.intFail, FixMessege.strMobileHistoryStateEmpty));
+      }
+      else
+      {			
+        sendRsp.setCode(FixValue.intResponSuccess);
+        sendRsp.setRsp(rspMsg.MobileJobHistoryMsgResponse(conn, FixValue.intSuccess, FixMessege.strMobileHistoryStateSuccess, res, rows));
+      }
+    }
+    catch (SQLException ex)
+    {
+			logger.severe(ex.getMessage());
+      sendRsp.setCode(FixValue.intResponFail);
+      sendRsp.setRsp(rspMsg.CoreMsgResponse(FixValue.intFail, FixMessege.strMobileHistoryStateFailed));
+    }
+
+    return sendRsp;
+  }  
 }

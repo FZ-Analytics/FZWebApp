@@ -30,8 +30,35 @@ public class ShowPreRouteVehicle implements BusinessLogic {
             , PageContext pc) throws Exception {
         
         String runId = FZUtil.getHttpParam(request, "runId");
+        String stat = FZUtil.getHttpParam(request, "stat");
         
-        String sql = "SELECT\n" +
+        String sql = "";
+        
+        if(stat.equalsIgnoreCase("run")){
+            sql = "SELECT\n" +
+                "	pr.vehicle_code,\n" +
+                "	pr.weight,\n" +
+                "	pr.volume,\n" +
+                "	pr.vehicle_type,\n" +
+                "	pr.branch,\n" +
+                "	pr.startLon,\n" +
+                "	pr.startLat,\n" +
+                "	pr.startTime,\n" +
+                "	pr.endTime,\n" +
+                "	pr.source1,\n" +
+                "	pr.costPerM,\n" +
+                "	pr.IdDriver,\n" +
+                "	pr.NamaDriver,\n" +
+                "	pr.agent_priority,\n" +
+                "	case when va.Channel is null then 'ALL' else va.Channel end,\n" +
+                "	pr.isActive\n" +
+                "FROM\n" +
+                "	BOSNET1.dbo.TMS_PreRouteVehicle pr\n" +
+                "Left outer JOIN BOSNET1.dbo.TMS_VehicleAtr va ON\n" +
+                "	pr.vehicle_code = va.vehicle_code\n" +
+                "WHERE\n" +
+                "	RunId = '"+runId+"'\n" +
+                "UNION ALL SELECT\n" +
                 "	vehicle_code,\n" +
                 "	weight,\n" +
                 "	volume,\n" +
@@ -43,11 +70,53 @@ public class ShowPreRouteVehicle implements BusinessLogic {
                 "	endTime,\n" +
                 "	source1,\n" +
                 "	costPerM,\n" +
-                "	isActive\n" +
+                "	IdDriver,\n" +
+                "	NamaDriver,\n" +
+                "	agent_priority,\n" +
+                "	Channel,\n" +
+                "	'0'\n" +
                 "FROM\n" +
-                "	BOSNET1.dbo.TMS_PreRouteVehicle\n" +
+                "	BOSNET1.dbo.TMS_VehicleAtr\n" +
+                "WHERE\n" +
+                "	IdDriver is not null and vehicle_code NOT IN(\n" +
+                "		SELECT\n" +
+                "			vehicle_code\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_PreRouteVehicle\n" +
+                "		WHERE\n" +
+                "			RunId = '"+runId+"'\n" +
+                "	)\n" +
+                "       and branch = (SELECT\n" +
+                "			 distinct branch\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_PreRouteVehicle\n" +
+                "		WHERE\n" +
+                "			RunId = '"+runId+"')";
+        }else{
+            sql = "SELECT\n" +
+                "	pr.vehicle_code,\n" +
+                "	pr.weight,\n" +
+                "	pr.volume,\n" +
+                "	pr.vehicle_type,\n" +
+                "	pr.branch,\n" +
+                "	pr.startLon,\n" +
+                "	pr.startLat,\n" +
+                "	pr.startTime,\n" +
+                "	pr.endTime,\n" +
+                "	pr.source1,\n" +
+                "	pr.costPerM,\n" +
+                "	pr.IdDriver,\n" +
+                "	pr.NamaDriver,\n" +
+                "	pr.agent_priority,\n" +
+                "	va.Channel,\n" +
+                "	pr.isActive\n" +
+                "FROM\n" +
+                "	BOSNET1.dbo.TMS_PreRouteVehicle pr \n" +
+                "	inner join BOSNET1.dbo.TMS_VehicleAtr va\n" +
+                "	on pr.vehicle_code = va.vehicle_code\n" +
                 "WHERE\n" +
                 "	RunId = '"+runId+"'";
+        }
         
         Vehicle ve = new Vehicle();
         String br = "";
@@ -70,8 +139,28 @@ public class ShowPreRouteVehicle implements BusinessLogic {
                     ve.endTime = FZUtil.getRsString(rs, i++, "");
                     ve.source1 = FZUtil.getRsString(rs, i++, "");
                     ve.costPerM = FZUtil.getRsString(rs, i++, "");
+                    ve.IdDriver = FZUtil.getRsString(rs, i++, "");
+                    ve.NamaDriver = FZUtil.getRsString(rs, i++, "");
+                    ve.agent_priority = FZUtil.getRsString(rs, i++, "");
+                    ve.Channel = FZUtil.getRsString(rs, i++, "");
                     ve.isActive = FZUtil.getRsString(rs, i++, "");
+                    
                     js.add(ve);
+                }
+                
+                int a = 0;
+                String addNew = "1";
+                
+                while(a < js.size()){
+                    ve = new Vehicle();
+                    ve = js.get(a);
+                    ve.addNew = addNew;
+                    a++;
+                    if(ve.isActive.equalsIgnoreCase("0") 
+                            && addNew.equalsIgnoreCase("1")){
+                        a = 0;
+                        addNew = "0";
+                    }
                 }
                 
                 request.setAttribute("VehicleList", js);

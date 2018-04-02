@@ -75,6 +75,8 @@
                 + '\n, \"status\" : ' + '\"' + saveType + '\"' 
                 + '\n, \"remark\" : ' + '\"' + $('#remark').val() + '\"' 
                 + '\n, \"kg\" : "0\"' 
+                + '\n, \"millID\" : ' + '\"' + $("#millID").val() + '\"'
+                + '\n, \"grabbercondition\" : ' + $("#grabbercondition").val() 
                 + '\n, \"hvsEstmID\" : \"' + $('#hvsEstmID').val() + "\""
                 + '\n, \"dtl\" : '  + dataJson
                 + '\n}'  

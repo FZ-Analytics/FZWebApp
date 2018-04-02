@@ -201,8 +201,24 @@ public class CustomerAttrDB {
             
                 // create sql
                 String sql ;
-                sql = "SELECT distinct Customer_ID, Name1, Street FROM BOSNET1.dbo.Customer "
-                        + "where Customer_Order_Block_all is null and Customer_Order_Block_all is null and Customer_ID like '%"+Str+"%' order by Customer_ID;";
+                sql = "SELECT\n" +
+                "	DISTINCT Customer_ID,\n" +
+                "	Name1,\n" +
+                "	Street\n" +
+                "FROM\n" +
+                "	BOSNET1.dbo.Customer\n" +
+                "WHERE\n" +
+                "	(\n" +
+                "		Customer_Order_Block_all IS NULL\n" +
+                "		OR Customer_Order_Block = ''\n" +
+                "	)\n" +
+                "	AND(\n" +
+                "		Customer_Order_Block_all IS NULL\n" +
+                "		OR Customer_Order_Block_all = ''\n" +
+                "	)\n" +
+                "	and Customer_ID like '%"+Str+"%'\n" +
+                "ORDER BY\n" +
+                "	Customer_ID;";
                 
                 // query
                 try (ResultSet rs = stm.executeQuery(sql)){

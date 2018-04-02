@@ -38,9 +38,11 @@ public class Delivery {
     public String lon2;
     public String rdd;
     public String dist = "0.0";
-    public String feasibleTruck;
-    public String feasibleCustomer;
-    public boolean dbNull;
+    public String feasibleAccess = "-";
+    public String feasibleTruck = "-";
+    public String feasibleCustomer ="-";
+    public String isFix = "";
+    public String error = "";
     
     public String getMapLink() {
         String s = "https://www.google.com/maps/dir/"

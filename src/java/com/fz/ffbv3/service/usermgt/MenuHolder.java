@@ -17,12 +17,10 @@ public class MenuHolder
 {
   private final CoreModule CoreResponse;
   private final List<MenuModule> MobileMenuRsp;
-  private final List<DivisiModule> DivisiRsp;
 
-	public MenuHolder(CoreModule CoreResponse, List<MenuModule> MobileMenuRsp, List<DivisiModule> DivisiRsp)
+	public MenuHolder(CoreModule CoreResponse, List<MenuModule> MobileMenuRsp)
 	{
 		this.CoreResponse = CoreResponse;
 		this.MobileMenuRsp = MobileMenuRsp;
-		this.DivisiRsp = DivisiRsp;
 	}
 }

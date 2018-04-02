@@ -19,10 +19,12 @@ public class EntryHolder
 {
   private final CoreModule CoreResponse;
   private final List<EntryModule> EntryResponse;
+  private final List<EntryModule> DirLocResponse;
 
-	public EntryHolder(CoreModule CoreResponse, List<EntryModule> EntryResponse)
+	public EntryHolder(CoreModule CoreResponse, List<EntryModule> EntryResponse, List<EntryModule> DirLocResponse)
 	{
 		this.CoreResponse = CoreResponse;
 		this.EntryResponse = EntryResponse;
+    this.DirLocResponse = DirLocResponse;
 	}
 }

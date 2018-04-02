@@ -39,12 +39,13 @@
                             '\",\"ExcInc\":\"' + $("#vExcInc").val() + '\",\"Customer_priority\":\"' + $("#Customer_priority").val() + 
                             '\",\"Service_time\":\"' + $("#service_time").val() + '\",\"deliv_start\":\"' + $("#deliv_start").val() +
                             '\",\"deliv_end\":\"' + $("#deliv_end").val() + '\",\"vehicle_type_list\":\"' + $("#vehicle_type_list").val() +'\"}';
+                    
                     var data = [];
                     
                     $.post($apiAddress, {json: jsonForServer}).done(function (data) {
                         if(data == 'OK'){
                             alert( 'sukses' );
-                            location.reload()
+                            location.reload();
                         }else{
                             alert( 'submit error' ); 
                         }
@@ -182,6 +183,18 @@
         <br>
         <label class="fzLabel">Channel:</label> 
         <input class="fzInput" type="text" id="Distribution_Channel" name="Distribution_Channel" value='<%=get("Distribution_Channel")%>' readonly="true">
+        
+        <br>
+        <label class="fzLabel">Kelurahan:</label> 
+        <input class="fzInput" type="text" id="Desa_Kelurahan" name="Desa_Kelurahan" value='<%=get("Desa_Kelurahan")%>' readonly="true">
+        
+        <br>
+        <label class="fzLabel">Kecamatan:</label> 
+        <input class="fzInput" type="text" id="Kecamatan" name="Kecamatan" value='<%=get("Kecamatan")%>' readonly="true">
+        
+        <br>
+        <label class="fzLabel">Kabupaten:</label> 
+        <input class="fzInput" type="text" id="Kodya_Kabupaten" name="Kodya_Kabupaten" value='<%=get("Kodya_Kabupaten")%>' readonly="true">
         
         <br><br>
         <button class="btn fzButton" type="submit" id="btn">Submit</button>

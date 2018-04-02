@@ -54,7 +54,6 @@
         <%@include file="../appGlobal/bodyTop.jsp"%>
         <link href="../appGlobal/eFreezeTable.css" rel="stylesheet">
         <script src="../appGlobal/eFreezeTable.js"></script>
-        <script src="jquery.ui.touch-punch.min.js"></script>
         <script>
             var rowIdx = 0;
             var vNoTop = "";
@@ -66,17 +65,10 @@
             var vehicleCode = "";
             
             $(document).ready(function () {
-                
-                //draggable table row
-//                $("tbody").sortable({
-//                    appendTo: "parent",
-//                    helper: "clone"
-//                });
-                
                 $('#table').eFreezeTableHead();
                 $('.custIDClick').click(function () {
                     if ($(this).text().length > 0) {
-                        window.open("../Params/PopUp/popupDetilDOCust.jsp?custId=" + $(this).text() + "&runId=" + $("#RunIdClick").text(), null,
+                        window.open("../Params/PopUp/popupDetilDOCust.jsp?custId=" + $(this).text() + "&runId=" + $("#OriRunID").val(), null,
                                 "scrollbars=1,resizable=1,height=500,width=750");
                         return true;
                     }
@@ -90,7 +82,7 @@
                 });
                 $('#RunIdClick').click(function () {
                     if ($(this).text().length > 0) {
-                        window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text(), null,
+                        window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text() + "&oriRunID=" + $("#OriRunID").val(), null,
                                 "scrollbars=1,resizable=1,height=500,width=850");
                         return true;
                     }
@@ -101,18 +93,6 @@
                                 "scrollbars=1,resizable=1,height=530,width=530");
                         return true;
                     }
-                });
-
-                $('#reRun').click(function () {
-                    setTimeout(function () {
-                        var dateNow = $.datepicker.formatDate('yy-mm-dd', new Date());//currentDate.getFullYear()+"-"+(currentDate.getMonth()+1)+"-"+currentDate.getDate();
-
-                        var win = window.open('runProcess.jsp?tripCalc=M&shift=1&dateDeliv=' + dateNow + '&branch=' + $('#branch').text() + '&runId=' + $("#RunIdClick").text() + '&oriRunID=' + $("#OriRunID").val()  + '&reRun=A' + '&channel=' + $('#channel').text(), '_blank');
-                        if (win) {
-                            //Browser has allowed it to be opened
-                            win.focus();
-                        }
-                    }, 3000);
                 });
                 
                 initContextMenu();
@@ -360,7 +340,7 @@
                     );
                 }
                 
-                var win = window.open('runResultEditResult.jsp?runId='+$('#RunIdClick').text()+'&oriRunId='+$('#oriRunId').text()+'&branchId='+$('#branch').text()+
+                var win = window.open('runResultEditResult.jsp?runId='+$('#RunIdClick').text()+'&oriRunId='+$('#OriRunID').val()+'&dateDeliv='+$('#dateDeliv').val()+'&branchId='+$('#branch').text()+
                         '&shift='+$('#shift').text()+'&channel='+$('#channel').text()+'&vehicle='+$('#vehicles').text()+'&array='+tableArr2);
                 if (win) {
                     //Browser has allowed it to be opened
@@ -374,8 +354,8 @@
             }
         </script>
         <h3>Runs</h3>
-
-        <label class="fzLabel" id="oriRunId"><%=get("oriRunId")%></label>
+        <input class="fzInput" id="OriRunID" name="OriRunID" value="<%=get("oriRunId")%>" hidden="true"/>
+        <input class="fzInput" id="dateDeliv" name="dateDeliv" value="<%=get("dateDeliv")%>" hidden="true"/>
         
         <br>
         <label class="fzLabel">Branch:</label> 
@@ -426,7 +406,8 @@
             </thead>
             <tbody>
                 <%for(Delivery j : (List<Delivery>) getList("listDelivery")) { %> 
-                <tr class="tableRows" id="tableRow"
+                <tr 
+                    class="tableRows" id="tableRow"
                     <%if (j.vehicleCode.equals("NA")) {%>
                     style="color: red"
                     <%} else if (j.arrive.length() == 0 && j.depart.length() > 0) {%>
@@ -440,7 +421,13 @@
                     <td class="fzCell"><%=j.arrive%></td>
                     <td class="fzCell"><%=j.depart%></td>                    
                     <td class="fzCell"><%=j.doNum%></td>
-                    <td class="fzCell"><%=j.serviceTime%></td>
+                    <td class="fzCell">
+                        <%if(!j.vehicleCode.equals("NA")) {%>
+                            <%=j.serviceTime%>
+                        <%} else {
+                            out.print("0");
+                        }%>  
+                    </td>
                     <td class="fzCell">
                         <%if (j.arrive.length() > 0) {%>
                         <a href="<%=j.getMapLink()%>" target="_blank"><%=j.storeName%></a>
@@ -456,7 +443,7 @@
                     <td class="fzCell"><%=j.dist%></td>
                     
                     <td class="editCust" onclick="klik(<%=j.custId%>)" style="color: blue;">
-                        <%if(j.doNum.length() > 0 && !j.vehicleCode.equals("NA")) {%>
+                        <%if(j.doNum.length() > 0) {%>
                             edit
                         <%}%>
                     </td>

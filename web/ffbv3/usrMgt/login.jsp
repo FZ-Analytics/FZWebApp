@@ -9,7 +9,7 @@
     <body>
         <%@include file="../appGlobal/bodyTop.jsp"%>
         <h3>Login</h3>
-        <form class="container" action="entry.jsp" method="post">
+        <form class="container" action="../usrMgt/entry.jsp" method="post">
 
             <div class="fzErrMsg">
                 <%=get("loginResult")%>

@@ -11,6 +11,7 @@ import com.fz.ffbv3.service.trackmgt.GraberModel;
 import com.fz.ffbv3.service.trackmgt.TrackingLogic;
 import com.fz.ffbv3.service.trackmgt.TrackingModel;
 import com.fz.generic.DBConnector;
+import com.fz.generic.Db;
 import com.fz.generic.ResponseMessege;
 import com.fz.generic.StatusHolder;
 import com.fz.util.FixMessege;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Random;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,12 +43,13 @@ import javax.ws.rs.core.Response;
  *
  * @author Agustinus Ignat
  */
-@Path("track")
+@Path("v1/track")
 public class TrackApi 
 {
   private final Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
-  FileHandler fh = null;
-  final String DATE_FORMAT = "yyyyMMdd";
+//  FileHandler fh = null;
+//  final String DATE_FORMAT = "yyyyMMdd.HHmm";
+//  Random rand = new Random();
 
   @Context
   private UriInfo context;
@@ -56,12 +59,13 @@ public class TrackApi
      */
     public TrackApi() 
     {
-      try 
+/*      
+			try 
       {
         DateTimeFormatter dateTimeformatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
         LocalDateTime localDateTime = LocalDateTime.now();
 
-        this.fh = new FileHandler("D:\\fza\\log\\TrackApi." + dateTimeformatter.format(localDateTime) + ".log", true);
+        this.fh = new FileHandler(FixValue.strLogPath + "TrackApi." + dateTimeformatter.format(localDateTime) + ".log", true);
       }
       catch (IOException ex)
       {
@@ -73,8 +77,9 @@ public class TrackApi
       }
 
       fh.setFormatter(new SimpleFormatter());
-      logger.addHandler(fh);
-    }
+      logger.addHandler(fh); 
+*/      
+		}
 
     /**
      * Retrieves representation of an instance of com.fz.ffbv3.api.TrackApi
@@ -109,27 +114,24 @@ public class TrackApi
 		TrackingModel trackingModel = gson.fromJson(content, TrackingModel.class);
     logger.severe("[Parsing] -> Parsing request with GSON done");
 
-    DBConnector dBConnector = new DBConnector();
-    Connection conn = dBConnector.ConnectToDatabase();
-    logger.severe("[Open] -> Open database done");
-
     StatusHolder statusHolder = new StatusHolder();
-    
-    if(conn != null)
-    {
+
+		try(Connection conn = (new Db()).getConnection("jdbc/fz"))
+		{
+	    logger.severe("[Open] -> Open database done");
       TrackingLogic trackingLogic = new TrackingLogic(conn, logger);
       statusHolder = trackingLogic.GPSDataUpload(trackingModel);
-    }
-    else
-    {
+		}
+		catch (Exception ex)
+		{
       statusHolder.setCode(FixValue.intResponError);
       statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strUploadFailed));
-    }   
-    
-    dBConnector.CloseDatabase(conn);
+      logger.log(Level.SEVERE, "[Stack Trace] -> {0}", ex.toString());
+		}
+
     logger.severe("[Close] -> Close database done");
     logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
-    fh.close();
+//    fh.close();
     return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build();
   }
 
@@ -146,27 +148,24 @@ public class TrackApi
 		GraberModel graberModel = gson.fromJson(content, GraberModel.class);
     logger.severe("[Parsing] -> Parsing request with GSON done");
 
-    DBConnector dBConnector = new DBConnector();
-    Connection conn = dBConnector.ConnectToDatabase();
-    logger.severe("[Open] -> Open database done");
-
     StatusHolder statusHolder = new StatusHolder();
-    
-    if(conn != null)
-    {
+
+		try(Connection conn = (new Db()).getConnection("jdbc/fz"))
+		{
+	    logger.severe("[Open] -> Open database done");
       TrackingLogic trackingLogic = new TrackingLogic(conn, logger);
       statusHolder = trackingLogic.GPSGraberUpload(graberModel);
-    }
-    else
-    {
+		}
+		catch (Exception ex)
+		{
       statusHolder.setCode(FixValue.intResponError);
       statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strUploadFailed));
-    }   
+      logger.log(Level.SEVERE, "[Stack Trace] -> {0}", ex.toString());
+		}
     
-    dBConnector.CloseDatabase(conn);
     logger.severe("[Close] -> Close database done");
     logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
-    fh.close();
+//    fh.close();
     return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build();
   }
 }

@@ -12,7 +12,7 @@
         <title>Jobs</title>
     </head>
     <body>
-        <%@include file="../appGlobal/bodyTop.jsp"%>
+        <%@include file="../../appGlobal/bodyTop.jsp"%>
         <script>
             $(document).ready(function () {
                 $('#vVehiType').on('change', function () {
@@ -69,7 +69,7 @@
                     $.post($apiAddress, {json: jsonForServer}).done(function (data) {
                         if(data == 'OK'){
                             alert( 'sukses' );
-                            location.reload()
+                            location.reload();
                         }else{
                             alert( data ); 
                         }
@@ -80,8 +80,8 @@
         <div class="fzErrMsg" id="errMsg">
             <%=get("errMsg")%>
         </div>
-        <link rel="stylesheet" href="../appGlobal/timepicker.css">
-        <script src="../appGlobal/timepicker.js"></script>
+        <link rel="stylesheet" href="../../appGlobal/timepicker.css">
+        <script src="../../appGlobal/timepicker.js"></script>
 
         <input type="text" id="flag" name="flag" value="<%=get("flag")%>" hidden="true">
         <br>
@@ -127,6 +127,6 @@
 
         <br><br>
         <button class="btn fzButton" type="submit" id="btn"><%=get("flag")%></button>
-        <%@include file="../appGlobal/bodyBottom.jsp"%>
+        <%@include file="../../appGlobal/bodyBottom.jsp"%>
     </body>
 </html>

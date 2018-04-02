@@ -15,11 +15,13 @@
     <body>
   <%@include file="../appGlobal/bodyTop.jsp"%>
   <script>
+
   $( function() {
     $( "#hvsDt" ).datepicker();
     $( "#hvsDt" ).datepicker( "option", "dateFormat", "yy-mm-dd");
     $( "#hvsDt" ).val(yyyymmddDate(new Date()));
   } );
+
   </script>
         <h3><%=FZUtil.getHttpParam(request, "title")%></h3>
         <form class="container" action="hvsEstmFilterProcess.jsp" method="post">
@@ -30,13 +32,13 @@
             
             <br>
             <label class="fzLabel">Harvest Date</label>
-            <input class="fzInput" id="hvsDt" 
+            <input type="fzInput" class="fzInput" id="hvsDt" 
                    name="hvsDt" value=""/>
             
             <br><br>
             <label class="fzLabel">Estate + Division</label>
             <input class="fzInput" type="text" id="estateID" 
-                   name="divID" value="BINE1">
+                   name="divID" value="">
             
             <br>
             <label class="fzLabel"></label>

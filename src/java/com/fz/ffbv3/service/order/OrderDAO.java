@@ -87,13 +87,15 @@ public class OrderDAO {
             try (Statement stm = con.createStatement()) { 
                 ResultSet rs = stm.executeQuery(sql);
                 if (rs!=null && rs.next()) {
+                    o = new Order();
                     o.JobID = rs.getString("JobID");
                     o.JobSeq = rs.getInt("JobSeq");
                     o.TruckID = rs.getString("ActualTruckID");
-                    o.blockId1 = rs.getString("blockId1");
-                    o.blockId2 = rs.getString("blockId2");
+                    o.blockId1 = rs.getString("BetweenBlock1");
+                    o.blockId2 = rs.getString("BetweenBlock2");
                     o.DoneStatus = rs.getString("DoneStatus");
                     o.divID = rs.getString("divID");
+                    o.rundID = rs.getString("runID");
                 }
             } catch(Exception ex) { 
                 String s = ex.getMessage();
