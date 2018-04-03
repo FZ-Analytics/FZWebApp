@@ -87,7 +87,9 @@ public class VehicleAttrDB {
                     "				WHEN vh.vehicle_code IS NULL THEN va.vehicle_type\n" +
                     "				ELSE vh.vehicle_type\n" +
                     "			END AS vehicle_type,\n" +
-                    "			va.included\n" +
+                    "			va.included,\n" +
+                    "			va.NamaDriver,\n" +
+                    "			va.Channel\n" +
                     "		FROM\n" +
                     "			BOSNET1.dbo.Vehicle vh\n" +
                     "		LEFT OUTER JOIN BOSNET1.dbo.TMS_VehicleAtr va ON\n" +
@@ -107,7 +109,9 @@ public class VehicleAttrDB {
                     "			va.volume,\n" +
                     "			va.branch AS plant,\n" +
                     "			va.vehicle_type,\n" +
-                    "			va.included\n" +
+                    "			va.included,\n" +
+                    "			va.NamaDriver,\n" +
+                    "			va.Channel\n" +
                     "		FROM\n" +
                     "			BOSNET1.dbo.TMS_VehicleAtr va\n" +
                     "		WHERE\n" +
@@ -132,6 +136,8 @@ public class VehicleAttrDB {
                         c.weight = rs.getString("weight");
                         c.volume = rs.getString("volume");
                         c.included = rs.getString("included");
+                        c.NamaDriver = rs.getString("NamaDriver");
+                        c.Channel = rs.getString("Channel");
                         ar.add(c);
                     }
                 }

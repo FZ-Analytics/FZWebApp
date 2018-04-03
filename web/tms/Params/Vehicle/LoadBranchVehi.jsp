@@ -26,34 +26,24 @@
                     <thead>
                         <tr>
                             <th>vehicle code</th>
-                            <th>branch</th>
-                            <th>startLon</th>
-                            <th>startLat</th>
-                            <th>endLon</th>
-                            <th>endLat</th>
-                            <th>startTime</th>
-                            <th>endTime</th>
-                            <th>source1</th>
+                            <th>driver</th>
                             <th>vehicle type</th>
-                            <th>weight</th>
-                            <th>volume</th>
+                            <th>startTime</th>
+                            <th>endTime</th>                            
+                            <th>channel</th>
+                            <th>included</th>
                         </tr>
                     </thead>
                     <tbody>
                         <%for (Vehicle j : (List<Vehicle>) getList("listVehicle")) {%> 
                         <tr>
                             <th class="fzCellClikck"><%=j.vehicle_code%></th>
-                            <th><%=j.branch%></th>
-                            <th><%=j.startLon%></th>
-                            <th><%=j.startLat%></th>
-                            <th><%=j.endLon%></th>
-                            <th><%=j.endLat%></th>
+                            <th><%=j.NamaDriver%></th>
+                            <th><%=j.vehicle_type%></th>
                             <th><%=j.startTime%></th>
                             <th><%=j.endTime%></th>
-                            <th><%=j.source1%></th>
-                            <th><%=j.vehicle_type%></th>
-                            <th><%=j.weight%></th>
-                            <th><%=j.volume%></th>
+                            <th><%=j.Channel%></th>
+                            <th><%=j.included%></th>
                         </tr>
                         <%} // for ProgressRecord %>
                     </tbody>
