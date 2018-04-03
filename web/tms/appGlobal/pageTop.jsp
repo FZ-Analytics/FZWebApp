@@ -32,4 +32,30 @@
 <%
     pc = pageContext;
     PageTopUtils.checkLogin(pc);
+    
+    String EmpyID = (String) pc.getSession().getAttribute("EmpyID") == null ? 
+            "null" : (String) pc.getSession().getAttribute("EmpyID");
+    String UserName = (String) pc.getSession().getAttribute("UserName") == null ?
+            "null" : (String) pc.getSession().getAttribute("UserName");
+    String UserID = (String) pc.getSession().getAttribute("UserID") == null ? 
+            "null" : (String) pc.getSession().getAttribute("UserID");
+    String WorkplaceID = (String) pc.getSession().getAttribute("WorkplaceID") == null ?
+            "null" : (String) pc.getSession().getAttribute("WorkplaceID");
+    
+    //System.out.println(EmpyID+"()"+UserName+"()"+UserID+"()"+WorkplaceID);
+    String url = request.getRequestURL().toString();
+    System.out.println(url+"()");
+    
+    String urlLogout = "";
+    if (url.contains("/run/")) {
+        urlLogout = "../usrMgt/logout.jsp";
+    }if (url.contains("/Params/")) {
+        urlLogout = "../../usrMgt/logout.jsp";
+    }
 %>
+<% if(!EmpyID.equalsIgnoreCase("null")){%>
+    <br>
+    <label clas="FzLabel">Wellcome : <%=UserName%>(<%=EmpyID%>) </label>            
+    <a href='<%=urlLogout%>'>Logout</a>
+    <br>
+<%}%>
