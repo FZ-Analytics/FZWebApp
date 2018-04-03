@@ -5,7 +5,7 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@include file="../../ffbv3/appGlobal/pageTop.jsp"%>
+<%@include file="../appGloball/pageTop.jsp"%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -82,7 +82,7 @@
         </script>
         <div class="container">            
             <header>
-                <%@include file="../../ffbv3/appGlobal/bodyTop.jsp"%> 
+                <%@include file="../appGlobal/bodyTop.jsp"%> 
             </header>
             <p><font size="3">Menu</font></p>
             <nav>
@@ -98,7 +98,7 @@
             <%--<iframe src="https://www.google.co.id" name="iframe1">
             </iframe>
             <footer><p>Copyright &copy; SMART Tbk</p></footer>--%>
-            <%@include file="../../ffbv3/appGlobal/bodyBottom.jsp"%>    
+            <%@include file="../appGlobal/bodyBottom.jsp"%>    
         </div>
     </body>
 </html>

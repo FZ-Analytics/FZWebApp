@@ -3,7 +3,7 @@
     Created on : Mar 14, 2018, 1:50:16 PM
     Author     : dwi.oktaviandi
 --%>
-<%@include file="../appGlobal/pageTop.jsp"%>
+<%@include file="../../appGlobal/pageTop.jsp"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="com.fz.tms.params.model.ForwadingAgent"%>
 <%run(new com.fz.tms.params.Driver.DriverAttrAddView());%>

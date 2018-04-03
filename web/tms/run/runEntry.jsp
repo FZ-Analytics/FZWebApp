@@ -3,6 +3,7 @@
     Created on : Sep 23, 2017, 5:07:33 AM
 --%>
 
+<%@page import="com.fz.util.FZUtil"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@include file="../appGlobal/pageTop.jsp"%>
 <!DOCTYPE html>
@@ -20,9 +21,7 @@
     $( "#dateDeliv" ).val(yyyymmddDate(new Date()));
   } );
   </script>
-        <h3>Run</h3>
         <form class="container" action="runProcess.jsp" method="post">
-
             <div class="fzErrMsg">
                 <%=get("errMsg")%>
             </div>
@@ -37,7 +36,7 @@
             <br><br>
             <label class="fzLabel">Branch</label>
             <input class="fzInput" id="branch" 
-                   name="branch" value="D314"/>
+                   name="branch" value="<%=WorkplaceID%>" readonly="true"/>
             
             <br><br>
             <label class="fzLabel">Date Deliv</label>

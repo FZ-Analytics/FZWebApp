@@ -3,7 +3,7 @@
     Created on : Oct 31, 2017, 5:07:49 PM
     Author     : dwi.rangga
 --%>
-<%@include file="../appGlobal/pageTop.jsp"%>
+<%@include file="../../appGlobal/pageTop.jsp"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="com.fz.tms.params.model.SummaryVehicle"%>
 <%run(new com.fz.tms.params.PopUp.popupDetilRunId());%>
