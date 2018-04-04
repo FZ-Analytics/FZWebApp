@@ -5,7 +5,7 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@include file="../appGlobal/pageTop.jsp"%>
+<%@include file="../../appGlobal/pageTop.jsp"%>
 <%run(new com.fz.tms.params.PopUp.popupEditCust());%>
 <!DOCTYPE html>
 <html>
@@ -39,12 +39,13 @@
                             '\",\"ExcInc\":\"' + $("#vExcInc").val() + '\",\"Customer_priority\":\"' + $("#Customer_priority").val() + 
                             '\",\"Service_time\":\"' + $("#service_time").val() + '\",\"deliv_start\":\"' + $("#deliv_start").val() +
                             '\",\"deliv_end\":\"' + $("#deliv_end").val() + '\",\"vehicle_type_list\":\"' + $("#vehicle_type_list").val() +'\"}';
+                    
                     var data = [];
                     
                     $.post($apiAddress, {json: jsonForServer}).done(function (data) {
                         if(data == 'OK'){
                             alert( 'sukses' );
-                            location.reload()
+                            location.reload();
                         }else{
                             alert( 'submit error' ); 
                         }

@@ -5,7 +5,7 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@include file="../appGlobal/pageTop.jsp"%>
+<%@include file="../../appGlobal/pageTop.jsp"%>
 <%@page import="com.fz.tms.params.model.Vehicle"%>
 <%run(new com.fz.tms.params.PopUp.ShowPreRouteVehicle());%>
 <!DOCTYPE html>
@@ -49,7 +49,7 @@
                 $.post($apiAddress, {json: jsonForServer}).done(function (data) {
                     if(data == 'OK'){
                         alert( 'sukses' );
-                        location.reload()
+                        location.reload();
                     }else{
                         alert( 'submit error' ); 
                     }
@@ -65,7 +65,7 @@
                 $.post($apiAddress, {json: jsonForServer}).done(function (data) {
                     if(data == 'OK'){
                         alert( 'sukses' );
-                        location.reload()
+                        location.reload();
                     }else{
                         alert( 'submit error' ); 
                     }

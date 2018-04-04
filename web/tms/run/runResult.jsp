@@ -89,7 +89,8 @@
                 }
 
                 var win = window.open('runResultEdit.jsp?&OriRunID=' + $('#RunIdClick').text() + '&runId=' + $('#nextRunId').text() + '&channel=' + $('#channel').text() +
-                        '&branch=' + $('#branch').text() + '&shift=' + $('#shift').text() + '&vehicles=' + $('#vehicles').text() + '&tableArr=' + tableArr);
+                        '&branch=' + $('#branch').text() + '&shift=' + $('#shift').text() + '&vehicles=' + $('#vehicles').text() + '&dateDeliv=' + $('#dateDeliv').text() + 
+                        '&tableArr=' + tableArr);
 
                 if (win) {
                     //Browser has allowed it to be opened
@@ -196,6 +197,7 @@
         <h3>Runs</h3>
 
         <label class="fzInput" id="nextRunId" hidden="true"><%=get("nextRunId")%></label>
+        <label class="fzInput" id="dateDeliv" hidden="true"><%=get("dateDeliv")%></label>
 
         <input class="fzInput" id="OriRunID" 
                name="OriRunID" value="<%=get("OriRunID")%>" hidden="true"/>
@@ -243,8 +245,8 @@
                     <th width="100px" class="fzCol">Priority</th>
                     <th width="100px" class="fzCol">Dist Chl</th>
                     <th width="100px" class="fzCol">Street</th>
-                    <th width="100px" class="fzCol">Weight</th>
-                    <th width="100px" class="fzCol">Volume</th>
+                    <th width="100px" class="fzCol">Weight (KG)</th>
+                    <th width="100px" class="fzCol">Volume (CM3)</th>
                     <th width="100px" class="fzCol">RDD</th>
                     <th width="100px" class="fzCol">Transport Cost</th>
                     <th width="100px" class="fzCol">Dist</th>

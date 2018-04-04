@@ -48,11 +48,13 @@ public class RouteJobListing implements BusinessLogic {
         String runID = FZUtil.getHttpParam(request, "runID");
         String OriRunID = FZUtil.getHttpParam(request, "OriRunID");
         String channel = FZUtil.getHttpParam(request, "channel");
+        String dateDeliv = FZUtil.getHttpParam(request, "dateDeliv");
         request.setAttribute("channel", channel);
         List<RouteJob> js = new ArrayList<RouteJob>();
         request.setAttribute("JobList", js);
         request.setAttribute("OriRunID", OriRunID);
         request.setAttribute("nextRunId", getTimeID());
+        request.setAttribute("dateDeliv", dateDeliv);
         
         String sql = "SELECT\n" +
                 "	j.customer_ID,\n" +
@@ -135,100 +137,6 @@ public class RouteJobListing implements BusinessLogic {
                 "		)\n" +
                 "	) AS Dist,\n" +
                 "	Request_Delivery_Date,\n" +
-                /*
-                "	CASE\n" +
-                "		WHEN len(j.customer_ID)> 3\n" +
-                "		AND j.vehicle_code <> 'NA'\n" +
-                "		AND(\n" +
-                "			SELECT\n" +
-                "				COUNT( Shipment_Number_Dummy )\n" +
-                "			FROM\n" +
-                "				BOSNET1.dbo.TMS_Result_Shipment\n" +
-                "			WHERE\n" +
-                "				Shipment_Number_Dummy = j.Shipment_Number_Dummy\n" +
-                "		)= 0 THEN 'OK'\n" +
-                "		WHEN j.vehicle_code = 'NA' THEN ''\n" +
-                "		WHEN(\n" +
-                "			SELECT\n" +
-                "				COUNT(*)\n" +
-                "			FROM\n" +
-                "				BOSNET1.dbo.TMS_Result_Shipment\n" +
-                "			WHERE\n" +
-                "				Shipment_Number_Dummy = j.Shipment_Number_Dummy\n" +
-                "		)> 0\n" +
-                "		AND(\n" +
-                "			SELECT\n" +
-                "				COUNT( CASE WHEN SAP_Status IS NULL THEN 1 ELSE SAP_Status END )\n" +
-                "			FROM\n" +
-                "				BOSNET1.dbo.TMS_Status_Shipment\n" +
-                "			WHERE\n" +
-                "				SAP_Status IS NULL\n" +
-                "				AND Shipment_Number_Dummy = j.Shipment_Number_Dummy\n" +
-                "		)> 0 THEN 'SEND'\n" +
-                "		WHEN(\n" +
-                "			SELECT\n" +
-                "				COUNT(*)\n" +
-                "			FROM\n" +
-                "				BOSNET1.dbo.TMS_Result_Shipment\n" +
-                "			WHERE\n" +
-                "				Shipment_Number_Dummy = j.Shipment_Number_Dummy\n" +
-                "		)> 0\n" +
-                "		AND(\n" +
-                "			SELECT\n" +
-                "				COUNT( CASE WHEN SAP_Status IS NULL THEN 1 ELSE SAP_Status END )\n" +
-                "			FROM\n" +
-                "				BOSNET1.dbo.TMS_Status_Shipment\n" +
-                "			WHERE\n" +
-                "				SAP_Status IS NULL\n" +
-                "				AND Shipment_Number_Dummy = j.Shipment_Number_Dummy\n" +
-                "		)= 0\n" +
-                "		AND(\n" +
-                "			SELECT\n" +
-                "				DATEDIFF(\n" +
-                "					MINUTE,\n" +
-                "					Time_Stamp,\n" +
-                "					TIMESTAMP\n" +
-                "				) AS ts\n" +
-                "			FROM\n" +
-                "				(\n" +
-                "					SELECT\n" +
-                "						top 1 Time_Stamp,\n" +
-                "						Shipment_Number_Dummy\n" +
-                "					FROM\n" +
-                "						BOSNET1.dbo.TMS_Result_Shipment\n" +
-                "					WHERE\n" +
-                "						Shipment_Number_Dummy = j.Shipment_Number_Dummy\n" +
-                "				) rs\n" +
-                "			INNER JOIN(\n" +
-                "					SELECT\n" +
-                "						top 1 TIMESTAMP,\n" +
-                "						Shipment_Number_Dummy\n" +
-                "					FROM\n" +
-                "						BOSNET1.dbo.TMS_Status_Shipment\n" +
-                "					WHERE\n" +
-                "						Shipment_Number_Dummy = j.Shipment_Number_Dummy\n" +
-                "				) ss ON\n" +
-                "				ss.Shipment_Number_Dummy = rs.Shipment_Number_Dummy\n" +
-                "		)> 0 THEN 'DELL'\n" +
-                "		WHEN(\n" +
-                "			SELECT\n" +
-                "				COUNT( Shipment_Number_Dummy )\n" +
-                "			FROM\n" +
-                "				BOSNET1.dbo.TMS_Result_Shipment\n" +
-                "			WHERE\n" +
-                "				Shipment_Number_Dummy = j.Shipment_Number_Dummy\n" +
-                "		)> 0\n" +
-                "		AND(\n" +
-                "			SELECT\n" +
-                "				COUNT( CASE WHEN SAP_Status IS NULL THEN 1 ELSE SAP_Status END )\n" +
-                "			FROM\n" +
-                "				BOSNET1.dbo.TMS_Status_Shipment\n" +
-                "			WHERE\n" +
-                "				SAP_Status IS NULL\n" +
-                "				AND Shipment_Number_Dummy = j.Shipment_Number_Dummy\n" +
-                "		)= 0 THEN 'INPR'\n" +
-                "	END,\n" +
-                */
                 "	rt.batch\n" +
                 "FROM\n" +
                 "	(\n" +
@@ -360,7 +268,7 @@ public class RouteJobListing implements BusinessLogic {
                     j.dist = FZUtil.getRsString(rs, i++, "");
                     j.rdd = FZUtil.getRsString(rs, i++, "");
                     //j.send = FZUtil.getRsString(rs, i++, "");
-                    j.bat = FZUtil.getRsString(rs, i++, "").length() > 0 ? "1" : "0";
+                    //j.bat = FZUtil.getRsString(rs, i++, "").length() > 0 ? "1" : "0";
                     //System.out.println(j.custID +"_"+j.bat);
                     
                     js.add(j);
@@ -425,6 +333,36 @@ public class RouteJobListing implements BusinessLogic {
                     
                     // for next round
                     prevJ = j;
+                }
+                List<HashMap<String, String>> px = cekData(runID, "");
+                int x = 0;
+                while(x < js.size()){
+                    int y = 0;
+                    Boolean cek = true;
+                    if(js.get(x).DONum.length() > 0){
+                        while(y < px.size()){  
+                            //cek jika do sama
+                            if(js.get(x).DONum.equalsIgnoreCase(px.get(y).get("DOPR"))){
+                                //cek shipmentplsn 
+                                if(js.get(x).DONum.equalsIgnoreCase("8020102726")){
+                                    System.out.println("com.fz.tms.service.run.RouteJobListing.run()");
+                                }
+                                if(px.get(y).get("DOSP") == null
+                                        || px.get(y).get("DOSS") != null
+                                        || px.get(y).get("DORS") != null){
+                                    cek = false;
+                                    break;
+                                }else{
+                                    cek = true;
+                                }
+                                //System.out.println(js.get(x).DONum + "()" + px.get(y).get("DOPR"));                                
+                            }
+                            y++;
+                        }
+                        if(!cek)    js.get(x).bat = "1";//merah
+                        //System.out.println(js.get(x).DONum + "()" + js.get(x).bat);
+                    }                    
+                    x++;
                 }
                 request.setAttribute("vehicleCount"
                         , String.valueOf(vehicles.size()));
@@ -508,5 +446,87 @@ public class RouteJobListing implements BusinessLogic {
              str = "OK";
         }
         return str;
+    }
+    
+    public List<HashMap<String, String>> cekData(String runID, String custId) throws Exception{
+        String sub = "";
+        if(custId.length() > 0){
+            sub = "	AND prj.Customer_ID = '"+custId+"'\n";
+        }
+        String sql = "SELECT\n" +
+                "	prj.DO_Number AS DOPR,\n" +
+                "	sp.DO_Number AS DOSP,\n" +
+                "	ss.Delivery_Number AS DOSS,\n" +
+                "	sn.Delivery_Number AS DORS\n" +
+                "FROM\n" +
+                "	(\n" +
+                "		SELECT\n" +
+                "			DISTINCT RunId,\n" +
+                "			DO_Number,\n" +
+                "			Customer_ID\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_PreRouteJob\n" +
+                "	) prj\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			DISTINCT DO_Number\n" +
+                "		FROM\n" +
+                "			bosnet1.dbo.TMS_ShipmentPlan\n" +
+                "		WHERE\n" +
+                "			already_shipment = 'N'\n" +
+                "			AND notused_flag IS NULL\n" +
+                "			AND incoterm = 'FCO'\n" +
+                "			AND Order_Type IN(\n" +
+                "				'ZDCO',\n" +
+                "				'ZDTO'\n" +
+                "			)\n" +
+                "			AND create_date >= DATEADD(\n" +
+                "				DAY,\n" +
+                "				- 7,\n" +
+                "				GETDATE()\n" +
+                "			)\n" +
+                "			AND batch IS NOT NULL\n" +
+                "	) sp ON\n" +
+                "	prj.DO_Number = sp.DO_Number\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			DISTINCT Delivery_Number\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_Status_Shipment\n" +
+                "		WHERE\n" +
+                "			SAP_Message IS NULL\n" +
+                "	) ss ON\n" +
+                "	prj.DO_Number = ss.Delivery_Number\n" +
+                "LEFT OUTER JOIN(\n" +
+                "		SELECT\n" +
+                "			DISTINCT Delivery_Number\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_Result_Shipment\n" +
+                "	) sn ON\n" +
+                "	prj.DO_Number = sn.Delivery_Number\n" +
+                "WHERE\n" +
+                "	prj.RunId ='"+runID+"'\n" + sub;
+        List<HashMap<String, String>> px = new ArrayList<HashMap<String, String>>();
+        HashMap<String, String> pl = new HashMap<String, String>();
+        try (Connection con = (new Db()).getConnection("jdbc/fztms");
+                PreparedStatement ps = con.prepareStatement(sql)) {
+            //System.out.println(sql);
+            try (ResultSet rs = ps.executeQuery()){
+                while (rs.next()) {
+                    pl = new HashMap<String, String>();
+                    pl.put("DOPR", rs.getString("DOPR"));
+                    pl.put("DOSP", rs.getString("DOSP"));
+                    pl.put("DOSS", rs.getString("DOSS"));
+                    pl.put("DORS", rs.getString("DORS"));                    
+                    px.add(pl);
+
+                    //con.setAutoCommit(false);
+                    //ps.executeUpdate();
+                    //con.setAutoCommit(true);
+                }
+            }    
+        }
+        
+        return px;
     }
 }

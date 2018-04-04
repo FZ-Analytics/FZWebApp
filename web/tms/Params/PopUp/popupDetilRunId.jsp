@@ -3,7 +3,7 @@
     Created on : Oct 31, 2017, 5:07:49 PM
     Author     : dwi.rangga
 --%>
-<%@include file="../appGlobal/pageTop.jsp"%>
+<%@include file="../../appGlobal/pageTop.jsp"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="com.fz.tms.params.model.SummaryVehicle"%>
 <%run(new com.fz.tms.params.PopUp.popupDetilRunId());%>
@@ -92,7 +92,7 @@
                         if (data == 'OK') {
                             $("#body").fadeIn();
                             $("#loader").fadeOut();
-                            location.reload()
+                            location.reload();
                         } else {
                             $("#body").fadeIn();
                             $("#loader").fadeOut();
@@ -123,7 +123,7 @@
                     <th width="100px" class="fzCol">Truck type</th>
                     <th width="100px" class="fzCol">Capacity(KG)</th>
                     <th width="100px" class="fzCol">(%)</th>
-                    <th width="100px" class="fzCol">Kubikasi(M3)</th>
+                    <th width="100px" class="fzCol">Kubikasi(CM3)</th>
                     <th width="100px" class="fzCol">(%)</th>
                     <th width="100px" class="fzCol">Amount</th>
                     <th width="100px" class="fzCol">Jarak tempuh (km)</th>

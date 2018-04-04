@@ -140,7 +140,7 @@ BEGIN
 			(select case when Deletion_Flag_all is null or Deletion_Flag_all = '' then 'null' else Deletion_Flag_all end),',',
 			(select case when Deletion_Flag is null or Deletion_Flag = '' then 'null' else Deletion_Flag end),',''',
 			(select FORMAT(Create_Date,'yyyy-MM-dd')),'''',',''',
-			(select case when Create_Time is null then 'null' else FORMAT(CONVERT(datetime, Create_Time,108),'HH:mm:s') end),'''',',',Flag,',',
+			(select case when Create_Time is null then 'null' else FORMAT(CONVERT(datetime, Create_Time,108),'HH:mm:ss') end),'''',',',Flag,',',
 			(select case when NOO_Create_Date is null then 'null' else '''' + FORMAT(NOO_Create_Date,'yyyy-MM-dd') + '''' end),',',
 			(select case when NOO_Approved_Date is null then 'null' else '''' + FORMAT(NOO_Approved_Date,'yyyy-MM-dd') + '''' end),',',
 			(select case when NOO_Update_Date is null then 'null' else '''' + FORMAT(NOO_Update_Date,'yyyy-MM-dd') + '''' end),',''',
@@ -226,11 +226,11 @@ BEGIN
 			HighLevelBatch,'''',',',Shift,',',
 			(select case when Expired_Date_Batch is null or LEN(Expired_Date_Batch) < 7 then 'null' else Expired_Date_Batch end),',''',
 			(select FORMAT(DOCreationDate,'yyyy-MM-dd')),''',''',
-			(select FORMAT(CONVERT(datetime, DOCreationTime,108),'HH:mm:s')),''',',
+			(select FORMAT(CONVERT(datetime, DOCreationTime,108),'HH:mm:ss')),''',',
 			(case when DOUpdatedDate is null then 'null' else '''' + (select FORMAT(DOUpdatedDate,'yyyy-MM-dd')) + '''' end),',''',
-			(select FORMAT(CONVERT(datetime, DOUpdatedTime,108),'HH:mm:s')),''',''',
+			(select FORMAT(CONVERT(datetime, DOUpdatedTime,108),'HH:mm:ss')),''',''',
 			(select FORMAT(Create_Date,'yyyy-MM-dd')),''',''',
-			(select FORMAT(CONVERT(datetime, Create_Time,108),'HH:mm:s')),''',',
+			(select FORMAT(CONVERT(datetime, Create_Time,108),'HH:mm:ss')),''',',
 			Flag,',',(select case when NotUsed_Flag is null then 'null' else '''' + NotUsed_Flag + '''' end),',''',Order_Type,'''',',''',
 			Incoterm,''');'
 		)	as sc 
@@ -238,6 +238,7 @@ BEGIN
 		BOSNET1.dbo.TMS_ShipmentPlan
 	where DO_Number in (select DO_Number from @Temp);
 	
+	insert into @Insert
 	  SELECT
 		concat('insert into BOSNET1.dbo.TMS_VehicleAtr values(''',
 			vehicle_code,'''',',''',branch,'''',',''',
@@ -246,11 +247,11 @@ BEGIN
 			startTime,'''',',''',endTime,'''',',''',
 			source1,'''',',''',vehicle_type,'''',',''',
 			weight,'''',',''',volume,'''',',',included,
-			',',costPerM,',',fixedCost,',''',Channel,
+			',',costPerM,',',fixedCost,',''',Channel,''',',
 			(select case when IdDriver is null then 'NULL' else '''' + IdDriver + '''' end),',',
 			(select case when NamaDriver is null then 'NULL' else '''' + NamaDriver + '''' end),',',
 			(select case when DriverDates is null then 'NULL' else '''' + DriverDates + '''' end),
-			');'
+			',',agent_priority,',',max_cust,');'
 		)	as sc 
 	FROM
 		BOSNET1.dbo.TMS_VehicleAtr

@@ -5,7 +5,7 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@include file="../appGlobal/pageTop.jsp"%>
+<%@include file="../../appGlobal/pageTop.jsp"%>
 <%run(new com.fz.tms.params.PopUp.PopupDetilDo());%>
 <%@page import="com.fz.tms.params.model.DODetil"%>
 <!DOCTYPE html>

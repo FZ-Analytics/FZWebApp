@@ -15,7 +15,7 @@
 <%@page import="org.json.JSONObject"%>
 <%@page import="com.fz.util.UrlResponseGetter"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@include file="../appGlobal/pageTop.jsp"%>
+<%@include file="../../appGlobal/pageTop.jsp"%>
 <%run(new com.fz.tms.params.test());%>
 <!DOCTYPE html>
 <html>

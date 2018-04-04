@@ -26,8 +26,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.PageContext;
@@ -46,7 +48,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
     int routeNb = 0;
     int jobNb = 1;
 
-    String oriRunId, runId, branch, shift;
+    String oriRunId, runId, branch, shift, dateDeliv;
 
     boolean hasBreak = false;
 
@@ -58,6 +60,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         runId = FZUtil.getHttpParam(request, "runId");
         branch = FZUtil.getHttpParam(request, "branch");
         shift = FZUtil.getHttpParam(request, "shift");
+        dateDeliv = FZUtil.getHttpParam(request, "dateDeliv");
         String channel = FZUtil.getHttpParam(request, "channel");
         String vehicles = FZUtil.getHttpParam(request, "vehicles");
         String tableArr = FZUtil.getHttpParam(request, "tableArr");
@@ -100,6 +103,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         request.setAttribute("branch", branch);
         request.setAttribute("shift", shift);
         request.setAttribute("channel", channel);
+        request.setAttribute("dateDeliv", dateDeliv);
         request.setAttribute("vehicles", vehicles);
         request.setAttribute("runId", runId);
         request.setAttribute("oriRunId", oriRunId);
@@ -125,52 +129,6 @@ public class RouteJobListingResultEdit implements BusinessLogic {
             d.distChannel = aSplit[7];
             d.street = aSplit[6];
             d.weight = "" + Math.round(Double.parseDouble(aSplit[9]) * 10) / 10.0;
-
-            //This try is for EXT vehicle
-            try {
-                String[] doSplit = d.doNum.split(";");
-                int checkResultShipment = checkResultShipment(doSplit[0], oriRunId.replace("_", "") + getVendorId(d.vehicleCode));
-                //Already in Result_Shipment table
-                if (checkResultShipment > 0) {
-                    String check = checkStatusShipment(doSplit[0], oriRunId.replace("_", "") + getVendorId(d.vehicleCode));
-                    //Already in Shipment_Status and error
-                    if (check.length() > 1) {
-                        d.isFix = "null";
-                        d.error = check;
-                    //Already in Shipment_Status and success 
-                    } else {
-                        d.isFix = check;
-                    }
-                } 
-                //Not in Result_Shipment yet
-                else {
-                    d.isFix = "null";
-                }
-            } //This catch is for INT vehicle
-            catch (Exception e) {
-                String[] doSplit = d.doNum.split(";");
-                if(d.vehicleCode.equals("B9103TCH")) {
-                    System.out.println(doSplit[0]);
-                }
-                int checkResultShipment = checkResultShipment(doSplit[0], oriRunId.replace("_", "") + d.vehicleCode);
-                //Already in Result_Shipment table
-                if (checkResultShipment > 0) {
-                    String check = checkStatusShipment(doSplit[0], oriRunId.replace("_", "") + d.vehicleCode);
-                    //Already in Shipment_Status and error
-                    if (check.length() > 1) {
-                        d.isFix = "null";
-                        d.error = check;
-                    }
-                    //Already in Shipment_Status and success
-                    else {
-                        d.isFix = check;
-                    }
-                } 
-                //Not in Result_Shipment yet
-                else {
-                    d.isFix = "null";
-                }
-            }
 
             try {
                 d.volume = "" + Math.round(Double.parseDouble(getVolume(custId, oriRunId)) * 1) / 1000000.0;
@@ -288,7 +246,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
             //Delivery object for break
             if (dl.dist.equals("null")) {
                 ld.add(dl);
-                prevDepart = addTime(prevDepart, 60);
+                prevDepart = addTime(prevDepart, getBreakTime(getDayByDate(dateDeliv)));
             }
 
             /**
@@ -362,50 +320,21 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         }
     }
 
-    public String checkStatusShipment(String doNum, String shipmentNo) throws Exception {
-        String msg = "";
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql;
-                sql = "SELECT TOP 1 SAP_Message FROM BOSNET1.dbo.TMS_Status_Shipment WHERE Delivery_Number = '" + doNum + "' and Shipment_Number_Dummy = '" + shipmentNo + "'";
+    public String getDayByDate(String dates) throws ParseException {
+        String[] dateParse = dates.split("-");
 
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    if (rs.next()) {
-                        if (rs.getString("SAP_Message") != null) {
-                            msg = rs.getString("SAP_Message"); //Error
-                        } else {
-                            msg = "2"; //Submitted
-                        }
-                    } else {
-                        msg = "1"; //Submitting
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return msg;
-    }
+        int year = Integer.parseInt(dateParse[0]);
+        int month = Integer.parseInt(dateParse[1]);
+        int day = Integer.parseInt(dateParse[2]);
 
-    public int checkResultShipment(String doNum, String shipmentNo) throws Exception {
-        int rowNum = 0;
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql;
-                sql = "SELECT COUNT(*) rowNum FROM BOSNET1.dbo.TMS_Result_Shipment WHERE Delivery_Number = '" + doNum + "' and Shipment_Number_Dummy = '" + shipmentNo + "'";
+        // First convert to Date. This is one of the many ways.
+        String dateString = String.format("%d-%d-%d", year, month, day);
+        Date date = new SimpleDateFormat("yyyy-M-d").parse(dateString);
 
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    if (rs.next()) {
-                        rowNum = rs.getInt("rowNum"); // Already in Result_Shipment
-                    } else {
-                        rowNum = 0;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return rowNum;
+        // Then get the day of week from the Date based on specific locale.
+        String dayOfWeek = new SimpleDateFormat("EEEE", Locale.ENGLISH).format(date);
+
+        return dayOfWeek;
     }
 
     public String getVendorId(String v) {
@@ -628,6 +557,28 @@ public class RouteJobListingResultEdit implements BusinessLogic {
 
         }
         return moreThan;
+    }
+
+    public int getBreakTime(String day) throws Exception {
+        int breakTime = 0;
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql = "";
+                if (day.equals("Friday")) {
+                    sql = "SELECT value FROM BOSNET1.dbo.TMS_Params WHERE param = 'fridayBreak'";
+                } else {
+                    sql = "SELECT value FROM BOSNET1.dbo.TMS_Params WHERE param = 'defaultBreak'";
+                }
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    while (rs.next()) {
+                        breakTime = rs.getInt("value");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return breakTime;
     }
 
     public static Timestamp getTimeStamp() throws ParseException {

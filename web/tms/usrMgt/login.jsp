@@ -1,6 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@include file="../../ffbv3/appGlobal/pageTop.jsp"%>
-<%run(new com.fz.tms.testDB());%>
+<%@include file="../appGlobal/pageTop.jsp"%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -8,12 +7,11 @@
         <title>Login</title>
     </head>
     <body>
-        <%@include file="../../ffbv3/appGlobal/bodyTop.jsp"%>
-        <h3>Login</h3>
-        <form class="container" action="entry.jsp" method="post">
-            <div class="fzErrMsg">
-                <%=get("connectResult")%>
-            </div>
+        <%@include file="../appGlobal/bodyTop.jsp"%>
+        <h1>Please Log In from Portal</h1>
+        <%--<h3>Login</h3>
+        <form class="container" action="../usrMgt/entry.jsp" method="post">
+
             <div class="fzErrMsg">
                 <%=get("loginResult")%>
             </div>
@@ -26,7 +24,7 @@
             <br>
             <br>
             <button class="btn fzButton" type="submit">GO</button>
-        </form>         
-        <%@include file="../../ffbv3/appGlobal/bodyBottom.jsp"%>
+        </form>--%>
+        <%@include file="../appGlobal/bodyBottom.jsp"%>
     </body>
 </html>

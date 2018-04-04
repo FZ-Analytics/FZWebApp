@@ -3,7 +3,7 @@
     Created on : Jan 19, 2018, 10:02:21 AM
     Author     : dwi.oktaviandi
 --%>
-<%@include file="../appGlobal/pageTop.jsp"%>
+<%@include file="../../appGlobal/pageTop.jsp"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%run(new com.fz.tms.params.PopUp.popupEditPreRouteVehicle());%>
 <%@page import="com.fz.tms.params.model.Vehicle"%>
@@ -43,7 +43,7 @@
                     $.post($apiAddress, {json: jsonForServer}).done(function (data) {
                         if(data == 'OK'){
                             alert( 'sukses' );
-                            location.reload()
+                            location.reload();
                         }else{
                             alert( 'submit error' ); 
                         }

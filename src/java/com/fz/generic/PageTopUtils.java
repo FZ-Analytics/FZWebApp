@@ -7,6 +7,9 @@
 package com.fz.generic;
 
 import com.fz.util.FZUtil;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -89,18 +92,45 @@ public class PageTopUtils {
             String url = request.getRequestURL().toString();
             if (url.contains("/usrMgt/login.jsp")) {
                 return true;
-            }
-            if (url.contains("/usrMgt/entry.jsp")) {
+            }else if (url.contains("/usrMgt/entry.jsp")) {
                 return true;
-            }
-            if (url.contains("/appGlobal/error.jsp")) {
+            }else if (url.contains("/appGlobal/error.jsp")) {
                 return true;
-            }
-            if (url.contains("/aic/aicView.jsp")) {
+            }else if (url.contains("/aic/aicView.jsp")) {
                 return true;
-            }
-            if (url.contains("/tms/")) {
+            }/*else if (url.contains("/main2/main.jsp")) {
                 return true;
+            }*/
+            
+            //custom untuk link dengan TMS
+            else if(url.contains("/tms/")){ 
+                String EmpyID = (String) pc.getSession().getAttribute("EmpyID");
+                String str = "ERROR";
+                if ((EmpyID == null) || (EmpyID.length() == 0)){
+                    str = getLink(url, request);
+                }else{
+                    str = "OK";
+                }
+                
+                
+                if(str.equalsIgnoreCase("OK")){
+                    return true;
+                }else{
+                    if(url.contains("/run/") || url.contains("/main2/main.jsp")){
+                        request.setAttribute("loginResult", "Please login");
+                        request.getRequestDispatcher("../usrMgt/login.jsp")
+                            .forward(request, (HttpServletResponse) pc.getResponse());
+                    }if(url.contains("/Params/")){
+                        request.setAttribute("loginResult", "Please login");
+                        request.getRequestDispatcher("../../usrMgt/login.jsp")
+                            .forward(request, (HttpServletResponse) pc.getResponse());
+                    }
+                    
+                    //String urls = request.getRequestURL().toString();
+                    //System.out.println("urls()" + urls);
+                    return false;
+                }
+                
             }
             
             // else, get userID from session variable
@@ -127,5 +157,53 @@ public class PageTopUtils {
         String sel = (param.equals(value) ? " selected" : "");
         String ret = "<option " + sel + " value='" + value + "'>" + text + "</option>";
         return ret;
+    }
+    
+    public static String getLink(String url, HttpServletRequest request) throws Exception{
+        String str = "ERROR";
+        
+        String UserID = FZUtil.getHttpParam(request, "UserID");
+        String EmpyID = FZUtil.getHttpParam(request, "EmpyID");
+        String UserName = FZUtil.getHttpParam(request, "UserName");
+        String WorkplaceID = FZUtil.getHttpParam(request, "WorkplaceID");
+        String Key = FZUtil.getHttpParam(request, "Key");
+        
+        if(UserID.length() > 0 && EmpyID.length() > 0 && UserName.length() > 0 && WorkplaceID.length() > 0 && Key.length() > 0 ){
+            String sql = "SELECT\n" +
+                "	COUNT(*) as cnt\n" +
+                "FROM\n" +
+                "	BOSNET1.dbo.TMS_UserStatus\n" +
+                "WHERE\n" +
+                "	NIK = '"+EmpyID+"'\n" +
+                "	AND Status = '1'\n" +
+                "	AND KEYLogin = '"+Key+"'";
+
+            try (Connection con = (new Db()).getConnection("jdbc/fztms");
+                    PreparedStatement ps = con.prepareStatement(sql)){
+                try (ResultSet rs = ps.executeQuery()){
+                    if(rs.next()){
+                        String cnt = rs.getString("cnt");
+
+                        //cek jika count > 0
+                        str = Integer.valueOf(cnt) > 0 ? "OK" : "ERROR";
+
+                        if(str.equalsIgnoreCase("OK")){
+                            // keep user profile as session object, for next views
+                            request.getSession()
+                                    .setAttribute("UserID", UserID);
+                            request.getSession()
+                                    .setAttribute("EmpyID", EmpyID);
+                            request.getSession()
+                                    .setAttribute("UserName", UserName);
+                            request.getSession()
+                                    .setAttribute("WorkplaceID", WorkplaceID);
+                        }
+                    }else{
+                        throw new Exception(); 
+                    }
+                }
+            }
+        }        
+        return str;
     }
 }

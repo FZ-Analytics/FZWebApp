@@ -31,4 +31,5 @@ public class Customer {
     public String customer_priority;
     public String rdd;
     public String isInc;
+    public String channel;
 }
