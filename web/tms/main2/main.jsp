@@ -144,6 +144,11 @@
               border-top: 10px solid transparent;
             }
         </style>
+        <script>
+            function opens(link){
+                $('#iframe1').attr('src', link);
+            }
+        </script>   
     </head>
     <body>
         <%@include file="../appGlobal/bodyTop.jsp"%>
@@ -152,7 +157,7 @@
             <div id='cssmenu' style="float: left">
                 <ul>
                     <li><a href='#'><span>Home</span></a></li>
-                    <li><a href='../run/runEntry.jsp' target="iframe1"><span>Routing</span></a></li>
+                    <li><a target="iframe1" onClick="opens('../run/runEntry.jsp')"><span>Routing</span></a></li>
                     <li><a href='#'><span>Param</span></a></li>
                     <li class='active has-sub'><a href='#'><span>Attribute</span></a>
                         <ul>
@@ -174,12 +179,11 @@
                 </ul>
             </div>
             <div id="countainer" style="float: left;">
-                <object data="../run/runEntry.jsp" style="width: 100%; height: 100%;position: absolute;"></object>
+                <%--<object data="../run/runEntry.jsp" style="width: 100%; height: 100%;position: absolute;"></object>--%>
                 <%--<embed src = "../run/runEntry.jsp" style="width: 100%; height: 100%;position: absolute;" />--%>
-                <%--<iframe name="iframe1" src="#" style="width: 100%; height: 100%;position: absolute;"></iframe>--%>
+                <iframe frameBorder="0" name="iframe1" id="iframe1" src="#" style="width: 100%; height: 100%;position: absolute;"></iframe>
             </div>
-        </div>
-        
+        </div>        
         <%@include file="../appGlobal/bodyBottom.jsp"%>
     </body>
 </html>
