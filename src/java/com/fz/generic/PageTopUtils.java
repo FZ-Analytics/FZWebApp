@@ -92,19 +92,18 @@ public class PageTopUtils {
             String url = request.getRequestURL().toString();
             if (url.contains("/usrMgt/login.jsp")) {
                 return true;
-            }
-            if (url.contains("/usrMgt/entry.jsp")) {
+            }else if (url.contains("/usrMgt/entry.jsp")) {
                 return true;
-            }
-            if (url.contains("/appGlobal/error.jsp")) {
+            }else if (url.contains("/appGlobal/error.jsp")) {
                 return true;
-            }
-            if (url.contains("/aic/aicView.jsp")) {
+            }else if (url.contains("/aic/aicView.jsp")) {
+                return true;
+            }else if (url.contains("/main2/main.jsp")) {
                 return true;
             }
             
             //custom untuk link dengan TMS
-            if(url.contains("/tms/")){     
+            else if(url.contains("/tms/")){ 
                 String EmpyID = (String) pc.getSession().getAttribute("EmpyID");
                 String str = "ERROR";
                 if ((EmpyID == null) || (EmpyID.length() == 0)){
