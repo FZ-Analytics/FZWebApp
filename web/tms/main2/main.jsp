@@ -69,7 +69,7 @@
             #cssmenu {
               font-family: 'Lato', sans-serif;
               font-size: 12px;
-              width: 120px;
+              width: 100px;
               display:inline-block;
             }
             #cssmenu ul a,
@@ -152,22 +152,29 @@
     </head>
     <body>
         <%@include file="../appGlobal/bodyTop.jsp"%>
+        <img src="../img/ffbtoplogo.png">
+        <% if(!EmpyID.equalsIgnoreCase("null") && !url.contains("/logout.")){%>
+            <br>
+            <label clas="FzLabel"><%=UserName%>(<%=EmpyID%>) </label>            
+            <a href='<%=urlLogout%>'>Logout</a>
+            <br>
+        <%}%>
         <br>
         <div >
             <div id='cssmenu' style="float: left">
                 <ul>
-                    <li><a href='#'><span>Home</span></a></li>
+                    <li><a target="iframe1" onClick="opens('../other/home.jsp')"><span>Home</span></a></li>
                     <li><a target="iframe1" onClick="opens('../run/runEntry.jsp')"><span>Routing</span></a></li>
                     <li><a href='#'><span>Param</span></a></li>
                     <li class='active has-sub'><a href='#'><span>Attribute</span></a>
                         <ul>
-                            <li class='has-sub'><a href='#'><span>Vehicle Attribute</span></a>
+                            <li class='has-sub'><a target="iframe1" onClick="opens('../Params/Customer/CustomerAttr.jsp')"><span>Customer Attribute</span></a>
                                 <%--<ul>
                                    <li><a href='#'><span>Sub Product</span></a></li>
                                    <li class='last'><a href='#'><span>Sub Product</span></a></li>
                                 </ul>--%>
                             </li>
-                            <li class='has-sub'><a href='#'><span>Customer Attribute</span></a>
+                            <li class='has-sub'><a target="iframe1" onClick="opens('../Params/Vehicle//VehicleAttr.jsp')"><span>Vehicle Attribute</span></a>
                                 <%--<ul>
                                    <li><a href='#'><span>Sub Product</span></a></li>
                                    <li class='last'><a href='#'><span>Sub Product</span></a></li>
@@ -181,7 +188,7 @@
             <div id="countainer" style="float: left;">
                 <%--<object data="../run/runEntry.jsp" style="width: 100%; height: 100%;position: absolute;"></object>--%>
                 <%--<embed src = "../run/runEntry.jsp" style="width: 100%; height: 100%;position: absolute;" />--%>
-                <iframe frameBorder="0" name="iframe1" id="iframe1" src="#" style="width: 100%; height: 100%;position: absolute;"></iframe>
+                <iframe frameBorder="0" name="iframe1" id="iframe1" src="../other/home.jsp" style="width: 100%; height: 100%;position: absolute;"></iframe>
             </div>
         </div>        
         <%@include file="../appGlobal/bodyBottom.jsp"%>

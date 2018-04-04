@@ -98,9 +98,9 @@ public class PageTopUtils {
                 return true;
             }else if (url.contains("/aic/aicView.jsp")) {
                 return true;
-            }else if (url.contains("/main2/main.jsp")) {
+            }/*else if (url.contains("/main2/main.jsp")) {
                 return true;
-            }
+            }*/
             
             //custom untuk link dengan TMS
             else if(url.contains("/tms/")){ 
@@ -116,7 +116,7 @@ public class PageTopUtils {
                 if(str.equalsIgnoreCase("OK")){
                     return true;
                 }else{
-                    if(url.contains("/run/")){
+                    if(url.contains("/run/") || url.contains("/main2/main.jsp")){
                         request.setAttribute("loginResult", "Please login");
                         request.getRequestDispatcher("../usrMgt/login.jsp")
                             .forward(request, (HttpServletResponse) pc.getResponse());

@@ -47,7 +47,7 @@
     //System.out.println(url+"()");
     
     String urlLogout = "";
-    if (url.contains("/run/")) {
+    if (url.contains("/run/") || url.contains("/main2/main.jsp")) {
         urlLogout = "../usrMgt/logout.jsp";
     }if (url.contains("/Params/")) {
         urlLogout = "../../usrMgt/logout.jsp";

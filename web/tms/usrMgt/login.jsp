@@ -8,7 +8,8 @@
     </head>
     <body>
         <%@include file="../appGlobal/bodyTop.jsp"%>
-        <h3>Login</h3>
+        <h1>Please Log In from Portal</h1>
+        <%--<h3>Login</h3>
         <form class="container" action="../usrMgt/entry.jsp" method="post">
 
             <div class="fzErrMsg">
@@ -23,7 +24,7 @@
             <br>
             <br>
             <button class="btn fzButton" type="submit">GO</button>
-        </form>         
+        </form>--%>
         <%@include file="../appGlobal/bodyBottom.jsp"%>
     </body>
 </html>

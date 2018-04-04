@@ -25,7 +25,6 @@
             <div class="fzErrMsg">
                 <%=get("errMsg")%>
             </div>
-            <br>
             <input class="fzInput" id="runId" 
                    name="runId" value="NA" hidden="true"/>
             <input class="fzInput" id="reRunId" 
@@ -33,7 +32,6 @@
             <input class="fzInput" id="oriRunID" 
                    name="oriRunID" value="NA" hidden="true"/>
 
-            <br><br>
             <label class="fzLabel">Branch</label>
             <input class="fzInput" id="branch" 
                    name="branch" value="<%=WorkplaceID%>" readonly="true"/>
