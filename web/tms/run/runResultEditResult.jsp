@@ -115,9 +115,9 @@
             <label class="fzLabel">Channel:</label> 
             <label class="fzLabel" id="channel"><%=get("channel")%></label> 
 
-            <br>
+<!--            <br>
             <label class="fzLabel">Vehicles:</label> 
-            <label class="fzLabel"><%=get("vehicle")%></label>
+            <label class="fzLabel"><%=get("vehicle")%></label>-->
 
             <br>
             <label class="fzLabel">RunID:</label> 
