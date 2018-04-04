@@ -3,7 +3,7 @@
     Created on : Oct 19, 2017, 3:41:53 PM
     Author     : dwi.rangga
 --%>
-<%@include file="../appGlobal/pageTop.jsp"%>
+<%@include file="../../appGlobal/pageTop.jsp"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="com.fz.tms.params.model.OptionModel"%>
 <%run(new com.fz.tms.params.map.GoogleDirMapAllVehi());%>
@@ -184,7 +184,7 @@
                     });
                 }
                 console.log("detikakhira" + new Date().getTime());
-                google.maps.event.addDomListener(window, 'load', initialize);
+                google.maps.event.addDomListener(window, 'load', initialize());
                 console.log("detikakhirb" + new Date().getTime());
             });
         </script>        

@@ -12,6 +12,7 @@ import com.fz.generic.DBConnector;
 import com.fz.generic.Db;
 import com.fz.generic.ResponseMessege;
 import com.fz.generic.StatusHolder;
+import com.fz.generic.UsersAll;
 import com.fz.util.FZUtil;
 import com.fz.util.FixMessege;
 import com.fz.util.FixValue;
@@ -44,6 +45,8 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import javax.ejb.Stateless;
 
 /**
@@ -58,8 +61,9 @@ import javax.ejb.Stateless;
 public class UsersApi 
 {
   private final Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
-  FileHandler fh = null;
-  final String DATE_FORMAT = "yyyyMMdd";
+//  FileHandler fh = null;
+//  final String DATE_FORMAT = "yyyyMMdd.HHmm";
+//  Random rand = new Random();
 
   @Context
   private UriInfo context;
@@ -69,12 +73,13 @@ public class UsersApi
    */
   public UsersApi()
   {
+/*    
 		try 
     {
       DateTimeFormatter dateTimeformatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
       LocalDateTime localDateTime = LocalDateTime.now();
 
-      this.fh = new FileHandler("D:\\fza\\log\\UsersApi." + dateTimeformatter.format(localDateTime) + ".log", true);
+      this.fh = new FileHandler(FixValue.strLogPath + "UsersApi." + dateTimeformatter.format(localDateTime) + ".log", true);
     }
     catch (IOException ex)
     {
@@ -87,6 +92,7 @@ public class UsersApi
 
     fh.setFormatter(new SimpleFormatter());
     logger.addHandler(fh);
+*/    
   }
 
   /**
@@ -119,31 +125,9 @@ public class UsersApi
   @Consumes(MediaType.APPLICATION_JSON)
   public Response postLoginJson(String content)
   {
-    logger.severe("[Path] -> /users/login");
-    
-    // Get Gson object and parse json string to object
-    logger.severe("[JSON] -> " + content);
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		UserModel userModel = gson.fromJson(content, UserModel.class);
-    logger.severe("[Parsing] -> Parsing request with GSON done");
-
-    StatusHolder statusHolder = new StatusHolder();    
-
-		try(Connection conn = (new Db()).getConnection("jdbc/fz"))
-		{
-      UserLogic userLogic = new UserLogic(conn, logger); 
-      statusHolder = userLogic.Login(userModel.getUserData().getUsername(), userModel.getUserData().getPassword());
-		}
-		catch (Exception ex)
-		{
-      statusHolder.setCode(FixValue.intResponError);
-      statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strLoginFailed));
-		}
-    
-    logger.severe("[Close] -> Close database done");
-    logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
-    fh.close();
-    return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build();
+//    UsersAll usersAll = new UsersAll(content, logger, fh);
+    UsersAll usersAll = new UsersAll(content, logger);
+    return usersAll.UsersLogin(1);
   }
 
   @POST
@@ -151,31 +135,8 @@ public class UsersApi
   @Consumes(MediaType.APPLICATION_JSON)
   public Response postLogoutJson(String content)
   {
-    logger.severe("[Path] -> /users/logout");
-    
-		// Get Gson object and parse json string to object
-    logger.severe("[JSON] -> " + content);
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		UserModel userModel = gson.fromJson(content, UserModel.class);
-    logger.severe("[Parsing] -> Parsing request with GSON done");
-
-    StatusHolder statusHolder = new StatusHolder();
-
-		try(Connection conn = (new Db()).getConnection("jdbc/fz"))
-		{
-	    logger.severe("[Open] -> Open database done");
-      UserLogic userLogic = new UserLogic(conn, logger); 
-      statusHolder = userLogic.logout(userModel);
-		}
-		catch (Exception ex)
-		{
-      statusHolder.setCode(FixValue.intResponError);
-      statusHolder.setRsp(new ResponseMessege().CoreMsgResponse(FixValue.intFail, FixMessege.strLogoutFailed));
-		}
-    
-    logger.severe("[Close] -> Close database done");
-    logger.severe("[" + statusHolder.getCode() + "] -> " + statusHolder.getRsp());
-    fh.close();
-    return Response.status(statusHolder.getCode()).entity(statusHolder.getRsp()).build();
+//    UsersAll usersAll = new UsersAll(content, logger, fh);
+    UsersAll usersAll = new UsersAll(content, logger);
+    return usersAll.UsersLogout();
   }
 }

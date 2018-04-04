@@ -48,6 +48,7 @@ public class RouteJob {
     public String dist;
     public String rdd;
     public String send;
+    public String bat;
     
     public String getMapLink() {
         

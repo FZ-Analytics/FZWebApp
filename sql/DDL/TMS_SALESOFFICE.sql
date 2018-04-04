@@ -1,0 +1,22 @@
+CREATE TABLE BOSNET1.dbo.TMS_SALESOFFICE (
+	SalOffCode char(4),
+	SalOffName varchar(50),
+	SFA bit,
+	RollOutDate smalldatetime,
+	Address varchar(150),
+	ProvinceID varchar(10),
+	CityID varchar(10),
+	ZipCode varchar(5),
+	Telp varchar(50),
+	Latitude varchar(20),
+	Longitude varchar(20),
+	RBMName varchar(150),
+	RBMEmailAddress varchar(150),
+	BMName varchar(150),
+	BMEmailAddress varchar(150),
+	SupportID varchar(10),
+	RegionID varchar(10),
+	Active bit,
+	UpdatedDate smalldatetime,
+	UpdatedBy varchar(25)
+) ;

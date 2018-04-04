@@ -24,9 +24,12 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.PageContext;
@@ -44,9 +47,8 @@ public class RouteJobListingResultEdit implements BusinessLogic {
     String prevVehiCode = "";
     int routeNb = 0;
     int jobNb = 1;
-    boolean oneVehicle = false;
 
-    String oriRunId, runId, branch, shift;
+    String oriRunId, runId, branch, shift, dateDeliv;
 
     boolean hasBreak = false;
 
@@ -58,27 +60,29 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         runId = FZUtil.getHttpParam(request, "runId");
         branch = FZUtil.getHttpParam(request, "branch");
         shift = FZUtil.getHttpParam(request, "shift");
+        dateDeliv = FZUtil.getHttpParam(request, "dateDeliv");
         String channel = FZUtil.getHttpParam(request, "channel");
         String vehicles = FZUtil.getHttpParam(request, "vehicles");
         String tableArr = FZUtil.getHttpParam(request, "tableArr");
 
         String[] tableArrSplit = tableArr.split("split");
 
-        speedTruck = getTruckSpeed();
-        trafficFactor = getTrafficFactor();
+        ArrayList<Double> alParam = getParam();
+        speedTruck = alParam.get(0);
+        trafficFactor = alParam.get(1);
         for (int i = 0; i < tableArrSplit.length; i++) {
             String str = tableArrSplit[i];
             String data = str;
             if (i != 0) {
                 data = str.substring(0, 0) + str.substring(0 + 1);
             }
+
             String[] dataSplit = data.split(",");
             switch (dataSplit.length) {
                 case 3: //normal row or start
                     if (!dataSplit[2].equals("start")) {
                         setObjectValue(dataSplit[0], dataSplit[1], dataSplit[2], "");
                     } else {
-
                         setObjectValue(dataSplit[0], dataSplit[1], "", getVehiStart(dataSplit[1]));
                         prevCustId = dataSplit[1];
                     }
@@ -99,6 +103,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         request.setAttribute("branch", branch);
         request.setAttribute("shift", shift);
         request.setAttribute("channel", channel);
+        request.setAttribute("dateDeliv", dateDeliv);
         request.setAttribute("vehicles", vehicles);
         request.setAttribute("runId", runId);
         request.setAttribute("oriRunId", oriRunId);
@@ -108,220 +113,233 @@ public class RouteJobListingResultEdit implements BusinessLogic {
     public void setObjectValue(String no, String vNo, String custId, String depart) throws Exception {
         ArrayList<String> a = getRouteData(custId);
         String[] aSplit = a.get(0).split("split");
-        if (getIsFix(oriRunId, custId) == null) {
-            //not a break-time row
-            if (!vNo.equals("")) {
-                Delivery d = new Delivery();
-                Delivery dl = new Delivery();
-                if (!vNo.equals("NA")) {
-                    d.no = no;
-                }
-                d.vehicleCode = vNo;
-                d.custId = custId;
-                d.doNum = aSplit[0];
-                d.serviceTime = aSplit[4];
-                d.storeName = aSplit[5];
-                d.priority = aSplit[1];
-                d.distChannel = aSplit[7];
-                d.street = aSplit[6];
-                d.weight = "" + Math.round(Double.parseDouble(aSplit[9]) * 10) / 10.0;
-                try {
-                    d.volume = "" + Math.round(Double.parseDouble(getVolume(custId, oriRunId)) * 10) / 10.0;
-                } catch (Exception e) {
-                }
-                d.rdd = aSplit[8];
-                if (!custId.equals("") || depart.equals("")) {
-                    d.arrive = prevDepart;
-                }
-                //start row
-                if (d.custId.equals("")) {
-                    d.depart = depart;
-                } else {
-                    d.depart = addTime(d.arrive, Integer.parseInt(d.serviceTime));
-                }
+        //not a break-time row
+        if (!vNo.equals("")) {
+            Delivery d = new Delivery();
+            Delivery dl = new Delivery();
+            if (!vNo.equals("NA")) {
+                d.no = no;
+            }
+            d.vehicleCode = vNo;
+            d.custId = custId;
+            d.doNum = aSplit[0];
+            d.serviceTime = aSplit[4];
+            d.storeName = aSplit[5];
+            d.priority = aSplit[1];
+            d.distChannel = aSplit[7];
+            d.street = aSplit[6];
+            d.weight = "" + Math.round(Double.parseDouble(aSplit[9]) * 10) / 10.0;
 
-                //set long lat of store name
-                if (!d.vehicleCode.equals("NA")) {
-                    //start row
-                    if (!d.vehicleCode.equals("") && d.custId.equals("") && !d.depart.equals("")) {
-                        previousCustId = d.vehicleCode;
-                        b = false;
-                    } //normal row
-                    else if (!d.vehicleCode.equals("") && !d.custId.equals("") && !d.doNum.equals("")) {
-                        //previousCustId is normal row
-                        if (previousCustId.matches("[0-9]+")) {
-                            String[] longlat1 = getLongLatCustomer(previousCustId).split("split");
+            try {
+                d.volume = "" + Math.round(Double.parseDouble(getVolume(custId, oriRunId)) * 1) / 1000000.0;
+            } catch (Exception e) {
+            }
+            d.rdd = aSplit[8];
+            if (!custId.equals("") || depart.equals("")) {
+                d.arrive = prevDepart;
+            }
+            //start row
+            if (d.custId.equals("")) {
+                d.depart = depart;
+            } else {
+                d.depart = addTime(d.arrive, Integer.parseInt(d.serviceTime));
+            }
+
+            //set long lat of store name
+            if (!d.vehicleCode.equals("NA")) {
+                //start row
+                if (!d.vehicleCode.equals("") && d.custId.equals("") && !d.depart.equals("")) {
+                    previousCustId = d.vehicleCode;
+                    b = false;
+                } //normal row
+                else if (!d.vehicleCode.equals("") && !d.custId.equals("") && !d.doNum.equals("")) {
+                    //previousCustId is normal row
+                    if (previousCustId.matches("[0-9]+")) {
+                        try {
+                            String[] longlat1 = getLongLatCustomer(oriRunId, previousCustId).split("split");
                             d.lon1 = reFormatLongLat(longlat1[0]);
                             d.lat1 = reFormatLongLat(longlat1[1]);
-                        } //previousCustId is a start row
-                        else {
+                        } catch (Exception e) {
+                        }
+                    } //previousCustId is a start row
+                    else {
+                        try {
                             String[] longlat1 = getLongLatVehicle(previousCustId).split("split");
                             d.lon1 = reFormatLongLat(longlat1[0]);
                             d.lat1 = reFormatLongLat(longlat1[1]);
+                        } catch (Exception e) {
                         }
-                        String[] longlat2 = getLongLatCustomer(d.custId).split("split");
+                    }
+                    String[] longlat2 = getLongLatCustomer(oriRunId, d.custId).split("split");
+                    try {
                         d.lon2 = reFormatLongLat(longlat2[0]);
                         d.lat2 = reFormatLongLat(longlat2[1]);
-                        previousCustId = d.custId;
-                    } //end row
-                    else if (!d.vehicleCode.equals("") && d.custId.equals("") && d.depart.equals("")) {
-                        String[] longlat1 = getLongLatCustomer(previousCustId).split("split");
+                    } catch (Exception e) {
+                    }
+                    previousCustId = d.custId;
+                } //end row
+                else if (!d.vehicleCode.equals("") && d.custId.equals("") && d.depart.equals("")) {
+                    try {
+                        String[] longlat1 = getLongLatCustomer(oriRunId, previousCustId).split("split");
                         d.lon1 = reFormatLongLat(longlat1[0]);
                         d.lat1 = reFormatLongLat(longlat1[1]);
                         String[] longlat2 = getLongLatVehicle(d.vehicleCode).split("split");
                         d.lon2 = reFormatLongLat(longlat2[0]);
                         d.lat2 = reFormatLongLat(longlat2[1]);
                         b = true;
+                    } catch (Exception e) {
                     }
-                    //set arrive, depart, distance using lon lat of store
-                    if (!custId.equals("") || depart.equals("")) {
-                        //Manhattan
-                        if (getTripCalc(oriRunId).equals("M")) {
+                }
+                //set arrive, depart, distance using lon lat of store
+                if (!custId.equals("") || depart.equals("")) {
+                    //Manhattan
+                    if (getTripCalc(oriRunId).equals("M")) {
+                        try {
                             double distance1 = calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat1), Double.parseDouble(d.lon1), Double.parseDouble(d.lat2));
                             double distance2 = calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat2), Double.parseDouble(d.lon2), Double.parseDouble(d.lat2));
                             d.arrive = "" + addTime(prevDepart, Math.round(trafficFactor * calcTripMinutes(distance1 + distance2, speedTruck)));
                             d.dist = "" + Math.round(((distance1 + distance2) / 1000) * 10) / 10.0;
                             d.transportCost = (int) Math.round(getCostPerM(d.vehicleCode, oriRunId) * (distance1 + distance2));
-                        } //Google
-                        else {
-                            double distance = getDistByGoogle(d.lon1, d.lat1, d.lon2, d.lat2);
-                            d.arrive = addTime(prevDepart, getDurByGoogle(d.lon1, d.lat1, d.lon2, d.lat2));
+                        } catch (Exception e) {
+                        }
+                    } //Google
+                    else {
+                        try {
+                            ArrayList<Double> alDurDist = getDistDurByGoogle(d.lon1, d.lat1, d.lon2, d.lat2);
+                            double distance = alDurDist.get(0);
+                            d.arrive = addTime(prevDepart, Math.round(alDurDist.get(1)));
                             d.dist = "" + Math.round((distance / 1000) * 10) / 10.0;
-                            d.transportCost = (int) ((int) Math.round((getCostPerM(d.vehicleCode, oriRunId) * distance / 1000) * 10) / 10.0);
-                        }
-
-                        //break if depart + 60 minutes is more than 11:30
-                        if (hasBreak == false && !d.depart.equals("") && timeMoreThan(addTime(addTime(d.arrive, Integer.parseInt(d.serviceTime)), 60), "11:30")) {
-                            dl.no = "";
-                            dl.vehicleCode = "";
-                            dl.custId = "";
-                            dl.doNum = "";
-                            dl.serviceTime = "0";
-                            dl.storeName = "";
-                            dl.priority = "";
-                            dl.distChannel = "";
-                            dl.street = "";
-                            dl.weight = "";
-                            dl.volume = "";
-                            dl.rdd = "null";
-                            dl.transportCost = 0;
-                            dl.dist = "null";
-
-                            hasBreak = true;
-                        } else if (d.depart.equals("")) {
-                            hasBreak = false;
+                            d.transportCost = (int) ((int) Math.round((getCostPerM(d.vehicleCode, oriRunId) * distance) * 10) / 10.0);
+                        } catch (Exception e) {
                         }
                     }
-                    if (d.custId.equals("")) {
-                        d.depart = depart;
-                    } else {
-                        d.depart = addTime(d.arrive, Integer.parseInt(d.serviceTime));
+
+                    //break if depart + 60 minutes is more than 11:30
+                    if (hasBreak == false && !d.depart.equals("") && timeMoreThan(addTime(addTime(d.arrive, Integer.parseInt(d.serviceTime)), 60), "11:30")) {
+                        dl.no = "";
+                        dl.vehicleCode = "";
+                        dl.custId = "";
+                        dl.doNum = "";
+                        dl.serviceTime = "0";
+                        dl.storeName = "";
+                        dl.priority = "";
+                        dl.distChannel = "";
+                        dl.street = "";
+                        dl.weight = "";
+                        dl.volume = "";
+                        dl.rdd = "null";
+                        dl.transportCost = 0;
+                        dl.dist = "null";
+                        hasBreak = true;
+                    } else if (d.depart.equals("")) {
+                        hasBreak = false;
                     }
                 }
-                prevDepart = d.depart;
-                ld.add(d);
-                //Delivery object for break
-                if (dl.dist.equals("null")) {
-                    ld.add(dl);
-                    prevDepart = addTime(prevDepart, 60);
+                if (d.custId.equals("")) {
+                    d.depart = depart;
+                } else {
+                    d.depart = addTime(d.arrive, Integer.parseInt(d.serviceTime));
                 }
+            }
+            prevDepart = d.depart;
+            ld.add(d);
+            //Delivery object for break
+            if (dl.dist.equals("null")) {
+                ld.add(dl);
+                prevDepart = addTime(prevDepart, getBreakTime(getDayByDate(dateDeliv)));
+            }
 
-                /********************************************
-                 * Data object Route_Job to be pushed to db *
-                 *******************************************/
-                if (!d.vehicleCode.equals("") || !d.custId.equals("")) {
-                    if (!prevVehiCode.equals(d.vehicleCode) && !d.vehicleCode.equals("NA")) {
-                        jobNb = 1;
-                        routeNb++;
-                    }
-                    RouteJobLog r = new RouteJobLog();
-                    String[] doSplit = d.doNum.split(";");
-                    if (!d.vehicleCode.equals("") && !d.vehicleCode.equals("NA") && d.custId.equals("")) {
-                        if (oneVehicle == false) {
-                            oneVehicle = true;
-                        } else {
-                            oneVehicle = false;
-                        }
-                        r.jobId = "DEPO";
-                    } else {
-                        r.jobId = d.custId + "-" + doSplit.length;
-                    }
-                    r.custId = d.custId;
-                    if (!r.jobId.equals("DEPO")) {
-                        r.countDoNo = "" + doSplit.length;
-                    }
-                    r.vehicleCode = d.vehicleCode;
-                    if (!r.vehicleCode.equals("NA")) {
-                        r.activity = "start";
-                        r.routeNb = routeNb;
-                        if (oneVehicle) {
-                            r.jobNb = jobNb;
-                        } else {
-                            r.jobNb = jobNb - 1;
-                        }
-                    } else {
-                        r.routeNb = 0;
-                        r.jobNb = 0;
-                    }
-                    r.arrive = d.arrive;
-                    r.depart = d.depart;
-                    r.runId = runId;
-                    r.branch = branch;
-                    r.shift = shift;
-                    if (r.custId.equals("")) {
-                        String[] longlatSplit = getLongLatVehicle(r.vehicleCode).split("split");
-                        try {
-                            r.lon = reFormatLongLat(longlatSplit[0]);
-                            r.lat = reFormatLongLat(longlatSplit[1]);
-                        } catch (Exception e) {
-
-                        }
-                    } else {
-                        String[] longlatSplit = getLongLatCustomer(r.custId).split("split");
-                        try {
-                            r.lon = reFormatLongLat(longlatSplit[0]);
-                            r.lat = reFormatLongLat(longlatSplit[1]);
-                        } catch (Exception e) {
-
-                        }
-                    }
-                    r.weight = aSplit[9];
-                    r.volume = getVolume(d.custId, oriRunId);
-                    r.transportCost = d.transportCost;
-
+            /**
+             * *****************************************
+             * Data object Route_Job to be pushed to db *
+             * ******************************************
+             */
+            if (!d.vehicleCode.equals("") || !d.custId.equals("")) {
+                if (!prevVehiCode.equals(d.vehicleCode) && !d.vehicleCode.equals("NA")) {
+                    jobNb = 1;
+                    routeNb++;
+                }
+                RouteJobLog r = new RouteJobLog();
+                String[] doSplit = d.doNum.split(";");
+                if (!d.vehicleCode.equals("") && !d.vehicleCode.equals("NA") && d.custId.equals("")) {
+                    r.jobId = "DEPO";
+                } else {
+                    r.jobId = d.custId + "-" + doSplit.length;
+                }
+                r.custId = d.custId;
+                if (!r.jobId.equals("DEPO")) {
+                    r.countDoNo = "" + doSplit.length;
+                }
+                r.vehicleCode = d.vehicleCode;
+                if (!r.vehicleCode.equals("NA")) {
+                    r.activity = "start";
+                    r.routeNb = routeNb;
+                    r.jobNb = jobNb;
+                } else {
+                    r.routeNb = 0;
+                    r.jobNb = 0;
+                }
+                r.arrive = d.arrive;
+                r.depart = d.depart;
+                r.runId = runId;
+                r.branch = branch;
+                r.shift = shift;
+                if (r.custId.equals("")) {
+                    String[] longlatSplit = getLongLatVehicle(r.vehicleCode).split("split");
                     try {
-                        double distance1 = Math.round(calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat1), Double.parseDouble(d.lon1), Double.parseDouble(d.lat2)) * 100.0) / 100.0;
-                        double distance2 = Math.round(calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat2), Double.parseDouble(d.lon2), Double.parseDouble(d.lat2)) * 100.0) / 100.0;
-                        r.dist = distance1 + distance2;
+                        r.lon = reFormatLongLat(longlatSplit[0]);
+                        r.lat = reFormatLongLat(longlatSplit[1]);
                     } catch (Exception e) {
-                        r.dist = 0.00;
-                    }
 
-                    arlistR.add(r);
-                    jobNb++;
-                    prevVehiCode = r.vehicleCode;
+                    }
+                } else {
+                    String[] longlatSplit = getLongLatCustomer(oriRunId, r.custId).split("split");
+                    try {
+                        r.lon = reFormatLongLat(longlatSplit[0]);
+                        r.lat = reFormatLongLat(longlatSplit[1]);
+                    } catch (Exception e) {
+
+                    }
                 }
+                r.weight = aSplit[9];
+                r.volume = getVolume(d.custId, oriRunId);
+                r.transportCost = d.transportCost;
+
+                try {
+                    double distance1 = Math.round(calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat1), Double.parseDouble(d.lon1), Double.parseDouble(d.lat2)) * 100.0) / 100.0;
+                    double distance2 = Math.round(calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat2), Double.parseDouble(d.lon2), Double.parseDouble(d.lat2)) * 100.0) / 100.0;
+                    r.dist = distance1 + distance2;
+                } catch (Exception e) {
+                    r.dist = 0.00;
+                }
+
+                arlistR.add(r);
+                jobNb++;
+                prevVehiCode = r.vehicleCode;
             }
         }
     }
 
-    public String getIsFix(String runId, String custId) throws Exception {
-        String isFix = "";
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql;
-                sql = "SELECT TOP 1 isFix FROM BOSNET1.dbo.TMS_RouteJob where runID = '" + runId + "' and customer_id = '" + custId + "';";
-                // query
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        isFix = rs.getString("isFix");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return isFix;
+    public String getDayByDate(String dates) throws ParseException {
+        String[] dateParse = dates.split("-");
+
+        int year = Integer.parseInt(dateParse[0]);
+        int month = Integer.parseInt(dateParse[1]);
+        int day = Integer.parseInt(dateParse[2]);
+
+        // First convert to Date. This is one of the many ways.
+        String dateString = String.format("%d-%d-%d", year, month, day);
+        Date date = new SimpleDateFormat("yyyy-M-d").parse(dateString);
+
+        // Then get the day of week from the Date based on specific locale.
+        String dayOfWeek = new SimpleDateFormat("EEEE", Locale.ENGLISH).format(date);
+
+        return dayOfWeek;
+    }
+
+    public String getVendorId(String v) {
+        String[] vSplit = v.split("_");
+        return vSplit[1] + vSplit[3];
     }
 
     public String getVehiStart(String vehiNo) throws Exception {
@@ -343,38 +361,22 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         return startTime;
     }
 
-    public double getDistByGoogle(String lon1, String lat1, String lon2, String lat2) throws Exception {
-        double distance = 0;
+    public ArrayList<Double> getDistDurByGoogle(String lon1, String lat1, String lon2, String lat2) throws Exception {
+        ArrayList<Double> al = new ArrayList<>();
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
-                String sql = "SELECT TOP 1 dist FROM BOSNET1.dbo.TMS_CostDist where lon1 = '" + lon1 + "' and lat1 = '" + lat1 + "' and lon2 = '" + lon2 + "' and lat2 = '" + lat2 + "';";
+                String sql = "SELECT TOP 1 dist, dur FROM BOSNET1.dbo.TMS_CostDist where lon1 = '" + lon1 + "' and lat1 = '" + lat1 + "' and lon2 = '" + lon2 + "' and lat2 = '" + lat2 + "';";
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
-                        distance = rs.getDouble("dist");
+                        al.add(rs.getDouble("dist"));
+                        al.add(rs.getDouble("dur"));
                     }
                 }
             }
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
-        return distance;
-    }
-
-    public int getDurByGoogle(String lon1, String lat1, String lon2, String lat2) throws Exception {
-        double duration = 0;
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql = "SELECT TOP 1 dur FROM BOSNET1.dbo.TMS_CostDist where lon1 = '" + lon1 + "' and lat1 = '" + lat1 + "' and lon2 = '" + lon2 + "' and lat2 = '" + lat2 + "';";
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        duration = rs.getDouble("dur");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return (int) Math.round(duration);
+        return al;
     }
 
     public String getTripCalc(String oriRunId) throws Exception {
@@ -398,6 +400,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
 
     public ArrayList<String> getRouteData(String custId) throws Exception {
         ArrayList<String> d = new ArrayList<>();
+        ArrayList<String> tempDO = new ArrayList<>();
         String doNumber = "";
         String priority = "";
         String storeOpen = "";
@@ -410,13 +413,36 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         double weight = 0.0;
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
-                String sql = "SELECT DO_Number, Customer_priority, deliv_start, deliv_end, Service_time, Name1, Street, Distribution_Channel, Request_Delivery_Date, SUM(total_kg) as total_kg "
-                        + "FROM BOSNET1.dbo.TMS_PreRouteJob "
-                        + "WHERE RunId = '" + oriRunId + "' and Customer_ID = '" + custId + "' and Is_Edit = 'edit' "
-                        + "GROUP BY DO_Number, Customer_priority, deliv_start, deliv_end, Service_time, Name1, Street, Distribution_Channel, Request_Delivery_Date";
+                String sql = "SELECT "
+                        + "     DO_Number, "
+                        + "     Customer_priority, "
+                        + "     deliv_start, "
+                        + "     deliv_end, "
+                        + "     Service_time, "
+                        + "     Name1, Street, "
+                        + "     Distribution_Channel, "
+                        + "     Request_Delivery_Date, "
+                        + "     SUM(total_kg) as total_kg "
+                        + "FROM "
+                        + "     BOSNET1.dbo.TMS_PreRouteJob "
+                        + "WHERE "
+                        + "     RunId = '" + oriRunId + "' "
+                        + "     and Customer_ID = '" + custId + "' "
+                        + "     and Is_Edit = 'edit' "
+                        + "GROUP "
+                        + "     BY DO_Number, "
+                        + "     Customer_priority, "
+                        + "     deliv_start, "
+                        + "     deliv_end, "
+                        + "     Service_time, "
+                        + "     Name1, Street, "
+                        + "     Distribution_Channel, "
+                        + "     Request_Delivery_Date "
+                        + "ORDER BY"
+                        + "     Request_Delivery_Date DESC";
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
-                        doNumber += rs.getString("DO_Number") + ";\n";
+                        tempDO.add(rs.getString("DO_Number"));
                         if (priority.length() == 0) {
                             priority = rs.getString("Customer_priority");
                         }
@@ -428,6 +454,10 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                         distChannel = rs.getString("Distribution_Channel");
                         rdd = rs.getString("Request_Delivery_Date");
                         weight += rs.getDouble("total_kg");
+                    }
+                    Collections.sort(tempDO);
+                    for (int i = 0; i < tempDO.size(); i++) {
+                        doNumber += tempDO.get(i) + ";\n";
                     }
                     if (doNumber.length() > 0) {
                         doNumber = doNumber.substring(0, doNumber.length() - 2);
@@ -443,12 +473,12 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         return d;
     }
 
-    public String getLongLatCustomer(String custId) throws Exception {
+    public String getLongLatCustomer(String runId, String custId) throws Exception {
         String longitude = "";
         String latitude = "";
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
-                String sql = "SELECT TOP 1 Long, Lat FROM BOSNET1.dbo.TMS_CustLongLat where CustId = '" + custId + "';";
+                String sql = "SELECT DISTINCT Long, Lat FROM BOSNET1.dbo.TMS_PreRouteJob where Customer_ID = '" + custId + "' and runId = '" + runId + "';";
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
                         longitude = rs.getString("Long");
@@ -529,6 +559,28 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         return moreThan;
     }
 
+    public int getBreakTime(String day) throws Exception {
+        int breakTime = 0;
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql = "";
+                if (day.equals("Friday")) {
+                    sql = "SELECT value FROM BOSNET1.dbo.TMS_Params WHERE param = 'fridayBreak'";
+                } else {
+                    sql = "SELECT value FROM BOSNET1.dbo.TMS_Params WHERE param = 'defaultBreak'";
+                }
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    while (rs.next()) {
+                        breakTime = rs.getInt("value");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return breakTime;
+    }
+
     public static Timestamp getTimeStamp() throws ParseException {
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(Calendar.getInstance().getTime());
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -543,31 +595,12 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         return id;
     }
 
-    public String getLongLatCustomer(String custId, String oriRunId) throws Exception {
-        String longitude = "";
-        String latitude = "";
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql = "SELECT TOP 1 Long, Lat FROM BOSNET1.dbo.TMS_PreRouteJob where Customer_ID = '" + custId + "' and RunId = '" + oriRunId + "';";
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        longitude = rs.getString("Long");
-                        latitude = rs.getString("Lat");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return longitude + "split" + latitude;
-    }
-
     public String getLongLatVehicle(String vehicleCode) throws Exception {
         String startLon = "";
         String startLat = "";
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
-                String sql = "SELECT TOP 1 startLon, startLat FROM BOSNET1.dbo.TMS_VehicleAtr where vehicle_code = '" + vehicleCode + "';";
+                String sql = "SELECT TOP 1 startLon, startLat FROM BOSNET1.dbo.TMS_PreRouteVehicle where vehicle_code = '" + vehicleCode + "' and RunId = '" + oriRunId + "';";
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
                         startLon = rs.getString("startLon");
@@ -721,7 +754,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
                 String sql = "SELECT vehicle_code, weight, volume, vehicle_type, branch, startLon, startLat, endLon, endLat, startTime, endTime, source1, UpdatevDate, "
-                        + "CreateDate, isActive, fixedCost, costPerM, costPerServiceMin, costPerTravelMin "
+                        + "CreateDate, isActive, fixedCost, costPerM, costPerServiceMin, costPerTravelMin, IdDriver, NamaDriver "
                         + "FROM BOSNET1.dbo.TMS_PreRouteVehicle "
                         + "WHERE RunId = '" + oriRunId + "';";
                 try (ResultSet rs = stm.executeQuery(sql)) {
@@ -747,6 +780,8 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                         p.costPerM = rs.getDouble("costPerM");
                         p.costPerminService = rs.getDouble("costPerServiceMin");
                         p.costPerTravelMin = rs.getDouble("costPerTravelMin");
+                        p.IdDriver = rs.getString("IdDriver");
+                        p.NamaDriver = rs.getString("NamaDriver");
 
                         arlistPrv.add(p);
                     }
@@ -775,38 +810,21 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         return volume;
     }
 
-    private double getTruckSpeed() throws Exception {
-        double speed = 0;
+    public ArrayList<Double> getParam() throws Exception {
+        ArrayList<Double> alParam = new ArrayList<>();
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
-                String sql = "SELECT value FROM BOSNET1.dbo.TMS_Params where param = 'SpeedKmPHour'";
+                String sql = "SELECT value FROM BOSNET1.dbo.TMS_Params WHERE param = 'SpeedKmPHour' OR param = 'TrafficFactor'";
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
-                        speed = (rs.getDouble("value"));
+                        alParam.add(rs.getDouble("value")); // Index 0 = speed, index 1 = traffic factor
                     }
                 }
             }
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
-        return speed;
-    }
-
-    private double getTrafficFactor() throws Exception {
-        double tFactor = 0;
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql = "SELECT value FROM BOSNET1.dbo.TMS_Params where param = 'TrafficFactor'";
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        tFactor = (rs.getDouble("value"));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return tFactor;
+        return alParam;
     }
 
     public void insertPreRouteVehicle(ArrayList<PreRouteVehicleLog> arlist, String runId) throws Exception {
@@ -827,8 +845,8 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         if (rowNum == 0) {
             String sql = "INSERT INTO bosnet1.dbo.TMS_PreRouteVehicle "
                     + "(RunId, vehicle_code, weight, volume, vehicle_type, branch, startLon, startLat, endLon, endLat, startTime, "
-                    + "endTime, source1, UpdatevDate, CreateDate, isActive, fixedCost, costPerM, costPerServiceMin, costPerTravelMin) "
-                    + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+                    + "endTime, source1, UpdatevDate, CreateDate, isActive, fixedCost, costPerM, costPerServiceMin, costPerTravelMin, IdDriver, NamaDriver) "
+                    + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
             for (int i = 0; i < arlist.size(); i++) {
                 PreRouteVehicleLog p = arlist.get(i);
@@ -853,6 +871,8 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                     psHdr.setDouble(18, p.costPerM);
                     psHdr.setDouble(19, p.costPerminService);
                     psHdr.setDouble(20, p.costPerTravelMin);
+                    psHdr.setString(21, p.IdDriver);
+                    psHdr.setString(22, p.NamaDriver);
 
                     psHdr.executeUpdate();
                 }

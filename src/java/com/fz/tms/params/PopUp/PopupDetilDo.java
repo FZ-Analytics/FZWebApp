@@ -9,6 +9,7 @@ import com.fz.generic.BusinessLogic;
 import com.fz.generic.Db;
 import com.fz.tms.params.model.DODetil;
 import com.fz.tms.params.model.SummaryVehicle;
+import com.fz.tms.service.run.RouteJobListing;
 import com.fz.util.FZUtil;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -18,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,15 +45,25 @@ public class PopupDetilDo  implements BusinessLogic {
                 + " where p.Product_Description = inv.szName and p.DOQtyUOM = inv.szUomId"
                 + " and p.NotUsed_Flag is null and p.DO_Number = '"+doID+"';";*/
         String sql = "SELECT\n" +
-                "	DISTINCT rb.DO_Number,\n" +
+                "	rb.DO_Number,\n" +
                 "	rb.Product_Description,\n" +
                 "	rb.Total_KG,\n" +
                 "	rb.DOQty,\n" +
                 "	rb.DOQtyUOM,\n" +
                 "	rj.branch\n" +
+                //"	CASE\n" +
+                //"		WHEN rb.batch IS NULL THEN 'no'\n" +
+                //"		ELSE 'yes'\n" +
+                //"	END sendSap\n" +
                 "FROM\n" +
                 "	BOSNET1.dbo.TMS_PreRouteJob rb\n" +
-                "INNER JOIN BOSNET1.dbo.TMS_RouteJob rj ON\n" +
+                "INNER JOIN(\n" +
+                "		SELECT\n" +
+                "			DISTINCT branch,\n" +
+                "			RunId\n" +
+                "		FROM\n" +
+                "			BOSNET1.dbo.TMS_RouteJob\n" +
+                "	) rj ON\n" +
                 "	rb.RunId = rj.RunId\n" +
                 "WHERE\n" +
                 "	is_edit = 'edit'\n" +
@@ -79,6 +91,7 @@ public class PopupDetilDo  implements BusinessLogic {
                     dt.DOQty = String.valueOf(new BigDecimal(FZUtil.getRsString(rs, i++, "")).intValue());
                     dt.DOQtyUOM = FZUtil.getRsString(rs, i++, "");  
                     br = FZUtil.getRsString(rs, i++, ""); 
+                    //dt.sap = FZUtil.getRsString(rs, i++, "");  
                     /*                    
                     String str = FZUtil.getRsString(rs, i++, "");
                     DecimalFormat df = new DecimalFormat("##.0");
@@ -87,6 +100,35 @@ public class PopupDetilDo  implements BusinessLogic {
                     */
                     totalkg = totalkg.add(new BigDecimal(dt.Total_KG_Item));
                     ar.add(dt);
+                }
+                RouteJobListing rj = new RouteJobListing();
+                List<HashMap<String, String>> px = rj.cekData(runId, custId);
+                int x = 0;
+                String str = "no";
+                while(x < ar.size()){
+                    int y = 0;
+                    Boolean cek = true;
+                    while(y < px.size()){
+                        //cek jika do sama
+                        if(ar.get(x).DO_Number.equalsIgnoreCase(px.get(y).get("DOPR"))){                                                        
+                            if(px.get(y).get("DOSP") == null)           str = "cek data ShipmentPlant";
+                            else if(px.get(y).get("DOSS") != null)      str = "cek data StatusShipment";
+                            else if(px.get(y).get("DORS") != null)      str = "cek data ResultShipment";
+                            
+                            if(!str.equalsIgnoreCase("no")){
+                                cek = false;
+                                break;
+                            }else{
+                                cek = true;
+                                break;
+                            }
+                        }
+                        y++;
+                    }
+                    
+                    if(!cek)    ar.get(x).sap = str;
+                    else        ar.get(x).sap = "yes";
+                    x++;
                 }
                 
                 request.setAttribute("ListDODetil", ar);

@@ -30,7 +30,7 @@ public class ResultShipment {
     public String Driver_Name;
     public String Delivery_Number;
     public String Delivery_Item;
-    public String Delivery_Quantity_Split;
+    public double Delivery_Quantity_Split;
     public double Delivery_Quantity;
     public String Delivery_Flag_Split;
     public String Material;
@@ -41,4 +41,6 @@ public class ResultShipment {
     public String Shipment_Number_SAP;
     public String I_Status;
     public String Shipment_Flag;
+    public String distance;
+    public String distanceUnit;
 }

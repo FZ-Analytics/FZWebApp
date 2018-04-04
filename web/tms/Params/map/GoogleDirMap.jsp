@@ -3,7 +3,7 @@
     Created on : Oct 19, 2017, 3:41:53 PM
     Author     : dwi.rangga
 --%>
-<%@include file="../appGlobal/pageTop.jsp"%>
+<%@include file="../../appGlobal/pageTop.jsp"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%run(new com.fz.tms.params.map.GoogleDirMap());%>
 <!DOCTYPE html>
@@ -214,7 +214,7 @@
                         infowindow.open(map, this);
                     });
                 }
-                google.maps.event.addDomListener(window, 'load', initialize);
+                google.maps.event.addDomListener(window, 'load', initialize());
             });
         </script>        
         <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyB_lu1GKTDK0Lc08lT6p1f4WFZaFvILIGY"></script>

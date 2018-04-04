@@ -64,7 +64,7 @@ public class ForwadingAgentDB {
         return ar;
     }
     
-        public String insert(ForwadingAgent c, String flag) throws Exception{
+    public String insert(ForwadingAgent c, String flag) throws Exception{
         
         String insert = "ERROR";
         // open db connection and 1 statement to insert header
@@ -73,6 +73,9 @@ public class ForwadingAgentDB {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
         Date date = new Date();
         c.dates = dateFormat.format(date);
+        
+        flag = cek(c.Service_agent_id);
+        
         if(flag.equalsIgnoreCase("insert")){
             sql = "INSERT INTO bosnet1.dbo.TMS_ForwadingAgent "
                 + "(Service_agent_id, Driver_Name, Branch, Status, dates, inc) "
@@ -120,4 +123,29 @@ public class ForwadingAgentDB {
         }
         return insert;
     } 
+    
+    public String cek(String id) throws Exception{
+        String str = "insert";
+        
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")){            
+            try (Statement stm = con.createStatement()){
+            
+                // create sql
+                String sql ;
+                sql = "SELECT count(*) FROM BOSNET1.dbo.TMS_ForwadingAgent where Service_agent_id = '" + id + "'";
+                
+                // query
+                try (ResultSet rs = stm.executeQuery(sql)){
+                    if (rs.next()){
+                        str = "update";
+                    }
+                }
+            }
+        }
+        catch (Exception e){
+            throw new Exception(e.getMessage());
+        }
+        
+        return str;        
+    }
 }

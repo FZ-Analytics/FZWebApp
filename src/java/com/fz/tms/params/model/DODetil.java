@@ -17,4 +17,5 @@ public class DODetil {
     public String DOQty;
     public String DOQtyUOM;
     public String pck;
+    public String sap;
 }

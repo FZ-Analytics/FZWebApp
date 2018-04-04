@@ -5,6 +5,14 @@
  */
 package com.fz.generic;
 
+import com.fz.ffbv3.service.datamgt.RoleDataModule;
+import com.fz.ffbv3.service.datamgt.UserLoginDataHolder;
+import com.fz.ffbv3.service.datamgt.UserLoginDataModule;
+import com.fz.ffbv3.service.datamgt.VehicleDataModule;
+import com.fz.ffbv3.service.divisionmgt.DivisionHolder;
+import com.fz.ffbv3.service.divisionmgt.DivisionModule;
+import com.fz.ffbv3.service.entrymgt.EntryHolder;
+import com.fz.ffbv3.service.entrymgt.EntryModule;
 import com.fz.ffbv3.service.reasonmgt.ReasonHolder;
 import com.fz.ffbv3.service.reasonmgt.ReasonModule;
 import com.fz.ffbv3.service.taskmgt.JobStateHolder;
@@ -19,24 +27,18 @@ import com.fz.ffbv3.service.usermgt.UserHolder;
 import com.fz.util.FixValue;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONStringer;
 
 /**
  *
@@ -65,7 +67,18 @@ public class ResponseMessege
 	JobStateModule jobStateModule;
 	JobStateHolder jobStateHolder;
 	
-	Gson gson;
+	EntryModule entryModule;
+	EntryHolder entryHolder;
+
+  DivisionModule divisionModule;
+  DivisionHolder divisionHolder;
+
+  UserLoginDataModule userLoginDataModule;
+  VehicleDataModule vehicleDataModule;
+  RoleDataModule roleDataModule;
+  UserLoginDataHolder userLoginDataHolder;
+
+  Gson gson;
 
   public String CoreMsgResponse(Integer Code, String Msg)
   {
@@ -94,7 +107,7 @@ public class ResponseMessege
     }
   }
   
-  public String LoginMsgResponse(Integer Code, String Msg, ResultSet res, Integer rows) throws SQLException
+  public String LoginMsgResponse(Integer Code, String Msg, ResultSet res, Integer rows, Integer VehicleID) throws SQLException
   {
     coreRsp = new CoreModule();    
     coreRsp.setCode(Code);
@@ -109,10 +122,29 @@ public class ResponseMessege
       userRsp.setPhone(res.getString("Phone"));
       userRsp.setLnkRoleID(res.getInt("lnkRoleID"));
       userRsp.setBrand(res.getString("Brand"));
-      userRsp.setType(res.getString("Type"));
+      userRsp.setTipe(res.getString("Tipe"));
       userRsp.setTimeTrackLocation(FixValue.intTrackingTimeout);
-      userRsp.setVehicleID(res.getInt("VehicleID"));
-		  userRsp.setVehicleName(res.getString("VehicleName"));
+      userRsp.setTimeSyncJob(FixValue.intSyncJobTimeout);
+      
+      if(VehicleID == 0)
+      {
+        userRsp.setDivisi(res.getString("Divisi"));
+        userRsp.setEstate(res.getString("Estate"));
+        userRsp.setMillID(res.getString("millID"));
+      }
+      else
+      if(VehicleID > 0)
+      {
+        userRsp.setType(res.getString("Type"));
+        userRsp.setDescription(res.getString("Description"));
+        userRsp.setEstate(res.getString("Estate"));
+      }
+
+      if((VehicleID == -1) || (VehicleID > 0))
+      {
+        userRsp.setVehicleID(res.getInt("VehicleID"));
+        userRsp.setVehicleName(res.getString("VehicleName"));
+      }
     }
     
     userHolder = new UserHolder(coreRsp, userRsp);
@@ -204,51 +236,6 @@ public class ResponseMessege
     return new Gson().toJson(listOfMaps);
   }
 
-  public String MobileMenuMsgResponse(Integer Code, String Msg, ResultSet res1, ResultSet res2, Integer rows1, Integer rows2) throws SQLException
-  {
-    coreRsp = new CoreModule();    
-    coreRsp.setCode(Code);
-    coreRsp.setMsg(Msg);
-
-    List<MenuModule> MobileMenuList = new ArrayList<>();
-    res1.first();
-  
-    for(int i=0; i<rows1; i++)
-    {      
-			menuModule = new MenuModule();
-      menuModule.setId(res1.getInt("id"));
-      menuModule.setTitle(res1.getString("Title"));
-      menuModule.setWebURL(res1.getString("WebURL"));
-      menuModule.setImageURL(res1.getString("ImageURL"));
-      MobileMenuList.add(menuModule);
-
-			res1.next();
-    }
-  	
-    List<DivisiModule> DivisiList = new ArrayList<>();
-    res2.first();
-  
-    for(int j=0; j<rows2; j++)
-    {      
-			divisiModule = new DivisiModule();
-      divisiModule.setId(res2.getInt("id"));
-      divisiModule.setProdAstUserID(res2.getInt("ProdAstUserID"));
-      divisiModule.setMillID(res2.getString("millID"));
-      divisiModule.setEstateID(res2.getString("estateID"));
-      divisiModule.setDivID(res2.getString("divID"));
-      DivisiList.add(divisiModule);
-
-			res2.next();
-    }
-		
-		menuHolder = new MenuHolder(coreRsp, MobileMenuList, DivisiList);
-    
-    res1.close();
-    res2.close();
-    gson = new GsonBuilder().setPrettyPrinting().create(); 
-  	return gson.toJson(menuHolder);
-  }
-	
   public String MobileJobStateMsgResponse(Connection conn, Integer Code, String Msg, ResultSet res, Integer rows) throws SQLException
   {
     coreRsp = new CoreModule();    
@@ -260,8 +247,25 @@ public class ResponseMessege
 
     for(int i=0; i<rows; i++)
     {
-      jobStateModule.setDoneStatus(res.getString("DoneStatus"));
-      res.next();
+			Integer intReason = res.getInt("ReasonState");
+
+      switch (intReason)
+      {
+        case 0:
+          jobStateModule.setDoneStatus("DONE");
+        break;
+        case 1:
+          jobStateModule.setDoneStatus("STOP");
+        break;
+        case 2:
+          jobStateModule.setDoneStatus("LATE");
+        break;
+        default:
+          jobStateModule.setDoneStatus("TKEN");
+        break;
+      }
+
+			res.next();
 		}
     
     jobStateHolder = new JobStateHolder(coreRsp, jobStateModule, null);
@@ -284,5 +288,199 @@ public class ResponseMessege
     gson = new GsonBuilder().setPrettyPrinting().create(); 
   	return gson.toJson(jobStateHolder).replaceAll("\\\\", "").replaceAll("\"\\{\"", "\\{\"").
 					 replaceAll("\"\\}\"", "\"\\}").replaceAll("\"\\[", "[").replaceAll("\\]\"", "]");
+  }
+
+  public String MobileMenuMsgResponse(Integer Code, String Msg, ResultSet res1, Integer rows1) throws SQLException
+  {
+    coreRsp = new CoreModule();    
+    coreRsp.setCode(Code);
+    coreRsp.setMsg(Msg);
+
+    List<MenuModule> MobileMenuList = new ArrayList<>();
+    res1.first();
+  
+    for(int i=0; i<rows1; i++)
+    {      
+			menuModule = new MenuModule();
+      menuModule.setId(res1.getInt("id"));
+      menuModule.setTitle(res1.getString("Title"));
+      menuModule.setImageURL(res1.getString("ImageURL"));
+      MobileMenuList.add(menuModule);
+
+			res1.next();
+    }
+  	
+		menuHolder = new MenuHolder(coreRsp, MobileMenuList);
+    
+    res1.close();
+    gson = new GsonBuilder().setPrettyPrinting().create(); 
+  	return gson.toJson(menuHolder);
+  }
+
+  public String DataEntryResponse(Integer Code, String Msg, ResultSet res, Integer rows, Integer intEntry) throws SQLException
+  {
+    coreRsp = new CoreModule();    
+    coreRsp.setCode(Code);
+    coreRsp.setMsg(Msg);
+
+    List<EntryModule> entryModules = new ArrayList<>();
+    res.first();
+    
+    for(int i=0; i<rows; i++)
+    {      
+      entryModule = new EntryModule();
+			
+			if(intEntry == 1)
+	      entryModule.setEstimation(res.getString("estimation"));
+			else
+			if(intEntry == 2)
+	      entryModule.setDirection(res.getString("direction"));
+      
+      entryModules.add(entryModule);
+      res.next();
+    }
+    
+		if(intEntry == 1)
+      entryHolder = new EntryHolder(coreRsp, entryModules, null);
+    else
+		if(intEntry == 2)
+      entryHolder = new EntryHolder(coreRsp, null, entryModules);
+    
+    res.close();
+    gson = new GsonBuilder().setPrettyPrinting().create(); 
+  	return gson.toJson(entryHolder);
+  }
+
+   public String DashbordDivisiMsgResponse(Integer Code, String Msg, ResultSet res, Integer rows) throws SQLException
+  {
+    coreRsp = new CoreModule();    
+    coreRsp.setCode(Code);
+    coreRsp.setMsg(Msg);
+    
+    divisionModule = new DivisionModule();
+
+    for(int i=0; i<rows; i++)
+    {      
+      divisionModule.setDivID(res.getString("divID"));
+      divisionModule.setTripsCount(res.getInt("TripsCount"));
+      divisionModule.setKg1(res.getInt("kg1"));
+      divisionModule.setKg2(res.getInt("kg2"));
+      divisionModule.setKg3(res.getInt("kg3"));
+      divisionModule.setKg4(res.getInt("kg4"));   
+      divisionModule.setTrip1(res.getInt("trip1"));
+      divisionModule.setTrip2(res.getInt("trip2"));
+      divisionModule.setTrip3(res.getInt("trip3"));
+      divisionModule.setTrip4(res.getInt("trip4"));      
+      divisionModule.setActualKgs(res.getDouble("ActualKgs"));
+      divisionModule.setAvgTrip(res.getDouble("avgTrip"));
+      divisionModule.setKgsTax(res.getDouble("KgsTax"));
+      divisionModule.setAvgTax(res.getDouble("avgTax"));
+
+      res.next();
+    }
+    
+    divisionHolder = new DivisionHolder(coreRsp, divisionModule);
+    
+    res.close();
+    gson = new GsonBuilder().setPrettyPrinting().create(); 
+  	return gson.toJson(divisionHolder);
+  }
+
+   public String DataUserLoginMsgResponse(Integer Code, String Msg, ResultSet res, Integer rows) throws SQLException
+  {
+    coreRsp = new CoreModule();    
+    coreRsp.setCode(Code);
+    coreRsp.setMsg(Msg);
+    
+    List<UserLoginDataModule> UserLoginRsp = new ArrayList<>();
+    res.first();
+
+    for(int i=0; i<rows; i++)
+    {      
+      userLoginDataModule = new UserLoginDataModule();
+      userLoginDataModule.setUserID(res.getInt("UserID"));
+      userLoginDataModule.setPassword(res.getString("Password"));
+      userLoginDataModule.setUsername(res.getString("Username"));
+      userLoginDataModule.setPhone(res.getString("Phone"));
+      userLoginDataModule.setFullName(res.getString("FullName"));
+      userLoginDataModule.setVehicleName(res.getString("VehicleName"));
+
+      if(res.getString("rights") == null)
+        userLoginDataModule.setRights("");
+      else
+        userLoginDataModule.setRights(res.getString("rights"));
+
+      if(res.getString("Name") == null)
+        userLoginDataModule.setName("");
+      else
+        userLoginDataModule.setName(res.getString("Name"));
+
+      UserLoginRsp.add(userLoginDataModule);
+      res.next();
+    }
+    
+    userLoginDataHolder = new UserLoginDataHolder(coreRsp, UserLoginRsp, null, null);
+    
+    res.close();
+    gson = new GsonBuilder().setPrettyPrinting().create(); 
+  	return gson.toJson(userLoginDataHolder);
+  }
+
+  public String DataVehicleMsgResponse(Integer Code, String Msg, ResultSet res, Integer rows, CallableStatement cs, Logger logger) throws SQLException
+  {
+    coreRsp = new CoreModule();    
+    coreRsp.setCode(Code);
+    coreRsp.setMsg(Msg);
+    
+    List<VehicleDataModule> VehicleRsp = new ArrayList<>();
+    List<RoleDataModule> RoleRsp = new ArrayList<>();
+
+    res.first();
+
+    for(int i=0; i<rows; i++)
+    {      
+      vehicleDataModule = new VehicleDataModule();
+      vehicleDataModule.setVehicleID(res.getInt("VehicleID"));
+      vehicleDataModule.setVehicleName(res.getString("VehicleName"));
+      vehicleDataModule.setType(res.getString("Type"));
+      vehicleDataModule.setWeight(res.getInt("Weight"));
+      vehicleDataModule.setDefDivCode(res.getString("DefDivCode"));
+      vehicleDataModule.setStartLocation(res.getString("StartLocation"));
+      vehicleDataModule.setRemark(res.getString("remark"));
+      vehicleDataModule.setDescription(res.getString("Description"));
+
+      VehicleRsp.add(vehicleDataModule);
+      res.next();
+    }
+    
+    if(cs.getMoreResults())
+    {
+      res.close();
+      res = cs.getResultSet(); 
+      res.last();
+      rows = res.getRow();
+      res.first();
+
+      for(int j=0; j<rows; j++)
+      {      
+        roleDataModule = new RoleDataModule();
+        roleDataModule.setId(res.getInt("Id"));
+        roleDataModule.setRoleName(res.getString("RoleName"));
+        roleDataModule.setDisplayName(res.getString("DisplayName"));
+        roleDataModule.setMobileMenuID(res.getString("MobileMenuID"));
+        roleDataModule.setDivisiID(res.getString("DivisiID"));
+        roleDataModule.setRightsID(res.getString("RightsID"));
+        roleDataModule.setDescription(res.getString("Description"));
+
+        RoleRsp.add(roleDataModule);
+        res.next();
+      }
+    }
+    
+    userLoginDataHolder = new UserLoginDataHolder(coreRsp, null, VehicleRsp, RoleRsp);
+
+    res.close();
+    gson = new GsonBuilder().setPrettyPrinting().create(); 
+  	return gson.toJson(userLoginDataHolder);
   }
 }

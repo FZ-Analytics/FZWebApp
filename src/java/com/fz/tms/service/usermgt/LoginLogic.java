@@ -10,6 +10,7 @@ import com.fz.generic.BusinessLogic;
 import com.fz.generic.Db;
 import com.fz.util.FZUtil;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import javax.servlet.http.HttpServletRequest;
@@ -94,6 +95,26 @@ public class LoginLogic implements BusinessLogic {
             throw new Exception("Error login. SQL = " + sql, e);
         }
 
+    }
+    
+    public String LogOut(String id) throws Exception{
+        String str = "ERROR";
+        
+        String sql = "update BOSNET1.dbo.TMS_UserStatus set Status = '0', KEYLogin = '-' where NIK = '"+id+"'";
+        try (
+            Connection con = (new Db()).getConnection("jdbc/fztms");
+            PreparedStatement psHdr = con.prepareStatement(sql
+                    , Statement.RETURN_GENERATED_KEYS);
+            )  {
+            con.setAutoCommit(false);
+
+            psHdr.executeUpdate();
+            
+             con.setAutoCommit(true);
+             str = "OK";
+        }
+        
+        return str;
     }
 
 }

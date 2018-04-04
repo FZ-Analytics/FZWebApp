@@ -7,7 +7,7 @@
 <%@page import="com.fz.generic.Db"%>
 <%@page import="com.fz.ffbv3.service.hvsEstm.HvsEstm"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@include file="../appGlobal/pageTop.jsp"%>
+<%@include file="../../appGlobal/pageTop.jsp"%>
 <%!
     String getData(HttpServletRequest request) {
     

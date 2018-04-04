@@ -24,4 +24,6 @@ public class SummaryVehicle {
     public String time = "";
     public String sctime = "";
     public String transportCost = "";
+    public String isFix = "";
+    public String error = "";
 }

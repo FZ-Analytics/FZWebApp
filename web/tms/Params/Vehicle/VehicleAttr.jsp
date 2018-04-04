@@ -5,7 +5,7 @@
 --%>
     
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@include file="../appGlobal/pageTop.jsp"%>
+<%@include file="../../appGlobal/pageTop.jsp"%>
 <%@page import="com.fz.tms.params.model.Branch"%>
 <%run(new com.fz.tms.params.Vehicle.LoadBranchVehi());%>
 <!DOCTYPE html>
@@ -18,28 +18,16 @@
         <%@include file="../appGlobal/bodyTop.jsp"%>
         <script>
             $(document).ready(function() {
-                /*
-                $('#branchId').on('change', function() {                
-                    var $apiAddress = '../../../api/Params/getVehicleId';
-                    var jsonForServer = '{\"branchId\": \"'+$(this).val()+'\"}';
-                    var data = [];
-                    //alert( jsonForServer ); 
-                    $.post( $apiAddress, {json : jsonForServer}).done(function(data) {
-                        $("#vVehicleId").get(0).options.length = 0;
-                        $("#vVehicleId").get(0).options[0] = new Option("Pilih", "-1");                         
-                        $.each(data, function(index, item) {
-                            $("#vVehicleId").get(0).options[$("#vVehicleId").get(0).options.length] = new Option(item.Display, item.Value);
-                        });
-                    });
+                $('#branchId').on('change', function () {
+                    var a = document.getElementById('urls'); //or grab it by tagname etc
+                    a.href = "VehicleAttrView.jsp?flag=insert"+"&branchId="+$("#branchId").val();
                 });
-                $('#myDiv').click(function(){
-                    //Some code
-                    alert( 'hello' ); 
-                    window.open("../../Params/popup.jsp", null, 
-                    "scrollbars=1,resizable=1,height=500,width=750");
-                });
-                 */
             });
+            
+            window.onload = function(){
+                var a = document.getElementById('urls'); //or grab it by tagname etc
+                a.href = "VehicleAttrView.jsp?flag=insert"+"&branchId="+$("#branchId").val();
+            }
         </script>
         <form class="container" action="LoadBranchVehi.jsp" method="post">
             <div class="fzErrMsg">
@@ -48,17 +36,14 @@
             <label class="fzLabel">Branch Id</label>
             <select id="branchId" name="branchId">
                 <%for (Branch hd : (List<Branch>) getList("ListBranch")) { %>
-                    <%= makeOption(hd.branchId, hd.branchId, hd.name)%>
+                <%--<%= makeOption(hd.branchId, hd.branchId, hd.name)%>--%>
+                    <option value='<%=hd.branchId%>' <%if (hd.branchId.equals(WorkplaceID)) {%> selected="true" <%}%>><%=hd.name%></option>
                 <% } /* end for Branch Id */ %>
             </select> 
             <br>
-            <%--<label class="fzLabel">Vehicle Id</label>
-            <select id="vVehicleId" name="vVehicleId" >
-            </select> --%>
-            <%--<label class="fzLabel" id="myDiv">test</label>--%>
-            <%--<input class="fzInput" type="text" id="veID" name="veID">--%>
             <br><br>
             <button class="btn fzButton" type="submit">GO</button>
+            <a id="urls">Add New</a>
         </form>        
         <%@include file="../appGlobal/bodyBottom.jsp"%>
     </body>

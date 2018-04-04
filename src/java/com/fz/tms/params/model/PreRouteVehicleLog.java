@@ -30,4 +30,6 @@ public class PreRouteVehicleLog {
     public double costPerM;
     public double costPerminService;
     public double costPerTravelMin;
+    public String IdDriver;
+    public String NamaDriver;
 }

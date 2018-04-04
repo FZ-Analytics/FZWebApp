@@ -56,4 +56,13 @@ public class FixMessege
 	public static final String strMobileHistoryStateFailed = "History job gagal";
 
 	public static final String strStatusUploadDataSuccess = "DONE";
+	public static final String strImageFileFailed = "Download file gambar gagal";
+
+	public static final String strDashboardDivisiEmpty = "Data dashboard kosong";
+	public static final String strDashboardDivisiSuccess = "Data dashboard sukses";
+	public static final String strDashboardDivisiFailed = "Data dashboard gagal";
+
+	public static final String strAmbilDataKosong = "Data tidak ditemukan";
+	public static final String strAmbilDataSuccess = "Ambil data sukses";
+	public static final String strAmbilDataFailed = "Ambil data gagal";
 }

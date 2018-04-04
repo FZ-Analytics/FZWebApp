@@ -3,8 +3,9 @@
     Created on : Oct 5, 2017, 10:02:24 AM
     Author     : dwi.rangga
 --%>
+<%@page import="com.fz.util.FZUtil"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@include file="../appGlobal/pageTop.jsp"%>
+<%@include file="../../appGlobal/pageTop.jsp"%>
 <%@page import="com.fz.tms.params.model.Vehicle"%>
 <%run(new com.fz.tms.params.Vehicle.ParamVehicleViewPre());%>
 <!DOCTYPE html>
@@ -30,13 +31,14 @@
                             '\",\"endTime\":\"' + $("#endTime").val() + '\",\"source1\":\"' + $("#source1").val() +
                             '\",\"included\":\"' + $("#included").val() + '\",\"costPerM\":\"' + $("#costPerM").val() +
                             '\",\"fixedCost\":\"' + $("#fixedCost").val() + '\",\"Channel\":\"' + $("#Channel").val() +
-                            '\",\"IdDriver\":\"' + $("#FixIdDriver").val() + '\",\"NamaDriver\":\"' + $("#NamaDriver").val() +'\"}';
+                            '\",\"IdDriver\":\"' + $("#FixIdDriver").val() + '\",\"NamaDriver\":\"' + $("#NamaDriver").val() +
+                            '\",\"agent_priority\":\"' + $("#agent_priority").val() + '\",\"max_cust\":\"' + $("#max_cust").val() + '\"}';
                     var data = [];
                     //alert(jsonForServer);
                     $.post($apiAddress, {json: jsonForServer}).done(function (data) {
                         if(data == 'OK'){
                             alert( 'sukses' );
-                            location.reload()
+                            location.reload();
                         }else{
                             alert( data ); 
                         }
@@ -71,7 +73,12 @@
             <input type="text" id="extVe" name="extVe" value="<%=get("extVe")%>" hidden="true">
             <br>
             <label class="fzLabel">vehicle Id:</label> 
-            <input class="fzInput" type="text" id="vehicle_code" name="vehicle_code" value="<%=get("vehicle_code")%>" readonly="true">
+            <% 
+                String flag = FZUtil.getHttpParam(request, "flag");
+                System.out.println("vehicle_code" + flag);
+            %>
+            <input class="fzInput" type="text" id="vehicle_code" name="vehicle_code" value="<%=get("vehicle_code")%>" 
+                   <%if (!flag.equalsIgnoreCase("insert")) {%>readonly="true"<%}%>>
                 
             <br>
             <label class="fzLabel">branch:</label> 
@@ -158,6 +165,14 @@
             <br>
             <label class="fzLabel">Nama Driver:</label> 
             <input class="fzInput" type="text" id="NamaDriver" name="NamaDriver" value="<%=get("NamaDriver")%>" maxlength="50" readonly="true">
+            
+            <br>
+            <label class="fzLabel">Vehicle Priority:</label> 
+            <input class="fzInput" type="text" id="agent_priority" name="agent_priority" value="<%=get("agent_priority")%>" maxlength="50">
+            
+            <br>
+            <label class="fzLabel">max cust:</label> 
+            <input class="fzInput" type="text" id="max_cust" name="max_cust" value="<%=get("max_cust")%>" maxlength="50">
             
             <br><br>
             <button class="btn fzButton" type="submit" id="btn"><%=get("flag")%></button>

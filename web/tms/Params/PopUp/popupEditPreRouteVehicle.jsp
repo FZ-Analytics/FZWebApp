@@ -3,7 +3,7 @@
     Created on : Jan 19, 2018, 10:02:21 AM
     Author     : dwi.oktaviandi
 --%>
-<%@include file="../appGlobal/pageTop.jsp"%>
+<%@include file="../../appGlobal/pageTop.jsp"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%run(new com.fz.tms.params.PopUp.popupEditPreRouteVehicle());%>
 <%@page import="com.fz.tms.params.model.Vehicle"%>
@@ -36,13 +36,14 @@
                             '\",\"startTime\":\"' + $("#startTime").val() + '\",\"endTime\":\"' + $("#endTime").val() +
                             '\",\"source1\":\"' + $("#source1").val() + '\",\"costPerM\":\"' + $("#costPerM").val() +
                             '\",\"fixedCost\":\"' + $("#fixedCost").val() + '\",\"IdDriver\":\"' + $("#FixIdDriver").val() + 
-                            '\",\"NamaDriver\":\"' + $("#NamaDriver").val() + '\",\"isActive\":\"' + $("#isActive").val() +'\"}';
+                            '\",\"NamaDriver\":\"' + $("#NamaDriver").val() + '\",\"agent_priority\":\"' + $("#agent_priority").val() + 
+                            '\",\"max_cust\":\"' + $("#max_cust").val() + '\",\"isActive\":\"' + $("#isActive").val() +'\"}';
                     var data = [];
                     
                     $.post($apiAddress, {json: jsonForServer}).done(function (data) {
                         if(data == 'OK'){
                             alert( 'sukses' );
-                            location.reload()
+                            location.reload();
                         }else{
                             alert( 'submit error' ); 
                         }
@@ -163,6 +164,14 @@
         <br>
         <label class="fzLabel">Driver name:</label> 
         <input class="fzInput" type="text" id="NamaDriver" name="NamaDriver" value='<%=get("NamaDriver")%>'readonly="true">
+        
+        <br>
+        <label class="fzLabel">agent priority:</label> 
+        <input class="fzInput" type="text" id="agent_priority" name="agent_priority" value='<%=get("agent_priority")%>'>
+        
+        <br>
+        <label class="fzLabel">max cust:</label> 
+        <input class="fzInput" type="text" id="max_cust" name="max_cust" value='<%=get("max_cust")%>'>
         
         <br>
         <label class="fzLabel">isActive:</label> 

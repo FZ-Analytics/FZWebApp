@@ -15,26 +15,48 @@ import com.google.gson.annotations.SerializedName;
  */
 public class DivisionData
 {
-  @SerializedName("field1")
+  @SerializedName("MillID")
   @Expose
-  private String field1;
-  @SerializedName("field2")
+  private String MillID;
+  @SerializedName("Estate")
   @Expose
-  private String field2;
+  private String Estate;
+  @SerializedName("Divisi")
+  @Expose
+  private String Divisi;
+  @SerializedName("Tanggal")
+  @Expose
+  private String Tanggal;
 
-  public String getField1() {
-    return field1;
+  public String getMillID() {
+    return MillID;
   }
 
-  public void setField1(String field1) {
-    this.field1 = field1;
+  public void setMillID(String MillID) {
+    this.MillID = MillID;
   }
 
-  public String getField2() {
-    return field2;
+  public String getEstate() {
+    return Estate;
   }
 
-  public void setField2(String field2) {
-    this.field2 = field2;
+  public void setEstate(String Estate) {
+    this.Estate = Estate;
   }
+
+  public String getDivisi() {
+    return Divisi;
+  }
+
+  public void setDivisi(String Divisi) {
+    this.Divisi = Divisi;
+  }
+
+  public String getTanggal() {
+    return Tanggal;
+  }
+
+  public void setTanggal(String Tanggal) {
+    this.Tanggal = Tanggal;
+  } 
 }

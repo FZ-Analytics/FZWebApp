@@ -16,11 +16,17 @@ public class UserModule
   private String Phone;
   private Integer lnkRoleID;
   private String Brand; 
-  private String Type;
+  private String Tipe;
   private Integer VehicleID;
   private String VehicleName;
   private long TimeTrackLocation;
   private String DoneStatus;
+  private String Divisi;
+  private String Estate;
+  private String MillID;
+  private String Description;
+  private String Type;
+  private long TimeSyncJob;
 
   public Integer getUserID()
   {
@@ -119,4 +125,52 @@ public class UserModule
 	public void setDoneStatus(String DoneStatus) {
 		this.DoneStatus = DoneStatus;
 	}	
+
+  public String getDivisi() {
+    return Divisi;
+  }
+
+  public void setDivisi(String Divisi) {
+    this.Divisi = Divisi;
+  }
+
+  public String getEstate() {
+    return Estate;
+  }
+
+  public void setEstate(String Estate) {
+    this.Estate = Estate;
+  }
+
+  public String getMillID() {
+    return MillID;
+  }
+
+  public void setMillID(String MillID) {
+    this.MillID = MillID;
+  }
+
+  public String getDescription() {
+    return Description;
+  }
+
+  public void setDescription(String Description) {
+    this.Description = Description;
+  }
+
+  public String getTipe() {
+    return Tipe;
+  }
+
+  public void setTipe(String Tipe) {
+    this.Tipe = Tipe;
+  }
+
+  public long getTimeSyncJob() {
+    return TimeSyncJob;
+  }
+
+  public void setTimeSyncJob(long TimeSyncJob) {
+    this.TimeSyncJob = TimeSyncJob;
+  }
 }

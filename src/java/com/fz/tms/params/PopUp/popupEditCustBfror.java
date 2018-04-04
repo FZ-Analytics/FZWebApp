@@ -46,8 +46,8 @@ public class popupEditCustBfror implements BusinessLogic {
         String oriRunID = FZUtil.getHttpParam(request, "oriRunID");
         String err = FZUtil.getHttpParam(request, "errMsg");
         String channel = FZUtil.getHttpParam(request, "channel");
-        request.getSession().setAttribute("errMsg"
-                        , err);        
+        request.setAttribute("errMsg", err.length() > 0 ? err : "");
+        //request.getSession().setAttribute("errMsg", err);        
         
         String cds = "ERROR insertPreRouteJob";
 
@@ -58,6 +58,7 @@ public class popupEditCustBfror implements BusinessLogic {
                 "	pr.long,\n" +
                 "	pr.lat,\n" +
                 "	pr.Customer_Priority,\n" +
+                "	pr.Distribution_Channel,\n" +
                 "	pr.Request_Delivery_Date,\n" +
                 "	pr.service_time,\n" +
                 "	pr.deliv_start,\n" +
@@ -105,6 +106,7 @@ public class popupEditCustBfror implements BusinessLogic {
                     c.lng = FZUtil.getRsString(rs, i++, "");
                     c.lat = FZUtil.getRsString(rs, i++, "");
                     c.customer_priority = FZUtil.getRsString(rs, i++, "");
+                    c.channel = FZUtil.getRsString(rs, i++, "");
                     c.rdd = FZUtil.getRsString(rs, i++, "");
                     c.service_time = Integer.parseInt(FZUtil.getRsString(rs, i++, ""));//Integer.parseInt(FZUtil.getRsString(rs, i++, getParams("DefaultCustServiceTime")));
                     c.deliv_start = FZUtil.getRsString(rs, i++, "");//FZUtil.getRsString(rs, i++, getParams("DefaultCustStartTime"));

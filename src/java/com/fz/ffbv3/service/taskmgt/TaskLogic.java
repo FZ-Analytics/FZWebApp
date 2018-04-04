@@ -254,8 +254,25 @@ public class TaskLogic
       {
         if(UpdateJobByJobID("UPDATE fbjob SET doneDt=CURRENT_TIMESTAMP(), DoneStatus=\"DONE\", ActualKg=" + uploadModel.getActualKg() + " WHERE JobID=" + mJobID))
         {
+          String strStatus;
+          Integer intStatus = uploadModel.getUploadData().get(1).getReasonState();
+          
+          if(intStatus == -1)
+            strStatus = "Unknown";
+          else
+          if(intStatus == 0)
+            strStatus = "DONE";
+          else
+          if(intStatus == 1)
+            strStatus = "STOP";
+          else
+          if(intStatus == 2)
+            strStatus = "LATE";
+          else
+            strStatus = FixMessege.strStatusUploadDataSuccess;
+          
           sendRsp.setCode(FixValue.intResponSuccess);
-					sendRsp.setRsp(rspMsg.CoreMsgResponse(FixValue.intSuccess, FixMessege.strStatusUploadDataSuccess));
+					sendRsp.setRsp(rspMsg.CoreMsgResponse(FixValue.intSuccess, strStatus));
           UpdateVehicleByVehicleID(VehicleID, "AVLB");
         }
         else
@@ -303,8 +320,9 @@ public class TaskLogic
     rspMsg = new ResponseMessege();
     sendRsp = new StatusHolder();
    
-    strQuery = "SELECT DoneStatus FROM fbjob WHERE JobID=" + taskPlanModel.getJobStateData().getJobID() + " AND " +
-               "ActualTruckID=" + taskPlanModel.getJobStateData().getVehicleID();
+    strQuery = "SELECT b.ReasonState FROM fbjob a, fbtask2 b WHERE a.JobID=b.JobID AND TaskSeq=2 AND a.JobID=" +
+							 taskPlanModel.getJobStateData().getJobID() + " AND a.ActualTruckID=" +
+               taskPlanModel.getJobStateData().getVehicleID();
 
     logger.severe("[Query fbjob] -> " + strQuery);
 
