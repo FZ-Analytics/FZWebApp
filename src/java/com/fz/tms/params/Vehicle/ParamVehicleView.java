@@ -6,6 +6,7 @@
 package com.fz.tms.params.Vehicle;
 
 import com.fz.generic.BusinessLogic;
+import com.fz.tms.params.model.Branch;
 import com.fz.tms.params.model.Vehicle;
 import com.fz.tms.params.service.VehicleAttrDB;
 import com.fz.util.FZUtil;
@@ -24,33 +25,55 @@ public class ParamVehicleView implements BusinessLogic {
     public void run(HttpServletRequest request, HttpServletResponse response
             , PageContext pc
     ) throws Exception {
-       VehicleAttrDB dao = new VehicleAttrDB();
-       String branchId = FZUtil.getHttpParam(request, "branchId");
-       
-       String sr = dao.isVehicle(branchId);
-       //String ex = veID.equalsIgnoreCase("NOPOL_EKSTERNAL") ? "false" : "true";
-       
-       if(sr.equalsIgnoreCase("OK")){
+        
+        VehicleAttrDB lb = new VehicleAttrDB();
+        
+        VehicleAttrDB dao = new VehicleAttrDB();
+        String branchId = FZUtil.getHttpParam(request, "branchId");
+        String flag = FZUtil.getHttpParam(request, "flag");
+        
+        try{
             List<Vehicle> ar = dao.getVehicle(branchId);
-            request.getSession().setAttribute("extVe", "true");
-            if(ar.size() > 0){        
-                request.setAttribute("listVehicle"
-                        , ar);
-                /*request.setAttribute("flag"
-                        , "update");
-                 request.setAttribute("flag"
-                        , "insert");*/
-            }
+            if(flag.equalsIgnoreCase("view")){
+                String sr = dao.isVehicle(branchId);
+                if(sr.equalsIgnoreCase("OK")){
 
-            //request.getRequestDispatcher("VehicleAttrView.jsp")
-                    //.forward(pc.getRequest(), pc.getResponse());
-       }else{
-           request.setAttribute("errMsg"
-                   , "Invalid Vehicle code");
-           request.getRequestDispatcher("VehicleAttr.jsp")
+                    List<Branch> lBr = lb.getBranch();  
+                    if(ar.size() > 0){        
+                        List<Vehicle> st = lb.getDriver(branchId, "");
+                        
+                        request.setAttribute("flag", flag);
+                        request.setAttribute("ListDriver", st);
+                        request.setAttribute("listVehicle"
+                                , ar);
+                        //request.getSession().setAttribute("extVe", "false");
+                        request.setAttribute("ListBranch", lBr);   
+                    }
+
+                    //request.getRequestDispatcher("VehicleAttrView.jsp")
+                            //.forward(pc.getRequest(), pc.getResponse());
+                }
+            }else if(flag.equalsIgnoreCase("insert")){
+                List<Branch> lBr = lb.getBranch();  
+                if(ar.size() > 0){    
+                    List<Vehicle> st = lb.getDriver(branchId, "");
+                    
+                    request.setAttribute("flag", flag);
+                    request.setAttribute("ListDriver", st);
+                    //request.getSession().setAttribute("extVe", "true");
+                    request.setAttribute("branch", branchId);
+                    request.setAttribute("ListBranch", lBr);   
+                    request.setAttribute("listVehicle"
+                                , ar);
+                }
+                
+            }
+        }catch(Exception e){
+            request.setAttribute("errMsg"
+                   , e.getMessage());
+            request.getRequestDispatcher("VehicleAttr.jsp")
                     .forward(pc.getRequest(), pc.getResponse());
-       }
-       
+        }
        
     }
     

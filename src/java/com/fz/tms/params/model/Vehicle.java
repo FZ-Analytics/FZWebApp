@@ -38,4 +38,5 @@ public class Vehicle {
     public String max_cust;
     public String DriverDates;    
     public String addNew;    
+    public String extVe;    
 }

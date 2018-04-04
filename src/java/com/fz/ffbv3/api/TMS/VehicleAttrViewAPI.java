@@ -119,6 +119,36 @@ public class VehicleAttrViewAPI {
         return jsonOutput;
     }
     
+    @POST
+    @Path("loadView")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String loadView(String content) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String str = "ERROR";
+        List<Vehicle> ay = new ArrayList<Vehicle>();
+        Vehicle c = new Vehicle();
+        try{
+            Vehicle he = gson.fromJson(content.contains("json") ? 
+                    decodeContent(content) : content, Vehicle.class);
+            
+            VehicleAttrDB dao = new VehicleAttrDB();  
+            
+            if(he.flag.equalsIgnoreCase("update")){
+                ay = dao.getVehi(he.vehicle_code);
+                c = ay.get(0);
+                c.flag = dao.isInsert(he.vehicle_code).equals("OK") ? "update" : "insert";
+                c.extVe = "false";
+            }
+                      
+        }catch(Exception e){
+            str = "ERROR";
+        }
+        //TODO return proper representation object
+        //throw new UnsupportedOperationException();
+        String jsonOutput = gson.toJson(c);
+        return jsonOutput;
+    }
+    
     public String cek(Vehicle c){
         String str = "OK";
         
