@@ -49,6 +49,7 @@
         <label class="fzLabel" id="re_Run" style="color: blue;">Routing</label>
         <label class="fzLabel" id="Vvehicle" style="color: blue;" onclick="Vklik();">Vehicle</label>
         <input id="clickMe" class="btn fzButton" type="button" value="Manual Route" onclick="openManualRoutePage();" />
+        <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span>
 
         <br><br>
         <table cellpadding="0" cellspacing="0" border="0" class="datatable table table-striped table-bordered">
@@ -159,7 +160,7 @@
                 $.post($apiAddress, {json: jsonForServer}).done(function (data) {
                     if(data == 'OK'){
                         alert( 'sukses' );
-                        //location.reload();
+                        location.reload();
                     }else{
                         alert( 'submit error' ); 
                     }

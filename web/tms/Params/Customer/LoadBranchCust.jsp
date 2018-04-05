@@ -18,11 +18,12 @@
         <%@include file="../../appGlobal/bodyTop.jsp"%>        
         <div class="fzErrMsg">
             <%=get("errMsg")%>
-        </div>
+        </div>        
         <br>
         <br>
         <div id="wrap">
             <div class="container">
+                <h4>Load Customer</h4>
                 <table cellpadding="0" cellspacing="0" border="0" class="datatable table table-striped table-bordered">
                     <thead>
                         <tr>

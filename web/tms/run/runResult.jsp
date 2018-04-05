@@ -59,7 +59,7 @@
                 $('#reRun').click(function () {
                     var dateNow = $.datepicker.formatDate('yy-mm-dd', new Date());//currentDate.getFullYear()+"-"+(currentDate.getMonth()+1)+"-"+currentDate.getDate();
 
-                    var win = window.open('runProcess.jsp?shift=1&dateDeliv=' + dateNow + '&branch=' + $('#branch').text() + '&runId=' + $("#RunIdClick").text() + '&oriRunID=' + $("#OriRunID").val() + '&reRun=A' + '&channel=' + $('#channel').text(), '_blank');
+                    var win = window.location.replace('runProcess.jsp?shift=1&dateDeliv=' + dateNow + '&branch=' + $('#branch').text() + '&runId=' + $("#RunIdClick").text() + '&oriRunID=' + $("#OriRunID").val() + '&reRun=A' + '&channel=' + $('#channel').text(), '_blank');
                     if (win) {
                         //Browser has allowed it to be opened
                         win.focus();
@@ -194,7 +194,7 @@
 
             }
         </script>
-        <h3>Runs</h3>
+        <h4>Routing Result</h4>
 
         <label class="fzInput" id="nextRunId" hidden="true"><%=get("nextRunId")%></label>
         <label class="fzInput" id="dateDeliv" hidden="true"><%=get("dateDeliv")%></label>
@@ -229,7 +229,8 @@
         <label class="fzLabel" id="test" style="color: blue;" onclick="fnExcelReport()">Convert Excel</label>
 
         <input id="clickMe" class="btn fzButton" type="button" value="Edit Route Manually" onclick="openEditRoutePage();" />
-
+        <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span>
+        
         <br><br>
         <table id="table" border1="1" style="border-color: lightgray;">
             <thead>

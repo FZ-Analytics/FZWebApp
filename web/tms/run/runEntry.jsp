@@ -21,6 +21,7 @@
           $( "#dateDeliv" ).val(yyyymmddDate(new Date()));
         } );
         </script>
+        <br>
         <form class="container" action="runProcess.jsp" method="post">
             <div class="fzErrMsg">
                 <%=get("errMsg")%>
@@ -32,11 +33,13 @@
             <input class="fzInput" id="oriRunID" 
                    name="oriRunID" value="NA" hidden="true"/>
 
+            <h4>Filter Intelligence Routing</h4>
+            <br>
             <label class="fzLabel">Branch</label>
             <input class="fzInput" id="branch" 
                    name="branch" value="<%=WorkplaceID%>" readonly="true"/>
 
-            <br><br>
+            <br><br>            
             <label class="fzLabel">Date Deliv</label>
             <input class="fzInput" id="dateDeliv" 
                    name="dateDeliv" value=""/>

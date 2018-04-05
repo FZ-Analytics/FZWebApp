@@ -20,19 +20,22 @@
             $(document).ready(function() {
                 $('#branchId').on('change', function () {
                     var a = document.getElementById('urls'); //or grab it by tagname etc
-                    a.href = "VehicleAttrView.jsp?flag=insert"+"&branchId="+$("#branchId").val();
+                    a.href = "LoadBranchVehi.jsp?flag=insert&branchId="+$("#branchId").val();
                 });
             });
             
             window.onload = function(){
                 var a = document.getElementById('urls'); //or grab it by tagname etc
-                a.href = "VehicleAttrView.jsp?flag=insert"+"&branchId="+$("#branchId").val();
-            }
+                a.href = "LoadBranchVehi.jsp?flag=insert&branchId="+$("#branchId").val();
+            };
         </script>
         <form class="container" action="LoadBranchVehi.jsp" method="post">
             <div class="fzErrMsg">
                 <%=get("errMsg")%>
             </div>
+            <h4>Filter Vehicle</h4>
+            <br>
+            <input type="text" id="flag" name="flag" value="view" hidden="true">
             <label class="fzLabel">Branch Id</label>
             <select id="branchId" name="branchId">
                 <%for (Branch hd : (List<Branch>) getList("ListBranch")) { %>

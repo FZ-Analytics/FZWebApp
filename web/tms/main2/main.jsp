@@ -9,7 +9,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Menu</title>
+        <title>IR</title>
         <style>
             @import url(http://fonts.googleapis.com/css?family=Lato:300,400,700);
             /* Starter CSS for Flyout Menu */
@@ -150,23 +150,22 @@
             }
         </script>   
     </head>
-    <body>
+    <body style="width: 100%!important; height: 100%!important;">
         <%@include file="../appGlobal/bodyTop.jsp"%>
         <img src="../img/ffbtoplogo.png">
-        <% if(!EmpyID.equalsIgnoreCase("null") && !url.contains("/logout.")){%>
+        <%--<% if(!EmpyID.equalsIgnoreCase("null") && !url.contains("/logout.")){%>
             <br>
             <label clas="FzLabel"><%=UserName%>(<%=EmpyID%>) </label>            
             <a href='<%=urlLogout%>'>Logout</a>
             <br>
-        <%}%>
-        <br>
-        <div >
-            <div id='cssmenu' style="float: left">
+        <%}%>--%>
+        <div style="width: 100%;height: 70%;">
+            <div id='cssmenu' style="float: left;width: 10%;height: 100%;">
                 <ul>
                     <li><a target="iframe1" onClick="opens('../other/home.jsp')"><span>Home</span></a></li>
                     <li><a target="iframe1" onClick="opens('../run/runEntry.jsp')"><span>Routing</span></a></li>
-                    <li><a href='#'><span>Param</span></a></li>
-                    <li class='active has-sub'><a href='#'><span>Attribute</span></a>
+                    <%--<li><a href='#'><span>Param</span></a></li>--%>
+                    <li class='active has-sub'><a ><span>Attribute</span></a>
                         <ul>
                             <li class='has-sub'><a target="iframe1" onClick="opens('../Params/Customer/CustomerAttr.jsp')"><span>Customer Attribute</span></a>
                                 <%--<ul>
@@ -174,21 +173,24 @@
                                    <li class='last'><a href='#'><span>Sub Product</span></a></li>
                                 </ul>--%>
                             </li>
-                            <li class='has-sub'><a target="iframe1" onClick="opens('../Params/Vehicle//VehicleAttr.jsp')"><span>Vehicle Attribute</span></a>
+                            <li class='has-sub'><a target="iframe1" onClick="opens('../Params/Vehicle/VehicleAttr.jsp')"><span>Vehicle Attribute</span></a>
                                 <%--<ul>
                                    <li><a href='#'><span>Sub Product</span></a></li>
                                    <li class='last'><a href='#'><span>Sub Product</span></a></li>
                                 </ul>--%>
                             </li>
+                            <%--<li class='has-sub'><a target="iframe1" onClick="opens('../Params/External/ForwadingAgentAttr.jsp')"><span>External Attribute</span></a></li>--%>
+                            <li class='has-sub'><a target="iframe1" onClick="opens('../Params/Driver/DriverAttrAddView.jsp')"><span>Driver Attribute</span></a></li>
                         </ul>
                     </li>
-                    <li class='last'><a href='#'><span>Contact</span></a></li>
+                    <li class='last'><a onClick="window.open('<%=urlLogout%>')">Log Out</a></li>
                 </ul>
             </div>
-            <div id="countainer" style="float: left;">
+            <div id="countainer" style="float: left; width: 90%;height: 100%;">
                 <%--<object data="../run/runEntry.jsp" style="width: 100%; height: 100%;position: absolute;"></object>--%>
                 <%--<embed src = "../run/runEntry.jsp" style="width: 100%; height: 100%;position: absolute;" />--%>
-                <iframe frameBorder="0" name="iframe1" id="iframe1" src="../other/home.jsp" style="width: 100%; height: 100%;position: absolute;"></iframe>
+                <%--position: absolute;--%>
+                <iframe frameBorder="1" name="iframe1" id="iframe1" src="../other/home.jsp" style="width: 88%; height: 70%;position: absolute;"></iframe>
             </div>
         </div>        
         <%@include file="../appGlobal/bodyBottom.jsp"%>

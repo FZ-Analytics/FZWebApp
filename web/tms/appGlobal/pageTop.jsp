@@ -53,9 +53,9 @@
         urlLogout = "../../usrMgt/logout.jsp";
     }
 %>
-<% if(!EmpyID.equalsIgnoreCase("null") && !url.contains("/logout.")){%>
+<%--<% if(!EmpyID.equalsIgnoreCase("null") && !url.contains("/logout.")){%>
     <br>
     <label clas="FzLabel">Wellcome : <%=UserName%>(<%=EmpyID%>) </label>            
     <a href='<%=urlLogout%>'>Logout</a>
     <br>
-<%}%>
+<%}%>--%>

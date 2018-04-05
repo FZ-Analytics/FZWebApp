@@ -23,7 +23,8 @@
                 */
             });
         </script>
-        <h3>Runs</h3>
+        <h3>Runs</h3><span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span>
+        
         <input class="fzInput" id="runId" 
                name="runId" value="<%=get("runId")%>" hidden="true"/>
         <input class="fzInput" id="oriRunID" 

@@ -82,7 +82,7 @@
         </div>
         <link rel="stylesheet" href="../../appGlobal/timepicker.css">
         <script src="../../appGlobal/timepicker.js"></script>
-
+        <h4>Form Edit Customer</h4>
         <input type="text" id="flag" name="flag" value="<%=get("flag")%>" hidden="true">
         <br>
         <label class="fzLabel">Customer Id:</label> 

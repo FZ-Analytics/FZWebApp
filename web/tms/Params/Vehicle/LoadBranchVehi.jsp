@@ -56,7 +56,7 @@
                     $.post($apiAddress, {json: jsonForServer}).done(function (data) {
                         if(data == 'OK'){
                             alert( 'sukses' );
-                            location.reload()
+                            location.reload();
                         }else{
                             alert( data ); 
                         }
@@ -123,7 +123,7 @@
                 });
             }
         </script>
-        <br>
+        <h4>Load Vehicle</h4>
         <br>
         <div style="width: 100%">
             <div style="width: 40%; float:left;" id="view">
@@ -146,7 +146,7 @@
                 <label class="fzLabel">vehicle_type:</label> 
                 <input class="fzInput" type="text" id="vehicle_type" name="vehicle_type" 
                        <%if (get("flag").equals("view")){%> readonly="true" <%}%>>
-                <span class="fzLabelBottom">e.g. "CDE"</span>
+                <%--<span class="fzLabelBottom">e.g. "CDE"</span>--%>
 
                 <br>
                 <label class="fzLabel">weight(/kg):</label> 
@@ -177,17 +177,17 @@
                 <br>
                 <label class="fzLabel">startTime:</label> 
                 <input class="fzInput" type="text" id="startTime" name="startTime" maxlength="5">
-                <span class="fzLabelBottom">e.g. "08:00"</span>
 
                 <br>
                 <label class="fzLabel">endTime:</label> 
                 <input class="fzInput" type="text" id="endTime" name="endTime" maxlength="5">
-                <span class="fzLabelBottom">e.g. "15:00"</span>
 
                 <br>
                 <label class="fzLabel">source1:</label> 
-                <input class="fzInput" type="text" id="source1" name="source1" maxlength="4">
-                <span class="fzLabelBottom">e.g. "INT"</span>
+                <select id="source1" name="source1" >
+                    <option value="EXT" <%if (get("source1").equals("EXT")) {%> selected="true" <%}%>>EXT</option>
+                    <option value="INT" <%if (get("source1").equals("INT")) {%> selected="true" <%}%>>INT</option>
+                </select>
 
                 <br>
                 <label class="fzLabel">included:</label> 
@@ -199,12 +199,10 @@
                 <br>
                 <label class="fzLabel">costPerM:</label> 
                 <input class="fzInput" type="text" id="costPerM" name="costPerM" maxlength="5">
-                <span class="fzLabelBottom">e.g. "9.50"</span>
 
                 <br>
                 <label class="fzLabel">fixedCost:</label> 
                 <input class="fzInput" type="text" id="fixedCost" name="fixedCost" maxlength="5">
-                <span class="fzLabelBottom">e.g. "1.00"</span>
 
                 <br>
                 <label class="fzLabel">Channel:</label> 

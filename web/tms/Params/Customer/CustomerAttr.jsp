@@ -82,6 +82,7 @@
             });
         </script>
         <form class="container" action="LoadBranchCust.jsp" method="post">
+            <h4>Filter Customer</h4>
             <div class="fzErrMsg">
                 <%=get("errMsg")%>
             </div>

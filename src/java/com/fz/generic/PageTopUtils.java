@@ -90,20 +90,9 @@ public class PageTopUtils {
             
             // if this is login page, ignore
             String url = request.getRequestURL().toString();
-            if (url.contains("/usrMgt/login.jsp")) {
-                return true;
-            }else if (url.contains("/usrMgt/entry.jsp")) {
-                return true;
-            }else if (url.contains("/appGlobal/error.jsp")) {
-                return true;
-            }else if (url.contains("/aic/aicView.jsp")) {
-                return true;
-            }/*else if (url.contains("/main2/main.jsp")) {
-                return true;
-            }*/
             
             //custom untuk link dengan TMS
-            else if(url.contains("/tms/")){ 
+            if(url.contains("/tms/")){ 
                 String EmpyID = (String) pc.getSession().getAttribute("EmpyID");
                 String str = "ERROR";
                 if ((EmpyID == null) || (EmpyID.length() == 0)){
