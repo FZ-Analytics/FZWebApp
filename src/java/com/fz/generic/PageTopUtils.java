@@ -96,27 +96,23 @@ public class PageTopUtils {
                 String EmpyID = (String) pc.getSession().getAttribute("EmpyID");
                 String str = "ERROR";
                 if ((EmpyID == null) || (EmpyID.length() == 0)){
-                    str = getLink(url, request);
+                    str = getLink(url, request, pc);
                 }else{
                     str = "OK";
                 }
                 
-                
-                if(str.equalsIgnoreCase("OK")){
+                if(str.equalsIgnoreCase("OK") && url.contains("/tms/")){     
                     return true;
                 }else{
-                    if(url.contains("/run/") || url.contains("/main2/main.jsp")){
-                        request.setAttribute("loginResult", "Please login");
-                        request.getRequestDispatcher("../usrMgt/login.jsp")
-                            .forward(request, (HttpServletResponse) pc.getResponse());
-                    }if(url.contains("/Params/")){
-                        request.setAttribute("loginResult", "Please login");
-                        request.getRequestDispatcher("../../usrMgt/login.jsp")
-                            .forward(request, (HttpServletResponse) pc.getResponse());
+                    String isParam = "";
+                    if(!url.contains("/Params/") && url.contains("/tms/")){
+                        isParam = "../usrMgt/login.jsp";
+                    }else if(url.contains("/Params/")){
+                        isParam = "../../usrMgt/login.jsp";
                     }
-                    
-                    //String urls = request.getRequestURL().toString();
-                    //System.out.println("urls()" + urls);
+                    request.setAttribute("loginResult", "Please login");
+                    request.getRequestDispatcher(isParam)
+                            .forward(request, (HttpServletResponse) pc.getResponse());
                     return false;
                 }
                 
@@ -148,7 +144,7 @@ public class PageTopUtils {
         return ret;
     }
     
-    public static String getLink(String url, HttpServletRequest request) throws Exception{
+    public static String getLink(String url, HttpServletRequest request, PageContext pc) throws Exception{
         String str = "ERROR";
         
         String UserID = FZUtil.getHttpParam(request, "UserID");
