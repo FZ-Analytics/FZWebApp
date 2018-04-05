@@ -25,3 +25,5 @@ hs_err_pid*
 /build/
 /web/META-INF/
 /dist/
+src/java/com/fz/ffbv3/api/ApplicationConfig.java
+nbproject/project.properties
