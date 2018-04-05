@@ -79,6 +79,44 @@ public class CustomerAttrDB {
         return ar;
     }
     
+    public Customer getCust(String str) throws Exception{
+        Customer c = new Customer();
+        List<Customer> ar = new ArrayList<Customer>();
+        
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")){            
+            try (Statement stm = con.createStatement()){
+            
+                // create sql
+                String sql ;
+                sql = "SELECT * FROM BOSNET1.dbo.TMS_CustAtr where customer_id = '"+str+"';";
+                
+                // query
+                try (ResultSet rs = stm.executeQuery(sql)){
+                    if (rs.next()){
+                        ar = new ArrayList<Customer>();
+                        c.customer_id = str;
+                        c.service_time = Integer.parseInt(rs.getString("service_time"));
+                        c.deliv_start = rs.getString("deliv_start");
+                        c.deliv_end = rs.getString("deliv_end");
+                        c.vehicle_type_list = rs.getString("vehicle_type_list");
+                        c.DayWinStart = rs.getString("DayWinStart");
+                        c.DayWinEnd = rs.getString("DayWinEnd");
+                        c.DeliveryDeadline = rs.getString("DeliveryDeadline");
+                        c.flag = "update";
+                        ar.add(c);
+                    }else{
+                        c.customer_id = str;
+                        c.flag = "insert";
+                    }
+                }
+            }
+        }
+        catch (Exception e){
+            throw new Exception(e.getMessage());
+        }
+        return c;
+    }
+    
     public String insert(Customer c, String flag) throws Exception{
         
         String insert = "ERROR";

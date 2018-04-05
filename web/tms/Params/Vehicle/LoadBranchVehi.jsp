@@ -123,7 +123,7 @@
                 });
             }
         </script>
-        <h4>Load Vehicle</h4>
+        <h4>Load Vehicle <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h4>
         <br>
         <div style="width: 100%">
             <div style="width: 40%; float:left;" id="view">

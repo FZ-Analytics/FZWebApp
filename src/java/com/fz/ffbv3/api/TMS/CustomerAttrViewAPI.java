@@ -127,6 +127,31 @@ public class CustomerAttrViewAPI {
         String jsonOutput = gson.toJson(str);
         return jsonOutput;
     }
+    
+    @POST
+    @Path("loadView")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String loadView(String content) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String str = "ERROR";
+        Customer he = new Customer();
+        try {
+            CustomerAttrDB db = new CustomerAttrDB();
+            he = gson.fromJson(content.contains("json")
+                    ? decodeContent(content) : content, Customer.class);
+            str = db.isCustomer(he.customer_id);
+            if (str == "OK") {
+                he = db.getCust(he.customer_id);
+            }
+
+        } catch (Exception e) {
+            str = "ERROR";
+        }
+        //TODO return proper representation object
+        //throw new UnsupportedOperationException();
+        String jsonOutput = gson.toJson(he);
+        return jsonOutput;
+    }
 
     public String cek(Customer c) {
         String str = "OK";
