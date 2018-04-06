@@ -7,6 +7,7 @@ package com.fz.ffbv3.api.TMS;
 
 import com.fz.generic.Db;
 import com.fz.tms.params.model.Vehicle;
+import com.fz.util.FZUtil;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.Produces;
@@ -29,6 +30,7 @@ import com.google.gson.GsonBuilder;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -85,127 +87,135 @@ public class ShowPreRouteVehicleAPI {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             Date date = new Date();
             
-            sql = "INSERT\n" +
-                "	INTO\n" +
-                "		bosnet1.dbo.TMS_PreRouteVehicle(\n" +
-                "			RunId,\n" +
-                "			vehicle_code,\n" +
-                "			weight,\n" +
-                "			volume,\n" +
-                "			vehicle_type,\n" +
-                "			branch,\n" +
-                "			startLon,\n" +
-                "			startLat,\n" +
-                "			endLon,\n" +
-                "			endLat,\n" +
-                "			startTime,\n" +
-                "			endTime,\n" +
-                "			source1,\n" +
-                "			UpdatevDate,\n" +
-                "			CreateDate,\n" +
-                "			isActive,\n" +
-                "			fixedCost,\n" +
-                "			costPerM,\n" +
-                "			costPerServiceMin,\n" +
-                "			costPerTravelMin,\n" +
-                "			IdDriver,\n" +
-                "			NamaDriver,\n" +
-                "			agent_priority,\n" +
-                "			max_cust\n" +
-                "		) SELECT\n" +
-                "			'"+he.RunId+"' AS RunId,\n" +
-                "			v.vehicle_code,\n" +
-                "			CASE\n" +
-                "				WHEN vh.vehicle_code IS NULL THEN va.weight\n" +
-                "				ELSE vh.weight\n" +
-                "			END AS weight,\n" +
-                "			CAST(\n" +
-                "				CASE\n" +
-                "					WHEN vh.vehicle_code IS NULL THEN va.volume\n" +
-                "					ELSE vh.volume\n" +
-                "				END AS NUMERIC(\n" +
-                "					18,\n" +
-                "					3\n" +
-                "				)\n" +
-                "			)* 1000000 AS volume," +
-                "			CASE\n" +
-                "				WHEN vh.vehicle_code IS NULL THEN va.vehicle_type\n" +
-                "				ELSE vh.vehicle_type\n" +
-                "			END AS vehicle_type,\n" +
-                "			CASE\n" +
-                "				WHEN vh.vehicle_code IS NULL THEN va.branch\n" +
-                "				ELSE vh.plant\n" +
-                "			END AS branch,\n" +
-                "			va.startLon,\n" +
-                "			va.startLat,\n" +
-                "			va.endLon,\n" +
-                "			va.endLat,\n" +
-                "			va.startTime,\n" +
-                "			CONVERT(\n" +
-                "				VARCHAR(5),\n" +
-                "				dateadd(\n" +
-                "					HOUR,\n" +
-                "					- 1,\n" +
-                "					CAST(\n" +
-                "						va.endTime AS TIME\n" +
-                "					)\n" +
-                "				)\n" +
-                "			) endTime,\n" +
-                "			va.source1,\n" +
-                "			'"+sdf.format(date)+"' AS UpdatevDate,\n" +
-                "			'"+sdf.format(date)+"' AS CreateDate,\n" +
-                "			'1' AS isActive,\n" +
-                "			va.fixedCost,\n" +
-                "			pr.value /(\n" +
-                "				va.costPerM * 1000\n" +
-                "			) AS costPerM,\n" +
-                "			0 AS costPerServiceMin,\n" +
-                "			0 AS costPerTravelMin,\n" +
-                "			va.IdDriver,\n" +
-                "			va.NamaDriver,\n" +
-                "			CASE\n" +
-                "				WHEN va.agent_priority is null THEN rt.value\n" +
-                "				ELSE va.agent_priority\n" +
-                "			END AS agent_priority,\n" +
-                "			CASE\n" +
-                "				WHEN va.max_cust is null THEN ry.value\n" +
-                "				ELSE va.max_cust\n" +
-                "			END AS max_cust\n" +
-                "		FROM\n" +
-                "			(\n" +
-                "				SELECT\n" +
-                "					DISTINCT vehicle_code\n" +
-                "				FROM\n" +
-                "					(\n" +
-                "						SELECT\n" +
-                "							vehicle_code\n" +
-                "						FROM\n" +
-                "							bosnet1.dbo.vehicle\n" +
-                "						WHERE\n" +
-                "							plant = '"+he.branch+"'\n" +
-                "					UNION SELECT\n" +
-                "							vehicle_code\n" +
-                "						FROM\n" +
-                "							bosnet1.dbo.TMS_VehicleAtr\n" +
-                "						WHERE\n" +
-                "							branch = '"+he.branch+"'\n" +
-                //"							AND included = 1\n" +
-                "					) vi\n" +
-                "			) v\n" +
-                "		LEFT OUTER JOIN bosnet1.dbo.vehicle vh ON\n" +
-                "			v.vehicle_code = vh.vehicle_code\n" +
-                "		LEFT OUTER JOIN bosnet1.dbo.TMS_vehicleAtr va ON\n" +
-                "			v.vehicle_code = va.vehicle_code\n" +
-                "		LEFT OUTER JOIN bosnet1.dbo.TMS_Params pr ON\n" +
-                "			pr.param = 'HargaSolar'\n" +
-                "		LEFT OUTER JOIN bosnet1.dbo.TMS_Params bm ON\n" +
-                "			bm.param = 'DefaultKonsumsiBBm'\n" +
-                "		LEFT OUTER JOIN bosnet1.dbo.TMS_Params rt ON\n" +
-                "			rt.param = 'Defaultagentpriority'\n" +
-                "		LEFT OUTER JOIN bosnet1.dbo.TMS_Params ry ON\n" +
-                "			ry.param = 'DefaultMaxCust'\n" +
-                "		WHERE\n" +
-                "			va.vehicle_code = '"+he.vehicle_code+"'\n";
+            String cek = isExits(he);
+            if(cek.equalsIgnoreCase("OK")){
+                sql = "update BOSNET1.dbo.TMS_PreRouteVehicle set isActive = '1' "
+                    + "where RunId = '"+he.RunId+"' and vehicle_code = '"+he.vehicle_code+"' and isActive = '0'";
+            }else{
+                sql = "INSERT\n" +
+                    "	INTO\n" +
+                    "		bosnet1.dbo.TMS_PreRouteVehicle(\n" +
+                    "			RunId,\n" +
+                    "			vehicle_code,\n" +
+                    "			weight,\n" +
+                    "			volume,\n" +
+                    "			vehicle_type,\n" +
+                    "			branch,\n" +
+                    "			startLon,\n" +
+                    "			startLat,\n" +
+                    "			endLon,\n" +
+                    "			endLat,\n" +
+                    "			startTime,\n" +
+                    "			endTime,\n" +
+                    "			source1,\n" +
+                    "			UpdatevDate,\n" +
+                    "			CreateDate,\n" +
+                    "			isActive,\n" +
+                    "			fixedCost,\n" +
+                    "			costPerM,\n" +
+                    "			costPerServiceMin,\n" +
+                    "			costPerTravelMin,\n" +
+                    "			IdDriver,\n" +
+                    "			NamaDriver,\n" +
+                    "			agent_priority,\n" +
+                    "			max_cust\n" +
+                    "		) SELECT\n" +
+                    "			'"+he.RunId+"' AS RunId,\n" +
+                    "			v.vehicle_code,\n" +
+                    "			CASE\n" +
+                    "				WHEN vh.vehicle_code IS NULL THEN va.weight\n" +
+                    "				ELSE vh.weight\n" +
+                    "			END AS weight,\n" +
+                    "			CAST(\n" +
+                    "				CASE\n" +
+                    "					WHEN vh.vehicle_code IS NULL THEN va.volume\n" +
+                    "					ELSE vh.volume\n" +
+                    "				END AS NUMERIC(\n" +
+                    "					18,\n" +
+                    "					3\n" +
+                    "				)\n" +
+                    "			)* 1000000 AS volume," +
+                    "			CASE\n" +
+                    "				WHEN vh.vehicle_code IS NULL THEN va.vehicle_type\n" +
+                    "				ELSE vh.vehicle_type\n" +
+                    "			END AS vehicle_type,\n" +
+                    "			CASE\n" +
+                    "				WHEN vh.vehicle_code IS NULL THEN va.branch\n" +
+                    "				ELSE vh.plant\n" +
+                    "			END AS branch,\n" +
+                    "			va.startLon,\n" +
+                    "			va.startLat,\n" +
+                    "			va.endLon,\n" +
+                    "			va.endLat,\n" +
+                    "			va.startTime,\n" +
+                    "			CONVERT(\n" +
+                    "				VARCHAR(5),\n" +
+                    "				dateadd(\n" +
+                    "					HOUR,\n" +
+                    "					- 1,\n" +
+                    "					CAST(\n" +
+                    "						va.endTime AS TIME\n" +
+                    "					)\n" +
+                    "				)\n" +
+                    "			) endTime,\n" +
+                    "			va.source1,\n" +
+                    "			'"+sdf.format(date)+"' AS UpdatevDate,\n" +
+                    "			'"+sdf.format(date)+"' AS CreateDate,\n" +
+                    "			'1' AS isActive,\n" +
+                    "			va.fixedCost,\n" +
+                    "			pr.value /(\n" +
+                    "				va.costPerM * 1000\n" +
+                    "			) AS costPerM,\n" +
+                    "			0 AS costPerServiceMin,\n" +
+                    "			0 AS costPerTravelMin,\n" +
+                    "			va.IdDriver,\n" +
+                    "			va.NamaDriver,\n" +
+                    "			CASE\n" +
+                    "				WHEN va.agent_priority is null THEN rt.value\n" +
+                    "				ELSE va.agent_priority\n" +
+                    "			END AS agent_priority,\n" +
+                    "			CASE\n" +
+                    "				WHEN va.max_cust is null THEN ry.value\n" +
+                    "				ELSE va.max_cust\n" +
+                    "			END AS max_cust\n" +
+                    "		FROM\n" +
+                    "			(\n" +
+                    "				SELECT\n" +
+                    "					DISTINCT vehicle_code\n" +
+                    "				FROM\n" +
+                    "					(\n" +
+                    "						SELECT\n" +
+                    "							vehicle_code\n" +
+                    "						FROM\n" +
+                    "							bosnet1.dbo.vehicle\n" +
+                    "						WHERE\n" +
+                    "							plant = '"+he.branch+"'\n" +
+                    "					UNION SELECT\n" +
+                    "							vehicle_code\n" +
+                    "						FROM\n" +
+                    "							bosnet1.dbo.TMS_VehicleAtr\n" +
+                    "						WHERE\n" +
+                    "							branch = '"+he.branch+"'\n" +
+                    //"							AND included = 1\n" +
+                    "					) vi\n" +
+                    "			) v\n" +
+                    "		LEFT OUTER JOIN bosnet1.dbo.vehicle vh ON\n" +
+                    "			v.vehicle_code = vh.vehicle_code\n" +
+                    "		LEFT OUTER JOIN bosnet1.dbo.TMS_vehicleAtr va ON\n" +
+                    "			v.vehicle_code = va.vehicle_code\n" +
+                    "		LEFT OUTER JOIN bosnet1.dbo.TMS_Params pr ON\n" +
+                    "			pr.param = 'HargaSolar'\n" +
+                    "		LEFT OUTER JOIN bosnet1.dbo.TMS_Params bm ON\n" +
+                    "			bm.param = 'DefaultKonsumsiBBm'\n" +
+                    "		LEFT OUTER JOIN bosnet1.dbo.TMS_Params rt ON\n" +
+                    "			rt.param = 'Defaultagentpriority'\n" +
+                    "		LEFT OUTER JOIN bosnet1.dbo.TMS_Params ry ON\n" +
+                    "			ry.param = 'DefaultMaxCust'\n" +
+                    "		WHERE\n" +
+                    "			va.vehicle_code = '"+he.vehicle_code+"'\n";
+            }
+            
+            
             
             try (Connection con = (new Db()).getConnection("jdbc/fztms");
                 PreparedStatement ps = con.prepareStatement(sql)) {
@@ -227,6 +237,23 @@ public class ShowPreRouteVehicleAPI {
         
         String jsonOutput = gson.toJson(tr);
         return jsonOutput;        
+    }
+    
+    public String isExits(Vehicle he) throws Exception{
+        String str = "ERROR";
+        String sql = "select count(*) as tr from BOSNET1.dbo.TMS_PreRouteVehicle "
+                + "where RunId = '"+he.RunId+"' and vehicle_code = '"+he.vehicle_code+"'";
+        
+        try (Connection con = (new Db()).getConnection("jdbc/fztms");
+                PreparedStatement ps = con.prepareStatement(sql)){
+            try (ResultSet rs = ps.executeQuery()){
+                if(rs.next()){
+                    Double tr = FZUtil.getRsDouble(rs, 1, 0);
+                    str  = tr > 0 ? "OK" : "ERROR";
+                }
+            }
+        }
+        return str;
     }
     
     @POST

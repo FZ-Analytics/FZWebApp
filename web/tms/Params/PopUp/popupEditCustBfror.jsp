@@ -17,6 +17,7 @@
         <div class="fzErrMsg" id="errMsg">
             <%=get("errMsg")%>
         </div>
+        <h4>Customer Editor<span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h4>
         <br>
         <label class="fzLabel">Branch:</label> 
         <label class="fzLabel" id="branch"><%=get("branchCode")%></label>
@@ -49,7 +50,6 @@
         <label class="fzLabel" id="re_Run" style="color: blue;">Routing</label>
         <label class="fzLabel" id="Vvehicle" style="color: blue;" onclick="Vklik();">Vehicle</label>
         <input id="clickMe" class="btn fzButton" type="button" value="Manual Route" onclick="openManualRoutePage();" />
-        <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span>
 
         <br><br>
         <table cellpadding="0" cellspacing="0" border="0" class="datatable table table-striped table-bordered">

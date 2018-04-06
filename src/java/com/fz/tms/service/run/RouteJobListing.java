@@ -342,10 +342,14 @@ public class RouteJobListing implements BusinessLogic {
                     if(js.get(x).DONum.length() > 0){
                         while(y < px.size()){  
                             //cek jika do sama
-                            if(js.get(x).DONum.equalsIgnoreCase(px.get(y).get("DOPR"))){
+                            if(js.get(x).DONum.equalsIgnoreCase("8020103331; 8020103633")&& px.get(y).get("DOPR").equalsIgnoreCase("8020103633")){
+                                //System.out.println("test()"+js.get(x).DONum+"+");
+                                //System.out.println(js.get(x).DONum+"()"+px.get(y).get("DOPR"));
+                            }                            
+                            if(js.get(x).DONum.contains(px.get(y).get("DOPR"))){
                                 //cek shipmentplsn 
-                                if(js.get(x).DONum.equalsIgnoreCase("8020102726")){
-                                    System.out.println("com.fz.tms.service.run.RouteJobListing.run()");
+                                if(js.get(x).DONum.equalsIgnoreCase("8020103633")){
+                                    //System.out.println(px.get(y).get("DOSP")+"()"+px.get(y).toString());
                                 }
                                 if(px.get(y).get("DOSP") == null
                                         || px.get(y).get("DOSS") != null
@@ -517,7 +521,8 @@ public class RouteJobListing implements BusinessLogic {
                     pl.put("DOPR", rs.getString("DOPR"));
                     pl.put("DOSP", rs.getString("DOSP"));
                     pl.put("DOSS", rs.getString("DOSS"));
-                    pl.put("DORS", rs.getString("DORS"));                    
+                    pl.put("DORS", rs.getString("DORS")); 
+                    //System.out.println("pl"+pl.toString());
                     px.add(pl);
 
                     //con.setAutoCommit(false);

@@ -23,7 +23,7 @@
                 */
             });
         </script>
-        <h3>Runs</h3><span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span>
+        <h3>Runs <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h3>
         
         <input class="fzInput" id="runId" 
                name="runId" value="<%=get("runId")%>" hidden="true"/>

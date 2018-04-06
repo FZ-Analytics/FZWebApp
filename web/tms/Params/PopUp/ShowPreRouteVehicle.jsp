@@ -72,6 +72,9 @@
                 });
             }
         </script>
+        <img src="../img/ffbtoplogo.png">
+        <br>
+        <h4>Vehicle Editor<span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h4>
         <br>
         <label class="fzLabel">RunID:</label> 
         <label class="fzLabel" id="runId" ><%=get("runId")%></label> 

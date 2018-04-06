@@ -65,7 +65,7 @@
                 <div class="fzErrMsg" id="errMsg">
                     <%=get("errMsg")%>
                 </div>
-
+                <h4>Driver Attr <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h4>
                 <br>
                 <label class="fzLabel">Driver Id:</label> 
                 <input class="fzInput" type="text" id="Service_agent_id" name="Service_agent_id" readonly="true">

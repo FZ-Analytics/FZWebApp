@@ -106,6 +106,9 @@
             <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
             <p>Processing</p>
         </div>
+        <img src="../img/ffbtoplogo.png">
+        <br>
+        <h4>Summary <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h4>
         <div id="body">
             <br>
             <label class="fzLabel">Branch:</label> 
