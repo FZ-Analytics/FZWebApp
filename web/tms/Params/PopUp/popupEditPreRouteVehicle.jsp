@@ -72,7 +72,8 @@
                $("#costPerM").val(cost);
             }
         </script>
-        
+        <img src="../img/ffbtoplogo.png">
+        <br>
         <h1>Edit Route Vehicle</h1>
         <div class="fzErrMsg">
             <%=get("errMsg")%>

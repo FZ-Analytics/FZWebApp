@@ -94,17 +94,34 @@ public class PageTopUtils {
             //custom untuk link dengan TMS
             if(url.contains("/tms/")){ 
                 String EmpyID = (String) pc.getSession().getAttribute("EmpyID");
-                String str = "ERROR";
+                String str = "ERROR";                
+                
                 if ((EmpyID == null) || (EmpyID.length() == 0)){
                     str = getLink(url, request, pc);
                 }else{
                     str = "OK";
                 }
                 
-                if(str.equalsIgnoreCase("OK") && url.contains("/tms/")){     
+                String isParam = "";
+                    
+                String IsMain = (String) pc.getSession().getAttribute("IsMain") == "1" ? 
+                        (String) pc.getSession().getAttribute("IsMain") : "0";
+                if(str.equalsIgnoreCase("OK") && url.contains("/tms/")){ 
+                    if(IsMain.equalsIgnoreCase("1")){
+                        if(!url.contains("/Params/") && url.contains("/tms/")){
+                            isParam = "../main2/main.jsp";
+                        }else if(url.contains("/Params/")){
+                            isParam = "../../main2/main.jsp";
+                            request.getSession()
+                                    .setAttribute("IsMain", "1");
+                        }
+                        request.getSession()
+                                    .setAttribute("IsMain", null);
+                        request.getRequestDispatcher(isParam)
+                            .forward(request, (HttpServletResponse) pc.getResponse());
+                    }
                     return true;
                 }else{
-                    String isParam = "";
                     if(!url.contains("/Params/") && url.contains("/tms/")){
                         isParam = "../usrMgt/login.jsp";
                     }else if(url.contains("/Params/")){
@@ -182,6 +199,8 @@ public class PageTopUtils {
                                     .setAttribute("UserName", UserName);
                             request.getSession()
                                     .setAttribute("WorkplaceID", WorkplaceID);
+                            request.getSession()
+                                    .setAttribute("IsMain", "1");
                         }
                     }else{
                         throw new Exception(); 

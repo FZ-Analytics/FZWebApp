@@ -111,6 +111,8 @@
                 });
             };
         </script>
+        <img src="../img/ffbtoplogo.png">
+        <br>
         <h1>Edit Customer</h1>
         <div class="fzErrMsg">
             <%=get("errMsg")%>

@@ -192,8 +192,8 @@
                 <br>
                 <label class="fzLabel">included:</label> 
                 <select id="included" name="included" >
-                    <option value="0" <%if (get("included").equals("0")) {%> selected="true" <%}%>>yes</option>
-                    <option value="1" <%if (get("included").equals("1")) {%> selected="true" <%}%>>no</option>
+                    <option value="1" <%if (get("included").equals("0")) {%> selected="true" <%}%>>yes</option>
+                    <option value="0" <%if (get("included").equals("1")) {%> selected="true" <%}%>>no</option>
                 </select>
 
                 <br>
