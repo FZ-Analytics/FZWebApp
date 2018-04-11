@@ -14,10 +14,24 @@
     </head>
     <body>
         <%@include file="../appGlobal/bodyTop.jsp"%>
+        <%
+            url = request.getRequestURL().toString();
+            String str =  url + "?" + request.getQueryString();
+            str = str.replace("http://","");
+            str = str.replace(":","9ETR9");
+            str = str.replace(".","9DOT9");
+            str = str.replace("/","9AK9");
+            str = str.replace("?","9ASK9");
+            str = str.replace("&","9END9");
+            str = str.replace("=","9EQU9");
+            str = str.replace("-","9MIN9");
+        %>
         <div class="fzErrMsg" id="errMsg">
             <%=get("errMsg")%>
         </div>
         <h4>Customer Editor<span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h4>
+        
+        <input type="hidden" value="<%=str%>" id="urls"/>
         <br>
         <label class="fzLabel">Branch:</label> 
         <label class="fzLabel" id="branch"><%=get("branchCode")%></label>
@@ -118,11 +132,11 @@
                 });
                 $('#re_Run').click(function () {
                     //setTimeout(function () {
-                        //alert($('#dateDeliv').text());
+                        //alert($("#urls").text());
                         //var dateNow = $.datepicker.formatDate('yy-mm-dd', new Date());//currentDate.getFullYear()+"-"+(currentDate.getMonth()+1)+"-"+currentDate.getDate();
                         //alert($('#dateDeliv').text() + '&branch=' + $('#branch').text() + '&runId=' + $("#runId").text() + '&oriRunID=' + $("#oriRunID").text()  + '&reRun=' + $("#reRun").text() + '&channel=' + $("#channel").text());
                         //var win = window.open('../../run/runProcess.jsp?tripCalc=M&shift=1&dateDeliv=' + $('#dateDeliv').text() + '&branch=' + $('#branch').text() + '&runId=' + $("#runId").text() + '&oriRunID=' + $("#oriRunID").text()  + '&reRun=' + $("#reRun").text(), null);
-                        var win = window.location.replace('../../run/runProcess.jsp?shift=1&dateDeliv=' + $('#dateDeliv').text() + '&branch=' + $('#branch').text() + '&runId=' + $("#runId").text() + '&oriRunID=' + $("#oriRunID").text()  + '&reRun=' + $("#reRun").text() + '&channel=' + $("#channel").text());
+                        var win = window.location.replace('../../run/runProcess.jsp?shift=1&dateDeliv=' + $('#dateDeliv').text() + '&branch=' + $('#branch').text() + '&runId=' + $("#runId").text() + '&oriRunID=' + $("#oriRunID").text()  + '&reRun=' + $("#reRun").text() + '&channel=' + $("#channel").text() + '&url=' + $("#urls").val());
                         if (win) {
                             //Browser has allowed it to be opened
                             win.focus();

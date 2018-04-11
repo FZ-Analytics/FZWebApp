@@ -14,6 +14,19 @@
             }
         </style>
         <%@include file="../appGlobal/bodyTop.jsp"%>
+        <%
+            url = request.getRequestURL().toString();
+            String str =  url + "?" + request.getQueryString();
+            str = str.replace("http://","");
+            str = str.replace(":","9ETR9");
+            str = str.replace(".","9DOT9");
+            str = str.replace("/","9AK9");
+            str = str.replace("?","9ASK9");
+            str = str.replace("&","9END9");
+            str = str.replace("=","9EQU9");
+            str = str.replace("-","9MIN9");
+        %>
+        <input type="hidden" value="<%=str%>" id="urls"/>
         <link href="../appGlobal/eFreezeTable.css" rel="stylesheet">
         <script src="../appGlobal/eFreezeTable.js"></script>
         <script>
@@ -59,7 +72,7 @@
                 $('#reRun').click(function () {
                     var dateNow = $.datepicker.formatDate('yy-mm-dd', new Date());//currentDate.getFullYear()+"-"+(currentDate.getMonth()+1)+"-"+currentDate.getDate();
 
-                    var win = window.location.replace('runProcess.jsp?shift=1&dateDeliv=' + dateNow + '&branch=' + $('#branch').text() + '&runId=' + $("#RunIdClick").text() + '&oriRunID=' + $("#OriRunID").val() + '&reRun=A' + '&channel=' + $('#channel').text(), '_blank');
+                    var win = window.location.replace('runProcess.jsp?shift=1&dateDeliv=' + dateNow + '&branch=' + $('#branch').text() + '&runId=' + $("#RunIdClick").text() + '&oriRunID=' + $("#OriRunID").val() + '&reRun=A' + '&channel=' + $('#channel').text() + '&url=' + $("#urls").val(), '_blank');
                     if (win) {
                         //Browser has allowed it to be opened
                         win.focus();

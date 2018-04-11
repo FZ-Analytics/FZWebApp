@@ -42,6 +42,17 @@ public class AlgoRunner implements BusinessLogic {
         String reRun = FZUtil.getHttpParam(request, "reRun");
         String oriRunID = FZUtil.getHttpParam(request, "oriRunID");
         String channel = FZUtil.getHttpParam(request, "channel");
+        String urls = FZUtil.getHttpParam(request, "url");
+        
+        if(urls != null || urls.length() > 0){
+            urls = urls.replace("9ETR9",":");
+            urls = urls.replace("9DOT9",".");
+            urls = urls.replace("9AK9","/");
+            urls = urls.replace("9ASK9","?");
+            urls = urls.replace("9END9","&");
+            urls = urls.replace("9EQU9","=");
+            urls = urls.replace("9MIN9","-");
+        }
 
         String maxIter = FZUtil.getHttpParam(request, "shift");
         if (maxIter.length() == 0) {
@@ -216,7 +227,7 @@ public class AlgoRunner implements BusinessLogic {
             pl.put("fileNmethod", "AlgoRunner&run Exc");
             pl.put("datas", "");
             String str = getStackTrace(e);
-            pl.put("msg", errMsg +" | "+ str);
+            pl.put("msg", urls + " | " + errMsg +" | "+ str);
             System.out.println("Exception " + str);
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
             Date date = new Date();
