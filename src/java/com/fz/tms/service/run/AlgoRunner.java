@@ -129,6 +129,7 @@ public class AlgoRunner implements BusinessLogic {
                     
                     //cek error data
                     if (resp.equalsIgnoreCase("OK")){
+                        px = replace(px);
                         errMsg = cekData(runID, runId, "ori", px);
                         resp = errMsg;
                     }
@@ -145,6 +146,7 @@ public class AlgoRunner implements BusinessLogic {
                     
                     if (resp.equalsIgnoreCase("OK")){
                         px = selectCust(runId, runID);
+                        px = replace(px);
                         errMsg = "Insert PreRouteJob Copy ori Error";
                         resp = insertPreRouteJobCopy(runID, runId, branchCode, dateDeliv, "ori", px);
                     }
@@ -1127,22 +1129,22 @@ public class AlgoRunner implements BusinessLogic {
                     else                            pl.replace("Customer_priority", String.valueOf(10));
                 }
             }else{
-                pl.replace("Customer_priority", String.valueOf(2));
                 //repale channel to GT
                 //pl.replace("Distribution_Channel", "GT");
-                /*
+                
                 if(pl.get("DeliveryDeadline").equalsIgnoreCase("BFOR")){
-                    if(str == 0)                    pl.replace("Customer_priority", String.valueOf(1));
-                    else if(str > 0)                pl.replace("Customer_priority", String.valueOf(3));
-                    else if(str < 0)                pl.replace("Customer_priority",  String.valueOf(10));
+                    //if(str == 0)                    pl.replace("Customer_priority", String.valueOf(1));
+                    //else if(str > 0)                pl.replace("Customer_priority", String.valueOf(3));
+                    if(str < 0)                 pl.replace("Customer_priority",  String.valueOf(10));
+                    else                        pl.replace("Customer_priority", String.valueOf(2));
                 }else if(pl.get("DeliveryDeadline").equalsIgnoreCase("AFTR")){
                     if(str == 0)                    pl.replace("Customer_priority", String.valueOf(1));
                     else if(str > 0)                pl.replace("Customer_priority", String.valueOf(3));
                     else if(str < 0)                pl.replace("Customer_priority", String.valueOf(2));
                 }else if(pl.get("DeliveryDeadline").equalsIgnoreCase("ONDL")){
-                    if(str == 0)            pl.replace("Customer_priority", String.valueOf(1));
+                    if(str == 0)            pl.replace("Customer_priority", String.valueOf(2));
                     else                    pl.replace("Customer_priority", String.valueOf(10));
-                }*/
+                }
             }//System.out.println(pl.get("Customer_ID"));
 
             if(pl.get("Customer_ID").equals("5820001001") || pl.get("Customer_ID").equals("5820000348")){
@@ -1375,6 +1377,47 @@ public class AlgoRunner implements BusinessLogic {
         
         if(err.equalsIgnoreCase(""))    err = "OK";
         return err;
+    }
+    
+    public List<HashMap<String, String>> replace(List<HashMap<String, String>> zx) throws Exception{
+        String err = "";
+        List<HashMap<String, String>> asd = zx;
+        HashMap<String, String> py = new HashMap<String, String>();
+        
+        int i = 0;
+        while(i < asd.size()){
+            py = zx.get(i);
+            
+            int j = 0;
+            Object[] keys = py.keySet().toArray();
+            
+            if(py.get("Customer_ID").equalsIgnoreCase("5810005710")){
+                System.out.println("com.fz.tms.service.run.AlgoRunner.cekData()");
+            }
+            
+            while(j <py.size()){
+                String tmp = py.get(keys[j]) == null ? "-" : py.get(keys[j]);
+                //System.out.print(j + str);
+                String re = "";
+                if(tmp.contains("'"))                
+                    re = py.get(keys[j]).replace("'", "");
+                
+                if(tmp.contains("\""))
+                    re = py.get(keys[j]).replace("\"", "");
+                
+                if(re.length() > 0){
+                    zx.remove(i);
+                    py.replace(keys[j].toString(), re);
+                    zx.add(i, py);
+                }
+                
+                j++;
+            }
+            //System.out.println();
+            i++;
+        }
+        
+        return zx;
     }
     
     public String cluster(String runId, String nextRunID, List<HashMap<String, String>> zx) throws Exception{

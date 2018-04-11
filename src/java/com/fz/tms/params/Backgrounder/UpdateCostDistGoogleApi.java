@@ -30,6 +30,17 @@ public class UpdateCostDistGoogleApi {
         HashMap<String, String> py = new HashMap<String, String>();
 
         String branch = "D312";
+        int sent = 10;
+        try{
+            px = getCustCombi(branch, sent);
+            String str = googleAPI(px, sent);
+        }catch(Exception e){
+            throw new Exception(e); 
+        }
+        
+        
+        
+        /*
         List<HashMap<String, String>> cust = new ArrayList<HashMap<String, String>>();
         cust = getDataCust(branch);
         List<HashMap<String, String>> shipment = new ArrayList<HashMap<String, String>>();
@@ -87,7 +98,7 @@ public class UpdateCostDistGoogleApi {
                 
             }           
             x++;
-        }
+        }*/
         //System.out.println(px.size());
         
         //px = googleAPI(px, cek);
@@ -146,75 +157,24 @@ public class UpdateCostDistGoogleApi {
         return px;
     }
     
-    public List<HashMap<String, String>> googleAPI(List<HashMap<String, String>> px, int cek) throws MalformedURLException, IOException, Exception{
+    public String googleAPI(List<HashMap<String, String>> px, int cek) throws MalformedURLException, IOException, Exception{
+        String str = "ERROR";
         List<HashMap<String, String>> pz = new ArrayList<HashMap<String, String>>();
         HashMap<String, String> py = new HashMap<String, String>();
         
         List<HashMap<String, String>> pj = new ArrayList<HashMap<String, String>>();
         List<HashMap<String, String>> pk = new ArrayList<HashMap<String, String>>();
         
+        String cust = "";
         int x = 0;
-        x = 0;
-        while(x <= cek){
+        while(x <= px.size()){
             py = new HashMap<String, String>();
             py = px.get(x);
-            pz.add(py);
-            //System.out.println(py.toString());
-            x++;
-        }
-        
-        System.out.println(pz.size());
-        
-        String wCust = "";
-        x = 0;
-        String cust1, cust2;
-        String lon1, lat1, lon2, lat2;
-        while(x <= cek){
-            wCust = "";
-            py = new HashMap<String, String>();
-            py = pz.get(x);
-            lon1 = py.get("Long");
-            lat1 = py.get("Lat");
-            cust1 = py.get("customer_id");
-            int y = 0;
-            String destList = "";
-            //lon lat ori to dest
-            while(y <= cek){
-                py = new HashMap<String, String>();
-                py = pz.get(y);
-                lon2 = py.get("Long");
-                lat2 = py.get("Lat");
-                cust2 = py.get("customer_id");
-                //System.out.println(cust1+"()"+cust2);                
-                if(!cust1.equalsIgnoreCase(cust2)){
-                    if(wCust.length() > 0) wCust += " or ";
-                    wCust += " (from1 = '"+cust1+"' and to1 = '"+cust2+"')";
-                    if(destList.length() > 0) destList += "|";
-                    destList += lat2 + "," + lon2;
-                }
-                y++;
-            }
-            
-            String sql = "select * from BOSNET1.dbo.TMS_CostDist where " + wCust;
-            System.out.println(sql);
-            /*String str = "ERROR";
-            try (Connection con = (new Db()).getConnection("jdbc/fztms");
-                PreparedStatement ps = con.prepareStatement(sql)) {
-                try (ResultSet rs = ps.executeQuery()){
-                    if (rs.next()) {
-                        str = "OK";
-                    }
-                }
-            }*/
-            
-            
-            
-            /*
             
             String key = "AIzaSyBOsad8CCGx7acE9H_c-27JVH-qqKzei20";
             String urlString = "https://maps.googleapis.com/maps/api/distancematrix/json"
-                    + "?origins=" + lat1 + "," + lon1
-                    + "&destinations=" + destList
+                    //+ "?origins=" + lat1 + "," + lon1
+                    //+ "&destinations=" + destList
                     + "&departure_time=now"
                     + "&traffic_model=best_guess"
                     ;
@@ -242,129 +202,223 @@ public class UpdateCostDistGoogleApi {
                 }
             }catch(Exception we){
                 
-            }*/
+            }
             //
             x++;
         }
         //System.out.println(wCust);
         
-        return pz;
+        return str;
     }
-
-    public List<HashMap<String, String>> getDataCust(String branch) throws Exception{
+    
+    public List<HashMap<String, String>> getCustCombi(String branch, int sent) throws Exception{
         List<HashMap<String, String>> px = new ArrayList<HashMap<String, String>>();
         HashMap<String, String> py = new HashMap<String, String>();
-        List<HashMap<String, String>> pz = new ArrayList<HashMap<String, String>>();
+
+        String str = "ERROR";
+        int x = 0;
+        while(x == 0){
+            String sql = "BEGIN DECLARE @sent INT = "+sent+";\n" +
+                    "\n" +
+                    "DECLARE @BrId VARCHAR(5)= '"+branch+"';\n" +
+                    "\n" +
+                    "DECLARE @Txt VARCHAR(100)= 'D312';\n" +
+                    "\n" +
+                    "DECLARE @rnd VARCHAR(5)=(\n" +
+                    "	SELECT\n" +
+                    "		CAST(\n" +
+                    "			RAND()*(\n" +
+                    "				CAST(\n" +
+                    "					(\n" +
+                    "						SELECT\n" +
+                    "							COUNT( DISTINCT Customer_ID )\n" +
+                    "						FROM\n" +
+                    "							BOSNET1.dbo.Customer\n" +
+                    "						WHERE\n" +
+                    "							Sales_Office = @BrId\n" +
+                    "					) AS INT\n" +
+                    "				)- 1\n" +
+                    "			)+ 1 AS INT\n" +
+                    "		)\n" +
+                    ");\n" +
+                    "\n" +
+                    "PRINT '@rnd ' + @rnd;\n" +
+                    "\n" +
+                    "DECLARE @cust AS TABLE\n" +
+                    "	(\n" +
+                    "		cust1 VARCHAR(100) NOT NULL,\n" +
+                    "		long1 VARCHAR(100) NOT NULL,\n" +
+                    "		lat1 VARCHAR(100) NOT NULL,\n" +
+                    "		cust2 VARCHAR(100) NOT NULL,\n" +
+                    "		long2 VARCHAR(100) NOT NULL,\n" +
+                    "		lat2 VARCHAR(100) NOT NULL\n" +
+                    "	);\n" +
+                    "\n" +
+                    "DECLARE @tCust AS TABLE\n" +
+                    "	(\n" +
+                    "		SNO VARCHAR(100) NOT NULL,\n" +
+                    "		cust VARCHAR(100) NOT NULL,\n" +
+                    "		long VARCHAR(100) NOT NULL,\n" +
+                    "		lat VARCHAR(100) NOT NULL\n" +
+                    "	);\n" +
+                    "\n" +
+                    "INSERT\n" +
+                    "	INTO\n" +
+                    "		@tCust SELECT\n" +
+                    "			DISTINCT aq.SNO,\n" +
+                    "			aq.customer_id AS cust,\n" +
+                    "			aq.Long AS long,\n" +
+                    "			aq.Lat AS lat\n" +
+                    "		FROM\n" +
+                    "			(\n" +
+                    "				SELECT\n" +
+                    "					ROW_NUMBER() OVER(\n" +
+                    "					ORDER BY\n" +
+                    "						(\n" +
+                    "							SELECT\n" +
+                    "								100\n" +
+                    "						)\n" +
+                    "					) AS SNO,\n" +
+                    "					*\n" +
+                    "				FROM\n" +
+                    "					(\n" +
+                    "						SELECT\n" +
+                    "							DISTINCT oi.Customer_ID,\n" +
+                    "							oi.sales_office,\n" +
+                    "							po.Long,\n" +
+                    "							po.Lat\n" +
+                    "						FROM\n" +
+                    "							BOSNET1.dbo.Customer oi\n" +
+                    "						INNER JOIN BOSNET1.dbo.TMS_CustLongLat po ON\n" +
+                    "							oi.Customer_ID = po.CustId\n" +
+                    "						WHERE\n" +
+                    "							oi.sales_office = @BrId\n" +
+                    "							AND(\n" +
+                    "								po.Long NOT IN(\n" +
+                    "									'0',\n" +
+                    "									'n/a',\n" +
+                    "									''\n" +
+                    "								)\n" +
+                    "								OR po.Lat NOT IN(\n" +
+                    "									'0',\n" +
+                    "									'n/a',\n" +
+                    "									''\n" +
+                    "								)\n" +
+                    "							)\n" +
+                    "					) ar\n" +
+                    "			) aq\n" +
+                    "		WHERE\n" +
+                    "			aq.SNO BETWEEN @rnd AND(\n" +
+                    "				@rnd + @sent\n" +
+                    "			);\n" +
+                    "\n" +
+                    "--select count(*) from @tCust;\n" +
+                    " INSERT\n" +
+                    "	INTO\n" +
+                    "		@cust SELECT\n" +
+                    "			*\n" +
+                    "		FROM\n" +
+                    "			(\n" +
+                    "				SELECT\n" +
+                    "					*\n" +
+                    "				FROM\n" +
+                    "					(\n" +
+                    "						SELECT\n" +
+                    "							*\n" +
+                    "						FROM\n" +
+                    "							(\n" +
+                    "								SELECT\n" +
+                    "									cust AS cust1,\n" +
+                    "									long AS long1,\n" +
+                    "									lat AS lat1\n" +
+                    "								FROM\n" +
+                    "									@tCust\n" +
+                    "							) yu\n" +
+                    "					) aq,\n" +
+                    "					(\n" +
+                    "						SELECT\n" +
+                    "							*\n" +
+                    "						FROM\n" +
+                    "							(\n" +
+                    "								SELECT\n" +
+                    "									cust AS cust2,\n" +
+                    "									long AS long2,\n" +
+                    "									lat AS lat2\n" +
+                    "								FROM\n" +
+                    "									@tCust\n" +
+                    "							) yu\n" +
+                    "					) sw\n" +
+                    "			) op\n" +
+                    "		WHERE\n" +
+                    "			cust1 <> cust2;\n" +
+                    "\n" +
+                    "DELETE\n" +
+                    "FROM\n" +
+                    "	BOSNET1.dbo.TMS_CustCombination;\n" +
+                    "\n" +
+                    "INSERT\n" +
+                    "	INTO\n" +
+                    "		BOSNET1.dbo.TMS_CustCombination SELECT\n" +
+                    "			cs.*\n" +
+                    "		FROM\n" +
+                    "			@cust cs\n" +
+                    "		LEFT OUTER JOIN BOSNET1.dbo.TMS_CostDist sd ON\n" +
+                    "			cs.cust1 = SUBSTRING( from1, 1, 10 )\n" +
+                    "			AND cs.cust2 = SUBSTRING( to1, 1, 10 )\n" +
+                    "		WHERE\n" +
+                    "			from1 IS NULL\n" +
+                    "			AND to1 IS NULL;\n" +
+                    "END;";
+            try (Connection con = (new Db()).getConnection("jdbc/fztms");
+                PreparedStatement ps = con.prepareStatement(sql)) {
+
+                //tr = rj.DeleteResultShipment(he);              
+
+                con.setAutoCommit(false);
+                ps.executeUpdate();
+                con.setAutoCommit(true);
+                str = "OK";
+
+                if(str.equalsIgnoreCase("OK")){
+                    px = getCustCombination();
+                    x = px.size();
+                }
+            }
+        }
+        return px;
+    }
+    
+    public List<HashMap<String, String>> getCustCombination() throws Exception{
+        List<HashMap<String, String>> px = new ArrayList<HashMap<String, String>>();
+        HashMap<String, String> py = new HashMap<String, String>();
 
         String sql = "SELECT\n" +
-            "	DISTINCT aq.customer_id,\n" +
-            "	sw.Long,\n" +
-            "	sw.Lat\n" +
-            "FROM\n" +
-            "	BOSNET1.dbo.Customer aq\n" +
-            "INNER JOIN BOSNET1.dbo.TMS_CustLongLat sw ON\n" +
-            "	aq.Customer_ID = sw.CustId\n" +
-            "WHERE\n" +
-            "	aq.sales_office = '"+branch+"'\n" +
-            "	AND(\n" +
-            "		sw.Long NOT IN(\n" +
-            "			'0',\n" +
-            "			'n/a'\n" +
-            "		)\n" +
-            "		OR sw.Lat NOT IN(\n" +
-            "			'0',\n" +
-            "			'n/a'\n" +
-            "		)\n" +
-            "	)";
-
+                "	cc.*\n" +
+                "FROM\n" +
+                "	BOSNET1.dbo.TMS_CustCombination cc\n" +
+                "LEFT OUTER JOIN BOSNET1.dbo.TMS_CustCostDist cd ON\n" +
+                "	cc.cust1 = cd.cust1\n" +
+                "	AND cc.cust2 = cd.cust2\n" +
+                "WHERE\n" +
+                "	cd.cust1 IS NULL\n" +
+                "	AND cd.cust2 IS NULL";
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
             PreparedStatement ps = con.prepareStatement(sql)) {
             try (ResultSet rs = ps.executeQuery()){
                 while (rs.next()) {
                     py = new HashMap<String, String>();
-                    py.put("customer_id", rs.getString("customer_id"));
-                    py.put("Long", rs.getString("Long"));
-                    py.put("Lat", rs.getString("Lat"));
+                    py.put("cust1", rs.getString("cust1"));
+                    py.put("long1", rs.getString("long1"));
+                    py.put("lat1", rs.getString("lat1"));
+                    py.put("cust2", rs.getString("cust2"));
+                    py.put("long2", rs.getString("long2"));
+                    py.put("lat2", rs.getString("lat2"));
                     px.add(py);
                 }
-                
-                //set kombinasi cust
-                int x = 0;
-                while(x <= px.size()){
-                    py = new HashMap<String, String>();
-                    py.put("cust1", px.get(x).get("customer_id"));
-                    py.put("long1", px.get(x).get("Long"));
-                    py.put("lat1", px.get(x).get("Lat"));
-                    
-                    int y = 0;
-                    while(y <= px.size()){
-                        if(!py.get("cust1").equalsIgnoreCase(px.get(y).get("customer_id"))){
-                            py.put("cust2", px.get(y).get("customer_id"));
-                            py.put("long2", px.get(y).get("Long"));
-                            py.put("lat2", px.get(y).get("Lat"));
-                            pz.add(py);
-                        }
-                    }
-                }
-                System.out.println("getDataCust()"+pz.size());
+                System.out.println("getCustCombi" + "()" + px.size());
             }
-        }
-        return pz;
-    }
-
-    public List<HashMap<String, String>> getShipment(String branch) throws Exception{
-        List<HashMap<String, String>> px = new ArrayList<HashMap<String, String>>();
-        HashMap<String, String> py = new HashMap<String, String>();
-        List<HashMap<String, String>> pz = new ArrayList<HashMap<String, String>>();
-
-        String sql = "select distinct Customer_ID from BOSNET1.dbo.TMS_ShipmentPlan where Plant = '"+branch+"'";
-
-        try (Connection con = (new Db()).getConnection("jdbc/fztms");
-            PreparedStatement ps = con.prepareStatement(sql)) {
-            try (ResultSet rs = ps.executeQuery()){
-                while (rs.next()) {
-                    py = new HashMap<String, String>();
-                    py.put("customer_id", rs.getString("Customer_ID"));
-                    px.add(py);
-                }
-                
-                //set kombinasi cust
-                int x = 0;
-                while(x <= px.size()){
-                    py = new HashMap<String, String>();
-                    py.put("cust1", px.get(x).get("customer_id"));
-                    
-                    int y = 0;
-                    while(y <= px.size()){
-                        if(!py.get("cust1").equalsIgnoreCase(px.get(y).get("customer_id"))){
-                            py.put("cust2", px.get(y).get("customer_id"));
-                            pz.add(py);
-                        }
-                    }
-                }
-                System.out.println("getShipment()" + pz.size());
-            }
-        }
-        return pz;
-    }
-
-    public List<HashMap<String, String>> getCostDist(String branch) throws Exception{
-        List<HashMap<String, String>> px = new ArrayList<HashMap<String, String>>();
-        HashMap<String, String> py = new HashMap<String, String>();
-
-        String sql = "select distinct SUBSTRING(to1, 1, 10) as to1, SUBSTRING(from1, 1, 10) as from1 from BOSNET1.dbo.TMS_CostDist where branch = '"+branch+"'";
-
-        try (Connection con = (new Db()).getConnection("jdbc/fztms");
-            PreparedStatement ps = con.prepareStatement(sql)) {
-            try (ResultSet rs = ps.executeQuery()){
-                while (rs.next()) {
-                    py = new HashMap<String, String>();
-                    py.put("cust1", rs.getString("from1"));
-                    py.put("cust2", rs.getString("to1"));
-                    px.add(py);
-                }
-                System.out.println("getCostDist" + "()" + px.size());
-            }
+        }catch(Exception e){
+            System.out.println(e.getMessage());
         }
         return px;
     }

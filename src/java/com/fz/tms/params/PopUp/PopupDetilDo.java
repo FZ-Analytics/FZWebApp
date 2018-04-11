@@ -17,6 +17,7 @@ import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -132,7 +133,7 @@ public class PopupDetilDo  implements BusinessLogic {
                 }
                 
                 request.setAttribute("ListDODetil", ar);
-                request.setAttribute("Name", getName(dt.DO_Number));
+                request.setAttribute("Name", getName(dt.DO_Number, runId));
                 request.setAttribute("branch", br);
                 request.setAttribute("total", totalkg.toString());
                 
@@ -140,10 +141,10 @@ public class PopupDetilDo  implements BusinessLogic {
         }
     }
     
-    public String getName(String n) throws Exception{
+    public String getName(String doNumber, String runId) throws Exception{
         String str = "";
-        String sql = "select distinct aw.Name1 from BOSNET1.dbo.Customer aw "
-                + "inner join BOSNET1.dbo.TMS_ShipmentPlan aq on aq.Customer_ID = aw.Customer_ID where DO_Number = '"+n+"';";
+        String sql = "SELECT Name1 FROM BOSNET1.dbo.TMS_PreRouteJob "
+                + "where runid = '"+runId+"' and DO_Number = '"+doNumber+"'";
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
                 PreparedStatement ps = con.prepareStatement(sql)){
 
