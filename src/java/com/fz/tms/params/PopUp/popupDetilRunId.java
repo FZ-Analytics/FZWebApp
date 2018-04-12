@@ -360,7 +360,8 @@ public class popupDetilRunId implements BusinessLogic {
 //                        + "             prj.Request_Delivery_Date = sp.Request_Delivery_Date\n"
 //			+ "		and prj.DO_Number = sp.DO_Number\n"
                         + "WHERE \n"
-                        + "	prj.RunId = '" + runId + "'";
+                        + "	prj.RunId = '" + runId + "'\n"
+                        + "     AND prj.Batch <> 'NULL'";
 
                 try (ResultSet rs = stm.executeQuery(sql)) {
                     while (rs.next()) {
