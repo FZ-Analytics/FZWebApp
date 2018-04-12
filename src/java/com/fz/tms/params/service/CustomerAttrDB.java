@@ -9,6 +9,7 @@ import com.fz.generic.Db;
 import com.fz.tms.params.model.Branch;
 import com.fz.tms.params.model.Customer;
 import com.fz.tms.params.model.OptionModel;
+import com.fz.util.FZUtil;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -88,20 +89,22 @@ public class CustomerAttrDB {
             
                 // create sql
                 String sql ;
-                sql = "SELECT * FROM BOSNET1.dbo.TMS_CustAtr where customer_id = '"+str+"';";
+                sql = "SELECT service_time, deliv_start, deliv_end, vehicle_type_list, DayWinStart, DayWinEnd, DeliveryDeadline "
+                        + "FROM BOSNET1.dbo.TMS_CustAtr where customer_id = '"+str+"';";
                 
                 // query
                 try (ResultSet rs = stm.executeQuery(sql)){
                     if (rs.next()){
                         ar = new ArrayList<Customer>();
+                        int i = 1;
                         c.customer_id = str;
-                        c.service_time = Integer.parseInt(rs.getString("service_time"));
-                        c.deliv_start = rs.getString("deliv_start");
-                        c.deliv_end = rs.getString("deliv_end");
-                        c.vehicle_type_list = rs.getString("vehicle_type_list");
-                        c.DayWinStart = rs.getString("DayWinStart");
-                        c.DayWinEnd = rs.getString("DayWinEnd");
-                        c.DeliveryDeadline = rs.getString("DeliveryDeadline");
+                        c.service_time = Integer.parseInt(FZUtil.getRsString(rs, i++, "0"));
+                        c.deliv_start = FZUtil.getRsString(rs, i++, "0");
+                        c.deliv_end = FZUtil.getRsString(rs, i++, "0");
+                        c.vehicle_type_list = FZUtil.getRsString(rs, i++, "");
+                        c.DayWinStart = FZUtil.getRsString(rs, i++, "0");
+                        c.DayWinEnd = FZUtil.getRsString(rs, i++, "0");
+                        c.DeliveryDeadline = FZUtil.getRsString(rs, i++, "");
                         c.flag = "update";
                         ar.add(c);
                     }else{

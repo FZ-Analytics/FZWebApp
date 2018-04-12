@@ -29,21 +29,75 @@ public class UpdateCostDistGoogleApi {
     
     public List<HashMap<String, String>> finalizeCust() throws Exception{
         List<HashMap<String, String>> px = new ArrayList<HashMap<String, String>>();
-        HashMap<String, String> py = new HashMap<String, String>();
-
-        String branch = "D312";
-        int sent = 10;
-        try{
-            px = getCustCombi(branch, sent);
-            List<HashMap<String, String>> str = googleAPI(px, sent, branch);
-        }catch(Exception e){
-            throw new Exception(e); 
+        HashMap<String, String> py = cekParam();
+        
+        if(py.get("stat").equalsIgnoreCase("TRUE")){
+            String branch = py.get("branch");
+            int sent = Integer.valueOf(py.get("sent"));
+            try{
+                setUpdateCostDistGoogleApi("FALSE");
+                px = getCustCombi(branch, sent);
+                String str = googleAPI(px, sent, branch);
+                if(str.equalsIgnoreCase("OK")){
+                    setUpdateCostDistGoogleApi("TRUE");
+                }
+            }catch(Exception e){
+                throw new Exception(e); 
+            }
         }
+        
 
         return px;
     }
     
-    public List<HashMap<String, String>> googleAPI(List<HashMap<String, String>> px, int cek, String branch) throws MalformedURLException, IOException, Exception{
+    public HashMap<String, String> cekParam() throws Exception{
+        HashMap<String, String> py = new HashMap<String, String>();
+        String str = "ERROR";
+
+        String sql = "SELECT\n" +
+                "	pa.value as stat,\n" +
+                "	ps.value as branch,\n" +
+                "	pd.value as sent\n" +
+                "FROM\n" +
+                "	BOSNET1.dbo.TMS_Params pa,\n" +
+                "	BOSNET1.dbo.TMS_Params ps,\n" +
+                "	BOSNET1.dbo.TMS_Params pd\n" +
+                "WHERE\n" +
+                "	pa.param = 'UpdateCostDistGoogleApi'\n" +
+                "	AND ps.param = 'UpdateCostDistBranch'\n" +
+                "	AND pd.param = 'UpdateCostDistSent'\n";
+        try (Connection con = (new Db()).getConnection("jdbc/fztms");
+            PreparedStatement ps = con.prepareStatement(sql)) {
+            try (ResultSet rs = ps.executeQuery()){
+                while (rs.next()) {
+                    py = new HashMap<String, String>();
+                    py.put("stat", rs.getString("stat"));
+                    py.put("branch", rs.getString("branch"));
+                    py.put("sent", rs.getString("sent"));
+                }
+                //System.out.println("getCustCombi" + "()" + px.size());
+            }
+        }
+        return py;
+    }
+    
+    public String setUpdateCostDistGoogleApi(String tr) throws Exception{
+        String str = "ERROR";
+
+        String sql = "update BOSNET1.dbo.TMS_Params set value = '"+tr+"' where param = 'UpdateCostDistGoogleApi'\n";
+        try (Connection con = (new Db()).getConnection("jdbc/fztms");
+                PreparedStatement ps = con.prepareStatement(sql)) {
+
+            con.setAutoCommit(false);
+            ps.executeUpdate();
+            con.setAutoCommit(true);
+
+            str = "OK";
+        } 
+        return str;
+    }
+    
+    public String googleAPI(List<HashMap<String, String>> px, int cek, String branch) throws MalformedURLException, IOException, Exception{
         String str = "ERROR";
         List<HashMap<String, String>> pz = new ArrayList<HashMap<String, String>>();
         HashMap<String, String> py = new HashMap<String, String>();
@@ -173,15 +227,15 @@ public class UpdateCostDistGoogleApi {
             x++;
         }
         
-        List<HashMap<String, String>> js = getGoogleData(px, pz, branch);        
+        String js = getGoogleData(px, pz, branch);        
         
         //System.out.println(wCust);
         
         return js;
     }
     
-    public List<HashMap<String, String>> getGoogleData(List<HashMap<String, String>> fx, List<HashMap<String, String>> fz, String branch) throws Exception{
-        List<HashMap<String, String>> js = new ArrayList<HashMap<String, String>>();
+    public String getGoogleData(List<HashMap<String, String>> fx, List<HashMap<String, String>> fz, String branch) throws Exception{
+        String str = "ERROR";
         ArrayList<JSONObject> finalCostDists = new ArrayList<>();
         int x = 0;
         while(x < fz.size()){   
@@ -227,75 +281,81 @@ public class UpdateCostDistGoogleApi {
                                 
                                 //JSONObject destCostDist = ary;
                                 JSONObject elm = elms.getJSONObject(i);
-
-                                // get dur & dist
-                                JSONObject durElm = elm.getJSONObject("duration");
-                                String durVal = durElm.getString("value");
-
-                                JSONObject distElm = elm.getJSONObject("distance");
-                                String distVal = distElm.getString("value");
-
-                                String durTrfVal = durVal;
-                                if (elm.has("duration_in_traffic")){
-                                    JSONObject durTrfElm = elm.getJSONObject(
-                                            "duration_in_traffic");
-                                    durTrfVal = durTrfElm.getString("value");
-                                }
-                                else {
-                                    //System.out.println("");
-                                }
-
-                                // convert second to min
-                                double durValDbl = Double.parseDouble(durVal) / 60;
-
-                                String[] cust = getCustArry(fx, from, ary);
-                                // add to list
-                                JSONObject custCostDist = new JSONObject();
-                                custCostDist.put("lon1", from[1]);
-                                custCostDist.put("lat1", from[0]);
-                                custCostDist.put("lon2", ary[1]);
-                                custCostDist.put("lat2", ary[0]);
-                                custCostDist.put("dist", distVal);
-                                custCostDist.put("dur", durValDbl);                                
-                                custCostDist.put("from", cust [0]);
-                                custCostDist.put("to", cust [1]);
-                                finalCostDists.add(custCostDist);
                                 
-                                                    
-                                // save to db
-                                String sql = "insert into bosnet1.dbo.TMS_CostDist"
-                                    + "(lon1, lat1, lon2, lat2, dist, dur, branch"
-                                    + ", from1, to1, source1)"
-                                    + " values("
-                                    + "'" + custCostDist.getString("lon1") + "'"
-                                    + ",'" + custCostDist.getString("lat1") + "'"
-                                    + ",'" + custCostDist.getString("lon2") + "'"
-                                    + ",'" + custCostDist.getString("lat2") + "'"
-                                    + ",'" + custCostDist.getString("dist") + "'"
-                                    + ",'" + custCostDist.getString("dur") + "'"
-                                    + ",'" + branch + "'"
-                                    + ",'" + custCostDist.getString("from") + "'"
-                                    + ",'" + custCostDist.getString("to") + "'"
-                                    + ",'BackDoor'"
-                                    + ")"
-                                    ;
-                                System.out.println(sql);
-                                try (Connection con = (new Db()).getConnection("jdbc/fztms")){
-                                    try (PreparedStatement ps = con.prepareStatement(sql) ){
-                                        ps.executeUpdate();
+                                //System.out.println(elm.get("status"));
+                                if(elm.get("status").equals("OK")){
+                                    // get dur & dist
+                                    JSONObject durElm = elm.getJSONObject("duration");
+                                    String durVal = durElm.getString("value");
+
+                                    JSONObject distElm = elm.getJSONObject("distance");
+                                    String distVal = distElm.getString("value");
+
+                                    String durTrfVal = durVal;
+                                    if (elm.has("duration_in_traffic")){
+                                        JSONObject durTrfElm = elm.getJSONObject(
+                                                "duration_in_traffic");
+                                        durTrfVal = durTrfElm.getString("value");
+                                    }
+                                    else {
+                                        //System.out.println("");
+                                    }
+
+                                    // convert second to min
+                                    double durValDbl = Double.parseDouble(durVal) / 60;
+
+                                    String[] cust = getCustArry(fx, from, ary);
+                                    // add to list
+                                    JSONObject custCostDist = new JSONObject();
+                                    custCostDist.put("lon1", from[1]);
+                                    custCostDist.put("lat1", from[0]);
+                                    custCostDist.put("lon2", ary[1]);
+                                    custCostDist.put("lat2", ary[0]);
+                                    custCostDist.put("dist", distVal);
+                                    custCostDist.put("dur", durValDbl);                                
+                                    custCostDist.put("from", cust [0]);
+                                    custCostDist.put("to", cust [1]);
+                                    finalCostDists.add(custCostDist);
+
+
+                                    // save to db
+                                    String sql = "insert into bosnet1.dbo.TMS_CostDist"
+                                        + "(lon1, lat1, lon2, lat2, dist, dur, branch"
+                                        + ", from1, to1, source1)"
+                                        + " values("
+                                        + "'" + custCostDist.getString("lon1") + "'"
+                                        + ",'" + custCostDist.getString("lat1") + "'"
+                                        + ",'" + custCostDist.getString("lon2") + "'"
+                                        + ",'" + custCostDist.getString("lat2") + "'"
+                                        + ",'" + custCostDist.getString("dist") + "'"
+                                        + ",'" + custCostDist.getString("dur") + "'"
+                                        + ",'" + branch + "'"
+                                        + ",'" + custCostDist.getString("from") + "'"
+                                        + ",'" + custCostDist.getString("to") + "'"
+                                        + ",'BackDoor'"
+                                        + ")"
+                                        ;
+                                    //System.out.println(sql);
+                                    try (Connection con = (new Db()).getConnection("jdbc/fztms")){
+                                        try (PreparedStatement ps = con.prepareStatement(sql) ){
+                                            ps.executeUpdate();
+                                            str = "OK";
+                                        }
                                     }
                                 }
 
+                                
                             }
                         }
                     }
                 }
             }catch(Exception e){
+                str = "ERROR";
                 throw new Exception(fz.toString()); 
             }
             x++;
         }
-        return js;
+        return str;
     }
     
     public String[] getCustArry(List<HashMap<String, String>> px, String[] from, String[] to){
@@ -480,13 +540,14 @@ public class UpdateCostDistGoogleApi {
 
                 //tr = rj.DeleteResultShipment(he);              
 
-                con.setAutoCommit(false);
-                ps.executeUpdate();
-                con.setAutoCommit(true);
+                //con.setAutoCommit(false);
+                //ps.executeUpdate();
+                //con.setAutoCommit(true);
                 str = "OK";
 
                 if(str.equalsIgnoreCase("OK")){
                     px = getCustCombination();
+                    //loop jika source yang ada 0
                     x = px.size();
                 }
             }
@@ -524,8 +585,6 @@ public class UpdateCostDistGoogleApi {
                 }
                 System.out.println("getCustCombi" + "()" + px.size());
             }
-        }catch(Exception e){
-            System.out.println(e.getMessage());
         }
         return px;
     }
