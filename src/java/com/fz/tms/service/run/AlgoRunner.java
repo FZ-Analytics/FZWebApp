@@ -1149,12 +1149,13 @@ public class AlgoRunner implements BusinessLogic {
                     if(str < 0)                 pl.replace("Customer_priority",  String.valueOf(10));
                     else                        pl.replace("Customer_priority", String.valueOf(2));
                 }else if(pl.get("DeliveryDeadline").equalsIgnoreCase("AFTR")){
-                    if(str == 0)                    pl.replace("Customer_priority", String.valueOf(1));
+                                                pl.replace("Customer_priority", String.valueOf(2));
+                    /*if(str == 0)                    pl.replace("Customer_priority", String.valueOf(1));
                     else if(str > 0)                pl.replace("Customer_priority", String.valueOf(3));
-                    else if(str < 0)                pl.replace("Customer_priority", String.valueOf(2));
+                    else if(str < 0)                pl.replace("Customer_priority", String.valueOf(2));*/
                 }else if(pl.get("DeliveryDeadline").equalsIgnoreCase("ONDL")){
-                    if(str == 0)            pl.replace("Customer_priority", String.valueOf(2));
-                    else                    pl.replace("Customer_priority", String.valueOf(10));
+                    if(str == 0)                pl.replace("Customer_priority", String.valueOf(2));
+                    else                        pl.replace("Customer_priority", String.valueOf(10));
                 }
             }//System.out.println(pl.get("Customer_ID"));
 

@@ -18,6 +18,8 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  *
@@ -33,158 +35,166 @@ public class UpdateCostDistGoogleApi {
         int sent = 10;
         try{
             px = getCustCombi(branch, sent);
-            String str = googleAPI(px, sent);
+            List<HashMap<String, String>> str = googleAPI(px, sent, branch);
         }catch(Exception e){
             throw new Exception(e); 
         }
-        
-        
-        
-        /*
-        List<HashMap<String, String>> cust = new ArrayList<HashMap<String, String>>();
-        cust = getDataCust(branch);
-        List<HashMap<String, String>> shipment = new ArrayList<HashMap<String, String>>();
-        shipment = getShipment(branch);
-        List<HashMap<String, String>> costdist = new ArrayList<HashMap<String, String>>();
-        costdist = getCostDist(branch);
-        
-        System.out.println(cust.size() + "getShipment ()" + shipment.size() + "getCostDist ()" + costdist.size());
-
-        int x = 0;
-        int cek = 24;
-        while(x < cust.size()){
-            int y = 0;
-            py = new HashMap<String, String>();
-            Boolean find = false;
-            //cek data udah ada di costdist
-            while(y < costdist.size()){
-                if(!cust.get(x).get("cust1").equalsIgnoreCase(costdist.get(y).get("cust1"))
-                        && !cust.get(x).get("cust2").equalsIgnoreCase(costdist.get(y).get("cust2"))){
-                    find = false;
-                }else{
-                    find = true;
-                    //System.out.println("find()" + find);
-                    y = costdist.size();
-                }
-                y++;
-            }
-            
-            if(find){
-                //udah ada di costdist di exclude
-                //break;
-            }else{
-                int z = 0;
-                while(z < shipment.size()){
-                    //bandingkan cust dengan shipmentplan + prior 1
-                    if(cust.get(x).get("cust1").equalsIgnoreCase(shipment.get(z).get("cust1"))
-                            && cust.get(x).get("cust2").equalsIgnoreCase(shipment.get(z).get("cust2"))){
-                        py.put("priority", "1");
-                        z = shipment.size();
-                        //System.out.println(cust.size() + "(as)" + x);
-                    }else{
-                        py.put("priority", "2");
-                        //System.out.println(cust.size() + "(aa)" + x);
-                    }                    
-                    z++;
-                }
-                if(py.get("priority").equalsIgnoreCase("1")){
-                    String prior = py.get("priority");
-                    py = cust.get(x);                    
-                    py.put("priority", prior);
-                    System.out.println("()" + py.toString());
-                    px.add(py);
-                }
-                //System.out.println(cust.size() + "()" + x);
-                
-            }           
-            x++;
-        }*/
-        //System.out.println(px.size());
-        
-        //px = googleAPI(px, cek);
-        //System.out.println("com.fz.tms.params.Backgrounder.UpdateCostDistGoogleApi.finalizeCust()");
-        /*
-        List<HashMap<String, String>> pz = new ArrayList<HashMap<String, String>>();
-        String urlString = "";/*
-            "https://maps.googleapis.com/maps/api/distancematrix/json"
-                + "?origins=" + origLat + "," + origLon
-                + "&destinations=" + destList
-                + "&departure_time=now"
-                + "&traffic_model=best_guess"
-                ;*/
-        /*
-        String key = "AIzaSyBOsad8CCGx7acE9H_c-27JVH-qqKzei20";
-        
-        URL url = new URL(urlString + "&key=" + key);
-        String finalURL = url.toString();
-        URL obj = new URL(finalURL);
-        
-        try{
-            HttpURLConnection htCon = (HttpURLConnection) obj.openConnection();
-            htCon.setRequestMethod("GET");
-            htCon.setRequestProperty("User-Agent", "Mozilla/5.0");
-            String resultJson = "";
-            try (BufferedReader in = new BufferedReader(
-                    new InputStreamReader(htCon.getInputStream()))){
-                String inputLine;
-                StringBuffer response = new StringBuffer();
-                while ((inputLine = in.readLine()) != null) {
-                        response.append(inputLine);
-                }
-                in.close();
-                resultJson = response.toString();
-                System.out.println("resultJson : " + resultJson);
-            }
-        }catch(Exception e){
-            
-        }
-        
-        while(pz.size() < send){
-            x = 0;
-            while(x < px.size()){
-                int y = 0;
-                while(y < px.size()){
-                    py = new HashMap<String, String>();
-                    if(!px.get(x).get("customer_id").equalsIgnoreCase(px.get(y).get("customer_id"))){
-                        
-                    }
-                    y++;
-                }
-                x++;
-            }            
-        }*/
 
         return px;
     }
     
-    public String googleAPI(List<HashMap<String, String>> px, int cek) throws MalformedURLException, IOException, Exception{
+    public List<HashMap<String, String>> googleAPI(List<HashMap<String, String>> px, int cek, String branch) throws MalformedURLException, IOException, Exception{
         String str = "ERROR";
         List<HashMap<String, String>> pz = new ArrayList<HashMap<String, String>>();
         HashMap<String, String> py = new HashMap<String, String>();
+        HashMap<String, String> pj = new HashMap<String, String>();
         
-        List<HashMap<String, String>> pj = new ArrayList<HashMap<String, String>>();
         List<HashMap<String, String>> pk = new ArrayList<HashMap<String, String>>();
         
         String cust = "";
         int x = 0;
-        while(x <= px.size()){
+        while(x < px.size()){
             py = new HashMap<String, String>();
             py = px.get(x);
             
-            String key = "AIzaSyBOsad8CCGx7acE9H_c-27JVH-qqKzei20";
-            String urlString = "https://maps.googleapis.com/maps/api/distancematrix/json"
-                    //+ "?origins=" + lat1 + "," + lon1
-                    //+ "&destinations=" + destList
-                    + "&departure_time=now"
-                    + "&traffic_model=best_guess"
-                    ;
+            int y = 0;
+            String origins = "";
+            String destinations = "";
+            Boolean isNew = false;
+            int xy = 0;
+            Boolean run = true;
             
-            URL url = new URL(urlString + "&key=" + key);
-            String finalURL = url.toString();
-            System.out.println(finalURL);
-            URL obj = new URL(finalURL);
+            origins = py.get("lat1")+","+py.get("long1");
+            destinations = py.get("lat2")+","+py.get("long2");
+            
+            if(origins.equalsIgnoreCase("-6.12689584239623,106.721545986395") 
+                    && destinations.equalsIgnoreCase("-6.18545875197853,106.753304794418")){
+                //System.out.println(origins + "(A)" + destinations);
+                //System.out.println(to + "(B)" + destinations);
+            }
+            while(run){  
+                //new
+                if(pz.size() == 0){
+                    String key = "AIzaSyBOsad8CCGx7acE9H_c-27JVH-qqKzei20";
+                    String urlString = "https://maps.googleapis.com/maps/api/distancematrix/json"
+                            + "?origins=" + origins
+                            + "&destinations=" + destinations
+                            + "&departure_time=now"
+                            + "&traffic_model=best_guess"
+                            + "&key=" + key
+                            ;
 
+                    pj = new HashMap<String, String>();
+                    pj.put("link", urlString);
+                    //System.out.println(pj.toString());
+                    pz.add(pj);
+                    run = false;
+                }else if(y < pz.size()){
+                    String from = "";
+                    String to = "";
+                    String link = "";
+                
+                    link = pz.get(y).get("link");
+                    from = link.substring((link.indexOf("=")+1),link.indexOf("&destinations"));
+                    to = link.substring((link.indexOf("destinations=")+13),link.indexOf("&departure"));
+                
+                    String[] ary = to.split("\\|");
+                    
+                    //System.out.println(from + "()" + origins);
+                    //System.out.println(to + "()" + destinations);
+                    // origin sama, dest belum include
+                    for (String n : ary){
+                        if(from.equalsIgnoreCase(origins) &&
+                            !n.equalsIgnoreCase(destinations)){//!to.contains(destinations)
+                            isNew = false;
+                            xy = y;
+                            //System.out.println(from + "from()" + origins + "<>" + n + "()" + destinations);
+                        }else if(!from.equalsIgnoreCase(origins) &&
+                                !n.equalsIgnoreCase(destinations)){//!to.contains(destinations)
+                            //new
+                            isNew = true;
+                        }
+                    }                    
+                    
+                    if((y+1) == pz.size()){
+                        if(isNew){
+                            origins = py.get("lat1")+","+py.get("long1");
+                            destinations = py.get("lat2")+","+py.get("long2");
+
+                            String key = "AIzaSyBOsad8CCGx7acE9H_c-27JVH-qqKzei20";
+                            String urlString = "https://maps.googleapis.com/maps/api/distancematrix/json"
+                                    + "?origins=" + origins
+                                    + "&destinations=" + destinations
+                                    + "&departure_time=now"
+                                    + "&traffic_model=best_guess"
+                                    + "&key=" + key
+                                    ;
+
+                            pj = new HashMap<String, String>();
+                            pj.put("link", urlString);
+                            //System.out.println(pj.toString());
+                            pz.add(pj);
+                            run = false;
+                        }else if(!isNew){
+                            pj = new HashMap<String, String>();
+                            pj = pz.get(xy);
+                            link = pz.get(xy).get("link");
+                            pz.remove(xy);
+                            
+                            from = link.substring((link.indexOf("=")+1),link.indexOf("&destinations"));
+                            to = link.substring((link.indexOf("destinations=")+13),link.indexOf("&departure"))
+                                    + "|" + destinations;
+                            
+                            String key = "AIzaSyBOsad8CCGx7acE9H_c-27JVH-qqKzei20";
+                            String urlString = "https://maps.googleapis.com/maps/api/distancematrix/json"
+                                    + "?origins=" + from
+                                    + "&destinations=" + to
+                                    + "&departure_time=now"
+                                    + "&traffic_model=best_guess"
+                                    + "&key=" + key
+                                    ;
+
+                            pj = new HashMap<String, String>();
+                            pj.put("link", urlString);
+                            //System.out.println(pj.toString());
+                            pz.add(pj);
+                            run = false;
+                        }
+                    }
+                    
+                }else{
+                    run = false;
+                }
+                
+                y++;
+            }
+            
+            
+            x++;
+        }
+        
+        List<HashMap<String, String>> js = getGoogleData(px, pz, branch);        
+        
+        //System.out.println(wCust);
+        
+        return js;
+    }
+    
+    public List<HashMap<String, String>> getGoogleData(List<HashMap<String, String>> fx, List<HashMap<String, String>> fz, String branch) throws Exception{
+        List<HashMap<String, String>> js = new ArrayList<HashMap<String, String>>();
+        ArrayList<JSONObject> finalCostDists = new ArrayList<>();
+        int x = 0;
+        while(x < fz.size()){   
+            String urlString = fz.get(x).get("link").toString();
+            String u = urlString.substring((urlString.indexOf("destinations=")+13),urlString.indexOf("&departure"));
+            String from = u.substring((u.indexOf("=")+1),u.indexOf("&destinations"));
+            String[] to = u.split("\\|");
+            System.out.println(fz.get(x).get("link").toString());
             try{
+                URL url = new URL(urlString);
+                String finalURL = url.toString();
+                //System.out.println(finalURL);
+                URL obj = new URL(finalURL);
                 HttpURLConnection htCon = (HttpURLConnection) obj.openConnection();
                 htCon.setRequestMethod("GET");
                 htCon.setRequestProperty("User-Agent", "Mozilla/5.0");
@@ -198,17 +208,89 @@ public class UpdateCostDistGoogleApi {
                     }
                     in.close();
                     resultJson = response.toString();
-                    System.out.println("resultJson : " + resultJson);
+                    //System.out.println("resultJson : " + resultJson);
+                    
+                    //mining jason google map api
+                    JSONObject obj1 = new JSONObject(resultJson);
+                    String status = obj1.getString("status");
+                    if (!status.equalsIgnoreCase("OK")){
+                        continue;
+                    }else if (status.equalsIgnoreCase("OK")){
+                        // parse ok, get rows
+                        JSONArray arr = obj1.getJSONArray("rows");
+                        if (arr.length() >= 1) {
+                            // for each destinations
+                            JSONObject row = arr.getJSONObject(0);
+                            JSONArray elms = row.getJSONArray("elements");
+                            for (int i =0 ;i < to.length; i++){
+                                
+                                //JSONObject destCostDist = ary;
+                                JSONObject elm = elms.getJSONObject(i);
+
+                                // get dur & dist
+                                JSONObject durElm = elm.getJSONObject("duration");
+                                String durVal = durElm.getString("value");
+
+                                JSONObject distElm = elm.getJSONObject("distance");
+                                String distVal = distElm.getString("value");
+
+                                String durTrfVal = durVal;
+                                if (elm.has("duration_in_traffic")){
+                                    JSONObject durTrfElm = elm.getJSONObject(
+                                            "duration_in_traffic");
+                                    durTrfVal = durTrfElm.getString("value");
+                                }
+                                else {
+                                    //System.out.println("");
+                                }
+
+                                // convert second to min
+                                double durValDbl = Double.parseDouble(durVal) / 60;
+
+                                // add to list
+                                JSONObject custCostDist = new JSONObject();
+                                //custCostDist.put("lon1", destCostDist.getString("lon1"));
+                                //custCostDist.put("lat1", destCostDist.getString("lat1"));
+                                //custCostDist.put("lon2", destCostDist.getString("lon2"));
+                                //custCostDist.put("lat2", destCostDist.getString("lat2"));
+                                custCostDist.put("dist", distVal);
+                                custCostDist.put("dur", durValDbl);
+                                //custCostDist.put("from", destCostDist.getString("from"));
+                                //custCostDist.put("to", destCostDist.getString("to"));
+                                finalCostDists.add(custCostDist);
+                                                    //cx.log("finalCostDists : " + finalCostDists.toString());
+
+                                // save to db
+                                String sql = "insert into bosnet1.dbo.TMS_CostDist"
+                                    + "(lon1, lat1, lon2, lat2, dist, dur, branch"
+                                    + ", from1, to1)"
+                                    + " values("
+                                    + "'" + custCostDist.getString("lon1") + "'"
+                                    + ",'" + custCostDist.getString("lat1") + "'"
+                                    + ",'" + custCostDist.getString("lon2") + "'"
+                                    + ",'" + custCostDist.getString("lat2") + "'"
+                                    + ",'" + custCostDist.getString("dist") + "'"
+                                    + ",'" + custCostDist.getString("dur") + "'"
+                                    + ",'" + branch + "'"
+                                    + ",'" + custCostDist.getString("from") + "'"
+                                    + ",'" + custCostDist.getString("to") + "'"
+                                    + ")"
+                                    ;
+
+                                //try (PreparedStatement ps = con.prepareStatement(sql)){
+                                    //ps.executeUpdate();
+                                //}
+
+                            }
+                        }
+                    }
                 }
-            }catch(Exception we){
-                
+            }catch(Exception e){
+                throw new Exception(fz.toString()); 
             }
-            //
             x++;
         }
-        //System.out.println(wCust);
-        
-        return str;
+        return js;
     }
     
     public List<HashMap<String, String>> getCustCombi(String branch, int sent) throws Exception{
@@ -374,9 +456,9 @@ public class UpdateCostDistGoogleApi {
 
                 //tr = rj.DeleteResultShipment(he);              
 
-                con.setAutoCommit(false);
-                ps.executeUpdate();
-                con.setAutoCommit(true);
+                //con.setAutoCommit(false);
+                //ps.executeUpdate();
+                //con.setAutoCommit(true);
                 str = "OK";
 
                 if(str.equalsIgnoreCase("OK")){
@@ -401,7 +483,8 @@ public class UpdateCostDistGoogleApi {
                 "	AND cc.cust2 = cd.cust2\n" +
                 "WHERE\n" +
                 "	cd.cust1 IS NULL\n" +
-                "	AND cd.cust2 IS NULL";
+                "	AND cd.cust2 IS NULL\n" +
+                "order by cc.cust1 asc";
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
             PreparedStatement ps = con.prepareStatement(sql)) {
             try (ResultSet rs = ps.executeQuery()){
