@@ -187,7 +187,7 @@ public class UpdateCostDistGoogleApi {
         while(x < fz.size()){   
             String urlString = fz.get(x).get("link").toString();
             String u = urlString.substring((urlString.indexOf("destinations=")+13),urlString.indexOf("&departure"));
-            String from = u.substring((u.indexOf("=")+1),u.indexOf("&destinations"));
+            String[] from = urlString.substring((urlString.indexOf("=")+1),urlString.indexOf("&destinations")).split("\\,");
             String[] to = u.split("\\|");
             System.out.println(fz.get(x).get("link").toString());
             try{
@@ -223,6 +223,7 @@ public class UpdateCostDistGoogleApi {
                             JSONObject row = arr.getJSONObject(0);
                             JSONArray elms = row.getJSONArray("elements");
                             for (int i =0 ;i < to.length; i++){
+                                String[] ary = to[i].split("\\,");
                                 
                                 //JSONObject destCostDist = ary;
                                 JSONObject elm = elms.getJSONObject(i);
@@ -247,23 +248,24 @@ public class UpdateCostDistGoogleApi {
                                 // convert second to min
                                 double durValDbl = Double.parseDouble(durVal) / 60;
 
+                                String[] cust = getCustArry(fx, from, ary);
                                 // add to list
                                 JSONObject custCostDist = new JSONObject();
-                                //custCostDist.put("lon1", destCostDist.getString("lon1"));
-                                //custCostDist.put("lat1", destCostDist.getString("lat1"));
-                                //custCostDist.put("lon2", destCostDist.getString("lon2"));
-                                //custCostDist.put("lat2", destCostDist.getString("lat2"));
+                                custCostDist.put("lon1", from[1]);
+                                custCostDist.put("lat1", from[0]);
+                                custCostDist.put("lon2", ary[1]);
+                                custCostDist.put("lat2", ary[0]);
                                 custCostDist.put("dist", distVal);
-                                custCostDist.put("dur", durValDbl);
-                                //custCostDist.put("from", destCostDist.getString("from"));
-                                //custCostDist.put("to", destCostDist.getString("to"));
+                                custCostDist.put("dur", durValDbl);                                
+                                custCostDist.put("from", cust [0]);
+                                custCostDist.put("to", cust [1]);
                                 finalCostDists.add(custCostDist);
-                                                    //cx.log("finalCostDists : " + finalCostDists.toString());
-
+                                
+                                                    
                                 // save to db
                                 String sql = "insert into bosnet1.dbo.TMS_CostDist"
                                     + "(lon1, lat1, lon2, lat2, dist, dur, branch"
-                                    + ", from1, to1)"
+                                    + ", from1, to1, source1)"
                                     + " values("
                                     + "'" + custCostDist.getString("lon1") + "'"
                                     + ",'" + custCostDist.getString("lat1") + "'"
@@ -274,12 +276,15 @@ public class UpdateCostDistGoogleApi {
                                     + ",'" + branch + "'"
                                     + ",'" + custCostDist.getString("from") + "'"
                                     + ",'" + custCostDist.getString("to") + "'"
+                                    + ",'BackDoor'"
                                     + ")"
                                     ;
-
-                                //try (PreparedStatement ps = con.prepareStatement(sql)){
-                                    //ps.executeUpdate();
-                                //}
+                                System.out.println(sql);
+                                try (Connection con = (new Db()).getConnection("jdbc/fztms")){
+                                    try (PreparedStatement ps = con.prepareStatement(sql) ){
+                                        ps.executeUpdate();
+                                    }
+                                }
 
                             }
                         }
@@ -291,6 +296,25 @@ public class UpdateCostDistGoogleApi {
             x++;
         }
         return js;
+    }
+    
+    public String[] getCustArry(List<HashMap<String, String>> px, String[] from, String[] to){
+        String[] cust = new String[2];
+        
+        int x = 0;
+        while(x < px.size()){
+            HashMap<String, String> py = px.get(x);
+            if(py.get("long1").equalsIgnoreCase(from[1])
+                    && py.get("lat1").equalsIgnoreCase(from[0])
+                    && py.get("long2").equalsIgnoreCase(to[1])
+                    && py.get("lat2").equalsIgnoreCase(to[0])){
+                cust[0] = py.get("cust1");
+                cust[1] = py.get("cust2");
+            }
+            x++;
+        }
+        
+        return cust;
     }
     
     public List<HashMap<String, String>> getCustCombi(String branch, int sent) throws Exception{
@@ -456,9 +480,9 @@ public class UpdateCostDistGoogleApi {
 
                 //tr = rj.DeleteResultShipment(he);              
 
-                //con.setAutoCommit(false);
-                //ps.executeUpdate();
-                //con.setAutoCommit(true);
+                con.setAutoCommit(false);
+                ps.executeUpdate();
+                con.setAutoCommit(true);
                 str = "OK";
 
                 if(str.equalsIgnoreCase("OK")){
@@ -478,12 +502,12 @@ public class UpdateCostDistGoogleApi {
                 "	cc.*\n" +
                 "FROM\n" +
                 "	BOSNET1.dbo.TMS_CustCombination cc\n" +
-                "LEFT OUTER JOIN BOSNET1.dbo.TMS_CustCostDist cd ON\n" +
-                "	cc.cust1 = cd.cust1\n" +
-                "	AND cc.cust2 = cd.cust2\n" +
+                "LEFT OUTER JOIN BOSNET1.dbo.TMS_CostDist cd ON\n" +
+                "	cc.cust1 = SUBSTRING( cd.from1, 1, 10 )\n" +
+                "	AND cc.cust2 = SUBSTRING( cd.to1, 1, 10 )\n" +
                 "WHERE\n" +
-                "	cd.cust1 IS NULL\n" +
-                "	AND cd.cust2 IS NULL\n" +
+                "	cd.from1 IS NULL\n" +
+                "	AND cd.to1 IS NULL\n" +
                 "order by cc.cust1 asc";
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
             PreparedStatement ps = con.prepareStatement(sql)) {
