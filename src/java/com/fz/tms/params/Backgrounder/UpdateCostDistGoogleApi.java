@@ -45,8 +45,6 @@ public class UpdateCostDistGoogleApi {
                 throw new Exception(e); 
             }
         }
-        
-
         return px;
     }
     

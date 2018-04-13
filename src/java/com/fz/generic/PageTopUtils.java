@@ -107,6 +107,8 @@ public class PageTopUtils {
                 String IsMain = (String) pc.getSession().getAttribute("IsMain") == "1" ? 
                         (String) pc.getSession().getAttribute("IsMain") : "0";
                 if(str.equalsIgnoreCase("OK") && url.contains("/tms/")){ 
+                    //redirect main
+                    /*
                     if(IsMain.equalsIgnoreCase("1")){
                         if(!url.contains("/Params/") && url.contains("/tms/")){
                             isParam = "../main2/main.jsp";
@@ -119,7 +121,7 @@ public class PageTopUtils {
                                     .setAttribute("IsMain", null);
                         request.getRequestDispatcher(isParam)
                             .forward(request, (HttpServletResponse) pc.getResponse());
-                    }
+                    }*/
                     return true;
                 }else{
                     if(!url.contains("/Params/") && url.contains("/tms/")){
