@@ -180,7 +180,7 @@
                                 </ul>--%>
                             </li>
                             <%--<li class='has-sub'><a target="iframe1" onClick="opens('../Params/External/ForwadingAgentAttr.jsp')"><span>External Attribute</span></a></li>--%>
-                            <li class='has-sub'><a target="iframe1" onClick="opens('../Params/Driver/DriverAttrAddView.jsp')"><span>Driver Attribute</span></a></li>
+                            <li class='has-sub'><a target="iframe1" onClick="opens('../Params/Driver/DriverAttrAddView.jsp')"><span>Vendor Attribute</span></a></li>
                         </ul>
                     </li>
                     <li class='last'><a onClick="window.location.replace('<%=urlLogout%>')">Log Out</a></li>

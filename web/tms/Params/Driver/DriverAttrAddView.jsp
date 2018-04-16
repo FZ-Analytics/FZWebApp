@@ -65,9 +65,9 @@
                 <div class="fzErrMsg" id="errMsg">
                     <%=get("errMsg")%>
                 </div>
-                <h4>Driver Attr <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h4>
+                <h4>Vendor Attr <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h4>
                 <br>
-                <label class="fzLabel">Driver Id:</label> 
+                <label class="fzLabel">Vendor Id:</label> 
                 <input class="fzInput" type="text" id="Service_agent_id" name="Service_agent_id" readonly="true">
 
                 <br>
@@ -75,7 +75,7 @@
                 <input class="fzInput" type="text" id="Driver_Name" name="Driver_Name" readonly="true">
 
                 <br>
-                <label class="fzLabel">Branch:</label> 
+                <label class="fzLabel">Vendor:</label> 
                 <select id="branchId" name="branchId">
                     <option value="D000" >D000</option>
                     <%for (Branch hd : (List<Branch>) getList("ListBranch")) { %>
@@ -98,7 +98,7 @@
                 <table cellpadding="0" cellspacing="0" border="0" class="datatable table table-striped table-bordered">
                     <thead>
                         <tr>
-                            <th>Driver Id</th>
+                            <th>Vendor Id</th>
                             <th>Name</th>
                             <th>Branch</th>
                             <th>Inc</th>
