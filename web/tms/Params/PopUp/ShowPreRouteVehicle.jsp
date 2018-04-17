@@ -49,7 +49,7 @@
                 $.post($apiAddress, {json: jsonForServer}).done(function (data) {
                     if(data == 'OK'){
                         alert( 'sukses' );
-                        location.reload();
+                        //location.reload();
                     }else{
                         alert( 'submit error' ); 
                     }

@@ -68,7 +68,7 @@ public class LoadDelivery implements BusinessLogic {
         String vehicle = FZUtil.getHttpParam(request, "vehicle");
         oriRunId = FZUtil.getHttpParam(request, "oriRunId");
 
-        String[] tableArrSplit = tableArr.split("split");
+        String[] tableArrSplit = tableArr(runId).split("split");//tableArr.split("split");
 
         ArrayList<Double> alParam = getParam();
         speedTruck = alParam.get(0);
@@ -106,6 +106,71 @@ public class LoadDelivery implements BusinessLogic {
         request.setAttribute("runId", runId);
         request.setAttribute("oriRunId", oriRunId);
         request.setAttribute("listDelivery", ld);
+    }
+    
+    public String tableArr(String runId) throws Exception{
+        String tableArr = "";
+        String sql = "SELECT\n" +
+                "	concat(\n" +
+                "		',',\n" +
+                "		CASE\n" +
+                "			WHEN jobNb > 0\n" +
+                "			AND customer_id <> '' THEN jobNb - 1\n" +
+                "			ELSE ''\n" +
+                "		END,\n" +
+                "		',',\n" +
+                "		vehicle_code,\n" +
+                "		',',\n" +
+                "		CASE\n" +
+                "			WHEN customer_id = ''\n" +
+                "			AND jobNb = 1 THEN 'start'\n" +
+                "			ELSE customer_id\n" +
+                "		END,\n" +
+                "		'split'\n" +
+                "	) AS arr,\n" +
+                "	arrive,\n" +
+                "	depart\n" +
+                "FROM\n" +
+                "	BOSNET1.dbo.TMS_RouteJob\n" +
+                "WHERE\n" +
+                "	runID = '"+runId+"'\n" +
+                "ORDER BY\n" +
+                "	routeNb,\n" +
+                "	jobNb;";
+        
+        try (Connection con = (new Db()).getConnection("jdbc/fztms");
+                PreparedStatement ps = con.prepareStatement(sql)){
+            //ps.setString(1, runID);            
+            // get list
+            try (ResultSet rs = ps.executeQuery()){
+                int n = 0;
+                String arv = "01:00";
+                while (rs.next()) {
+                    int i = 1;
+                    String arr = FZUtil.getRsString(rs, i++, "");
+                    arr = arr.replace(",0,",",,");
+                    String arrive = FZUtil.getRsString(rs, i++, "");
+                    
+                    if(arrive.length() > 0){
+                        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+                        Date arv12 = sdf.parse("12:00");
+                        Date arvA = sdf.parse(arv);
+                        Date arvB = sdf.parse(arrive);
+                        if(arvA.before(arv12)&& arvB.after(arv12))   tableArr += ",,,split";
+                        arv = arrive;
+                    }
+                    
+                    tableArr += arr;
+                    n++;
+                }
+                
+                /*String[] tableArrSplit = tableArr.split("split");
+                for(int a = 0 ; a<tableArrSplit.length;a++){
+                    System.out.println(tableArrSplit[a]);
+                }*/
+            }
+        }        
+        return tableArr;
     }
 
     public void setObjectValue(String no, String vNo, String custId, String depart) throws Exception {

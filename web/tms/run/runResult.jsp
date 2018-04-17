@@ -82,7 +82,7 @@
             });
 
             function openEditRoutePage() {
-                var table = document.getElementById("table");
+                /*var table = document.getElementById("table");
 
                 var tableArr = [];
                 for (var i = 1; i < table.rows.length; i++) {
@@ -99,12 +99,11 @@
                             truck,
                             custId
                             );
-                }
+                }*/
 
                 var win = window.location.replace('runResultEdit.jsp?&OriRunID=' + $('#RunIdClick').text() + '&runId=' + $('#nextRunId').text() + '&channel=' + $('#channel').text() +
-                        '&branch=' + $('#branch').text() + '&shift=' + $('#shift').text() + '&vehicles=' + $('#vehicles').text() + '&dateDeliv=' + $('#dateDeliv').text() + 
-                        '&tableArr=' + tableArr);
-
+                        '&branch=' + $('#branch').text() + '&shift=' + $('#shift').text() + '&vehicles=' + $('#vehicles').text() + '&dateDeliv=' + $('#dateDeliv').text());
+                // + '&tableArr=' + tableArr
                 if (win) {
                     //Browser has allowed it to be opened
                     win.focus();
@@ -246,7 +245,7 @@
         <br><br>
         <table id="table" border1="1" style="border-color: lightgray;">
             <thead>
-                <tr style="background-color:orange">
+                <tr style="background-color:orange;">
                     <th width="100px" class="fzCol">No.</th>
                     <th width="100px" class="fzCol">Truck</th>
                     <th width="100px" class="fzCol">CustID</th>

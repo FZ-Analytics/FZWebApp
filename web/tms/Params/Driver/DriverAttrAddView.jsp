@@ -60,7 +60,7 @@
                 $('#inc').val(inc);
             }
         </script>
-        <div style="width: 100%">
+        <div style="width: 100%;height: 500px;">
             <div style="width: 30%; float:left;">
                 <div class="fzErrMsg" id="errMsg">
                     <%=get("errMsg")%>

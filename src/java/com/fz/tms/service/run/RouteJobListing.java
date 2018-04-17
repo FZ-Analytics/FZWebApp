@@ -40,6 +40,9 @@ import javax.servlet.jsp.PageContext;
  */
 public class RouteJobListing implements BusinessLogic {
     //DecimalFormat df = new DecimalFormat("##.0");
+    Set<String> vehicles = new HashSet<String>();
+    String shift = "";
+    String branch = "";
         
     @Override
     public void run(HttpServletRequest request, HttpServletResponse response
@@ -50,11 +53,22 @@ public class RouteJobListing implements BusinessLogic {
         String channel = FZUtil.getHttpParam(request, "channel");
         String dateDeliv = FZUtil.getHttpParam(request, "dateDeliv");
         request.setAttribute("channel", channel);
-        List<RouteJob> js = new ArrayList<RouteJob>();
+        List<RouteJob> js = getAll(runID, OriRunID);
         request.setAttribute("JobList", js);
         request.setAttribute("OriRunID", OriRunID);
         request.setAttribute("nextRunId", getTimeID());
         request.setAttribute("dateDeliv", dateDeliv);
+        
+        request.setAttribute("vehicleCount", 
+                String.valueOf(vehicles.size()));
+        request.setAttribute("runID", runID);
+        request.setAttribute("branch", branch);
+        request.setAttribute("shift", shift);
+        request.setAttribute("OriRunID", OriRunID);
+    }
+    
+    public List<RouteJob> getAll(String runID, String OriRunID) throws Exception{
+        List<RouteJob> js = new ArrayList<RouteJob>();
         
         String sql = "SELECT\n" +
                 "	j.customer_ID,\n" +
@@ -227,7 +241,7 @@ public class RouteJobListing implements BusinessLogic {
                 // populate list
                 RouteJob prevJ = null;
                 int km = 0;
-                Set<String> vehicles = new HashSet<String>();
+                
                 VehicleAttrDB ar = new VehicleAttrDB();
                 int a = 1;
                     
@@ -312,10 +326,8 @@ public class RouteJobListing implements BusinessLogic {
                     // if no prev job/first time
                     // , keep header infos in request attrib
                     if (prevJ == null){
-                        request.setAttribute("runID", runID);
-                        request.setAttribute("branch", j.branch);
-                        request.setAttribute("shift", j.shift);
-                        request.setAttribute("OriRunID", OriRunID);
+                        branch = j.branch;
+                        shift = j.shift;
                     }
                     // else if has prev job within same route
                     else if (prevJ.routeNb == j.routeNb){
@@ -368,9 +380,6 @@ public class RouteJobListing implements BusinessLogic {
                     }                    
                     x++;
                 }
-                request.setAttribute("vehicleCount"
-                        , String.valueOf(vehicles.size()));
-                
             }
         }catch(Exception e){
             HashMap<String, String> pl = new HashMap<String, String>();
@@ -383,6 +392,8 @@ public class RouteJobListing implements BusinessLogic {
             pl.put("dates", dateFormat.format(date).toString());
             Other.insertLog(pl);
         }
+        
+        return js;
     }
     public static String getTimeID() {
         String id = (new SimpleDateFormat("yyyyMMdd_HHmmssSSS").format(

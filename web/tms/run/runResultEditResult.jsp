@@ -99,7 +99,7 @@
 
         </script>
         <div id="body">
-            <h3>Runs</h3>
+            <h3>Runs <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h3>
 
             <input class="fzInput" id="OriRunID" name="OriRunID" value="<%=get("oriRunId")%>" hidden="true"/>
 
