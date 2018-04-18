@@ -25,12 +25,13 @@
             str = str.replace("&","9END9");
             str = str.replace("=","9EQU9");
             str = str.replace("-","9MIN9");
+            String urls =  url + "?" + request.getQueryString();
         %>
         <input type="hidden" value="<%=str%>" id="urls"/>
         <link href="../appGlobal/eFreezeTable.css" rel="stylesheet">
         <script src="../appGlobal/eFreezeTable.js"></script>
         <script>
-            $(document).ready(function () {
+            $(document).ready(function () {                
                 $('#table').eFreezeTableHead();
                 $('.custIDClick').click(function () {
                     //Some code
@@ -54,7 +55,7 @@
                     //Some code
                     //alert( $("#runID").text()+"&vCode="+$(this).text() ); 
                     if ($(this).text().length > 0) {
-                        window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text() + "&oriRunID=" + $("#nextRunId").text() + "&flag=runResult", null,
+                        window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text() + "&oriRunID=" + $("#nextRunId").text(), null,
                                 "scrollbars=1,resizable=1,height=500,width=850");
                         return true;
                     }
@@ -82,7 +83,7 @@
             });
 
             function openEditRoutePage() {
-                var table = document.getElementById("table");
+                /*var table = document.getElementById("table");
 
                 var tableArr = [];
                 for (var i = 1; i < table.rows.length; i++) {
@@ -99,12 +100,11 @@
                             truck,
                             custId
                             );
-                }
+                }*/
 
                 var win = window.location.replace('runResultEdit.jsp?&OriRunID=' + $('#RunIdClick').text() + '&runId=' + $('#nextRunId').text() + '&channel=' + $('#channel').text() +
-                        '&branch=' + $('#branch').text() + '&shift=' + $('#shift').text() + '&vehicles=' + $('#vehicles').text() + '&dateDeliv=' + $('#dateDeliv').text());  
-                        //'&tableArr=' + tableArr);
-
+                        '&branch=' + $('#branch').text() + '&shift=' + $('#shift').text() + '&vehicles=' + $('#vehicles').text() + '&dateDeliv=' + $('#dateDeliv').text());
+                // + '&tableArr=' + tableArr
                 if (win) {
                     //Browser has allowed it to be opened
                     win.focus();
@@ -206,8 +206,25 @@
                         'scrollbars=1,resizable=1,height=500,width=950');
 
             }
+            function saveHistory() {
+                var $apiAddress = '../../api/popupEditCustBfror/savehistory';
+                var jsonForServer = '{\"Value\": \"' + '<%=urls%>' + '\",\"NIK\":\"' + '<%=EmpyID%>' + '"}';
+                var data = [];
+
+                $.post($apiAddress, {json: jsonForServer}).done(function (data) {
+                    if(data == 'OK'){
+                        alert( 'sukses' );
+                        //location.reload();
+                    }else{
+                        alert( 'submit error' ); 
+                    }
+                });
+            }
         </script>
-        <h4>Routing Result <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h4>
+        <h4>Routing Result 
+            <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span>
+            <span class="glyphicon glyphicon-list-alt" aria-hidden="true" onclick="saveHistory()"></span>
+        </h4>
 
         <label class="fzInput" id="nextRunId" hidden="true"><%=get("nextRunId")%></label>
         <label class="fzInput" id="dateDeliv" hidden="true"><%=get("dateDeliv")%></label>
@@ -246,7 +263,7 @@
         <br><br>
         <table id="table" border1="1" style="border-color: lightgray;">
             <thead>
-                <tr style="background-color:orange">
+                <tr style="background-color:orange;">
                     <th width="100px" class="fzCol">No.</th>
                     <th width="100px" class="fzCol">Truck</th>
                     <th width="100px" class="fzCol">CustID</th>
