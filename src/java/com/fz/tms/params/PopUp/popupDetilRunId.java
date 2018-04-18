@@ -47,6 +47,7 @@ public class popupDetilRunId implements BusinessLogic {
 
     String runID = "";
     String oriRunID = "";
+    String flag = "";
 
     @Override
     public void run(HttpServletRequest request, HttpServletResponse response,
@@ -56,6 +57,7 @@ public class popupDetilRunId implements BusinessLogic {
         //w.renderLngLat();
         runID = FZUtil.getHttpParam(request, "runID");
         oriRunID = FZUtil.getHttpParam(request, "oriRunID");
+        flag = FZUtil.getHttpParam(request, "flag");
 
         try {
             List<SummaryVehicle> asd = getSummary(runID);
@@ -268,7 +270,13 @@ public class popupDetilRunId implements BusinessLogic {
                     tkm = tkm.add(km);
 
                     //Check error submit SAP
-                    ArrayList<String> alDo = getDo(runID, sq.truckid);
+                    String findRunId = "";
+                    if(flag.equals("runResultEditResult")) {
+                        findRunId = oriRunID;
+                    } else {
+                        findRunId = runID;
+                    }
+                    ArrayList<String> alDo = getDo(findRunId, sq.truckid);
                     for (int j = 0; j < alDo.size(); j++) {
                         String doNum = alDo.get(j);
 
@@ -308,7 +316,6 @@ public class popupDetilRunId implements BusinessLogic {
                         sq.isFix = "er";
                         sq.error = "Capacity and kubikasi overload";
                     }
-
                     asd.add(sq);
                 }
                 tcap = tcap.divide(BigDecimal.valueOf(asd.size()), MathContext.DECIMAL128);

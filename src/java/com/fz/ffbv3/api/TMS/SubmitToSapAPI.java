@@ -89,14 +89,14 @@ public class SubmitToSapAPI {
             vNo = he.vehicle_no;
             runId = he.runId;
             oriRunId = he.oriRunId;
-
+            
             HashMap<String, String> hmPRV = getFromPreRouteVehicle(runId, he.vehicle_no);
             ArrayList<String> alCustId = getCustomerId(runId, he.vehicle_no);
             ArrayList<String> alStartAndEndTime = getStartAndEndTime(runId, he.vehicle_no);
             Timestamp time = getTimeID();
             String route = getLongestRoute(alCustId, he.vehicle_no, runId);
             boolean isAlreadyOnce = false;
-
+            
             //check if any route is null
             boolean isRouteNull = false;
             for (int i = 0; i < alCustId.size(); i++) {
@@ -106,14 +106,12 @@ public class SubmitToSapAPI {
                     break;
                 }
             }
-
             if (isRouteNull == false) {
                 for (int i = 0; i < alCustId.size(); i++) {
 
                     ArrayList<HashMap<String, String>> alSP = getFromShipmentPlan(runId, alCustId.get(i));
+                    System.out.println("alcust size: " + alSP.size());
                     for (int j = 0; j < alSP.size(); j++) {
-                        System.out.println("alcust size: " + alCustId.size());
-
                         HashMap<String, String> hmSP = alSP.get(j); //HashMap Shipment Plan
                         rs.Shipment_Type = hmPRV.get("source1");
                         rs.Plant = hmSP.get("Plant");

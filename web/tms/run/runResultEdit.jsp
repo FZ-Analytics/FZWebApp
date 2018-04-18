@@ -371,7 +371,7 @@
                 }
 
                 function jumpToResult() {
-                    /*var table = document.getElementById("table");
+                    var table = document.getElementById("table");
 
                     var tableArr2 = [];
                     for (var i = 1; i < table.rows.length; i++) {
@@ -388,10 +388,10 @@
                                 truck,
                                 custId
                                 );
-                    }*/
+                    }
 
-                    var win = window.location.replace('runResultEditResult.jsp?runId=' + $('#RunIdClick').text() + '&oriRunId=' + $('#OriRunID').val() + '&dateDeliv=' + $('#dateDeliv').val() + '&branchId=' + $('#branch').text() +
-                            '&shift=' + $('#shift').text() + '&channel=' + $('#channel').text() + '&vehicle=' + $('#vehicles').text());// + '&array=' + tableArr2
+                    var win = window.open('runResultEditResult.jsp?runId=' + $('#RunIdClick').text() + '&oriRunId=' + $('#OriRunID').val() + '&dateDeliv=' + $('#dateDeliv').val() + '&branchId=' + $('#branch').text() +
+                            '&shift=' + $('#shift').text() + '&channel=' + $('#channel').text() + '&vehicle=' + $('#vehicles').text() + '&array=' + tableArr2);
                     if (win) {
                         //Browser has allowed it to be opened
                         win.focus();
@@ -403,7 +403,7 @@
                             "scrollbars=1,resizable=1,height=500,width=750");
                 }
             </script>
-            <h3>Runs <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h3>
+            <h3>Runs</h3>
             <input class="fzInput" id="OriRunID" name="OriRunID" value="<%=get("oriRunId")%>" hidden="true"/>
             <input class="fzInput" id="dateDeliv" name="dateDeliv" value="<%=get("dateDeliv")%>" hidden="true"/>
 
@@ -425,8 +425,8 @@
 
             <br>
             <label class="fzLabel">RunID:</label> 
-            <label class="fzLabel" id="RunIdClick" style="color: blue;"><%=get("runId")%></label> 
-
+            <!--<label class="fzLabel" id="RunIdClick" style="color: blue;"><%=get("runId")%></label> -->
+            <label class="fzLabel"><%=get("runId")%></label>
             <br>
             <label class="fzLabel" id="mapAll" style="color: blue;">Map</label> 
 

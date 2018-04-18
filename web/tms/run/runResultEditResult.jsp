@@ -47,7 +47,7 @@
                 });
                 $('#RunIdClick').click(function () {
                     if ($(this).text().length > 0) {
-                        window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text() + "&oriRunID=" + $("#OriRunID").val(), null,
+                        window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text() + "&oriRunID=" + $("#OriRunID").val() + "&flag=runResultEditResult", null,
                                 "scrollbars=1,resizable=1,height=500,width=850");
                         return true;
                     }
@@ -99,7 +99,7 @@
 
         </script>
         <div id="body">
-            <h3>Runs <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h3>
+            <h3>Runs</h3>
 
             <input class="fzInput" id="OriRunID" name="OriRunID" value="<%=get("oriRunId")%>" hidden="true"/>
 
