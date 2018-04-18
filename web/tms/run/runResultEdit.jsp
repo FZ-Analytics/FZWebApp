@@ -52,6 +52,10 @@
                 cursor: pointer;
             </style>
             <%@include file="../appGlobal/bodyTop.jsp"%>
+            <%
+                url = request.getRequestURL().toString();
+                String urls =  url + "?" + request.getQueryString();
+            %>
             <link href="../appGlobal/eFreezeTable.css" rel="stylesheet">
             <script src="../appGlobal/eFreezeTable.js"></script>
             <script>
@@ -81,6 +85,13 @@
                             return true;
                         }
                     });
+                    /*$('#RunIdClick').click(function () {
+                        if ($(this).text().length > 0) {
+                            window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text() + "&oriRunID=" + $("#OriRunID").val(), null,
+                                    "scrollbars=1,resizable=1,height=500,width=850");
+                            return true;
+                        }
+                    });*/
                     $('#mapAll').click(function () {
                         if ($(this).text().length > 0) {
                             window.open("../Params/map/GoogleDirMapAllVehi.jsp?runID=" + $("#RunIdClick").text() + '&channel=' + $('#channel').text(), null,
@@ -364,7 +375,7 @@
                 }
 
                 function jumpToResult() {
-                    var table = document.getElementById("table");
+                    /*var table = document.getElementById("table");
 
                     var tableArr2 = [];
                     for (var i = 1; i < table.rows.length; i++) {
@@ -381,10 +392,10 @@
                                 truck,
                                 custId
                                 );
-                    }
+                    }*/
 
-                    var win = window.open('runResultEditResult.jsp?runId=' + $('#RunIdClick').text() + '&oriRunId=' + $('#OriRunID').val() + '&dateDeliv=' + $('#dateDeliv').val() + '&branchId=' + $('#branch').text() +
-                            '&shift=' + $('#shift').text() + '&channel=' + $('#channel').text() + '&vehicle=' + $('#vehicles').text());// + '&array=' + tableArr2);
+                    var win = window.location.replace('runResultEditResult.jsp?runId=' + $('#RunIdClick').text() + '&oriRunId=' + $('#OriRunID').val() + '&dateDeliv=' + $('#dateDeliv').val() + '&branchId=' + $('#branch').text() +
+                            '&shift=' + $('#shift').text() + '&channel=' + $('#channel').text() + '&vehicle=' + $('#vehicles').text());// + '&array=' + tableArr2
                     if (win) {
                         //Browser has allowed it to be opened
                         win.focus();
@@ -395,8 +406,27 @@
                     window.open("../Params/PopUp/popupEditCust.jsp?runId=" + $("#RunIdClick").text() + "&custId=" + kode, null,
                             "scrollbars=1,resizable=1,height=500,width=750");
                 }
+                
+                function saveHistory() {
+                    var $apiAddress = '../../api/popupEditCustBfror/savehistory';
+                    var jsonForServer = '{\"Value\": \"' + '<%=urls%>' + '\",\"NIK\":\"' + '<%=EmpyID%>' + '"}';
+                    var data = [];
+
+                    $.post($apiAddress, {json: jsonForServer}).done(function (data) {
+                        if(data == 'OK'){
+                            alert( 'sukses' );
+                            //location.reload();
+                        }else{
+                            alert( 'submit error' ); 
+                        }
+                    });
+                }
             </script>
-            <h3>Runs</h3>
+            <h3>Runs 
+                <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span>
+                <span class="glyphicon glyphicon-list-alt" aria-hidden="true" onclick="saveHistory()"></span>
+            </h3>
+            
             <input class="fzInput" id="OriRunID" name="OriRunID" value="<%=get("oriRunId")%>" hidden="true"/>
             <input class="fzInput" id="dateDeliv" name="dateDeliv" value="<%=get("dateDeliv")%>" hidden="true"/>
 
@@ -420,6 +450,7 @@
             <label class="fzLabel">RunID:</label> 
             <!--<label class="fzLabel" id="RunIdClick" style="color: blue;"><%=get("runId")%></label> -->
             <label id="RunIdClick" class="fzLabel"><%=get("runId")%></label>
+
             <br>
             <label class="fzLabel" id="mapAll" style="color: blue;">Map</label> 
 
