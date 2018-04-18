@@ -26,11 +26,15 @@
                 str = str.replace("&","9END9");
                 str = str.replace("=","9EQU9");
                 str = str.replace("-","9MIN9");
+                String urls =  url + "?" + request.getQueryString();
             %>
             <div class="fzErrMsg" id="errMsg">
                 <%=get("errMsg")%>
             </div>
-            <h4>Customer Editor<span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h4>
+            <h4>Customer Editor 
+                <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span>
+                <span class="glyphicon glyphicon-list-alt" aria-hidden="true" onclick="saveHistory()"></span>
+            </h4>
 
             <input type="hidden" value="<%=str%>" id="urls"/>
             <br>
@@ -181,6 +185,20 @@
                         }
                     });
 
+                }
+                function saveHistory() {
+                    var $apiAddress = '../../../api/popupEditCustBfror/savehistory';
+                    var jsonForServer = '{\"Value\": \"' + '<%=urls%>' + '\",\"NIK\":\"' + '<%=EmpyID%>' + '"}';
+                    var data = [];
+
+                    $.post($apiAddress, {json: jsonForServer}).done(function (data) {
+                        if(data == 'OK'){
+                            alert( 'sukses' );
+                            //location.reload();
+                        }else{
+                            alert( 'submit error' ); 
+                        }
+                    });
                 }
             </script>
         </div>

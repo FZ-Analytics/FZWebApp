@@ -6,7 +6,10 @@
 package com.fz.ffbv3.api.TMS;
 
 import static com.fz.ffbv3.api.TMS.PopupEditCustAPI.decodeContent;
+import com.fz.tms.params.model.OptionModel;
 import com.fz.tms.params.model.PreRouteJobSubmitCustomer;
+import com.fz.tms.params.model.history;
+import com.fz.tms.params.service.Other;
 import com.fz.tms.params.service.PreRouteJobDB;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -68,6 +71,29 @@ public class popupEditCustBfrorAPI {
             PreRouteJobSubmitCustomer he = gson.fromJson(content.contains("json") ? 
                     decodeContent(content) : content, PreRouteJobSubmitCustomer.class);
             tr =  PreRouteJobDB.submitEditDO(he);              
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+            tr = "";
+        }
+        //TODO return proper representation object
+        //throw new UnsupportedOperationException();
+        String jsonOutput = gson.toJson(tr);
+        return jsonOutput;
+    }
+    
+    @POST
+    @Path("savehistory")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String SaveHistory(String content) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String tr = "";
+        try{
+            history he = gson.fromJson(content.contains("json") ? 
+                    decodeContent(content) : content, history.class);
+            if(he.Value.length() > 0){
+                Other ot = new Other();
+                tr =  ot.InsertHistory(he);
+            }                          
         }catch(Exception e){
             System.out.println(e.getMessage());
             tr = "";

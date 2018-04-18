@@ -542,6 +542,7 @@
                                 <li><a target="iframe1" onClick="opens('../Params/Driver/DriverAttrAddView.jsp')">Vendor Attribute</a> <span class="icon"><i class="fa fa-bank"></i></span></li>
                             </ul>
                         </li>
+                        <li><a target="iframe1" onClick="opens('../other/history.jsp')">History</a><span class="icon"><i class="fa fa-calendar"></i></span></li>
                         <li><a onClick="window.location.replace('<%=urlLogout%>')">Log Out</a><span class="icon"><i class="fa fa-power-off"></i></span></li>
                     </ul>
                 </div>
