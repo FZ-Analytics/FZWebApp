@@ -81,13 +81,6 @@
                             return true;
                         }
                     });
-                    $('#RunIdClick').click(function () {
-                        if ($(this).text().length > 0) {
-                            window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text() + "&oriRunID=" + $("#OriRunID").val(), null,
-                                    "scrollbars=1,resizable=1,height=500,width=850");
-                            return true;
-                        }
-                    });
                     $('#mapAll').click(function () {
                         if ($(this).text().length > 0) {
                             window.open("../Params/map/GoogleDirMapAllVehi.jsp?runID=" + $("#RunIdClick").text() + '&channel=' + $('#channel').text(), null,
@@ -391,7 +384,7 @@
                     }
 
                     var win = window.open('runResultEditResult.jsp?runId=' + $('#RunIdClick').text() + '&oriRunId=' + $('#OriRunID').val() + '&dateDeliv=' + $('#dateDeliv').val() + '&branchId=' + $('#branch').text() +
-                            '&shift=' + $('#shift').text() + '&channel=' + $('#channel').text() + '&vehicle=' + $('#vehicles').text() + '&array=' + tableArr2);
+                            '&shift=' + $('#shift').text() + '&channel=' + $('#channel').text() + '&vehicle=' + $('#vehicles').text());// + '&array=' + tableArr2);
                     if (win) {
                         //Browser has allowed it to be opened
                         win.focus();
@@ -426,7 +419,7 @@
             <br>
             <label class="fzLabel">RunID:</label> 
             <!--<label class="fzLabel" id="RunIdClick" style="color: blue;"><%=get("runId")%></label> -->
-            <label class="fzLabel"><%=get("runId")%></label>
+            <label id="RunIdClick" class="fzLabel"><%=get("runId")%></label>
             <br>
             <label class="fzLabel" id="mapAll" style="color: blue;">Map</label> 
 

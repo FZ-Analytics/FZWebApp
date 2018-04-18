@@ -33,7 +33,7 @@
             <input class="fzInput" id="oriRunID" 
                    name="oriRunID" value="NA" hidden="true"/>
 
-            <h4>Filter Intelligence Routing</h4>
+            <h4>Filter Intelligent Routing</h4>
             <br>
             <label class="fzLabel">Branch</label>
             <input class="fzInput" id="branch" 
