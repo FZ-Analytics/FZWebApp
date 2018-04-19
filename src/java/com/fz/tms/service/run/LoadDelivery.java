@@ -68,7 +68,7 @@ public class LoadDelivery implements BusinessLogic {
         String vehicle = FZUtil.getHttpParam(request, "vehicle");
         oriRunId = FZUtil.getHttpParam(request, "oriRunId");
 
-        String[] tableArrSplit = tableArr(runId).split("split");//tableArr.split("split");
+        String[] tableArrSplit = tableArr.split("split");//tableArr.split("split");
 
         ArrayList<Double> alParam = getParam();
         speedTruck = alParam.get(0);

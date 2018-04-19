@@ -375,7 +375,7 @@
                 }
 
                 function jumpToResult() {
-                    /*var table = document.getElementById("table");
+                    var table = document.getElementById("table");
 
                     var tableArr2 = [];
                     for (var i = 1; i < table.rows.length; i++) {
@@ -392,10 +392,10 @@
                                 truck,
                                 custId
                                 );
-                    }*/
+                    }
 
-                    var win = window.location.replace('runResultEditResult.jsp?runId=' + $('#RunIdClick').text() + '&oriRunId=' + $('#OriRunID').val() + '&dateDeliv=' + $('#dateDeliv').val() + '&branchId=' + $('#branch').text() +
-                            '&shift=' + $('#shift').text() + '&channel=' + $('#channel').text() + '&vehicle=' + $('#vehicles').text());// + '&array=' + tableArr2
+                    var win = window.open('runResultEditResult.jsp?runId=' + $('#RunIdClick').text() + '&oriRunId=' + $('#OriRunID').val() + '&dateDeliv=' + $('#dateDeliv').val() + '&branchId=' + $('#branch').text() +
+                            '&shift=' + $('#shift').text() + '&channel=' + $('#channel').text() + '&vehicle=' + $('#vehicles').text() + '&array=' + tableArr2);
                     if (win) {
                         //Browser has allowed it to be opened
                         win.focus();
@@ -422,7 +422,7 @@
                     });
                 }
             </script>
-            <h3>Runs 
+            <h3>Result Editor
                 <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span>
                 <span class="glyphicon glyphicon-list-alt" aria-hidden="true" onclick="saveHistory()"></span>
             </h3>
