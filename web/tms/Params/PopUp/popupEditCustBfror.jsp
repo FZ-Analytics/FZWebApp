@@ -68,7 +68,7 @@
             <br>
             <label class="fzLabel" id="re_Run" style="color: blue;">Routing</label>
             <label class="fzLabel" id="Vvehicle" style="color: blue;" onclick="Vklik();">Vehicle</label>
-            <input id="clickMe" class="btn fzButton" type="button" value="Manual Route" onclick="openManualRoutePage();" />
+            <%--<input id="clickMe" class="btn fzButton" type="button" value="Manual Route" onclick="openManualRoutePage();" />--%>
 
             <br><br>
             <table cellpadding="0" cellspacing="0" border="0" class="datatable table table-striped table-bordered">

@@ -33,6 +33,7 @@ public class UpdateCostDistGoogleApi {
         
         if(py.get("stat").equalsIgnoreCase("TRUE")){
             String branch = py.get("branch");
+            //jumlah cust yang dicek
             int sent = Integer.valueOf(py.get("sent"));
             try{
                 setUpdateCostDistGoogleApi("FALSE");
@@ -538,9 +539,9 @@ public class UpdateCostDistGoogleApi {
 
                 //tr = rj.DeleteResultShipment(he);              
 
-                //con.setAutoCommit(false);
-                //ps.executeUpdate();
-                //con.setAutoCommit(true);
+                con.setAutoCommit(false);
+                ps.executeUpdate();
+                con.setAutoCommit(true);
                 str = "OK";
 
                 if(str.equalsIgnoreCase("OK")){

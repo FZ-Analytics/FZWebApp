@@ -605,7 +605,7 @@ public class AlgoRunner implements BusinessLogic {
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
                 PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setEscapeProcessing(true);
-            ps.setQueryTimeout(150);
+            //ps.setQueryTimeout(150);
             ps.setString(1, branchCode);
             ps.execute();
             str = "OK";

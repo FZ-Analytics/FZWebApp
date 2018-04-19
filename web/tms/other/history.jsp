@@ -19,27 +19,32 @@
         <h4>History <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h4>
         <br>
         <br>
-        <table cellpadding="0" cellspacing="0" border="0" class="datatable table table-striped table-bordered" style="width: 500px">
-            <thead>
-                <tr style="background-color:orange">
-                    <th width="100px" class="fzCol">History</th>
-                    <th width="100px" class="fzCol">Date</th>
-                    <%--<th width="100px" class="fzCol">Highlight</th>
-                    <th width="100px" class="fzCol">Dell</th>--%>
-                </tr>
-            </thead>
-            <tbody>
-                <%for (history j : (List<history>) getList("ListHistory")) {%> 
-                <tr >
-                    <td class="fzCell" ><a target="iframe1" href="<%=j.Value%>" ><%=j.Display%></a></td>
-                    <td class="fzCell" ><%=j.Dates%></td>
-                    <%--<td class="fzCell" ><span class="fa fa-star-o" aria-hidden="true" onclick="location.reload();"></span></td>
-                    <td class="fzCell" ><span class="fa fa-remove" aria-hidden="true" onclick="location.reload();"></span></td>--%>
-                </tr>
-                <%} // for ProgressRecord %>
-            </tbody>
-            <tfoot></tfoot>
-        </table>
+        <script src="../appGlobal/jquery.dataTables.min.js"></script>
+        <script src="../appGlobal/datatables.js"></script>
+        <div style="width: 500px">
+            <table cellpadding="0" cellspacing="0" border="0" class="datatable table table-striped table-bordered">
+                <thead>
+                    <tr style="background-color:orange">
+                        <th width="100px" class="fzCol">History</th>
+                        <th width="100px" class="fzCol">Date</th>
+                        <%--<th width="100px" class="fzCol">Highlight</th>--%>
+                        <th width="100px" class="fzCol">Dell</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <%for (history j : (List<history>) getList("ListHistory")) {%> 
+                    <tr >
+                        <td class="fzCell" ><a target="iframe1" href="<%=j.Value%>" ><%=j.Display%></a></td>
+                        <td class="fzCell" ><%=j.Dates%></td>
+                        <%--<td class="fzCell" ><span class="fa fa-star-o" aria-hidden="true" onclick="location.reload();"></span></td>--%>
+                        <td class="fzCell" ><span class="glyphicon glyphicon-remove" aria-hidden="true" onclick="location.reload();"></span></td>
+                    </tr>
+                    <%} // for ProgressRecord %>
+                </tbody>
+                <tfoot></tfoot>
+            </table>
+        </div>
+        
         <script >
             $(document).ready(function () {
                 $('.datatable').dataTable({
