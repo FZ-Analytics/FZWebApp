@@ -38,6 +38,7 @@ public class UpdateCostDistGoogleApi {
             try{
                 setUpdateCostDistGoogleApi("FALSE");
                 px = getCustCombi(branch, sent);
+                System.out.println(px.get(0).toString());
                 String str = googleAPI(px, sent, branch);
                 if(str.equalsIgnoreCase("OK")){
                     setUpdateCostDistGoogleApi("TRUE");
@@ -156,14 +157,20 @@ public class UpdateCostDistGoogleApi {
                     //System.out.println(from + "()" + origins);
                     //System.out.println(to + "()" + destinations);
                     // origin sama, dest belum include
+                    
                     for (String n : ary){
-                        if(from.equalsIgnoreCase(origins) &&
-                            !n.equalsIgnoreCase(destinations)){//!to.contains(destinations)
+                        Boolean up = false;
+                        if(ary.length == 25){
+                            up = true;
+                        }
+                        
+                        if((from.equalsIgnoreCase(origins) &&
+                            !n.equalsIgnoreCase(destinations)) && !up){//!to.contains(destinations)
                             isNew = false;
                             xy = y;
                             //System.out.println(from + "from()" + origins + "<>" + n + "()" + destinations);
-                        }else if(!from.equalsIgnoreCase(origins) &&
-                                !n.equalsIgnoreCase(destinations)){//!to.contains(destinations)
+                        }else if((!from.equalsIgnoreCase(origins) &&
+                                !n.equalsIgnoreCase(destinations)) || up){//!to.contains(destinations)
                             //new
                             isNew = true;
                         }
@@ -225,6 +232,28 @@ public class UpdateCostDistGoogleApi {
             
             x++;
         }
+        
+        /*String to = "";
+        for(int a = 0; a<pz.size();a++){
+            System.out.println(pz.get(a).get("link").toString());
+            String link = pz.get(a).get("link");
+            to += ""+ link.substring((link.indexOf("destinations=")+13),link.indexOf("&departure"));  
+        }
+        String[] ary = to.split("\\|");
+        int cn = 0;
+        for(int s = 0;ary.length > s;s++){
+            cn = 0;
+            for(int t = 0;ary.length > t;t++){
+                if(ary[s].equalsIgnoreCase(ary[t])){
+                    cn++;
+                }
+                
+                if(cn > 1){
+                    System.out.println(cn+"."+s+"."+ary[s]);
+                }
+            }
+        }*/
+        
         
         String js = getGoogleData(px, pz, branch);        
         
@@ -334,7 +363,7 @@ public class UpdateCostDistGoogleApi {
                                         + ",'BackDoor'"
                                         + ")"
                                         ;
-                                    //System.out.println(sql);
+                                    System.out.println(sql);
                                     try (Connection con = (new Db()).getConnection("jdbc/fztms")){
                                         try (PreparedStatement ps = con.prepareStatement(sql) ){
                                             ps.executeUpdate();
@@ -383,33 +412,16 @@ public class UpdateCostDistGoogleApi {
         String str = "ERROR";
         int x = 0;
         while(x == 0){
-            String sql = "BEGIN DECLARE @sent INT = "+sent+";\n" +
+            String sql = "DECLARE @BrId VARCHAR(5)= '"+branch+"';\n" +
                     "\n" +
-                    "DECLARE @BrId VARCHAR(5)= '"+branch+"';\n" +
+                    "DECLARE @tcust AS TABLE\n" +
+                    "	(\n" +
+                    "		cust VARCHAR(100) NOT NULL,\n" +
+                    "		long VARCHAR(100) NOT NULL,\n" +
+                    "		lat VARCHAR(100) NOT NULL\n" +
+                    "	);\n" +
                     "\n" +
-                    "DECLARE @Txt VARCHAR(100)= 'D312';\n" +
-                    "\n" +
-                    "DECLARE @rnd VARCHAR(5)=(\n" +
-                    "	SELECT\n" +
-                    "		CAST(\n" +
-                    "			RAND()*(\n" +
-                    "				CAST(\n" +
-                    "					(\n" +
-                    "						SELECT\n" +
-                    "							COUNT( DISTINCT Customer_ID )\n" +
-                    "						FROM\n" +
-                    "							BOSNET1.dbo.Customer\n" +
-                    "						WHERE\n" +
-                    "							Sales_Office = @BrId\n" +
-                    "					) AS INT\n" +
-                    "				)- 1\n" +
-                    "			)+ 1 AS INT\n" +
-                    "		)\n" +
-                    ");\n" +
-                    "\n" +
-                    "PRINT '@rnd ' + @rnd;\n" +
-                    "\n" +
-                    "DECLARE @cust AS TABLE\n" +
+                    "DECLARE @zcust AS TABLE\n" +
                     "	(\n" +
                     "		cust1 VARCHAR(100) NOT NULL,\n" +
                     "		long1 VARCHAR(100) NOT NULL,\n" +
@@ -419,121 +431,144 @@ public class UpdateCostDistGoogleApi {
                     "		lat2 VARCHAR(100) NOT NULL\n" +
                     "	);\n" +
                     "\n" +
-                    "DECLARE @tCust AS TABLE\n" +
+                    "DECLARE @ycust AS TABLE\n" +
                     "	(\n" +
-                    "		SNO VARCHAR(100) NOT NULL,\n" +
-                    "		cust VARCHAR(100) NOT NULL,\n" +
-                    "		long VARCHAR(100) NOT NULL,\n" +
-                    "		lat VARCHAR(100) NOT NULL\n" +
+                    "		cust1 VARCHAR(100) NOT NULL,\n" +
+                    "		long1 VARCHAR(100) NOT NULL,\n" +
+                    "		lat1 VARCHAR(100) NOT NULL,\n" +
+                    "		cust2 VARCHAR(100) NOT NULL,\n" +
+                    "		long2 VARCHAR(100) NOT NULL,\n" +
+                    "		lat2 VARCHAR(100) NOT NULL\n" +
                     "	);\n" +
                     "\n" +
-                    "INSERT\n" +
-                    "	INTO\n" +
-                    "		@tCust SELECT\n" +
-                    "			DISTINCT aq.SNO,\n" +
-                    "			aq.customer_id AS cust,\n" +
-                    "			aq.Long AS long,\n" +
-                    "			aq.Lat AS lat\n" +
-                    "		FROM\n" +
-                    "			(\n" +
-                    "				SELECT\n" +
-                    "					ROW_NUMBER() OVER(\n" +
-                    "					ORDER BY\n" +
-                    "						(\n" +
-                    "							SELECT\n" +
-                    "								100\n" +
-                    "						)\n" +
-                    "					) AS SNO,\n" +
-                    "					*\n" +
-                    "				FROM\n" +
-                    "					(\n" +
-                    "						SELECT\n" +
-                    "							DISTINCT oi.Customer_ID,\n" +
-                    "							oi.sales_office,\n" +
-                    "							po.Long,\n" +
-                    "							po.Lat\n" +
-                    "						FROM\n" +
-                    "							BOSNET1.dbo.Customer oi\n" +
-                    "						INNER JOIN BOSNET1.dbo.TMS_CustLongLat po ON\n" +
-                    "							oi.Customer_ID = po.CustId\n" +
-                    "						WHERE\n" +
-                    "							oi.sales_office = @BrId\n" +
-                    "							AND(\n" +
-                    "								po.Long NOT IN(\n" +
-                    "									'0',\n" +
-                    "									'n/a',\n" +
-                    "									''\n" +
-                    "								)\n" +
-                    "								OR po.Lat NOT IN(\n" +
-                    "									'0',\n" +
-                    "									'n/a',\n" +
-                    "									''\n" +
-                    "								)\n" +
-                    "							)\n" +
-                    "					) ar\n" +
-                    "			) aq\n" +
-                    "		WHERE\n" +
-                    "			aq.SNO BETWEEN @rnd AND(\n" +
-                    "				@rnd + @sent\n" +
-                    "			);\n" +
-                    "\n" +
-                    "--select count(*) from @tCust;\n" +
+                    "--ambil TMS_ShipmentPlan + TMS_CustLongLat\n" +
                     " INSERT\n" +
                     "	INTO\n" +
-                    "		@cust SELECT\n" +
-                    "			*\n" +
+                    "		@tCust SELECT\n" +
+                    "			DISTINCT sp.Customer_ID,\n" +
+                    "			cl.Long,\n" +
+                    "			cl.Lat\n" +
                     "		FROM\n" +
-                    "			(\n" +
-                    "				SELECT\n" +
-                    "					*\n" +
-                    "				FROM\n" +
-                    "					(\n" +
-                    "						SELECT\n" +
-                    "							*\n" +
-                    "						FROM\n" +
-                    "							(\n" +
-                    "								SELECT\n" +
-                    "									cust AS cust1,\n" +
-                    "									long AS long1,\n" +
-                    "									lat AS lat1\n" +
-                    "								FROM\n" +
-                    "									@tCust\n" +
-                    "							) yu\n" +
-                    "					) aq,\n" +
-                    "					(\n" +
-                    "						SELECT\n" +
-                    "							*\n" +
-                    "						FROM\n" +
-                    "							(\n" +
-                    "								SELECT\n" +
-                    "									cust AS cust2,\n" +
-                    "									long AS long2,\n" +
-                    "									lat AS lat2\n" +
-                    "								FROM\n" +
-                    "									@tCust\n" +
-                    "							) yu\n" +
-                    "					) sw\n" +
-                    "			) op\n" +
+                    "			BOSNET1.dbo.TMS_ShipmentPlan sp\n" +
+                    "		INNER JOIN BOSNET1.dbo.TMS_CustLongLat cl ON\n" +
+                    "			sp.Customer_ID = cl.CustId\n" +
                     "		WHERE\n" +
-                    "			cust1 <> cust2;\n" +
+                    "			sp.Plant = @BrId\n" +
+                    "			AND cl.Long IS NOT NULL\n" +
+                    "			AND cl.Lat IS NOT NULL\n" +
+                    "			AND cl.Long NOT IN(\n" +
+                    "				'n/a',\n" +
+                    "				'0'\n" +
+                    "			)\n" +
+                    "			AND cl.Lat NOT IN(\n" +
+                    "				'n/a',\n" +
+                    "				',',\n" +
+                    "				'0'\n" +
+                    "			)\n" +
+                    "			AND cl.Long NOT LIKE('%,%')\n" +
+                    "			AND cl.Lat NOT LIKE('%,%')\n" +
+                    "			AND cl.Long LIKE('106.%')\n" +
+                    "			AND cl.Lat LIKE('-6.%');\n" +
                     "\n" +
-                    "DELETE\n" +
+                    "--cek hasil combinasi (TMS_ShipmentPlan + TMS_CustLongLat) X (TMS_ShipmentPlan + TMS_CustLongLat) dengan TMS_CostDist\n" +
+                    " --select * from BOSNET1.dbo.TMS_CustCombination aq left outer join BOSNET1.dbo.TMS_CostDist aw on aq.cust1 = aw.from1 and aq.cust2 = aw.to1\n" +
+                    " --where aw.from1 is null and aw.to1 is null\n" +
+                    " --select * from BOSNET1.dbo.TMS_CostDist where from1 = '5810000365' and to1 = '5810002824'\n" +
+                    " DELETE\n" +
                     "FROM\n" +
                     "	BOSNET1.dbo.TMS_CustCombination;\n" +
                     "\n" +
                     "INSERT\n" +
                     "	INTO\n" +
-                    "		BOSNET1.dbo.TMS_CustCombination SELECT\n" +
-                    "			cs.*\n" +
+                    "		@zcust --TMS_CustCombination \n" +
+                    " SELECT\n" +
+                    "			top 1000 cx.*\n" +
                     "		FROM\n" +
-                    "			@cust cs\n" +
-                    "		LEFT OUTER JOIN BOSNET1.dbo.TMS_CostDist sd ON\n" +
-                    "			cs.cust1 = SUBSTRING( from1, 1, 10 )\n" +
-                    "			AND cs.cust2 = SUBSTRING( to1, 1, 10 )\n" +
+                    "			(\n" +
+                    "				SELECT\n" +
+                    "					DISTINCT c1.cust AS cust1,\n" +
+                    "					c1.long AS long1,\n" +
+                    "					c1.lat AS lat1,\n" +
+                    "					c2.cust AS cust2,\n" +
+                    "					c2.long AS long2,\n" +
+                    "					c2.lat AS lat2\n" +
+                    "				FROM\n" +
+                    "					@tCust c1,\n" +
+                    "					@tCust c2\n" +
+                    "				WHERE\n" +
+                    "					c1.cust <> c2.cust\n" +
+                    "			) cx\n" +
+                    "		LEFT OUTER JOIN(\n" +
+                    "				SELECT\n" +
+                    "					DISTINCT lon1,\n" +
+                    "					lat1,\n" +
+                    "					SUBSTRING( from1, 1, 10 ) AS from1,\n" +
+                    "					lon2,\n" +
+                    "					lat2,\n" +
+                    "					SUBSTRING( to1, 1, 10 ) AS to1\n" +
+                    "				FROM\n" +
+                    "					BOSNET1.dbo.TMS_CostDist\n" +
+                    "				WHERE\n" +
+                    "					branch = @BrId\n" +
+                    "			) cy ON\n" +
+                    "			cx.cust1 = cy.from1\n" +
+                    "			AND cx.cust2 = cy.to1\n" +
                     "		WHERE\n" +
-                    "			from1 IS NULL\n" +
-                    "			AND to1 IS NULL;\n" +
-                    "END;";
+                    "			cy.from1 IS NULL\n" +
+                    "			AND cy.to1 IS NULL;\n" +
+                    "\n" +
+                    "INSERT\n" +
+                    "	INTO\n" +
+                    "		TMS_CustCombination SELECT\n" +
+                    "			top "+sent+" cust1,\n" +
+                    "			long1,\n" +
+                    "			lat1,\n" +
+                    "			cust2,\n" +
+                    "			long2,\n" +
+                    "			lat2\n" +
+                    "		FROM\n" +
+                    "			(\n" +
+                    "				SELECT\n" +
+                    "					cust1,\n" +
+                    "					long1,\n" +
+                    "					lat1,\n" +
+                    "					cust2,\n" +
+                    "					long2,\n" +
+                    "					lat2,\n" +
+                    "					CONCAT(\n" +
+                    "						cust1,\n" +
+                    "						long1,\n" +
+                    "						lat1,\n" +
+                    "						cust2,\n" +
+                    "						long2,\n" +
+                    "						lat2\n" +
+                    "					) AS cs\n" +
+                    "				FROM\n" +
+                    "					@zcust\n" +
+                    "			) cx\n" +
+                    "		INNER JOIN(\n" +
+                    "				SELECT\n" +
+                    "					cs\n" +
+                    "				FROM\n" +
+                    "					(\n" +
+                    "						SELECT\n" +
+                    "							CONCAT(\n" +
+                    "								cust1,\n" +
+                    "								long1,\n" +
+                    "								lat1,\n" +
+                    "								cust2,\n" +
+                    "								long2,\n" +
+                    "								lat2\n" +
+                    "							) AS cs\n" +
+                    "						FROM\n" +
+                    "							@zcust\n" +
+                    "					) aw\n" +
+                    "				GROUP BY\n" +
+                    "					cs\n" +
+                    "				HAVING\n" +
+                    "					COUNT( cs )= 1\n" +
+                    "			) cy ON\n" +
+                    "			cx.cs = cy.cs";
             try (Connection con = (new Db()).getConnection("jdbc/fztms");
                 PreparedStatement ps = con.prepareStatement(sql)) {
 
