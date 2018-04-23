@@ -25,9 +25,10 @@
             , PageContext pc
     ) throws Exception{
         String result = "OK";
-        System.out.println("className.methodName()");
+        //System.out.println("className.methodName()");
         UpdateCostDistGoogleApi fin = new UpdateCostDistGoogleApi();
         fin.finalizeCust();
+        
         
         return result;
     } 

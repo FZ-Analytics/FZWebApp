@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -30,18 +31,25 @@ public class UpdateCostDistGoogleApi {
     public List<HashMap<String, String>> finalizeCust() throws Exception{
         List<HashMap<String, String>> px = new ArrayList<HashMap<String, String>>();
         HashMap<String, String> py = cekParam();
+        Logger log = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
         
         if(py.get("stat").equalsIgnoreCase("TRUE")){
             String branch = py.get("branch");
             //jumlah cust yang dicek
             int sent = Integer.valueOf(py.get("sent"));
             try{
+                log.info("------- Process Start ----------------------");
                 setUpdateCostDistGoogleApi("FALSE");
+                log.info("------- Process Get Data Customer Start ----------------------");
                 px = getCustCombi(branch, sent);
-                System.out.println(px.get(0).toString());
+                log.info("------- Process Get Data Customer End ----------------------");
+                //System.out.println(px.get(0).toString());
+                log.info("------- Process Get Data Google Start ----------------------");
                 String str = googleAPI(px, sent, branch);
+                log.info("------- Process Get Data Google End ----------------------");
                 if(str.equalsIgnoreCase("OK")){
                     setUpdateCostDistGoogleApi("TRUE");
+                    log.info("------- Process End ----------------------");
                 }
             }catch(Exception e){
                 throw new Exception(e); 
@@ -107,6 +115,9 @@ public class UpdateCostDistGoogleApi {
         
         String cust = "";
         int x = 0;
+        
+        //contoh data yang diproses 
+        //{lat1=-6.168805, long2=106.869, lat2=-6.29533, long1=106.829789, cust1=5810000365, cust2=5810003293}
         while(x < px.size()){
             py = new HashMap<String, String>();
             py = px.get(x);
@@ -121,10 +132,9 @@ public class UpdateCostDistGoogleApi {
             origins = py.get("lat1")+","+py.get("long1");
             destinations = py.get("lat2")+","+py.get("long2");
             
-            if(origins.equalsIgnoreCase("-6.12689584239623,106.721545986395") 
-                    && destinations.equalsIgnoreCase("-6.18545875197853,106.753304794418")){
-                //System.out.println(origins + "(A)" + destinations);
-                //System.out.println(to + "(B)" + destinations);
+            if(origins.equalsIgnoreCase("-6.168805,106.829789") 
+                    && destinations.equalsIgnoreCase("-6.13907,106.87")){
+                System.out.println("double() " + x);
             }
             while(run){  
                 //new
@@ -135,10 +145,10 @@ public class UpdateCostDistGoogleApi {
                             + "&destinations=" + destinations
                             + "&departure_time=now"
                             + "&traffic_model=best_guess"
-                            + "&key=" + key
-                            ;
+                            + "&key=" + key;
 
                     pj = new HashMap<String, String>();
+                    pj.put("cust", py.get("cust1") + "|" + py.get("cust2"));
                     pj.put("link", urlString);
                     //System.out.println(pj.toString());
                     pz.add(pj);
@@ -154,10 +164,6 @@ public class UpdateCostDistGoogleApi {
                 
                     String[] ary = to.split("\\|");
                     
-                    //System.out.println(from + "()" + origins);
-                    //System.out.println(to + "()" + destinations);
-                    // origin sama, dest belum include
-                    
                     for (String n : ary){
                         Boolean up = false;
                         if(ary.length == 25){
@@ -166,6 +172,7 @@ public class UpdateCostDistGoogleApi {
                         
                         if((from.equalsIgnoreCase(origins) &&
                             !n.equalsIgnoreCase(destinations)) && !up){//!to.contains(destinations)
+                            // origin sama, dest belum include
                             isNew = false;
                             xy = y;
                             //System.out.println(from + "from()" + origins + "<>" + n + "()" + destinations);
@@ -177,7 +184,9 @@ public class UpdateCostDistGoogleApi {
                     }                    
                     
                     if((y+1) == pz.size()){
+                        
                         if(isNew){
+                            //add new
                             origins = py.get("lat1")+","+py.get("long1");
                             destinations = py.get("lat2")+","+py.get("long2");
 
@@ -187,18 +196,20 @@ public class UpdateCostDistGoogleApi {
                                     + "&destinations=" + destinations
                                     + "&departure_time=now"
                                     + "&traffic_model=best_guess"
-                                    + "&key=" + key
-                                    ;
+                                    + "&key=" + key;
 
                             pj = new HashMap<String, String>();
                             pj.put("link", urlString);
+                            pj.put("cust", py.get("cust1") + "|" + py.get("cust2"));
                             //System.out.println(pj.toString());
                             pz.add(pj);
                             run = false;
                         }else if(!isNew){
+                            // +latlon to existing one 
                             pj = new HashMap<String, String>();
                             pj = pz.get(xy);
                             link = pz.get(xy).get("link");
+                            String cust2 = pz.get(xy).get("cust") + "|" + py.get("cust2");
                             pz.remove(xy);
                             
                             from = link.substring((link.indexOf("=")+1),link.indexOf("&destinations"));
@@ -211,11 +222,11 @@ public class UpdateCostDistGoogleApi {
                                     + "&destinations=" + to
                                     + "&departure_time=now"
                                     + "&traffic_model=best_guess"
-                                    + "&key=" + key
-                                    ;
+                                    + "&key=" + key;
 
                             pj = new HashMap<String, String>();
                             pj.put("link", urlString);
+                            pj.put("cust", cust2);
                             //System.out.println(pj.toString());
                             pz.add(pj);
                             run = false;
@@ -233,13 +244,14 @@ public class UpdateCostDistGoogleApi {
             x++;
         }
         
-        /*String to = "";
+        String to = "";
         for(int a = 0; a<pz.size();a++){
-            System.out.println(pz.get(a).get("link").toString());
-            String link = pz.get(a).get("link");
-            to += ""+ link.substring((link.indexOf("destinations=")+13),link.indexOf("&departure"));  
+            //System.out.println(pz.get(a).get("link").toString());
+            //System.out.println(pz.get(a).get("cust").toString());
+            //String link = pz.get(a).get("link");
+            //to += ""+ link.substring((link.indexOf("destinations=")+13),link.indexOf("&departure"));  
         }
-        String[] ary = to.split("\\|");
+        /*String[] ary = to.split("\\|");
         int cn = 0;
         for(int s = 0;ary.length > s;s++){
             cn = 0;
@@ -271,7 +283,9 @@ public class UpdateCostDistGoogleApi {
             String u = urlString.substring((urlString.indexOf("destinations=")+13),urlString.indexOf("&departure"));
             String[] from = urlString.substring((urlString.indexOf("=")+1),urlString.indexOf("&destinations")).split("\\,");
             String[] to = u.split("\\|");
-            System.out.println(fz.get(x).get("link").toString());
+            String cust = fz.get(x).get("cust").toString();
+            String[] cust2 = cust.split("\\|");
+            //System.out.println(fz.get(x).get("link").toString());
             try{
                 URL url = new URL(urlString);
                 String finalURL = url.toString();
@@ -332,7 +346,7 @@ public class UpdateCostDistGoogleApi {
                                     // convert second to min
                                     double durValDbl = Double.parseDouble(durVal) / 60;
 
-                                    String[] cust = getCustArry(fx, from, ary);
+                                    //String[] cust = getCustArry(fx, from, ary);
                                     // add to list
                                     JSONObject custCostDist = new JSONObject();
                                     custCostDist.put("lon1", from[1]);
@@ -341,8 +355,8 @@ public class UpdateCostDistGoogleApi {
                                     custCostDist.put("lat2", ary[0]);
                                     custCostDist.put("dist", distVal);
                                     custCostDist.put("dur", durValDbl);                                
-                                    custCostDist.put("from", cust [0]);
-                                    custCostDist.put("to", cust [1]);
+                                    custCostDist.put("from", cust2 [0]);
+                                    custCostDist.put("to", cust2 [i+1]);
                                     finalCostDists.add(custCostDist);
 
 
@@ -363,7 +377,7 @@ public class UpdateCostDistGoogleApi {
                                         + ",'BackDoor'"
                                         + ")"
                                         ;
-                                    System.out.println(sql);
+                                    //System.out.println(sql);
                                     try (Connection con = (new Db()).getConnection("jdbc/fztms")){
                                         try (PreparedStatement ps = con.prepareStatement(sql) ){
                                             ps.executeUpdate();
@@ -617,7 +631,7 @@ public class UpdateCostDistGoogleApi {
                     py.put("lat2", rs.getString("lat2"));
                     px.add(py);
                 }
-                System.out.println("getCustCombi" + "()" + px.size());
+                //System.out.println("getCustCombi" + "()" + px.size());
             }
         }
         return px;
