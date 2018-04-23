@@ -56,7 +56,7 @@ public class RouteJobListing implements BusinessLogic {
         List<RouteJob> js = getAll(runID, OriRunID);
         request.setAttribute("JobList", js);
         request.setAttribute("OriRunID", OriRunID);
-        request.setAttribute("nextRunId", getTimeID());
+        request.setAttribute("nextRunId", getNextRunId(runID));
         request.setAttribute("dateDeliv", dateDeliv);
         
         request.setAttribute("vehicleCount", 
@@ -395,10 +395,11 @@ public class RouteJobListing implements BusinessLogic {
         
         return js;
     }
-    public static String getTimeID() {
-        String id = (new SimpleDateFormat("yyyyMMdd_HHmmssSSS").format(
-                        new java.util.Date()));
-        return id;
+    public static String getNextRunId(String runId) {
+        String[] id = runId.split("_");
+        String date = id[0];
+        int time = Integer.parseInt(id[1]) + 1;
+        return date + "_" + time;
     }
 
     public String sendSAP(Vehicle he) throws Exception{

@@ -54,7 +54,7 @@
             <%@include file="../appGlobal/bodyTop.jsp"%>
             <%
                 url = request.getRequestURL().toString();
-                String urls =  url + "?" + request.getQueryString();
+                String urls = url + "?" + request.getQueryString();
             %>
             <link href="../appGlobal/eFreezeTable.css" rel="stylesheet">
             <script src="../appGlobal/eFreezeTable.js"></script>
@@ -86,12 +86,12 @@
                         }
                     });
                     /*$('#RunIdClick').click(function () {
-                        if ($(this).text().length > 0) {
-                            window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text() + "&oriRunID=" + $("#OriRunID").val(), null,
-                                    "scrollbars=1,resizable=1,height=500,width=850");
-                            return true;
-                        }
-                    });*/
+                     if ($(this).text().length > 0) {
+                     window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text() + "&oriRunID=" + $("#OriRunID").val(), null,
+                     "scrollbars=1,resizable=1,height=500,width=850");
+                     return true;
+                     }
+                     });*/
                     $('#mapAll').click(function () {
                         if ($(this).text().length > 0) {
                             window.open("../Params/map/GoogleDirMapAllVehi.jsp?runID=" + $("#RunIdClick").text() + '&channel=' + $('#channel').text(), null,
@@ -382,16 +382,46 @@
                         var no = table.rows[i].cells[0].innerHTML; //no
                         var truck = table.rows[i].cells[1].innerHTML; //truck
                         var custId = "";
-                        if ((table.rows[i].cells[1].innerHTML !== "") && (table.rows[i].cells[2].innerHTML === "") && (table.rows[i].cells[4].innerHTML !== "")) {
-                            custId = "start" + "split";
-                        } else {
-                            custId = table.rows[i].cells[2].innerHTML + "split"; //custId
+                        //if ((table.rows[i].cells[1].innerHTML !== "") && (table.rows[i].cells[2].innerHTML === "") && (table.rows[i].cells[4].innerHTML !== "")) {
+                        //custId = "start" + "split";
+
+                        var curArrv = table.rows[i].cells[3].innerHTML;
+                        var curDepart = table.rows[i].cells[4].innerHTML;
+                        var nextArrv = "";
+                        var nextDepart = "";
+                        var prevArrv = "";
+                        var prevDepart = "";
+                        if (i !== table.rows.length - 1) {
+                            nextArrv = table.rows[i + 1].cells[3].innerHTML;
+                            nextDepart = table.rows[i + 1].cells[4].innerHTML;
                         }
-                        tableArr2.push(
-                                no,
-                                truck,
-                                custId
-                                );
+                        if (i !== 1) {
+                            prevArrv = table.rows[i - 1].cells[3].innerHTML;
+                            prevDepart = table.rows[i - 1].cells[4].innerHTML;
+                        }
+                        if (curArrv === "" && curDepart !== "" && nextArrv !== "" && nextDepart === "") {
+                            console.log(truck + " is not included");
+                        } else if (curArrv !== "" && curDepart === "" && prevArrv === "" && prevDepart !== "") {
+                            console.log(truck + " is not included");
+                        } else {
+                            //custId = table.rows[i].cells[2].innerHTML + "split"; //custId
+                            if ((table.rows[i].cells[1].innerHTML !== "") && (table.rows[i].cells[2].innerHTML === "") && (table.rows[i].cells[4].innerHTML !== "")) {
+                                custId = "start" + "split";
+                            } else {
+                                custId = table.rows[i].cells[2].innerHTML + "split"; //custId
+                            }
+                            tableArr2.push(
+                                    no,
+                                    truck,
+                                    custId
+                                    );
+
+                        }
+//                        tableArr2.push(
+//                                no,
+//                                truck,
+//                                custId
+//                                );
                     }
 
                     var win = window.open('runResultEditResult.jsp?runId=' + $('#RunIdClick').text() + '&oriRunId=' + $('#OriRunID').val() + '&dateDeliv=' + $('#dateDeliv').val() + '&branchId=' + $('#branch').text() +
@@ -406,18 +436,18 @@
                     window.open("../Params/PopUp/popupEditCust.jsp?runId=" + $("#RunIdClick").text() + "&custId=" + kode, null,
                             "scrollbars=1,resizable=1,height=500,width=750");
                 }
-                
+
                 function saveHistory() {
                     var $apiAddress = '../../api/popupEditCustBfror/savehistory';
                     var jsonForServer = '{\"Value\": \"' + '<%=urls%>' + '\",\"NIK\":\"' + '<%=EmpyID%>' + '"}';
                     var data = [];
 
                     $.post($apiAddress, {json: jsonForServer}).done(function (data) {
-                        if(data == 'OK'){
-                            alert( 'sukses' );
+                        if (data == 'OK') {
+                            alert('sukses');
                             //location.reload();
-                        }else{
-                            alert( 'submit error' ); 
+                        } else {
+                            alert('submit error');
                         }
                     });
                 }
@@ -426,7 +456,7 @@
                 <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span>
                 <span class="glyphicon glyphicon-list-alt" aria-hidden="true" onclick="saveHistory()"></span>
             </h3>
-            
+
             <input class="fzInput" id="OriRunID" name="OriRunID" value="<%=get("oriRunId")%>" hidden="true"/>
             <input class="fzInput" id="dateDeliv" name="dateDeliv" value="<%=get("dateDeliv")%>" hidden="true"/>
 
@@ -489,8 +519,8 @@
                             <%} else if (j.arrive.length() == 0 && j.storeName.length() == 0) {%>
                             style="background-color: #e6ffe6"
                             <%}%> >
-                        <td class="fzCell index"><%=j.no%></td>
-                        <td class="vCodeClick" id="vehicleCode" style="color: blue;"><%=j.vehicleCode%></td>
+                            <td class="fzCell index"><%=j.no%></td>
+                            <td class="vCodeClick" id="vehicleCode" style="color: blue;"><%=j.vehicleCode%></td>
                         <td class="custIDClick" id="custId" style="color: blue;"><%=j.custId%></td>
                         <td class="fzCell"><%=j.arrive%></td>
                         <td class="fzCell"><%=j.depart%></td>                    

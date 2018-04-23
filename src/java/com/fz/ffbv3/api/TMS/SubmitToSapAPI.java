@@ -43,7 +43,7 @@ import org.eclipse.persistence.jpa.jpql.parser.DateTime;
 public class SubmitToSapAPI {
 
     String runId = "";
-    String oriRunId = "";
+    String flag = "";
     String vNo = "";
     @Context
     private UriInfo context;
@@ -87,8 +87,12 @@ public class SubmitToSapAPI {
         try {
             RunResultEditResultSubmitToSap he = gson.fromJson(content.contains("json") ? decodeContent(content) : content, RunResultEditResultSubmitToSap.class);
             vNo = he.vehicle_no;
-            runId = he.runId;
-            oriRunId = he.oriRunId;
+            flag = he.flag;
+            if(flag.equals("runResult")) {
+                runId = he.runId;
+            } else if(flag.equals("runResultEditResult")) {
+                runId = he.runId;
+            }
 
             HashMap<String, String> hmPRV = getFromPreRouteVehicle(runId, he.vehicle_no);
             ArrayList<String> alCustId = getCustomerId(runId, he.vehicle_no);

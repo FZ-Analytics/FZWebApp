@@ -25,4 +25,8 @@ public class RunResultEditResultSubmitToSap {
     @Expose
     public String vehicle_no;
     
+    @SerializedName("flag")
+    @Expose
+    public String flag;
+    
 }

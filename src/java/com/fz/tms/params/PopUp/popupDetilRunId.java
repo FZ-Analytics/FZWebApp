@@ -63,6 +63,7 @@ public class popupDetilRunId implements BusinessLogic {
             List<SummaryVehicle> asd = getSummary(runID);
             request.setAttribute("oriRunID", oriRunID);
             request.setAttribute("runID", runID);
+            request.setAttribute("flag", flag);
             request.setAttribute("cap", df.format(tcap).toString());
             request.setAttribute("kub", df.format(tkub).toString());
             request.setAttribute("ttravel", df.format(ttravel).toString());
@@ -270,13 +271,14 @@ public class popupDetilRunId implements BusinessLogic {
                     tkm = tkm.add(km);
 
                     //Check error submit SAP
-                    String findRunId = "";
+                    ArrayList<String> alDo = new ArrayList<>();
                     if(flag.equals("runResultEditResult")) {
-                        findRunId = oriRunID;
+                        System.out.println(runID + " " + oriRunID);
+                        alDo = getDo(oriRunID, runID, sq.truckid);
                     } else {
-                        findRunId = runID;
+                        alDo = getDo(runID, runID, sq.truckid);
                     }
-                    ArrayList<String> alDo = getDo(findRunId, sq.truckid);
+                    
                     for (int j = 0; j < alDo.size(); j++) {
                         String doNum = alDo.get(j);
 
@@ -336,7 +338,7 @@ public class popupDetilRunId implements BusinessLogic {
         return vSplit[1] + vSplit[3];
     }
 
-    public ArrayList<String> getDo(String runId, String vehicleCode) throws Exception {
+    public ArrayList<String> getDo(String oriRunId, String runId, String vehicleCode) throws Exception {
         ArrayList<String> alDo = new ArrayList<>();
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
             try (Statement stm = con.createStatement()) {
@@ -367,7 +369,7 @@ public class popupDetilRunId implements BusinessLogic {
 //                        + "             prj.Request_Delivery_Date = sp.Request_Delivery_Date\n"
 //			+ "		and prj.DO_Number = sp.DO_Number\n"
                         + "WHERE \n"
-                        + "	prj.RunId = '" + runId + "'\n"
+                        + "	prj.RunId = '" + oriRunId + "'\n"
                         + "     AND prj.Batch <> 'NULL'";
 
                 try (ResultSet rs = stm.executeQuery(sql)) {
