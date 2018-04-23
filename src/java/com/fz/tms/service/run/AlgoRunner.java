@@ -968,11 +968,12 @@ public class AlgoRunner implements BusinessLogic {
         
             List<HashMap<String, String>> ins = new ArrayList<HashMap<String, String>>();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");            
-            Calendar c = Calendar.getInstance();
+            Calendar calendar = Calendar.getInstance();
             Date dDeliv = sdf.parse(dateDeliv);
             System.out.println("QueryCust()");
             for(int a = 0;a<asd.size();a++){ 
-                c = Calendar.getInstance();
+                //calendar = Calendar.getInstance();
+                calendar.setTime(dDeliv);
                 pl = new HashMap<String, String>();
                 Date rdd = sdf.parse(asd.get(a).get("Request_Delivery_Date"));
                 pl = asd.get(a);      
@@ -980,16 +981,20 @@ public class AlgoRunner implements BusinessLogic {
                 
                 //cek hari buka
                 
-                int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
+                int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
                 //System.out.println(dayOfWeek);
                 if(pl.get("DO_Number").equals("8020089252")){
                     System.out.println(rdd);
                     String g = edt;
                     //System.out.println(dayOfWeek + "()" + Integer.parseInt(asd.get(a).get("DayWinStart")));
                     //System.out.println(pl.get("5820002148"));
-                }
+                }                
+                
                 if(dayOfWeek >= Integer.parseInt(asd.get(a).get("DayWinStart"))
                         && dayOfWeek <= Integer.parseInt(asd.get(a).get("DayWinEnd"))){
+                    if(Integer.parseInt(asd.get(a).get("DayWinEnd")) == 6){
+                        //System.out.println(asd.get(a).get("DayWinEnd"));
+                    }
                     //System.out.println(asd.get(a).get("DayWinStart") + "()" + asd.get(a).get("DayWinEnd"));
                     //System.out.println(asd.get(a).get("DeliveryDeadline") + " " + asd.get(a).get("Request_Delivery_Date"));
                     
