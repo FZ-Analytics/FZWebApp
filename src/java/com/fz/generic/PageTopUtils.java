@@ -92,7 +92,9 @@ public class PageTopUtils {
             String url = request.getRequestURL().toString();
             
             //custom untuk link dengan TMS
-            if(url.contains("/tms/")){ 
+            if(url.contains("/tms/Params/Backgrounder/")){ 
+                return true;
+            }else if(url.contains("/tms/")){ 
                 String EmpyID = (String) pc.getSession().getAttribute("EmpyID");
                 String str = "ERROR";                
                 

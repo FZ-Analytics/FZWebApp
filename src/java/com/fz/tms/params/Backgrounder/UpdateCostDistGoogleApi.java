@@ -28,7 +28,7 @@ import org.json.JSONObject;
  */
 public class UpdateCostDistGoogleApi {
     Logger log = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-    public List<HashMap<String, String>> finalizeCust() throws Exception{
+    public void finalizeCust() throws Exception{
         List<HashMap<String, String>> px = new ArrayList<HashMap<String, String>>();
         HashMap<String, String> py = cekParam();
         
@@ -59,7 +59,6 @@ public class UpdateCostDistGoogleApi {
                 log.info("------- Process End ----------------------");
             }
         }
-        return px;
     }
     
     public HashMap<String, String> cekParam() throws Exception{

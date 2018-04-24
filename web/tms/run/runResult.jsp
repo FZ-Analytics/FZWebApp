@@ -276,7 +276,7 @@
                     <th width="100px" class="fzCol">Dist Chl</th>
                     <th width="100px" class="fzCol">Street</th>
                     <th width="100px" class="fzCol">Weight (KG)</th>
-                    <th width="100px" class="fzCol">Volume (CM3)</th>
+                    <th width="100px" class="fzCol">Volume (M3)</th>
                     <th width="100px" class="fzCol">RDD</th>
                     <th width="100px" class="fzCol">Transport Cost</th>
                     <th width="100px" class="fzCol">Dist</th>
