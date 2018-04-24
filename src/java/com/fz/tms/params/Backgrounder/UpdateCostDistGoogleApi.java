@@ -27,11 +27,11 @@ import org.json.JSONObject;
  * @author dwi.oktaviandi
  */
 public class UpdateCostDistGoogleApi {
-    
+    Logger log = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     public List<HashMap<String, String>> finalizeCust() throws Exception{
         List<HashMap<String, String>> px = new ArrayList<HashMap<String, String>>();
         HashMap<String, String> py = cekParam();
-        Logger log = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+        
         
         if(py.get("stat").equalsIgnoreCase("TRUE")){
             String branch = py.get("branch");
@@ -52,7 +52,11 @@ public class UpdateCostDistGoogleApi {
                     log.info("------- Process End ----------------------");
                 }
             }catch(Exception e){
-                throw new Exception(e); 
+                //throw new Exception(e); 
+                log.info("------- Process Get Data Google ERROR ----------------------");
+                log.info("------- Process Get Data Google End ----------------------");
+                setUpdateCostDistGoogleApi("TRUE");
+                log.info("------- Process End ----------------------");
             }
         }
         return px;
@@ -289,12 +293,15 @@ public class UpdateCostDistGoogleApi {
             try{
                 URL url = new URL(urlString);
                 String finalURL = url.toString();
+                log.info(finalURL);
                 //System.out.println(finalURL);
                 URL obj = new URL(finalURL);
                 HttpURLConnection htCon = (HttpURLConnection) obj.openConnection();
+                htCon.setConnectTimeout(5000);
                 htCon.setRequestMethod("GET");
                 htCon.setRequestProperty("User-Agent", "Mozilla/5.0");
                 String resultJson = "";
+                
                 try (BufferedReader in = new BufferedReader(
                         new InputStreamReader(htCon.getInputStream()))){
                     String inputLine;

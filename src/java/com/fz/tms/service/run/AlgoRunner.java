@@ -979,8 +979,7 @@ public class AlgoRunner implements BusinessLogic {
                 pl = asd.get(a);      
                 //System.out.println(pl.toString());
                 
-                //cek hari buka
-                
+                //cek hari buka                
                 int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
                 //System.out.println(dayOfWeek);
                 if(pl.get("DO_Number").equals("8020089252")){
@@ -995,28 +994,6 @@ public class AlgoRunner implements BusinessLogic {
                     if(Integer.parseInt(asd.get(a).get("DayWinEnd")) == 6){
                         //System.out.println(asd.get(a).get("DayWinEnd"));
                     }
-                    //System.out.println(asd.get(a).get("DayWinStart") + "()" + asd.get(a).get("DayWinEnd"));
-                    //System.out.println(asd.get(a).get("DeliveryDeadline") + " " + asd.get(a).get("Request_Delivery_Date"));
-                    
-                    
-                    //cek rule
-                    /*
-                    if(!asd.get(a).get("DeliveryDeadline").equals("AFTR")){
-                        if(dDeliv.compareTo(rdd) <= 0){
-                            pl = tree(asd.get(a), rdd, dDeliv, asd.get(a).get("DeliveryDeadline"), chn);
-                        }else{
-                            pl = new HashMap<String, String>();
-                        }
-                    }else if(asd.get(a).get("DeliveryDeadline").equals("AFTR")){
-                        c.setTime(rdd);
-                        c.add(Calendar.DATE, 7);
-                        rdd = sdf.parse(sdf.format(c.getTime()));
-                        if(dDeliv.compareTo(rdd) <= 0){
-                            pl = tree(asd.get(a), rdd, dDeliv, asd.get(a).get("DeliveryDeadline"), chn);
-                        }else{
-                            pl = new HashMap<String, String>();
-                        }
-                    }*/
                     
                     if(dDeliv.compareTo(rdd) <= 7){
                         pl = tree(asd.get(a), dDeliv, asd.get(a).get("DeliveryDeadline"), chn);
@@ -1027,9 +1004,6 @@ public class AlgoRunner implements BusinessLogic {
                     if(pl != null){
                         ins.add(pl);
                     }
-                    
-                    //System.out.println("dDeliv.compareTo(rdd) " + dDeliv.compareTo(rdd));
-                    //System.out.println(pl.toString());
                 }                
             }
             
