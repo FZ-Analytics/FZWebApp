@@ -3,16 +3,20 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.fz.tms.service.run;
+package com.fz.ffbv3.api.TMS;
 
-import com.fz.generic.BusinessLogic;
 import com.fz.generic.Db;
 import com.fz.tms.params.model.Delivery;
-import com.fz.util.FZUtil;
+import com.fz.tms.params.model.RouteJobLog;
+import static com.fz.tms.service.run.RouteJobListingResultEdit.getTimeStamp;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
@@ -22,15 +26,23 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.PageContext;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.Produces;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PUT;
+import javax.ws.rs.core.MediaType;
 
 /**
+ * REST Web Service
  *
- * @author rifki.nurfaiz
+ * @author Administrator
  */
-public class LoadDelivery implements BusinessLogic {
+@Path("submitEditRouteJob")
+public class SubmitEditRouteJob {
 
     List<Delivery> ld = new ArrayList<>();
 
@@ -40,6 +52,8 @@ public class LoadDelivery implements BusinessLogic {
     double long1, lat1, long2, lat2;
     boolean b = true;
 
+    ArrayList<RouteJobLog> arlistR = new ArrayList<>();
+    ArrayList<RouteJobLog> arlistOriR = new ArrayList<>();
     String prevVehiCode = "";
     int routeNb = 0;
     int jobNb = 1;
@@ -50,121 +64,99 @@ public class LoadDelivery implements BusinessLogic {
 
     double speedTruck, trafficFactor;
 
-    @Override
-    public void run(HttpServletRequest request, HttpServletResponse response, PageContext pc) throws Exception {
-        runId = FZUtil.getHttpParam(request, "runId");
-        branch = FZUtil.getHttpParam(request, "branchId");
-        shift = FZUtil.getHttpParam(request, "shift");
-        dateDeliv = FZUtil.getHttpParam(request, "dateDeliv");
-        String channel = FZUtil.getHttpParam(request, "channel");
-        String vehicle = FZUtil.getHttpParam(request, "vehicle");
-        oriRunId = FZUtil.getHttpParam(request, "oriRunId");
+    @Context
+    private UriInfo context;
 
-        String[] tableArrSplit = tableArr(runId).split("split");//tableArr.split("split");
+    /**
+     * Creates a new instance of SubmitEditRouteJob
+     */
+    public SubmitEditRouteJob() {
+    }
 
+    /**
+     * Retrieves representation of an instance of
+     * com.fz.ffbv3.api.TMS.SubmitEditRouteJob
+     *
+     * @return an instance of java.lang.String
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_XML)
+    public String getXml() {
+        //TODO return proper representation object
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * PUT method for updating or creating an instance of SubmitEditRouteJob
+     *
+     * @param content representation for the resource
+     */
+    @PUT
+    @Consumes(MediaType.APPLICATION_XML)
+    public void putXml(String content) {
+    }
+
+    @POST
+    @Path("submitEditRouteJob")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String submitEditRouteJob(String content) throws Exception {
         ArrayList<Double> alParam = getParam();
         speedTruck = alParam.get(0);
         trafficFactor = alParam.get(1);
-        for (int i = 0; i < tableArrSplit.length; i++) {
-            String str = tableArrSplit[i];
-            String data = str;
-            if (i != 0) {
-                data = str.substring(0, 0) + str.substring(0 + 1);
-            }
-            String[] dataSplit = data.split(",");
-            switch (dataSplit.length) {
-                case 3: //normal row or start
-                    if (!dataSplit[2].equals("start")) {
-                        setObjectValue(dataSplit[0], dataSplit[1], dataSplit[2], "");
-                    } else {
-                        setObjectValue(dataSplit[0], dataSplit[1], "", getVehiStart(dataSplit[1]));
-                        prevCustId = dataSplit[1];
-                    }
-                    break;
-                case 2: //end row
-                    setObjectValue(dataSplit[0], dataSplit[1], "", "");
-                    break;
-                default: //truck break row
-                    setObjectValue("", "", "", "");
-                    break;
-            }
-        }
 
-        request.setAttribute("branchId", branch);
-        request.setAttribute("shift", shift);
-        request.setAttribute("channel", channel);
-        request.setAttribute("vehicle", vehicle);
-        request.setAttribute("runId", runId);
-        request.setAttribute("oriRunId", oriRunId);
-        request.setAttribute("listDelivery", ld);
-    }
-    
-    public String tableArr(String runId) throws Exception{
-        String tableArr = "";
-        String sql = "SELECT\n" +
-                "	concat(\n" +
-                "		',',\n" +
-                "		CASE\n" +
-                "			WHEN jobNb > 0\n" +
-                "			AND customer_id <> '' THEN jobNb - 1\n" +
-                "			ELSE ''\n" +
-                "		END,\n" +
-                "		',',\n" +
-                "		vehicle_code,\n" +
-                "		',',\n" +
-                "		CASE\n" +
-                "			WHEN customer_id = ''\n" +
-                "			AND jobNb = 1 THEN 'start'\n" +
-                "			ELSE customer_id\n" +
-                "		END,\n" +
-                "		'split'\n" +
-                "	) AS arr,\n" +
-                "	arrive,\n" +
-                "	depart\n" +
-                "FROM\n" +
-                "	BOSNET1.dbo.TMS_RouteJob\n" +
-                "WHERE\n" +
-                "	runID = '"+runId+"'\n" +
-                "ORDER BY\n" +
-                "	routeNb,\n" +
-                "	jobNb;";
-        
-        try (Connection con = (new Db()).getConnection("jdbc/fztms");
-                PreparedStatement ps = con.prepareStatement(sql)){
-            //ps.setString(1, runID);            
-            // get list
-            try (ResultSet rs = ps.executeQuery()){
-                int n = 0;
-                String arv = "01:00";
-                while (rs.next()) {
-                    int i = 1;
-                    String arr = FZUtil.getRsString(rs, i++, "");
-                    arr = arr.replace(",0,",",,");
-                    String arrive = FZUtil.getRsString(rs, i++, "");
-                    
-                    if(arrive.length() > 0){
-                        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-                        Date arv12 = sdf.parse("12:00");
-                        Date arvA = sdf.parse(arv);
-                        Date arvB = sdf.parse(arrive);
-                        if(arvA.before(arv12)&& arvB.after(arv12))   tableArr += ",,,split";
-                        arv = arrive;
-                    }
-                    if(n == 0) {
-                        arr = arr.substring(1, arr.length());
-                    }
-                    System.out.println(arr);
-                    tableArr += arr;
-                    n++;
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String ret = "OK";
+        try {
+            String[] tableArrSplit = decodeContent(content);
+
+            getRunIdAndOriRunId(tableArrSplit[tableArrSplit.length - 1]);
+            for (int i = 0; i < tableArrSplit.length-1; i++) {
+                System.out.println(i + tableArrSplit[i]);
+                String str = tableArrSplit[i];
+                String data = str;
+                if (i != 0) {
+                    data = str.substring(0, 0) + str.substring(0 + 1);
                 }
-                
-                /*String[] tableArrSplit = tableArr.split("split");
-                for(int a = 0 ; a<tableArrSplit.length;a++){
-                    System.out.println(tableArrSplit[a]);
-                }*/
+                String[] dataSplit = data.split(",");
+                switch (dataSplit.length) {
+                    case 3: //normal row or start
+                        if (!dataSplit[2].equals("start")) {
+                            setObjectValue(dataSplit[0], dataSplit[1], dataSplit[2], "");
+                        } else {
+                            setObjectValue(dataSplit[0], dataSplit[1], "", getVehiStart(dataSplit[1]));
+                            prevCustId = dataSplit[1];
+                        }
+                        break;
+                    case 2: //end row
+                        setObjectValue(dataSplit[0], dataSplit[1], "", "");
+                        break;
+                    default: //truck break row
+                        setObjectValue("", "", "", "");
+                        break;
+                }
             }
-        }        
-        return tableArr;
+            updateRouteJob(arlistR, runId);
+        } catch (Exception e) {
+            System.out.println("ERROR" + e.getLocalizedMessage());
+            ret = "ERROR";
+        }
+        String jsonOutput = gson.toJson(ret);
+        return jsonOutput;
+    }
+
+    public static String[] decodeContent(String content) throws UnsupportedEncodingException {
+        content = java.net.URLDecoder.decode(content, "UTF-8");
+        content = content.substring(16);
+        String[] contentSplit = content.split("split");
+        return contentSplit;
+    }
+
+    public void getRunIdAndOriRunId(String arr) {
+        String[] runIdArr = arr.split(",");
+        String[] runIdSplit = runIdArr[1].split(":");
+        String[] oriRunIdSplit = runIdArr[2].split(":");
+        runId = runIdSplit[1].replaceAll("\"", "");
+        oriRunId = oriRunIdSplit[1].replaceAll("\"", "").replace("}", "");
     }
 
     public void setObjectValue(String no, String vNo, String custId, String depart) throws Exception {
@@ -173,7 +165,6 @@ public class LoadDelivery implements BusinessLogic {
         //not a break-time row
         if (!vNo.equals("")) {
             Delivery d = new Delivery();
-            Delivery dl = new Delivery();
             if (!vNo.equals("NA")) {
                 d.no = no;
             }
@@ -274,28 +265,6 @@ public class LoadDelivery implements BusinessLogic {
                         } catch (Exception e) {
                         }
                     }
-
-                    //break if depart + 60 minutes is more than 11:30
-                    if (hasBreak == false && !d.depart.equals("") && timeMoreThan(addTime(addTime(d.arrive, Integer.parseInt(d.serviceTime)), 60), "11:30")) {
-                        dl.no = "";
-                        dl.vehicleCode = "";
-                        dl.custId = "";
-                        dl.doNum = "";
-                        dl.serviceTime = "0";
-                        dl.storeName = "";
-                        dl.priority = "";
-                        dl.distChannel = "";
-                        dl.street = "";
-                        dl.weight = "";
-                        dl.volume = "";
-                        dl.rdd = "null";
-                        dl.transportCost = 0;
-                        dl.dist = "null";
-
-                        hasBreak = true;
-                    } else if (d.depart.equals("")) {
-                        hasBreak = false;
-                    }
                 }
                 if (d.custId.equals("")) {
                     d.depart = depart;
@@ -339,11 +308,85 @@ public class LoadDelivery implements BusinessLogic {
 
             prevDepart = d.depart;
             ld.add(d);
-            if (dl.dist.equals("null")) {
-                ld.add(dl);
-                prevDepart = addTime(prevDepart, getBreakTime(getDayByDate(dateDeliv)));
+
+            /**
+             * ******************************************
+             * Data object Route_Job to be pushed to db *
+             * ******************************************
+             */
+            if (!d.vehicleCode.equals("") || !d.custId.equals("")) {
+                if (!prevVehiCode.equals(d.vehicleCode) && !d.vehicleCode.equals("NA")) {
+                    jobNb = 1;
+                    routeNb++;
+                }
+                RouteJobLog r = new RouteJobLog();
+                String[] doSplit = d.doNum.split(";");
+                if (!d.vehicleCode.equals("") && !d.vehicleCode.equals("NA") && d.custId.equals("")) {
+                    r.jobId = "DEPO";
+                } else {
+                    r.jobId = d.custId + "-" + doSplit.length;
+                }
+                r.custId = d.custId;
+                if (!r.jobId.equals("DEPO")) {
+                    r.countDoNo = "" + doSplit.length;
+                }
+                r.vehicleCode = d.vehicleCode;
+                if (!r.vehicleCode.equals("NA")) {
+                    r.activity = "start";
+                    r.routeNb = routeNb;
+                    r.jobNb = jobNb;
+                } else {
+                    r.routeNb = 0;
+                    r.jobNb = 0;
+                }
+                r.arrive = d.arrive;
+                r.depart = d.depart;
+                r.runId = runId;
+                r.branch = branch;
+                r.shift = shift;
+                if (r.custId.equals("")) {
+                    String[] longlatSplit = getLongLatVehicle(r.vehicleCode).split("split");
+                    try {
+                        r.lon = reFormatLongLat(longlatSplit[0]);
+                        r.lat = reFormatLongLat(longlatSplit[1]);
+                    } catch (Exception e) {
+
+                    }
+                } else {
+                    String[] longlatSplit = getLongLatCustomer(oriRunId, r.custId).split("split");
+                    try {
+                        r.lon = reFormatLongLat(longlatSplit[0]);
+                        r.lat = reFormatLongLat(longlatSplit[1]);
+                    } catch (Exception e) {
+
+                    }
+                }
+                r.weight = aSplit[9];
+                r.volume = getVolume(d.custId, oriRunId);
+                try {
+                    r.transportCost = d.transportCost;
+                } catch (Exception e) {
+                    r.transportCost = 0;
+                }
+                try {
+                    double distance1 = Math.round(calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat1), Double.parseDouble(d.lon1), Double.parseDouble(d.lat2)) * 100.0) / 100.0;
+                    double distance2 = Math.round(calcMeterDist(Double.parseDouble(d.lon1), Double.parseDouble(d.lat2), Double.parseDouble(d.lon2), Double.parseDouble(d.lat2)) * 100.0) / 100.0;
+                    r.dist = distance1 + distance2;
+                } catch (Exception e) {
+                    r.dist = 0.00;
+                }
+
+                arlistR.add(r);
+                arlistOriR.add(r);
+                jobNb++;
+                prevVehiCode = r.vehicleCode;
             }
         }
+    }
+
+    public String getVendorId(String v) {
+        String[] vSplit = v.split("_");
+        return vSplit[1] + vSplit[3];
     }
 
     public String reFormatLongLat(String longlat) {
@@ -368,7 +411,7 @@ public class LoadDelivery implements BusinessLogic {
         }
         return newTime;
     }
-    
+
     public String getDayByDate(String dates) throws ParseException {
         String[] dateParse = dates.split("-");
 
@@ -436,50 +479,6 @@ public class LoadDelivery implements BusinessLogic {
             ret = "No";
         }
         return ret;
-    }
-
-    public boolean timeMoreThan(String currentTime, String comparedTime) {
-        boolean moreThan = false;
-        try {
-            String[] currentTimeSplit = currentTime.split(":");
-            String[] comparedTimeSplit = comparedTime.split(":");
-            //Compare hour
-            if (Integer.parseInt(currentTimeSplit[0]) > Integer.parseInt(comparedTimeSplit[0])) {
-                moreThan = true;
-            } //If hour is same than compare minutes
-            else if (Integer.parseInt(currentTimeSplit[0]) == Integer.parseInt(comparedTimeSplit[0])) {
-                if (Integer.parseInt(currentTimeSplit[1]) > Integer.parseInt(comparedTimeSplit[1])) {
-                    moreThan = true;
-                }
-            }
-        } catch (Exception e) {
-
-        }
-        return moreThan;
-    }
-    
-    public int getBreakTime(String day) throws Exception {
-        System.out.println(day);
-        int breakTime = 0;
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql = "";
-                if (day.equals("Friday")) {
-                    sql = "SELECT value FROM BOSNET1.dbo.TMS_Params WHERE param = 'fridayBreak'";
-                } else {
-                    sql = "SELECT value FROM BOSNET1.dbo.TMS_Params WHERE param = 'defaultBreak'";
-                }
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        breakTime = rs.getInt("value");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        System.out.println(breakTime);
-        return breakTime;
     }
 
     private String getVehicleType(String runId, String vehicleCode) throws Exception {
@@ -773,5 +772,63 @@ public class LoadDelivery implements BusinessLogic {
             throw new Exception(e.getMessage());
         }
         return volume;
+    }
+
+    public void updateRouteJob(ArrayList<RouteJobLog> arlist, String runId) throws Exception {
+        Timestamp createTime = getTimeStamp();
+        int rowNum = 0;
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql = "SELECT COUNT(*) total FROM bosnet1.dbo.TMS_RouteJob WHERE runID = '" + runId + "';";
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    while (rs.next()) {
+                        rowNum = rs.getInt("total");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        if (rowNum > 0) {
+            try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+                try (Statement stm = con.createStatement()) {
+                    String sql = "DELETE FROM bosnet1.dbo.TMS_RouteJob WHERE runID = '" + runId + "';";
+                    stm.executeQuery(sql);
+                }
+            } catch (Exception e) {
+
+            }
+        }
+        String sql = "INSERT INTO bosnet1.dbo.TMS_RouteJob "
+                + "(job_id, customer_id, do_number, vehicle_code, activity, routeNb, jobNb, arrive, depart, runID, create_dtm, branch, shift, lon, lat, weight, volume, transportCost, activityCost, Dist) "
+                + "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+
+        for (int i = 0; i < arlist.size(); i++) {
+            RouteJobLog r = arlist.get(i);
+            try (Connection con = (new Db()).getConnection("jdbc/fztms"); PreparedStatement psHdr = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);) {
+                psHdr.setString(1, r.jobId);
+                psHdr.setString(2, r.custId);
+                psHdr.setString(3, r.countDoNo);
+                psHdr.setString(4, r.vehicleCode);
+                psHdr.setString(5, r.activity);
+                psHdr.setInt(6, r.routeNb);
+                psHdr.setInt(7, r.jobNb);
+                psHdr.setString(8, r.arrive);
+                psHdr.setString(9, r.depart);
+                psHdr.setString(10, r.runId);
+                psHdr.setTimestamp(11, createTime);
+                psHdr.setString(12, r.branch);
+                psHdr.setString(13, r.shift);
+                psHdr.setString(14, r.lon);
+                psHdr.setString(15, r.lat);
+                psHdr.setString(16, r.weight);
+                psHdr.setString(17, r.volume);
+                psHdr.setDouble(18, r.transportCost);
+                psHdr.setDouble(19, r.activityCost);
+                psHdr.setDouble(20, r.dist);
+
+                psHdr.executeUpdate();
+            }
+        }
     }
 }

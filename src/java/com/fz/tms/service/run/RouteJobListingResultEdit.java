@@ -26,8 +26,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
@@ -65,7 +63,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         String vehicles = FZUtil.getHttpParam(request, "vehicles");
         String tableArr = FZUtil.getHttpParam(request, "tableArr");
 
-        String[] tableArrSplit = tableArr(oriRunId).split("split");
+        String[] tableArrSplit = tableArr.split("split");
         ArrayList<Double> alParam = getParam();
         speedTruck = alParam.get(0);
         trafficFactor = alParam.get(1);
@@ -401,11 +399,6 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         return dayOfWeek;
     }
 
-    public String getVendorId(String v) {
-        String[] vSplit = v.split("_");
-        return vSplit[1] + vSplit[3];
-    }
-
     public String getVehiStart(String vehiNo) throws Exception {
         String startTime = "";
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
@@ -556,40 +549,6 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         return longitude + "split" + latitude;
     }
 
-    public String getStoreName(String custId) throws Exception {
-        String storeName = "";
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql = "SELECT TOP 1 Name1 FROM BOSNET1.dbo.Customer where Customer_ID = '" + custId + "';";
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        storeName = rs.getString("Name1");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return storeName;
-    }
-
-    public String getStoreStreet(String custId) throws Exception {
-        String storeStreet = "";
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql = "SELECT TOP 1 Street FROM BOSNET1.dbo.Customer where Customer_ID = '" + custId + "';";
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        storeStreet = rs.getString("Street");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return storeStreet;
-    }
-
     public String addTime(String currentTime, double minToAdd) {
         String newTime = "";
         try {
@@ -654,11 +613,6 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         return timeStampDate;
     }
 
-    public static String getTimeID() {
-        String id = (new SimpleDateFormat("yyyyMMdd_HHmmssSSS").format(new java.util.Date()));
-        return id;
-    }
-
     public String getLongLatVehicle(String vehicleCode) throws Exception {
         String startLon = "";
         String startLat = "";
@@ -676,35 +630,6 @@ public class RouteJobListingResultEdit implements BusinessLogic {
             throw new Exception(e.getMessage());
         }
         return startLon + "split" + startLat;
-    }
-
-    public HashMap<String, String> getShipmentPlan(String doNum) throws Exception {
-        HashMap<String, String> hm = new HashMap<>();
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql = "SELECT Total_KG, Total_Cubication, DOCreationDate, DOCreationTime, DOUpdatedDate, DOUpdatedTime, "
-                        + "Product_Description, Gross_Amount, DOQty, DOQtyUOM "
-                        + "FROM BOSNET1.dbo.TMS_ShipmentPlan "
-                        + "WHERE DO_Number = '" + doNum + "';";
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        hm.put("Total_KG", rs.getString("Total_KG"));
-                        hm.put("Total_Cubication", rs.getString("Total_Cubication"));
-                        hm.put("DOCreationDate", rs.getString("DOCreationDate"));
-                        hm.put("DOCreationTime", rs.getString("DOCreationTime"));
-                        hm.put("DOUpdatedDate", rs.getString("DOUpdatedDate"));
-                        hm.put("DOUpdatedTime", rs.getString("DOUpdatedTime"));
-                        hm.put("Product_Description", rs.getString("Product_Description"));
-                        hm.put("Gross_Amount", rs.getString("Gross_Amount"));
-                        hm.put("DOQty", rs.getString("DOQty"));
-                        hm.put("DOQtyUOM", rs.getString("DOQtyUOM"));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return hm;
     }
 
     public String reFormatLongLat(String longlat) {

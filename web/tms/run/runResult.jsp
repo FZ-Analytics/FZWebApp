@@ -83,7 +83,7 @@
             });
 
             function openEditRoutePage() {
-                /*var table = document.getElementById("table");
+                var table = document.getElementById("table");
 
                 var tableArr = [];
                 for (var i = 1; i < table.rows.length; i++) {
@@ -100,11 +100,11 @@
                             truck,
                             custId
                             );
-                }*/
+                }
 
                 var win = window.location.replace('runResultEdit.jsp?&OriRunID=' + $('#RunIdClick').text() + '&runId=' + $('#nextRunId').text() + '&channel=' + $('#channel').text() +
-                        '&branch=' + $('#branch').text() + '&shift=' + $('#shift').text() + '&vehicles=' + $('#vehicles').text() + '&dateDeliv=' + $('#dateDeliv').text());
-                // + '&tableArr=' + tableArr
+                        '&branch=' + $('#branch').text() + '&shift=' + $('#shift').text() + '&vehicles=' + $('#vehicles').text() + '&dateDeliv=' + $('#dateDeliv').text()
+                 + '&tableArr=' + tableArr);
                 if (win) {
                     //Browser has allowed it to be opened
                     win.focus();
