@@ -33,7 +33,8 @@ public class UpdateCostDistGoogleApi {
         HashMap<String, String> py = cekParam();
         
         
-        if(py.get("stat").equalsIgnoreCase("TRUE")){
+        if(py.get("stat").equalsIgnoreCase("TRUE")
+                && py.get("run").equalsIgnoreCase("FALSE")){
             String branch = py.get("branch");
             //jumlah cust yang dicek
             int sent = Integer.valueOf(py.get("sent"));
@@ -68,15 +69,18 @@ public class UpdateCostDistGoogleApi {
         String sql = "SELECT\n" +
                 "	pa.value as stat,\n" +
                 "	ps.value as branch,\n" +
-                "	pd.value as sent\n" +
+                "	pd.value as sent,\n" +
+                "	pf.value as run\n" +
                 "FROM\n" +
                 "	BOSNET1.dbo.TMS_Params pa,\n" +
                 "	BOSNET1.dbo.TMS_Params ps,\n" +
-                "	BOSNET1.dbo.TMS_Params pd\n" +
+                "	BOSNET1.dbo.TMS_Params pd,\n" +
+                "	BOSNET1.dbo.TMS_Params pf\n" +
                 "WHERE\n" +
                 "	pa.param = 'UpdateCostDistGoogleApi'\n" +
                 "	AND ps.param = 'UpdateCostDistBranch'\n" +
-                "	AND pd.param = 'UpdateCostDistSent'\n";
+                "	AND pd.param = 'UpdateCostDistSent'\n" +
+                "	AND pf.param = 'UpdateCostDistIsRunning'";
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
             PreparedStatement ps = con.prepareStatement(sql)) {
             try (ResultSet rs = ps.executeQuery()){
@@ -85,6 +89,7 @@ public class UpdateCostDistGoogleApi {
                     py.put("stat", rs.getString("stat"));
                     py.put("branch", rs.getString("branch"));
                     py.put("sent", rs.getString("sent"));
+                    py.put("run", rs.getString("run"));
                 }
                 //System.out.println("getCustCombi" + "()" + px.size());
             }
