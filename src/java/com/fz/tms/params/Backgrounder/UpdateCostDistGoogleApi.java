@@ -39,7 +39,7 @@ public class UpdateCostDistGoogleApi {
             int sent = Integer.valueOf(py.get("sent"));
             try{
                 log.info("------- Process Start ----------------------");
-                setUpdateCostDistGoogleApi("FALSE");
+                setUpdateCostDistGoogleApi("TRUE");
                 log.info("------- Process Get Data Customer Start ----------------------");
                 px = getCustCombi(branch, sent);
                 log.info("------- Process Get Data Customer End ----------------------");
@@ -48,14 +48,14 @@ public class UpdateCostDistGoogleApi {
                 String str = googleAPI(px, sent, branch);
                 log.info("------- Process Get Data Google End ----------------------");
                 if(str.equalsIgnoreCase("OK")){
-                    setUpdateCostDistGoogleApi("TRUE");
+                    setUpdateCostDistGoogleApi("FALSE");
                     log.info("------- Process End ----------------------");
                 }
             }catch(Exception e){
                 //throw new Exception(e); 
                 log.info("------- Process Get Data Google ERROR ----------------------");
                 log.info("------- Process Get Data Google End ----------------------");
-                setUpdateCostDistGoogleApi("TRUE");
+                setUpdateCostDistGoogleApi("FALSE");
                 log.info("------- Process End ----------------------");
             }
         }
@@ -95,7 +95,7 @@ public class UpdateCostDistGoogleApi {
     public String setUpdateCostDistGoogleApi(String tr) throws Exception{
         String str = "ERROR";
 
-        String sql = "update BOSNET1.dbo.TMS_Params set value = '"+tr+"' where param = 'UpdateCostDistGoogleApi'\n";
+        String sql = "update BOSNET1.dbo.TMS_Params set value = '"+tr+"' where param = 'UpdateCostDistIsRunning'\n";
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
                 PreparedStatement ps = con.prepareStatement(sql)) {
 
@@ -246,29 +246,6 @@ public class UpdateCostDistGoogleApi {
             
             x++;
         }
-        
-        String to = "";
-        for(int a = 0; a<pz.size();a++){
-            //System.out.println(pz.get(a).get("link").toString());
-            //System.out.println(pz.get(a).get("cust").toString());
-            //String link = pz.get(a).get("link");
-            //to += ""+ link.substring((link.indexOf("destinations=")+13),link.indexOf("&departure"));  
-        }
-        /*String[] ary = to.split("\\|");
-        int cn = 0;
-        for(int s = 0;ary.length > s;s++){
-            cn = 0;
-            for(int t = 0;ary.length > t;t++){
-                if(ary[s].equalsIgnoreCase(ary[t])){
-                    cn++;
-                }
-                
-                if(cn > 1){
-                    System.out.println(cn+"."+s+"."+ary[s]);
-                }
-            }
-        }*/
-        
         
         String js = getGoogleData(px, pz, branch);        
         
