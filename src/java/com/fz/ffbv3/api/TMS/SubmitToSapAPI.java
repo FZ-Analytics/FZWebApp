@@ -88,9 +88,9 @@ public class SubmitToSapAPI {
             RunResultEditResultSubmitToSap he = gson.fromJson(content.contains("json") ? decodeContent(content) : content, RunResultEditResultSubmitToSap.class);
             vNo = he.vehicle_no;
             flag = he.flag;
-            if(flag.equals("runResult")) {
+            if (flag.equals("runResult")) {
                 runId = he.runId;
-            } else if(flag.equals("runResultEditResult")) {
+            } else if (flag.equals("runResultEditResult")) {
                 runId = he.runId;
             }
 
@@ -107,6 +107,10 @@ public class SubmitToSapAPI {
                 if (getRoute(alCustId.get(i)) == null) {
                     ret = "Aborted: One of the route is empty on Customer ID: " + alCustId.get(i);
                     isRouteNull = true;
+                    break;
+                }
+                if (getFromShipmentPlan(runId, alCustId.get(i)).isEmpty()) {
+                    ret = "Aborted: Already Shipment is Y or Batch is NULL for DO on Customer ID: " + alCustId.get(i);
                     break;
                 }
             }
