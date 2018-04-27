@@ -7,11 +7,8 @@ package com.fz.tms.params.model;
 
 /**
  *
- * @author dwi.rangga
+ * @author dwi.oktaviandi
  */
-public class OptionModel {
-    public String Display;
-    public String Value;
-    public String Desc;
-    public String Branch;
+public class URL {
+    public String url;
 }

@@ -123,13 +123,15 @@
                 });
             }
         </script>
-        <h4>Load Vehicle <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h4>
+        <h4>Vehicle Attribute <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h4>
+        <br>
         <br>
         <div style="width: 100%;height: 700px;">
             <div style="width: 40%; float:left;" id="view">
                 <div class="fzErrMsg">
                     <%=get("errMsg")%>
                 </div>
+                <h4>Editor</h4>
                 <input type="text" id="flag" name="flag" value="<%=get("flag")%>" hidden="true">
                 <br>
                 <label class="fzLabel">vehicle Id:</label> 
@@ -213,12 +215,14 @@
 
                 <br>
                 <label class="fzLabel">Id Driver:</label> 
-                <input class="fzInput" type="text" id="FixIdDriver" name="FixIdDriver" readonly="true">
                 <select id="IdDriver" name="IdDriver" >
                 <%for (Vehicle hd : (List<Vehicle>) getList("ListDriver")) { %>
                     <%= makeOption(hd.IdDriver, hd.IdDriver, hd.IdDriver)%>
                 <% } /* end for Branch Id */ %>
                 </select>
+                <br>
+                <label class="fzLabel"></label> 
+                <input class="fzInput" type="text" id="FixIdDriver" name="FixIdDriver" readonly="true"> 
 
                 <br>
                 <label class="fzLabel">Nama Driver:</label> 

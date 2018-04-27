@@ -22,13 +22,15 @@
         </div>        
         <br>
         <br>
-        <h4>Load Customer <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h4>
-                
+        <h4>Customer Attribute <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h4>
+        <br>
+        <br>
         <div  style="width: 100%;height: 500px;">
-            <div style="width: 40%; float:left;" id="view">
+            <div style="width: 450px; float:left;" id="view">
                 <div class="fzErrMsg" id="errMsg">
                     <%=get("errMsg")%>
                 </div>
+                <h4>Editor</h4>
                 <link rel="stylesheet" href="../../appGlobal/timepicker.css">
                 <script src="../../appGlobal/timepicker.js"></script>
                 <input type="text" id="flag" name="flag" value="<%=get("flag")%>" hidden="true">
@@ -50,7 +52,6 @@
 
                 <br>
                 <label class="fzLabel">Vehicle Type List:</label>             
-                <input class="fzInput" type="text" id="vehicle_type_list" name="vehicle_type_list" value="<%=get("vehicle_type_list")%>" readonly="true">
                 <select id="vVehiType" name="vVehiType" >
                     <option value="CDE4">CDE4</option>
                     <option value="VAN4">VAN4</option>
@@ -60,7 +61,10 @@
                     <option value="TRNT">TRNT</option>
                 </select>
                 <label class="fzLabel" id="dell">Dell</label> 
-
+                <br>
+                <label class="fzLabel"></label>  
+                <input class="fzInput" type="text" id="vehicle_type_list" name="vehicle_type_list" value="<%=get("vehicle_type_list")%>" readonly="true">
+                
                 <br>
                 <label class="fzLabel">Day Win Start:</label> 
                 <input class="fzInput" type="text" id="dayWinStart" name="dayWinStart" value="<%=get("dayWinStart")%>" maxlength="5">
@@ -77,7 +81,7 @@
                 <button class="btn fzButton" type="submit" id="btn"><%=get("flag")%></button>
             </div>
             <%String flag = FZUtil.getHttpParam(request, "flag");%>
-            <div style="width: 60%; float:left;" id="tbl"
+            <div style="float:left;" id="tbl"
                 <%if (flag.equalsIgnoreCase("insert")) {%> hidden="true" <%}%> >
                 <table cellpadding="0" cellspacing="0" border="0" class="datatable table table-striped table-bordered">
                     <thead>

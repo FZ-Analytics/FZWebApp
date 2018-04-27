@@ -60,13 +60,15 @@
                 $('#inc').val(inc);
             }
         </script>
+        <h4>Vendor Attribute <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h4>
+        <br>
+        <br>
         <div style="width: 100%;height: 500px;">
             <div style="width: 30%; float:left;">
                 <div class="fzErrMsg" id="errMsg">
                     <%=get("errMsg")%>
                 </div>
-                <h4>Vendor Attr <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h4>
-                <br>
+                <h4>Editor</h4>
                 <label class="fzLabel">Vendor Id:</label> 
                 <input class="fzInput" type="text" id="Service_agent_id" name="Service_agent_id" readonly="true">
 
@@ -94,7 +96,7 @@
                 <br><br>
                 <button class="btn fzButton" type="submit" id="btn">submit</button>
             </div>
-            <div style="width: 70%; float:left;" >
+            <div style="width: 50%; float:left;" >
                 <table cellpadding="0" cellspacing="0" border="0" class="datatable table table-striped table-bordered">
                     <thead>
                         <tr>
