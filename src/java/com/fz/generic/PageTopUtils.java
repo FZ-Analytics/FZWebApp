@@ -106,7 +106,7 @@ public class PageTopUtils {
                     str = getLink(url, request, pc);
                 }else{
                     str = "OK";
-                    setDate(EmpyID, Key);
+                    //setDate(EmpyID, Key);
                 }
                 
                 String isParam = "";
