@@ -10,7 +10,7 @@
     System.out.println(EmpyID+"()"+UserName+"()"+UserID+"()"+WorkplaceID);
     
     LoginLogic aw = new LoginLogic();
-    String str = aw.LogOut(EmpyID);
+    String str = aw.LogOut(EmpyID, Key);
     if(str.equalsIgnoreCase("OK")){
         session.invalidate();
     }

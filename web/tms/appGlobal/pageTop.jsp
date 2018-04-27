@@ -41,6 +41,8 @@
             "null" : (String) pc.getSession().getAttribute("UserID");
     String WorkplaceID = (String) pc.getSession().getAttribute("WorkplaceID") == null ?
             "null" : (String) pc.getSession().getAttribute("WorkplaceID");
+    String Key = (String) pc.getSession().getAttribute("Key") == null ?
+            "null" : (String) pc.getSession().getAttribute("Key");
     
     //System.out.println(EmpyID+"()"+UserName+"()"+UserID+"()"+WorkplaceID);
     String url = request.getRequestURL().toString();

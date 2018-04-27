@@ -10,7 +10,10 @@ import com.fz.util.FZUtil;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -96,12 +99,14 @@ public class PageTopUtils {
                 return true;
             }else if(url.contains("/tms/")){ 
                 String EmpyID = (String) pc.getSession().getAttribute("EmpyID");
+                String Key = (String) pc.getSession().getAttribute("Key");
                 String str = "ERROR";                
                 
                 if ((EmpyID == null) || (EmpyID.length() == 0)){
                     str = getLink(url, request, pc);
                 }else{
                     str = "OK";
+                    setDate(EmpyID, Key);
                 }
                 
                 String isParam = "";
@@ -165,6 +170,35 @@ public class PageTopUtils {
         return ret;
     }
     
+    public static void setDate(String NIK, String KEYLogin) throws Exception{
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+        Date date = new Date();
+        String dt = dateFormat.format(date).toString();
+        
+        String sql = "UPDATE\n" +
+                "	BOSNET1.dbo.TMS_UserStatus\n" +
+                "SET\n" +
+                "	UpdateTable = '\"+dt+\"'\n" +
+                "WHERE\n" +
+                "	NIK = '\"+NIK+\"'\n" +
+                "	AND KEYLogin = '\"+KEYLogin+\"';\n" +
+                "\n" +
+                "DELETE\n" +
+                "	BOSNET1.dbo.TMS_UserStatus\n" +
+                "WHERE\n" +
+                "	DATEDIFF(\n" +
+                "		HOUR,\n" +
+                "		UpdateTable,\n" +
+                "		GETDATE()\n" +
+                "	)> 2;";
+        try (Connection con = (new Db()).getConnection("jdbc/fztms");
+                PreparedStatement ps = con.prepareStatement(sql)) {
+            con.setAutoCommit(false);
+            ps.executeUpdate();
+            con.setAutoCommit(true);
+        }
+    }
+    
     public static String getLink(String url, HttpServletRequest request, PageContext pc) throws Exception{
         String str = "ERROR";
         
@@ -205,6 +239,8 @@ public class PageTopUtils {
                                     .setAttribute("WorkplaceID", WorkplaceID);
                             request.getSession()
                                     .setAttribute("IsMain", "1");
+                            request.getSession()
+                                    .setAttribute("Key", Key);
                         }
                     }else{
                         throw new Exception(); 
