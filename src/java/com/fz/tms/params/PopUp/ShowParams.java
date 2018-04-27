@@ -74,8 +74,9 @@ public class ShowParams implements BusinessLogic {
                 "FROM\n" +
                 "	BOSNET1.dbo.TMS_Params\n" +
                 "WHERE\n" +
-                "	param = 'DefaultMaxCust'\n" +
-                "	AND branch = @BrId IF @N = 0 BEGIN INSERT\n" +
+                "	param = 'DefaultDistance'\n" +
+                "	AND branch = @BrId;\n" +
+                "IF @N = 0 BEGIN INSERT\n" +
                 "		INTO\n" +
                 "			BOSNET1.dbo.TMS_Params SELECT\n" +
                 "				param,\n" +
@@ -85,7 +86,7 @@ public class ShowParams implements BusinessLogic {
                 "			FROM\n" +
                 "				BOSNET1.dbo.TMS_Params\n" +
                 "			WHERE\n" +
-                "				param = 'DefaultMaxCust'\n" +
+                "				param = 'DefaultDistance'\n" +
                 "				AND branch = 'DEF';\n" +
                 "END";
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
