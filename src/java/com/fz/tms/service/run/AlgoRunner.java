@@ -10,6 +10,7 @@ import com.fz.generic.Db;
 import com.fz.tms.params.service.Other;
 import com.fz.util.FZUtil;
 import com.fz.util.UrlResponseGetter;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -146,7 +147,8 @@ public class AlgoRunner implements BusinessLogic {
                     }
                     
                     if (resp.equalsIgnoreCase("OK")){
-                        errMsg = cluster(runId, runID, px);
+                        List<HashMap<String, String>> zx = px;
+                        errMsg = cluster(runId, runID, zx);
                         resp = errMsg;
                     }
                     
@@ -1319,7 +1321,7 @@ public class AlgoRunner implements BusinessLogic {
             Object[] keys = py.keySet().toArray();
             
             if(py.get("Customer_ID").equalsIgnoreCase("5810002739")){
-                System.out.println("com.fz.tms.service.run.AlgoRunner.cekData()");
+                //System.out.println("com.fz.tms.service.run.AlgoRunner.cekData()");
             }
             
             while(j <py.size()){
@@ -1331,8 +1333,9 @@ public class AlgoRunner implements BusinessLogic {
                 }
                 
                 if(keys[j].equals("Long") || keys[j].equals("Lat")){
-                    if(py.get("Customer_ID").equalsIgnoreCase("5810110214")){
-                        System.out.println("com.fz.tms.service.run.AlgoRunner.cekData()");
+                    if(py.get("Customer_ID").equalsIgnoreCase("5810003561")){
+                        System.out.println(py.get("Customer_ID"));                       
+                        
                     }
                     if(tmp.replaceAll("[^.]", "").length() > 1){
                         err += ". ";
@@ -1342,6 +1345,26 @@ public class AlgoRunner implements BusinessLogic {
                     }
                     if(tmp.equalsIgnoreCase("0")){
                         err += "0 ";
+                    }
+                    if(keys[j].equals("Long")){
+                        Double start = Double.parseDouble("95.31644");
+                        Double end = Double.parseDouble("140.71813");
+                        
+                        Double lng = Double.parseDouble(tmp);
+                        if ( lng < start
+                                || end < lng ) {
+                            err += "Long ";
+                        }
+                    }
+                    if(keys[j].equals("Lat")){
+                        Double start = Double.parseDouble("-10.1718");
+                        Double end = Double.parseDouble("5.88969");
+                        
+                        Double lat = Double.parseDouble(tmp);
+                        if ( lat < start
+                                || end < lat ) {
+                            err += "Lat ";
+                        }
                     }
                 }
                 

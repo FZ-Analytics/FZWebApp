@@ -62,24 +62,33 @@ public class test implements BusinessLogic {
     @Override
     public void run(HttpServletRequest request, HttpServletResponse response,
             PageContext pc) throws Exception {
-        selectCust();
+        selectCust("","");
     }
 
-    public List<HashMap<String, String>> selectCust() throws SQLException {
+    public List<HashMap<String, String>> selectCust(String runId, String branch) throws SQLException {
         List<HashMap<String, String>> px = new ArrayList<HashMap<String, String>>();
-        String sql = "EXEC bosnet1.dbo.TMS_GetCustLongLat ?";
-
-        HashMap<String, String> pl = new HashMap<String, String>();
+        HashMap<String, String> py = new HashMap<String, String>();
+        
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
-                CallableStatement cs = con.prepareCall(sql)) {
-            cs.setString(1, "D312");
-            cs.execute();
+                java.sql.CallableStatement stmt =
+                        con.prepareCall("{call bosnet1.dbo.TMS_GetCustCombinatiion(?,?)}")) {
+            stmt.setString(1, "D312");
+            stmt.setString(2, "20180426_094554334");
+            //stmt.execute();
             //ps.setEscapeProcessing(true);
             //ps.setQueryTimeout(150);
             //ps.setString(1, "D312");
-            ResultSet rs = (ResultSet) cs.getResultSet();
+            ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                System.out.println(rs.getString("cust1"));
+                py = new HashMap<String, String>();
+                py.put("cust1", rs.getString("cust1"));
+                py.put("long1", rs.getString("long1"));
+                py.put("lat1", rs.getString("lat1"));
+                py.put("cust2", rs.getString("cust2"));
+                py.put("long2", rs.getString("long2"));
+                py.put("lat2", rs.getString("lat2"));
+                System.out.println(py.toString());
+                px.add(py);
             }
         }catch (Exception e) {
             System.out.println(e.getMessage());
