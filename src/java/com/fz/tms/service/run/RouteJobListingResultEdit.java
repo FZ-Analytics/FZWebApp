@@ -63,7 +63,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         String vehicles = FZUtil.getHttpParam(request, "vehicles");
         String tableArr = FZUtil.getHttpParam(request, "tableArr");
 
-        String[] tableArrSplit = tableArr.split("split");
+        String[] tableArrSplit = tableArr(oriRunId).split("split");
         ArrayList<Double> alParam = getParam();
         speedTruck = alParam.get(0);
         trafficFactor = alParam.get(1);
@@ -107,7 +107,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         request.setAttribute("tableArr", tableArr);
     }
     
-    public String tableArr(String oriRunId) throws Exception{
+    public String tableArr(String runId) throws Exception{
         String tableArr = "";
         String sql = "SELECT\n" +
                 "	concat(\n" +
@@ -132,7 +132,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                 "FROM\n" +
                 "	BOSNET1.dbo.TMS_RouteJob\n" +
                 "WHERE\n" +
-                "	runID = '"+oriRunId+"'\n" +
+                "	runID = '"+runId+"'\n" +
                 "ORDER BY\n" +
                 "	routeNb,\n" +
                 "	jobNb;";
@@ -158,7 +158,10 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                         if(arvA.before(arv12)&& arvB.after(arv12))   tableArr += ",,,split";
                         arv = arrive;
                     }
-                    
+                    if(n == 0) {
+                        arr = arr.substring(1, arr.length());
+                    }
+                    System.out.println(arr);
                     tableArr += arr;
                     n++;
                 }
