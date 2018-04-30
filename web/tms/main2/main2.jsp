@@ -533,7 +533,7 @@
                     <ul class="menu-dropdown">
                         <li><a target="iframe1" onClick="opens('../other/home.jsp')">Home</a><span class="icon"><i class="fa fa-lightbulb-o"></i></span></li>
                         <li><a target="iframe1" onClick="opens('../run/runEntry.jsp')">Routing</a><span class="icon"><i class="fa fa-dashboard"></i></span></li>
-                        <li><a target="iframe1" onClick="opens('../Params/PopUp/ShowParams.jsp')">Params</a><span class="icon"><i class="fa fa-book"></i></span></li>
+                        <%--<li><a target="iframe1" onClick="opens('../Params/PopUp/ShowParams.jsp')">Params</a><span class="icon"><i class="fa fa-book"></i></span></li>--%>
                         <li class="menu-hasdropdown"> <a target="iframe1" onClick="opens('../Params/Vehicle/VehicleAttr.jsp')">Attribute</a><span class="icon"><i class="fa fa-gear"></i></span>
                             <label title="toggle menu" for="settings"> <span class="downarrow"><i class="fa fa-caret-down"></i></span> </label>
                             <input type="checkbox" class="sub-menu-checkbox" id="settings" />
