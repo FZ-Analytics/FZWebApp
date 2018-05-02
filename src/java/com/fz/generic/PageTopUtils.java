@@ -106,7 +106,7 @@ public class PageTopUtils {
                     str = getLink(url, request, pc);
                 }else{
                     str = "OK";
-                    //setDate(EmpyID, Key);
+                    setDate(EmpyID, Key);
                 }
                 
                 String isParam = "";
@@ -115,12 +115,11 @@ public class PageTopUtils {
                         (String) pc.getSession().getAttribute("IsMain") : "0";
                 if(str.equalsIgnoreCase("OK") && url.contains("/tms/")){ 
                     //redirect main
-                    /*
                     if(IsMain.equalsIgnoreCase("1")){
                         if(!url.contains("/Params/") && url.contains("/tms/")){
-                            isParam = "../main2/main.jsp";
+                            isParam = "../main2/main2.jsp";
                         }else if(url.contains("/Params/")){
-                            isParam = "../../main2/main.jsp";
+                            isParam = "../../main2/main2.jsp";
                             request.getSession()
                                     .setAttribute("IsMain", "1");
                         }
@@ -128,7 +127,7 @@ public class PageTopUtils {
                                     .setAttribute("IsMain", null);
                         request.getRequestDispatcher(isParam)
                             .forward(request, (HttpServletResponse) pc.getResponse());
-                    }*/
+                    }
                     return true;
                 }else{
                     if(!url.contains("/Params/") && url.contains("/tms/")){
@@ -178,13 +177,15 @@ public class PageTopUtils {
         String sql = "UPDATE\n" +
                 "	BOSNET1.dbo.TMS_UserStatus\n" +
                 "SET\n" +
-                "	UpdateTable = '\"+dt+\"'\n" +
+                "	UpdateTable = '"+dt+"'\n" +
                 "WHERE\n" +
-                "	NIK = '\"+NIK+\"'\n" +
-                "	AND KEYLogin = '\"+KEYLogin+\"';\n" +
+                "	NIK = '"+NIK+"'\n" +
+                "	AND KEYLogin = '"+KEYLogin+"';\n" +
                 "\n" +
-                "DELETE\n" +
+                "UPDATE\n" +
                 "	BOSNET1.dbo.TMS_UserStatus\n" +
+                "SET\n" +
+                "	Status = '0'\n" +
                 "WHERE\n" +
                 "	DATEDIFF(\n" +
                 "		HOUR,\n" +
@@ -208,7 +209,8 @@ public class PageTopUtils {
         String WorkplaceID = FZUtil.getHttpParam(request, "WorkplaceID");
         String Key = FZUtil.getHttpParam(request, "Key");
         
-        if(UserID.length() > 0 && EmpyID.length() > 0 && UserName.length() > 0 && WorkplaceID.length() > 0 && Key.length() > 0 ){
+        if(UserID.length() > 0 && EmpyID.length() > 0 
+                && UserName.length() > 0 && Key.length() > 0 ){
             String sql = "SELECT\n" +
                 "	COUNT(*) as cnt\n" +
                 "FROM\n" +

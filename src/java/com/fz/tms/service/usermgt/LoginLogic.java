@@ -100,7 +100,7 @@ public class LoginLogic implements BusinessLogic {
     public String LogOut(String id, String Key) throws Exception{
         String str = "ERROR";
         
-        String sql = "update BOSNET1.dbo.TMS_UserStatus set Status = '0', KEYLogin = '-' where NIK = '"+id+"' and KEYLogin = '"+Key+"'";
+        String sql = "update BOSNET1.dbo.TMS_UserStatus set Status = '0' where NIK = '"+id+"' and KEYLogin = '"+Key+"'";
         try (
             Connection con = (new Db()).getConnection("jdbc/fztms");
             PreparedStatement psHdr = con.prepareStatement(sql

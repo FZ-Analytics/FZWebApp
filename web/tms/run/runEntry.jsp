@@ -6,6 +6,8 @@
 <%@page import="com.fz.util.FZUtil"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@include file="../appGlobal/pageTop.jsp"%>
+<%@page import="com.fz.tms.params.model.Branch"%>
+<%run(new com.fz.tms.service.run.runEntry());%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -36,8 +38,14 @@
             <h4>Filter Intelligent Routing</h4>
             <br>
             <label class="fzLabel">Branch</label>
-            <input class="fzInput" id="branch" 
-                   name="branch" value="<%=WorkplaceID%>" readonly="true"/>
+            <%--<input class="fzInput" id="branch" 
+                    name="branch" value="<%=WorkplaceID%>" readonly="true"/>--%>
+            <select class="fzInput" id="branch" name="branch">
+                <%for (Branch hd : (List<Branch>) getList("ListBranch")) { %>
+                <%--<%= makeOption(hd.branchId, hd.branchId, hd.name)%>--%>
+                    <option value='<%=hd.branchId%>' <%if (hd.branchId.equals(WorkplaceID)) {%> selected="true" <%}%>><%=hd.branchId%></option>
+                <% } /* end for Branch Id */ %>
+            </select> 
 
             <br><br>            
             <label class="fzLabel">Date Deliv</label>

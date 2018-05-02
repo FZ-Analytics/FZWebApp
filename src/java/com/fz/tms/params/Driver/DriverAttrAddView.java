@@ -33,7 +33,8 @@ public class DriverAttrAddView implements BusinessLogic {
     ) throws Exception {      
         List<ForwadingAgent> al = getDriver();
         VehicleAttrDB lb = new VehicleAttrDB();
-        List<Branch> lBr = lb.getBranch();
+        String br = (String) pc.getSession().getAttribute("WorkplaceID");
+        List<Branch> lBr = lb.getBranch(br);
         request.setAttribute("ListBranch", lBr);
         request.setAttribute("ListDriver"
                         , al);

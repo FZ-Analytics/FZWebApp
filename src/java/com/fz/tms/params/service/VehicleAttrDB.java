@@ -289,7 +289,7 @@ public class VehicleAttrDB {
         return ex;
     }
     
-    public List<Branch> getBranch() throws Exception{
+    public List<Branch> getBranch(String br) throws Exception{
         Branch c = new Branch();
         List<Branch> ar = new ArrayList<Branch>();
         
@@ -297,8 +297,12 @@ public class VehicleAttrDB {
             try (Statement stm = con.createStatement()){
             
                 // create sql
+                String str = "";
+                if(br.length() > 0){
+                    str = "where SalOffCode = '" + br + "'";
+                }
                 String sql ;
-                sql = "SELECT SalOffCode, SalOffName FROM BOSNET1.dbo.TMS_SALESOFFICE order by SalOffName asc;";
+                sql = "SELECT SalOffCode, SalOffName FROM BOSNET1.dbo.TMS_SALESOFFICE "+str+" order by SalOffCode asc;";
                 
                 // query
                 try (ResultSet rs = stm.executeQuery(sql)){

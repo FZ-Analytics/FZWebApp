@@ -22,9 +22,9 @@ public class LoadBranchVehi  implements BusinessLogic {
     @Override
     public void run(HttpServletRequest request, HttpServletResponse response
             , PageContext pc) throws Exception {
-        Branch br = new Branch();
+        String br = (String) pc.getSession().getAttribute("WorkplaceID");
         VehicleAttrDB lb = new VehicleAttrDB();
-        List<Branch> lBr = lb.getBranch();
+        List<Branch> lBr = lb.getBranch(br);
         request.setAttribute("ListBranch", lBr);
     }
     

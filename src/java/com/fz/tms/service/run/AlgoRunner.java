@@ -984,8 +984,10 @@ public class AlgoRunner implements BusinessLogic {
                 //cek hari buka                
                 int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
                 //System.out.println(dayOfWeek);
-                if(pl.get("DO_Number").equals("8020089252")){
-                    System.out.println(rdd);
+                if(pl.get("DO_Number").equals("8020109240")){
+                    //System.out.println(pl.get("Customer_ID"));
+                    //System.out.println(pl.get("DayWinEnd"));
+                    //System.out.println(asd.get(a).get("DayWinEnd"));
                     String g = edt;
                     //System.out.println(dayOfWeek + "()" + Integer.parseInt(asd.get(a).get("DayWinStart")));
                     //System.out.println(pl.get("5820002148"));
@@ -994,7 +996,7 @@ public class AlgoRunner implements BusinessLogic {
                 if(dayOfWeek >= Integer.parseInt(asd.get(a).get("DayWinStart"))
                         && dayOfWeek <= Integer.parseInt(asd.get(a).get("DayWinEnd"))){
                     if(Integer.parseInt(asd.get(a).get("DayWinEnd")) == 6){
-                        //System.out.println(asd.get(a).get("DayWinEnd"));
+                        System.out.println(pl.get("Customer_ID") +" : "+ pl.get("DayWinEnd"));
                     }
                     
                     if(dDeliv.compareTo(rdd) <= 7){

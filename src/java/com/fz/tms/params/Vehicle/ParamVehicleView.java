@@ -27,7 +27,7 @@ public class ParamVehicleView implements BusinessLogic {
     ) throws Exception {
         
         VehicleAttrDB lb = new VehicleAttrDB();
-        
+        String br = (String) pc.getSession().getAttribute("WorkplaceID");
         VehicleAttrDB dao = new VehicleAttrDB();
         String branchId = FZUtil.getHttpParam(request, "branchId");
         String flag = FZUtil.getHttpParam(request, "flag");
@@ -37,8 +37,7 @@ public class ParamVehicleView implements BusinessLogic {
             if(flag.equalsIgnoreCase("view")){
                 String sr = dao.isVehicle(branchId);
                 if(sr.equalsIgnoreCase("OK")){
-
-                    List<Branch> lBr = lb.getBranch();  
+                    List<Branch> lBr = lb.getBranch(br);  
                     if(ar.size() > 0){        
                         List<Vehicle> st = lb.getDriver(branchId, "");
                         
@@ -54,7 +53,7 @@ public class ParamVehicleView implements BusinessLogic {
                             //.forward(pc.getRequest(), pc.getResponse());
                 }
             }else if(flag.equalsIgnoreCase("insert")){
-                List<Branch> lBr = lb.getBranch();  
+                List<Branch> lBr = lb.getBranch(br);  
                 if(ar.size() > 0){    
                     List<Vehicle> st = lb.getDriver(branchId, "");
                     
