@@ -42,7 +42,7 @@ public class UpdateCostDistGoogleApi {
                 log.info("------- Process Start ----------------------");
                 setUpdateCostDistGoogleApi("TRUE");
                 log.info("------- Process Get Data Customer Start ----------------------");
-                px = getCustCombi(branch, sent);
+                px = getCustCombination(branch, sent);
                 log.info("------- Process Get Data Customer End ----------------------");
                 //System.out.println(px.get(0).toString());
                 log.info("------- Process Get Data Google Start ----------------------");
@@ -407,221 +407,35 @@ public class UpdateCostDistGoogleApi {
         return cust;
     }
     
-    public List<HashMap<String, String>> getCustCombi(String branch, int sent) throws Exception{
+    public List<HashMap<String, String>> getCustCombination(String branch, int sent) throws Exception{
         List<HashMap<String, String>> px = new ArrayList<HashMap<String, String>>();
         HashMap<String, String> py = new HashMap<String, String>();
-
-        String str = "ERROR";
-        int x = 0;
-        while(x == 0){
-            String sql = "DECLARE @BrId VARCHAR(5)= '"+branch+"';\n" +
-                    "\n" +
-                    "DECLARE @tcust AS TABLE\n" +
-                    "	(\n" +
-                    "		cust VARCHAR(100) NOT NULL,\n" +
-                    "		long VARCHAR(100) NOT NULL,\n" +
-                    "		lat VARCHAR(100) NOT NULL\n" +
-                    "	);\n" +
-                    "\n" +
-                    "DECLARE @zcust AS TABLE\n" +
-                    "	(\n" +
-                    "		cust1 VARCHAR(100) NOT NULL,\n" +
-                    "		long1 VARCHAR(100) NOT NULL,\n" +
-                    "		lat1 VARCHAR(100) NOT NULL,\n" +
-                    "		cust2 VARCHAR(100) NOT NULL,\n" +
-                    "		long2 VARCHAR(100) NOT NULL,\n" +
-                    "		lat2 VARCHAR(100) NOT NULL\n" +
-                    "	);\n" +
-                    "\n" +
-                    "DECLARE @ycust AS TABLE\n" +
-                    "	(\n" +
-                    "		cust1 VARCHAR(100) NOT NULL,\n" +
-                    "		long1 VARCHAR(100) NOT NULL,\n" +
-                    "		lat1 VARCHAR(100) NOT NULL,\n" +
-                    "		cust2 VARCHAR(100) NOT NULL,\n" +
-                    "		long2 VARCHAR(100) NOT NULL,\n" +
-                    "		lat2 VARCHAR(100) NOT NULL\n" +
-                    "	);\n" +
-                    "\n" +
-                    "--ambil TMS_ShipmentPlan + TMS_CustLongLat\n" +
-                    " INSERT\n" +
-                    "	INTO\n" +
-                    "		@tCust SELECT\n" +
-                    "			DISTINCT sp.Customer_ID,\n" +
-                    "			cl.Long,\n" +
-                    "			cl.Lat\n" +
-                    "		FROM\n" +
-                    "			BOSNET1.dbo.TMS_ShipmentPlan sp\n" +
-                    "		INNER JOIN BOSNET1.dbo.TMS_CustLongLat cl ON\n" +
-                    "			sp.Customer_ID = cl.CustId\n" +
-                    "		WHERE\n" +
-                    "			sp.Plant = @BrId\n" +
-                    "			AND cl.Long IS NOT NULL\n" +
-                    "			AND cl.Lat IS NOT NULL\n" +
-                    "			AND cl.Long NOT IN(\n" +
-                    "				'n/a',\n" +
-                    "				'0'\n" +
-                    "			)\n" +
-                    "			AND cl.Lat NOT IN(\n" +
-                    "				'n/a',\n" +
-                    "				',',\n" +
-                    "				'0'\n" +
-                    "			)\n" +
-                    "			AND cl.Long NOT LIKE('%,%')\n" +
-                    "			AND cl.Lat NOT LIKE('%,%')\n" +
-                    "			AND cl.Long LIKE('106.%')\n" +
-                    "			AND cl.Lat LIKE('-6.%');\n" +
-                    "\n" +
-                    "--cek hasil combinasi (TMS_ShipmentPlan + TMS_CustLongLat) X (TMS_ShipmentPlan + TMS_CustLongLat) dengan TMS_CostDist\n" +
-                    " --select * from BOSNET1.dbo.TMS_CustCombination aq left outer join BOSNET1.dbo.TMS_CostDist aw on aq.cust1 = aw.from1 and aq.cust2 = aw.to1\n" +
-                    " --where aw.from1 is null and aw.to1 is null\n" +
-                    " --select * from BOSNET1.dbo.TMS_CostDist where from1 = '5810000365' and to1 = '5810002824'\n" +
-                    " DELETE\n" +
-                    "FROM\n" +
-                    "	BOSNET1.dbo.TMS_CustCombination;\n" +
-                    "\n" +
-                    "INSERT\n" +
-                    "	INTO\n" +
-                    "		@zcust --TMS_CustCombination \n" +
-                    " SELECT\n" +
-                    "			top 1000 cx.*\n" +
-                    "		FROM\n" +
-                    "			(\n" +
-                    "				SELECT\n" +
-                    "					DISTINCT c1.cust AS cust1,\n" +
-                    "					c1.long AS long1,\n" +
-                    "					c1.lat AS lat1,\n" +
-                    "					c2.cust AS cust2,\n" +
-                    "					c2.long AS long2,\n" +
-                    "					c2.lat AS lat2\n" +
-                    "				FROM\n" +
-                    "					@tCust c1,\n" +
-                    "					@tCust c2\n" +
-                    "				WHERE\n" +
-                    "					c1.cust <> c2.cust\n" +
-                    "			) cx\n" +
-                    "		LEFT OUTER JOIN(\n" +
-                    "				SELECT\n" +
-                    "					DISTINCT lon1,\n" +
-                    "					lat1,\n" +
-                    "					SUBSTRING( from1, 1, 10 ) AS from1,\n" +
-                    "					lon2,\n" +
-                    "					lat2,\n" +
-                    "					SUBSTRING( to1, 1, 10 ) AS to1\n" +
-                    "				FROM\n" +
-                    "					BOSNET1.dbo.TMS_CostDist\n" +
-                    "				WHERE\n" +
-                    "					branch = @BrId\n" +
-                    "			) cy ON\n" +
-                    "			cx.cust1 = cy.from1\n" +
-                    "			AND cx.cust2 = cy.to1\n" +
-                    "		WHERE\n" +
-                    "			cy.from1 IS NULL\n" +
-                    "			AND cy.to1 IS NULL;\n" +
-                    "\n" +
-                    "INSERT\n" +
-                    "	INTO\n" +
-                    "		TMS_CustCombination SELECT\n" +
-                    "			top "+sent+" cust1,\n" +
-                    "			long1,\n" +
-                    "			lat1,\n" +
-                    "			cust2,\n" +
-                    "			long2,\n" +
-                    "			lat2\n" +
-                    "		FROM\n" +
-                    "			(\n" +
-                    "				SELECT\n" +
-                    "					cust1,\n" +
-                    "					long1,\n" +
-                    "					lat1,\n" +
-                    "					cust2,\n" +
-                    "					long2,\n" +
-                    "					lat2,\n" +
-                    "					CONCAT(\n" +
-                    "						cust1,\n" +
-                    "						long1,\n" +
-                    "						lat1,\n" +
-                    "						cust2,\n" +
-                    "						long2,\n" +
-                    "						lat2\n" +
-                    "					) AS cs\n" +
-                    "				FROM\n" +
-                    "					@zcust\n" +
-                    "			) cx\n" +
-                    "		INNER JOIN(\n" +
-                    "				SELECT\n" +
-                    "					cs\n" +
-                    "				FROM\n" +
-                    "					(\n" +
-                    "						SELECT\n" +
-                    "							CONCAT(\n" +
-                    "								cust1,\n" +
-                    "								long1,\n" +
-                    "								lat1,\n" +
-                    "								cust2,\n" +
-                    "								long2,\n" +
-                    "								lat2\n" +
-                    "							) AS cs\n" +
-                    "						FROM\n" +
-                    "							@zcust\n" +
-                    "					) aw\n" +
-                    "				GROUP BY\n" +
-                    "					cs\n" +
-                    "				HAVING\n" +
-                    "					COUNT( cs )= 1\n" +
-                    "			) cy ON\n" +
-                    "			cx.cs = cy.cs";
-            try (Connection con = (new Db()).getConnection("jdbc/fztms");
-                PreparedStatement ps = con.prepareStatement(sql)) {
-
-                //tr = rj.DeleteResultShipment(he);              
-
-                con.setAutoCommit(false);
-                ps.executeUpdate();
-                con.setAutoCommit(true);
-                str = "OK";
-
-                if(str.equalsIgnoreCase("OK")){
-                    px = getCustCombination();
-                    //loop jika source yang ada 0
-                    x = px.size();
-                }
-            }
-        }
-        return px;
-    }
-    
-    public List<HashMap<String, String>> getCustCombination() throws Exception{
-        List<HashMap<String, String>> px = new ArrayList<HashMap<String, String>>();
-        HashMap<String, String> py = new HashMap<String, String>();
-
-        String sql = "SELECT\n" +
-                "	cc.*\n" +
-                "FROM\n" +
-                "	BOSNET1.dbo.TMS_CustCombination cc\n" +
-                "LEFT OUTER JOIN BOSNET1.dbo.TMS_CostDist cd ON\n" +
-                "	cc.cust1 = SUBSTRING( cd.from1, 1, 10 )\n" +
-                "	AND cc.cust2 = SUBSTRING( cd.to1, 1, 10 )\n" +
-                "WHERE\n" +
-                "	cd.from1 IS NULL\n" +
-                "	AND cd.to1 IS NULL\n" +
-                "order by cc.cust1 asc";
+        
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
-            PreparedStatement ps = con.prepareStatement(sql)) {
-            try (ResultSet rs = ps.executeQuery()){
-                while (rs.next()) {
-                    py = new HashMap<String, String>();
-                    py.put("cust1", rs.getString("cust1"));
-                    py.put("long1", rs.getString("long1"));
-                    py.put("lat1", rs.getString("lat1"));
-                    py.put("cust2", rs.getString("cust2"));
-                    py.put("long2", rs.getString("long2"));
-                    py.put("lat2", rs.getString("lat2"));
-                    px.add(py);
-                }
-                //System.out.println("getCustCombi" + "()" + px.size());
+                java.sql.CallableStatement stmt =
+                        con.prepareCall("{call bosnet1.dbo.TMS_UpdateCostDistGoogleApi(?,?)}")) {
+            stmt.setString(1, branch);
+            stmt.setInt(2, sent);
+            //stmt.execute();
+            //ps.setEscapeProcessing(true);
+            //ps.setQueryTimeout(150);
+            //ps.setString(1, "D312");
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                py = new HashMap<String, String>();
+                py.put("cust1", rs.getString("cust1"));
+                py.put("long1", rs.getString("long1"));
+                py.put("lat1", rs.getString("lat1"));
+                py.put("cust2", rs.getString("cust2"));
+                py.put("long2", rs.getString("long2"));
+                py.put("lat2", rs.getString("lat2"));
+                System.out.println(py.toString());
+                px.add(py);
             }
+        }catch (Exception e) {
+            System.out.println(e.getMessage());
         }
+        
         return px;
     }
 }
