@@ -58,6 +58,7 @@ public class popupDetilRunId implements BusinessLogic {
         runID = FZUtil.getHttpParam(request, "runID");
         oriRunID = FZUtil.getHttpParam(request, "oriRunID");
         flag = FZUtil.getHttpParam(request, "flag");
+        branch = FZUtil.getHttpParam(request, "branch");
 
         try {
             List<SummaryVehicle> asd = getSummary(runID);
@@ -250,7 +251,8 @@ public class popupDetilRunId implements BusinessLogic {
                     tamount = tamount.add(BigDecimal.valueOf(Long.valueOf(amount)));
                     sq.DOcount = FZUtil.getRsString(rs, i++, "");
                     tcust = tcust.add(BigDecimal.valueOf(Long.valueOf(sq.DOcount)));
-                    branch = FZUtil.getRsString(rs, i++, "");
+                    //branch = FZUtil.getRsString(rs, i++, "");
+                    i++;
                     String time = FZUtil.getRsString(rs, i++, "");
                     //System.out.println("ttravel " + time + " " +df.format(BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128)));
                     //System.out.println("tservice "+BigDecimal.valueOf(Long.valueOf(time)).divide(BigDecimal.valueOf(60), MathContext.DECIMAL128));

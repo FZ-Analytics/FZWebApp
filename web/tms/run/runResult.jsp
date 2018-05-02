@@ -55,7 +55,7 @@
                     //Some code
                     //alert( $("#runID").text()+"&vCode="+$(this).text() ); 
                     if ($(this).text().length > 0) {
-                        window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text() + "&oriRunID=" + $("#nextRunId").text() + "&flag=runResult", null,
+                        window.open("../Params/PopUp/popupDetilRunId.jsp?runID=" + $("#RunIdClick").text() + "&oriRunID=" + $("#nextRunId").text() + "&flag=runResult" + "&branch=" + $("#branch").text(), null,
                                 "scrollbars=1,resizable=1,height=500,width=850");
                         return true;
                     }
