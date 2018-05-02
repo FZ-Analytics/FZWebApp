@@ -185,7 +185,7 @@ public class AlgoRunner implements BusinessLogic {
                     } 
                     
                     if (!resp.equalsIgnoreCase("OK")){
-                        throw new Exception(); 
+                        throw new Exception(errMsg); 
                     }
                     
                 } else if (reRun.equals("N")) {
@@ -216,7 +216,7 @@ public class AlgoRunner implements BusinessLogic {
                     }
                     
                     if (!resp.equalsIgnoreCase("OK")){
-                        throw new Exception(); 
+                        throw new Exception(errMsg); 
                     }
 
                 }
@@ -1333,6 +1333,7 @@ public class AlgoRunner implements BusinessLogic {
                 }
                 
                 if(keys[j].equals("Long") || keys[j].equals("Lat")){
+                    //System.out.println(py.get("Customer_ID"));          
                     if(py.get("Customer_ID").equalsIgnoreCase("5810003561")){
                         System.out.println(py.get("Customer_ID"));                       
                         
