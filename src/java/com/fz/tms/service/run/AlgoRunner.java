@@ -1349,7 +1349,7 @@ public class AlgoRunner implements BusinessLogic {
                     if(tmp.equalsIgnoreCase("0")){
                         err += "0 ";
                     }
-                    if(keys[j].equals("Long")){
+                    if(keys[j].equals("Long") && !tmp.contains("n/a")){
                         Double start = Double.parseDouble("95.31644");
                         Double end = Double.parseDouble("140.71813");
                         
@@ -1359,7 +1359,7 @@ public class AlgoRunner implements BusinessLogic {
                             err += "Long ";
                         }
                     }
-                    if(keys[j].equals("Lat")){
+                    if(keys[j].equals("Lat") && !tmp.contains("n/a")){
                         Double start = Double.parseDouble("-10.1718");
                         Double end = Double.parseDouble("5.88969");
                         
