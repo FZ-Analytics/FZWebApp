@@ -180,7 +180,8 @@ public class PageTopUtils {
                 "	UpdateTable = '"+dt+"'\n" +
                 "WHERE\n" +
                 "	NIK = '"+NIK+"'\n" +
-                "	AND KEYLogin = '"+KEYLogin+"';\n" +
+                "	AND KEYLogin = '"+KEYLogin+"'\n" +
+                "	AND Status = 1;\n" +
                 "\n" +
                 "UPDATE\n" +
                 "	BOSNET1.dbo.TMS_UserStatus\n" +
@@ -191,7 +192,17 @@ public class PageTopUtils {
                 "		HOUR,\n" +
                 "		UpdateTable,\n" +
                 "		GETDATE()\n" +
-                "	)> 2;";
+                "	)> 2;\n" +
+                "\n" +
+                "DELETE\n" +
+                "FROM\n" +
+                "	BOSNET1.dbo.TMS_UserStatus\n" +
+                "WHERE\n" +
+                "	DATEDIFF(\n" +
+                "		HOUR,\n" +
+                "		UpdateTable,\n" +
+                "		GETDATE()\n" +
+                "	)> 5;";
         try (Connection con = (new Db()).getConnection("jdbc/fztms");
                 PreparedStatement ps = con.prepareStatement(sql)) {
             con.setAutoCommit(false);
