@@ -1,6 +1,6 @@
 USE [BOSNET1]
 GO
-/****** Object:  StoredProcedure [dbo].[TMS_GetCustCombinatiion]    Script Date: 03/05/2018 12:24:10 ******/
+/****** Object:  StoredProcedure [dbo].[TMS_GetCustCombinatiion]    Script Date: 03/05/2018 17:36:20 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -74,7 +74,7 @@ AS
 
   --DELETE FROM BOSNET1.dbo.TMS_CostDistCombination;
   --compare cust combination with TMS_CostDist
-  INSERT INTO @zcust
+  --INSERT INTO @zcust
     SELECT
       cx.*
     FROM @ycust cx
@@ -96,18 +96,14 @@ AS
       AND cx.lat2 = cy.lat2
     WHERE cy.from1 IS NULL
     AND cy.to1 IS NULL;
-  --INSERT INTO BOSNET1.dbo.TMS_CostDistCombination
-  --  SELECT
-  --    *
-  --  FROM @zcust
-  --;
+  
 
-  SELECT
-    cc.*
-  FROM @zcust cc
-  LEFT OUTER JOIN BOSNET1.dbo.TMS_CostDist cd
-    ON cc.cust1 = SUBSTRING(cd.from1, 1, 10)
-    AND cc.cust2 = SUBSTRING(cd.to1, 1, 10)
-  WHERE cd.from1 IS NULL
-  AND cd.to1 IS NULL
-  ORDER BY cc.cust1 ASC
+  --SELECT
+  --  cc.*
+  --FROM @zcust cc
+  --LEFT OUTER JOIN BOSNET1.dbo.TMS_CostDist cd
+  --  ON cc.cust1 = SUBSTRING(cd.from1, 1, 10)
+  --  AND cc.cust2 = SUBSTRING(cd.to1, 1, 10)
+  --WHERE cd.from1 IS NULL
+  --AND cd.to1 IS NULL
+  --ORDER BY cc.cust1 ASC
