@@ -1349,26 +1349,31 @@ public class AlgoRunner implements BusinessLogic {
                     if(tmp.equalsIgnoreCase("0")){
                         err += "0 ";
                     }
-                    if(keys[j].equals("Long") && !tmp.contains("n/a")){
-                        Double start = Double.parseDouble("95.31644");
-                        Double end = Double.parseDouble("140.71813");
-                        
-                        Double lng = Double.parseDouble(tmp);
-                        if ( lng < start
-                                || end < lng ) {
-                            err += "Long ";
+                    try{
+                        if(keys[j].equals("Long")){
+                            Double start = Double.parseDouble("95.31644");
+                            Double end = Double.parseDouble("140.71813");
+
+                            Double lng = Double.parseDouble(tmp);
+                            if ( lng < start
+                                    || end < lng ) {
+                                err += "Long ";
+                            }
                         }
-                    }
-                    if(keys[j].equals("Lat") && !tmp.contains("n/a")){
-                        Double start = Double.parseDouble("-10.1718");
-                        Double end = Double.parseDouble("5.88969");
-                        
-                        Double lat = Double.parseDouble(tmp);
-                        if ( lat < start
-                                || end < lat ) {
-                            err += "Lat ";
+                        if(keys[j].equals("Lat")){
+                            Double start = Double.parseDouble("-10.1718");
+                            Double end = Double.parseDouble("5.88969");
+
+                            Double lat = Double.parseDouble(tmp);
+                            if ( lat < start
+                                    || end < lat ) {
+                                err += "Lat ";
+                            }
                         }
-                    }
+                    }catch(Exception e){
+                        err += "Long ";
+                        err += "Lat ";
+                    }                    
                 }
                 
                 if(tmp.contains("\"")){
