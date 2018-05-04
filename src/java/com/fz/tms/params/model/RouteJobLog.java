@@ -20,7 +20,6 @@ public class RouteJobLog {
     public String arrive = "";
     public String depart = "";
     public String runId = "";
-    public String createDtm = "";
     public String branch = "";
     public String shift = "";
     public String lon = "";

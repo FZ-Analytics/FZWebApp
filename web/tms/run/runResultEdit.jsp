@@ -424,14 +424,14 @@
 //                                custId
 //                                );
                 }
-                document.getElementById("submit").disabled=true;
+                document.getElementById("submit").disabled = true;
                 $("#submit").val('Loading...');
                 var $apiAddress = '../../api/submitEditRouteJob/submitEditRouteJob';
                 var jsonForServer = '{\"table\": \"' + tableArr2 + '\", \"runId\":\"' + $("#RunIdClick").text() + '\", \"oriRunId\":\"' + $("#OriRunID").val() + '\"}';
                 $.post($apiAddress, {json: jsonForServer}).done(function (data) {
                     if (data == 'OK') {
                         console.log("OK");
-                        document.getElementById("submit").disabled=false;
+                        document.getElementById("submit").disabled = false;
                         $("#submit").val('Edit');
                         var win = window.open('runResultEditResult.jsp?runId=' + $('#RunIdClick').text() + '&oriRunId=' + $('#OriRunID').val() + '&dateDeliv=' + $('#dateDeliv').val() + '&branchId=' + $('#branch').text() +
                                 '&shift=' + $('#shift').text() + '&channel=' + $('#channel').text() + '&vehicle=' + $('#vehicles').text());// + '&array=' + tableArr2);
@@ -533,7 +533,11 @@
                     <%} else if (j.arrive.length() == 0 && j.storeName.length() == 0) {%>
                     style="background-color: #e6ffe6"
                     <%}%> >
-                    <td class="fzCell index"><%=j.no%></td>
+                    <td class="fzCell index">
+                        <%if (!j.no.equals("0")) {%>
+                        <%=j.no%>
+                        <%}%>
+                    </td>
                     <td class="vCodeClick" id="vehicleCode" style="color: blue;"><%=j.vehicleCode%></td>
                     <td class="custIDClick" id="custId" style="color: blue;"><%=j.custId%></td>
                     <td class="fzCell"><%=j.arrive%></td>
@@ -559,12 +563,12 @@
                     <td class="fzCell"><%=j.rdd%></td>
                     <td class="fzCell"><%=j.transportCost%></td>
                     <td class="fzCell"><%=j.dist%></td>
-
                     <td class="editCust" onclick="klik(<%=j.custId%>)" style="color: blue;">
                         <%if (j.doNum.length() > 0) {%>
                         edit
                         <%}%>
                     </td>
+
                 </tr>
 
                 <%} // for ProgressRecord %>

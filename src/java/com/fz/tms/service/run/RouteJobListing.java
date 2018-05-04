@@ -398,7 +398,20 @@ public class RouteJobListing implements BusinessLogic {
     public static String getNextRunId(String runId) {
         String[] id = runId.split("_");
         String date = id[0];
-        int time = Integer.parseInt(id[1]) + 1;
+        String time = "";
+        System.out.println("CHAR AT 0: " + id[1].charAt(0));
+        //Jam 10 pagi ke atas
+        if(id[1].charAt(0) != '0') {
+            int waktu = 0;
+            waktu = Integer.parseInt(id[1]) + 1;
+            time = "" + waktu;
+        } 
+        //Sebelum jam 10 pagi
+        else {
+            int waktu = 0;
+            waktu = Integer.parseInt(id[1]) + 1;
+            time = "0" + waktu;
+        }
         return date + "_" + time;
     }
 
