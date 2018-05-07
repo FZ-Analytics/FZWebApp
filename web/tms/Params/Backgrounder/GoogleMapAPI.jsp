@@ -8,84 +8,79 @@
 <%@page import="com.fz.util.FZUtil"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@include file="../../appGlobal/pageTop.jsp"%>
+<%run(new com.fz.tms.params.Backgrounder.GoogleMapAPIController());%>
 <!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>GoogleMapAPI</title>
     </head>
-    <body id="result">   
+    <body onload="calculateDistance()">   
+        <input type="text" id="StringUrlGoogle" name="StringUrlGoogle" value="<%=get("StringUrlGoogle")%>"  readonly="true"><br>
+        
         <%@include file="../appGlobal/bodyTop.jsp"%>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
         <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&key=AIzaSyBOsad8CCGx7acE9H_c-27JVH-qqKzei20"></script>
-        <input id="origin" type="hidden" value="<%=origin%>" />
-        <input id="destinations" type="hidden" value="<%=destinations%>" />
-        <input id="test" />
+        
+        <input type="text" id="result" /><br>
+        <label class="fzLabel" id="txt"></label><br>
         <script>
+            var origin = null;
+            var dest = null;
             function calculateDistance() {
-                var origin = $('#origin').val();
-                var destination = $('#destinations').val();
-                //alert(destination);
-                var dest = destination.split("split");
+                var FullUrl = $('#StringUrlGoogle').val();
+                var urls = FullUrl.split("||");
+                
+                //for (var i = 0; i < urls.length; i++) {
+                    var url = urls[0];
+                    var x = url.indexOf("origins");
+                    var y = url.indexOf("&destinations");
+                    var z = url.indexOf("&departure_time");
+                    
+                    origin = url.substring((x+8), y);
+                    var destination = url.substring((y+14), z);                   
+                    dest = destination.split("|");
+                
+                    serv(origin, dest);
+                //}
+            }
+            
+            function serv(origin, dest) {
                 var service = new google.maps.DistanceMatrixService();
                 service.getDistanceMatrix(
-                        {
-                            origins: [origin],
-                            destinations: dest,
-                            travelMode: google.maps.TravelMode.DRIVING,
-                            unitSystem: google.maps.UnitSystem.IMPERIAL,
-                            avoidHighways: false,
-                            avoidTolls: false
-                        }, callback);
+                {
+                    origins: [origin],
+                    destinations: dest,
+                    travelMode: google.maps.TravelMode.DRIVING,
+                    unitSystem: google.maps.UnitSystem.IMPERIAL,
+                    avoidHighways: false,
+                    avoidTolls: false
+                }, callback);
             }
 
             function callback(response, status) {
-                if (status != google.maps.DistanceMatrixStatus.OK) {
-                    console.log("resend ");
-                    $('#result').html(err);
+                var obj = response;
+                if (status == google.maps.DistanceMatrixStatus.OK) {            
+                    var $apiAddress = '../../../api/GoogleMapAPI/submit';
+                    $('#result').val(JSON.stringify(obj));
+                    var jsonForServer = JSON.stringify(obj);
+                    //$('#txt').text(jsonForServer);
+                    var data = [];
+                    //console.log(JSON.stringify(jsonForServer).length);
+                    //alert(jsonForServer);
+                    $.post($apiAddress, {json: jsonForServer}).done(function (data) {
+                        if(data == 'OK'){
+                            //alert( 'sukses' );
+                            location.reload();
+                        }else{
+                            //alert( data ); 
+                        }
+                    });
                 } else {
-                    var obj = response;
-
-                    $('#result').text(JSON.stringify(obj));
-
-                    /*var origin = response.originAddresses[0];
-                    var destination = response.destinationAddresses[0];
-                    if (response.rows[0].elements[0].status === "ZERO_RESULTS") {
-                        $('#result').html("Better get on a plane. There are no roads between "
-                                + origin + " and " + destination);
-                    } else {
-                        var distance = response.rows[0].elements[0].distance;
-                        var distance_value = distance.value;
-                        var distance_text = distance.text;
-                        var miles = distance_text.substring(0, distance_text.length - 3);
-                        $('#result').html("It is " + miles + " miles from " + origin + " to " + destination);
-                    }*/
+                    console.log("resend " + status);
+                    serv(origin, dest);
                 }
             }            
         </script>
-        <%!            
-            String origin = "";
-            String destinations = "";
-
-            public String run(HttpServletRequest request, HttpServletResponse response,
-                     PageContext pc) throws Exception {
-                String str = "OK";
-
-                origin = FZUtil.getHttpParam(request, "origin");
-                destinations = FZUtil.getHttpParam(request, "destinations");
-                if (origin.length() > 0 && destinations.length() > 0) {
-                    System.out.println(origin + "()" + destinations);
-                    %>
-                        <script>
-                            calculateDistance();
-                        </script>
-                    <%! 
-                }
-                    
-                return "";
-            }
-        %>
-        <%=run(request, response, pageContext)%>
-        
     </body>
 </html>
