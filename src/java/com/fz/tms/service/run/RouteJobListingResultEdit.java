@@ -24,10 +24,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,6 +35,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
     String prevCustId = "";
     String previousCustId = "";
     String prevDepart = "";
+    int breakTime = 0;
     double long1, lat1, long2, lat2;
     boolean b = true;
 
@@ -54,7 +52,6 @@ public class RouteJobListingResultEdit implements BusinessLogic {
 
     @Override
     public void run(HttpServletRequest request, HttpServletResponse response, PageContext pc) throws Exception {
-        long startTime = System.nanoTime();
         oriRunId = FZUtil.getHttpParam(request, "OriRunID");
         runId = FZUtil.getHttpParam(request, "runId");
         branch = FZUtil.getHttpParam(request, "branch");
@@ -98,10 +95,6 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         insertToRouteJob(alRjl, runId);
         insertToPreRouteJob(getListPreRouteJob(oriRunId, runId), runId);
         insertPreRouteVehicle(getListPreRouteVehicle(oriRunId, runId), runId);
-
-        long endTime = System.nanoTime();
-        long totalTime = (endTime - startTime) / 1000000000;
-        System.out.println("TOTAL TIME " + totalTime);
 
         request.setAttribute("listDelivery", alTableData);
         request.setAttribute("branch", branch);
@@ -197,16 +190,19 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                     String prevLat = "";
                     while (rs.next()) {
                         Delivery ld = new Delivery(); //Used in view
-                        /**
-                         * ********************
-                         * Object used in view 
-                         ********************
+                        /*
+                         * Object used in view
                          */
                         ld.no = rs.getString("no");
                         ld.vehicleCode = rs.getString("vehicle_code");
                         ld.custId = rs.getString("customer_id");
-                        ld.arrive = rs.getString("arrive");
-                        ld.depart = rs.getString("depart");
+                        if (hasBreak) {
+                            ld.depart = addTime(rs.getString("depart"), breakTime);
+                            ld.arrive = addTime(rs.getString("arrive"), breakTime);
+                        } else {
+                            ld.depart = rs.getString("depart");
+                            ld.arrive = rs.getString("arrive");
+                        }
                         ld.doNum = rs.getString("DO_Number");
                         ld.serviceTime = rs.getString("serviceTime");
                         ld.storeName = rs.getString("Name1");
@@ -243,29 +239,31 @@ public class RouteJobListingResultEdit implements BusinessLogic {
 
                         //break if depart + 60 minutes is more than 11:30
                         if (hasBreak == false && !ld.depart.equals("") && timeMoreThan(addTime(addTime(ld.arrive, Integer.parseInt(ld.serviceTime)), 60), "11:30")) {
-                            ld.no = "";
-                            ld.vehicleCode = "";
-                            ld.custId = "";
-                            ld.doNum = "";
-                            ld.serviceTime = "0";
-                            ld.storeName = "";
-                            ld.priority = "";
-                            ld.distChannel = "";
-                            ld.street = "";
-                            ld.weight = "";
-                            ld.volume = "";
-                            ld.rdd = "null";
-                            ld.transportCost = 0;
-                            ld.dist = "null";
+                            Delivery ldBreak = new Delivery();
+                            ldBreak.no = "";
+                            ldBreak.vehicleCode = "";
+                            ldBreak.custId = "";
+                            ldBreak.doNum = "";
+                            ldBreak.serviceTime = "0";
+                            ldBreak.storeName = "";
+                            ldBreak.priority = "";
+                            ldBreak.distChannel = "";
+                            ldBreak.street = "";
+                            ldBreak.weight = "";
+                            ldBreak.volume = "";
+                            ldBreak.rdd = "0";
+                            ldBreak.transportCost = 0;
+                            ldBreak.dist = "0";
+
                             hasBreak = true;
+                            breakTime = getBreakTime(getDayByDate(dateDeliv));
+                            alDelivery.add(ldBreak);
                         } else if (ld.depart.equals("")) {
                             hasBreak = false;
                         }
 
-                        /**
-                         * *************************
-                         * Object to be pushed to DB 
-                         **************************
+                        /*
+                         * Object to be pushed to DB
                          */
                         RouteJobLog rjl = new RouteJobLog(); //Used to push to DB
                         if (!prevVehiCode.equals(ld.vehicleCode) && !ld.vehicleCode.equals("NA")) {
@@ -597,22 +595,22 @@ public class RouteJobListingResultEdit implements BusinessLogic {
 //        }
 //    }
 //
-//    public String getDayByDate(String dates) throws ParseException {
-//        String[] dateParse = dates.split("-");
-//
-//        int year = Integer.parseInt(dateParse[0]);
-//        int month = Integer.parseInt(dateParse[1]);
-//        int day = Integer.parseInt(dateParse[2]);
-//
-//        // First convert to Date. This is one of the many ways.
-//        String dateString = String.format("%d-%d-%d", year, month, day);
-//        Date date = new SimpleDateFormat("yyyy-M-d").parse(dateString);
-//
-//        // Then get the day of week from the Date based on specific locale.
-//        String dayOfWeek = new SimpleDateFormat("EEEE", Locale.ENGLISH).format(date);
-//
-//        return dayOfWeek;
-//    }
+    public String getDayByDate(String dates) throws ParseException {
+        String[] dateParse = dates.split("-");
+
+        int year = Integer.parseInt(dateParse[0]);
+        int month = Integer.parseInt(dateParse[1]);
+        int day = Integer.parseInt(dateParse[2]);
+
+        // First convert to Date. This is one of the many ways.
+        String dateString = String.format("%d-%d-%d", year, month, day);
+        Date date = new SimpleDateFormat("yyyy-M-d").parse(dateString);
+
+        // Then get the day of week from the Date based on specific locale.
+        String dayOfWeek = new SimpleDateFormat("EEEE", Locale.ENGLISH).format(date);
+
+        return dayOfWeek;
+    }
 //
 //    public String getVehiStart(String vehiNo) throws Exception {
 //        String startTime = "";
@@ -764,6 +762,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
 //        return longitude + "split" + latitude;
 //    }
 //
+
     public String addTime(String currentTime, double minToAdd) {
         String newTime = "";
         try {
@@ -775,7 +774,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         }
         return newTime;
     }
-//
+
     public boolean timeMoreThan(String currentTime, String comparedTime) {
         boolean moreThan = false;
         try {
@@ -796,29 +795,29 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         }
         return moreThan;
     }
-//
-//    public int getBreakTime(String day) throws Exception {
-//        int breakTime = 0;
-//        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-//            try (Statement stm = con.createStatement()) {
-//                String sql = "";
-//                if (day.equals("Friday")) {
-//                    sql = "SELECT value FROM BOSNET1.dbo.TMS_Params WHERE param = 'fridayBreak'";
-//                } else {
-//                    sql = "SELECT value FROM BOSNET1.dbo.TMS_Params WHERE param = 'defaultBreak'";
-//                }
-//                try (ResultSet rs = stm.executeQuery(sql)) {
-//                    while (rs.next()) {
-//                        breakTime = rs.getInt("value");
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            throw new Exception(e.getMessage());
-//        }
-//        return breakTime;
-//    }
-//
+
+    public int getBreakTime(String day) throws Exception {
+        int breakTime = 0;
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql = "";
+                if (day.equals("Friday")) {
+                    sql = "SELECT value FROM BOSNET1.dbo.TMS_Params WHERE param = 'fridayBreak'";
+                } else {
+                    sql = "SELECT value FROM BOSNET1.dbo.TMS_Params WHERE param = 'defaultBreak'";
+                }
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    while (rs.next()) {
+                        breakTime = rs.getInt("value");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return breakTime;
+    }
+
     public static Timestamp getTimeStamp() throws ParseException {
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(Calendar.getInstance().getTime());
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");

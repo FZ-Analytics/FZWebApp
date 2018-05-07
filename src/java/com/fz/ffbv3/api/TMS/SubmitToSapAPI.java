@@ -8,7 +8,6 @@ package com.fz.ffbv3.api.TMS;
 import com.fz.generic.Db;
 import com.fz.tms.params.model.ResultShipment;
 import com.fz.tms.params.model.RunResultEditResultSubmitToSap;
-import static com.fz.tms.service.run.LoadDelivery.calcMeterDist;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.UnsupportedEncodingException;
@@ -201,6 +200,26 @@ public class SubmitToSapAPI {
         String convertedDate = dateFormat.format(cal.getTime());
 
         return "" + convertedDate;
+    }
+
+    public static double calcMeterDist(double lon1, double lat1, double lon2, double lat2) {
+        double el1 = 0; // was in function param
+        double el2 = 0; // was in function param
+        final int R = 6371; // Radius of the earth
+
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = R * c * 1000; // convert to meters
+
+        double height = el1 - el2;
+
+        distance = Math.pow(distance, 2) + Math.pow(height, 2);
+
+        return Math.sqrt(distance);
     }
 
     public String getVendorId(String v) {

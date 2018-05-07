@@ -110,7 +110,7 @@ public class SubmitEditRouteJob {
             String[] tableArrSplit = decodeContent(content);
 
             getRunIdAndOriRunId(tableArrSplit[tableArrSplit.length - 1]);
-            for (int i = 0; i < tableArrSplit.length-1; i++) {
+            for (int i = 0; i < tableArrSplit.length - 1; i++) {
                 System.out.println(i + tableArrSplit[i]);
                 String str = tableArrSplit[i];
                 String data = str;
@@ -398,6 +398,48 @@ public class SubmitEditRouteJob {
             ret = longlat.replaceAll(",", ".");
         }
         return ret;
+    }
+
+    public int getBreakTime(String day) throws Exception {
+        int breakTime = 0;
+        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+            try (Statement stm = con.createStatement()) {
+                String sql = "";
+                if (day.equals("Friday")) {
+                    sql = "SELECT value FROM BOSNET1.dbo.TMS_Params WHERE param = 'fridayBreak'";
+                } else {
+                    sql = "SELECT value FROM BOSNET1.dbo.TMS_Params WHERE param = 'defaultBreak'";
+                }
+                try (ResultSet rs = stm.executeQuery(sql)) {
+                    while (rs.next()) {
+                        breakTime = rs.getInt("value");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return breakTime;
+    }
+
+    public boolean timeMoreThan(String currentTime, String comparedTime) {
+        boolean moreThan = false;
+        try {
+            String[] currentTimeSplit = currentTime.split(":");
+            String[] comparedTimeSplit = comparedTime.split(":");
+            //Compare hour
+            if (Integer.parseInt(currentTimeSplit[0]) > Integer.parseInt(comparedTimeSplit[0])) {
+                moreThan = true;
+            } //If hour is same than compare minutes
+            else if (Integer.parseInt(currentTimeSplit[0]) == Integer.parseInt(comparedTimeSplit[0])) {
+                if (Integer.parseInt(currentTimeSplit[1]) > Integer.parseInt(comparedTimeSplit[1])) {
+                    moreThan = true;
+                }
+            }
+        } catch (Exception e) {
+
+        }
+        return moreThan;
     }
 
     public String addTime(String currentTime, long minToAdd) {

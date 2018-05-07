@@ -28,16 +28,16 @@
         <%@include file="../appGlobal/bodyTop.jsp"%>
         <%
             url = request.getRequestURL().toString();
-            String str =  url + "?" + request.getQueryString();
-            str = str.replace("http://","");
-            str = str.replace(":","9ETR9");
-            str = str.replace(".","9DOT9");
-            str = str.replace("/","9AK9");
-            str = str.replace("?","9ASK9");
-            str = str.replace("&","9END9");
-            str = str.replace("=","9EQU9");
-            str = str.replace("-","9MIN9");
-            String urls =  url + "?" + request.getQueryString();
+            String str = url + "?" + request.getQueryString();
+            str = str.replace("http://", "");
+            str = str.replace(":", "9ETR9");
+            str = str.replace(".", "9DOT9");
+            str = str.replace("/", "9AK9");
+            str = str.replace("?", "9ASK9");
+            str = str.replace("&", "9END9");
+            str = str.replace("=", "9EQU9");
+            str = str.replace("-", "9MIN9");
+            String urls = url + "?" + request.getQueryString();
         %>
         <link href="../appGlobal/eFreezeTable.css" rel="stylesheet">
         <script src="../appGlobal/eFreezeTable.js"></script>
@@ -115,11 +115,11 @@
                 var data = [];
 
                 $.post($apiAddress, {json: jsonForServer}).done(function (data) {
-                    if(data == 'OK'){
-                        alert( 'sukses' );
+                    if (data == 'OK') {
+                        alert('sukses');
                         //location.reload();
-                    }else{
-                        alert( 'submit error' ); 
+                    } else {
+                        alert('submit error');
                     }
                 });
             }
@@ -193,7 +193,11 @@
                         <%} else if (j.arrive.length() == 0 && j.storeName.length() == 0) {%>
                         style="background-color: #e6ffe6"
                         <%}%> >
-                        <td class="fzCell index"><%=j.no%></td>
+                        <td class="fzCell index">
+                            <%if (!j.no.equals("0")) {%>
+                            <%=j.no%>
+                            <%}%>
+                        </td>
                         <td class="vCodeClick" style="color: blue;"><%=j.vehicleCode%></td>
                         <td class="custIDClick" id="custId" style="color: blue;"><%=j.custId%></td>
                         <td class="fzCell"><%=j.arrive%></td>

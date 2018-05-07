@@ -441,6 +441,8 @@
                         }
                     } else {
                         console.log("ERROR");
+                        document.getElementById("submit").disabled = false;
+                        $("#submit").val('Edit');
                         alert(data);
                     }
                 });
