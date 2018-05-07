@@ -17,6 +17,11 @@
     </head>
     <body onload="calculateDistance()">   
         <input type="text" id="StringUrlGoogle" name="StringUrlGoogle" value="<%=get("StringUrlGoogle")%>"  readonly="true"><br>
+        <input type="text" id="cust" name="cust" value="<%=get("cust")%>"  readonly="true"><br>
+        <input type="text" id="branch" name="branch" value="<%=get("branch")%>"  readonly="true"><br>
+        
+        <input type="text" id="cText" name="cText"readonly="true"><br>
+        <input type="text" id="uText" name="uText" readonly="true"><br>
         
         <%@include file="../appGlobal/bodyTop.jsp"%>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
@@ -27,12 +32,20 @@
         <script>
             var origin = null;
             var dest = null;
+            var url = "0";
+            var cust = null;
             function calculateDistance() {
                 var FullUrl = $('#StringUrlGoogle').val();
                 var urls = FullUrl.split("||");
+                var FullCust = $('#cust').val();
+                var custs = FullCust.split("||");
                 
-                //for (var i = 0; i < urls.length; i++) {
-                    var url = urls[0];
+                for (var i = 0; i < urls.length; i++) {
+                    cust = custs[i];
+                    url = urls[i];
+                    $('#cText').val(cust);
+                    $('#uText').val(url);
+                    //console.log(urls[i]);
                     var x = url.indexOf("origins");
                     var y = url.indexOf("&destinations");
                     var z = url.indexOf("&departure_time");
@@ -42,7 +55,7 @@
                     dest = destination.split("|");
                 
                     serv(origin, dest);
-                //}
+                }
             }
             
             function serv(origin, dest) {
@@ -60,6 +73,12 @@
 
             function callback(response, status) {
                 var obj = response;
+                //var ul = { "url":url };
+                //console.log(url);
+                    
+                obj["url"]=$('#uText').val();
+                obj["cust"]=$('#cText').val();
+                obj["branch"]=$('#branch').val();
                 if (status == google.maps.DistanceMatrixStatus.OK) {            
                     var $apiAddress = '../../../api/GoogleMapAPI/submit';
                     $('#result').val(JSON.stringify(obj));

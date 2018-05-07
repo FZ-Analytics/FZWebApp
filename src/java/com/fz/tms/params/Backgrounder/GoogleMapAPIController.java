@@ -37,8 +37,15 @@ public class GoogleMapAPIController implements BusinessLogic {
 
         String str = "";
         str = finalizeCust(branch, runId, str);
-        System.out.println("com.fz.tms.params.Backgrounder.GoogleMapAPIController.run()");
-        if(str.length() > 0)    request.setAttribute("StringUrlGoogle", str);
+        
+        String[] ary = str.split("&&");
+        if(str.length() > 0){
+            request.setAttribute("StringUrlGoogle", ary[0]);
+            System.out.println("ary[0]()" + ary[0]);
+            request.setAttribute("cust", ary[1]);
+            System.out.println("ary[0]()" + ary[1]);
+            request.setAttribute("branch", branch);
+        }
     }
 
     public String finalizeCust(String branch, String runId, String str) throws Exception {
@@ -225,13 +232,18 @@ public class GoogleMapAPIController implements BusinessLogic {
             x++;
         }
 
+        String str2 = "";
         for(int qw = 0;qw<pz.size();qw++){
-            System.out.println(pz.get(qw).get("link"));
+            //System.out.println(pz.get(qw).get("link"));
+            //System.out.println(pz.get(qw).get("cust"));
             if(!str.equalsIgnoreCase(""))   str += "||";
             str += pz.get(qw).get("link");
+            
+            if(!str2.equalsIgnoreCase(""))   str2 += "||";
+            str2 += pz.get(qw).get("cust");
         }
         
-        System.out.println(str);
+        str += "&&" + str2;
 
         //System.out.println(wCust);
         return str;
