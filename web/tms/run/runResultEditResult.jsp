@@ -195,7 +195,7 @@
                         <%}%> >
                         <td class="fzCell index">
                             <%if (!j.no.equals("0")) {%>
-                            <%=j.no%>
+                                <%=j.no%>
                             <%}%>
                         </td>
                         <td class="vCodeClick" style="color: blue;"><%=j.vehicleCode%></td>
@@ -204,30 +204,60 @@
                         <td class="fzCell"><%=j.depart%></td>                    
                         <td class="fzCell"><%=j.doNum%></td>
                         <td class="fzCell">
-                            <%if (!j.vehicleCode.equals("NA")) {%>
-                            <%=j.serviceTime%>
+                            <%if (!j.vehicleCode.equals("NA")) {
+                                if (!j.serviceTime.equals("0")) {%>
+                                    <%=j.serviceTime%>
+                                <%} else {
+                                    out.print("");
+                                }%>
                             <%} else {
-                                    out.print("0");
-                                }%>  
+                                out.print("0");
+                            }%>  
                         </td>
                         <td class="fzCell">
                             <%if (!j.vehicleCode.equals("NA")) {%>
-                            <a href="<%=j.getMapLink()%>" target="_blank"><%=j.storeName%></a>
+                                <a href="<%=j.getMapLink()%>" target="_blank"><%=j.storeName%></a>
                             <%} else {%>
-                            <%=j.storeName%>
+                                <%=j.storeName%>
                             <%}%>
-                        <td class="fzCell"><%=j.priority%></td>
+                        <td class="fzCell">
+                            <%if (!j.priority.equals("0")) {%>
+                                <%=j.priority%>
+                            <%} else {
+                                out.print("");
+                            }%>
+                        </td>
                         <td class="fzCell"><%=j.distChannel%></td>
                         <td class="fzCell"><%=j.street%></td>
-                        <td class="fzCell"><%=j.weight%></td>
+                        <td class="fzCell">
+                            <%if (!j.weight.equals("0.0")) {%>
+                                <%=j.weight%>
+                            <%} else  {
+                                out.print("");
+                            }%>
+                        </td>
                         <td class="fzCell"><%=j.volume%></td>
-                        <td class="fzCell"><%=j.rdd%></td>
-                        <%if (j.arrive.length() == 0 && j.storeName.length() == 0) {%>
-                        <td class="fzCell">null</td>
-                        <%} else {%>
-                        <td class="fzCell"><%=j.transportCost%></td>
-                        <%}%>
-                        <td class="fzCell"><%=j.dist%></td>
+                        <td class="fzCell">
+                            <%if (j.rdd != null) {%>
+                                <%=j.rdd%>
+                            <%} else {
+                                out.print("");
+                            }%>
+                        </td>
+                        <td class="fzCell">
+                            <%if (!j.custId.equals("")) {%>
+                                <%=j.transportCost%>
+                            <%} else {
+                                out.print("");
+                            }%>
+                        </td>
+                        <td class="fzCell">
+                            <%if (!j.custId.equals("")) {%>
+                                <%=j.dist%>
+                            <%} else {
+                                out.print("");
+                            }%>
+                        </td>
                         <td class="fzCell"><%=j.feasibleAccess%></td>
                         <td class="fzCell"><%=j.feasibleCustomer%></td>
                         <td class="fzCell"><%=j.feasibleTruck%></td>

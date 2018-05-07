@@ -261,16 +261,16 @@ public class LoadDelivery implements BusinessLogic {
                             ldBreak.vehicleCode = "";
                             ldBreak.custId = "";
                             ldBreak.doNum = "";
-                            ldBreak.serviceTime = "0";
+                            ldBreak.serviceTime = "";
                             ldBreak.storeName = "";
                             ldBreak.priority = "";
                             ldBreak.distChannel = "";
                             ldBreak.street = "";
                             ldBreak.weight = "";
                             ldBreak.volume = "";
-                            ldBreak.rdd = "null";
+                            ldBreak.rdd = "";
                             ldBreak.transportCost = 0;
-                            ldBreak.dist = "null";
+                            ldBreak.dist = "";
                             
                             hasBreak = true;
                             breakTime = getBreakTime(getDayByDate(dateDeliv));

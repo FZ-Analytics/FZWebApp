@@ -546,25 +546,55 @@
                     <td class="fzCell"><%=j.depart%></td>                    
                     <td class="fzCell"><%=j.doNum%></td>
                     <td class="fzCell">
-                        <%if (!j.vehicleCode.equals("NA")) {%>
-                        <%=j.serviceTime%>
-                        <%} else {
-                                out.print("0");
-                            }%>  
+                        <%if (!j.vehicleCode.equals("NA")) {
+                            if (!j.serviceTime.equals("0")) {%>
+                                <%=j.serviceTime%>
+                            <%} else {
+                                out.print("");
+                            }
+                        } else {
+                            out.print("0");
+                        }%>  
                     </td>
                     <td class="fzCell">
                         <%if (j.arrive.length() > 0) {%>
-                        <a href="<%=j.getMapLink()%>" target="_blank"><%=j.storeName%></a>
-
-                        <%} else {%><%=j.storeName%><%}%>
-                    <td class="fzCell"><%=j.priority%></td>
+                            <a href="<%=j.getMapLink()%>" target="_blank"><%=j.storeName%></a>
+                        <%} else {%>
+                            <%=j.storeName%>
+                        <%}%>
+                    </td>
+                    <td class="fzCell">
+                        <%if (!j.priority.equals("0")) {%>
+                            <%=j.priority%>
+                        <%} else {
+                            out.print("");
+                        }%>
+                    </td>
                     <td class="fzCell"><%=j.distChannel%></td>
                     <td class="fzCell"><%=j.street%></td>
                     <td class="fzCell"><%=j.weight%></td>
                     <td class="fzCell"><%=j.volume%></td>
-                    <td class="fzCell"><%=j.rdd%></td>
-                    <td class="fzCell"><%=j.transportCost%></td>
-                    <td class="fzCell"><%=j.dist%></td>
+                    <td class="fzCell">
+                        <%if (j.rdd != null) {%>
+                            <%=j.rdd%>
+                        <%} else {
+                            out.print("");
+                        }%>
+                    </td>
+                    <td class="fzCell">
+                        <%if (!j.custId.equals("")) {%>
+                            <%=j.transportCost%>
+                        <%} else {
+                            out.print("");
+                        }%>
+                    </td>
+                    <td class="fzCell">
+                        <%if (!j.custId.equals("")) {%>
+                            <%=j.dist%>
+                        <%} else {
+                            out.print("");
+                        }%>
+                    </td>
                     <td class="editCust" onclick="klik(<%=j.custId%>)" style="color: blue;">
                         <%if (j.doNum.length() > 0) {%>
                         edit
