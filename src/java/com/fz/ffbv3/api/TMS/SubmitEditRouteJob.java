@@ -155,8 +155,12 @@ public class SubmitEditRouteJob {
         String[] runIdArr = arr.split(",");
         String[] runIdSplit = runIdArr[1].split(":");
         String[] oriRunIdSplit = runIdArr[2].split(":");
+        String[] branchSplit = runIdArr[3].split(":");
+        String[] shiftSplit = runIdArr[4].split(":");
         runId = runIdSplit[1].replaceAll("\"", "");
         oriRunId = oriRunIdSplit[1].replaceAll("\"", "").replace("}", "");
+        branch = branchSplit[1].replaceAll("\"", "");
+        shift = shiftSplit[1].replaceAll("\"", "").replace("}", "");
     }
 
     public void setObjectValue(String no, String vNo, String custId, String depart) throws Exception {

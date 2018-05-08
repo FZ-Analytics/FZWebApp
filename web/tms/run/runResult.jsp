@@ -12,6 +12,9 @@
         <style>
             tr { border-bottom: 2px solid lightgray;
             }
+            .hover:hover {
+               cursor: pointer; 
+            }
         </style>
         <%@include file="../appGlobal/bodyTop.jsp"%>
         <%
@@ -222,8 +225,8 @@
             }
         </script>
         <h4>Routing Result 
-            <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span>
-            <span class="glyphicon glyphicon-list-alt" aria-hidden="true" onclick="saveHistory()"></span>
+            <span class="glyphicon glyphicon-refresh hover" aria-hidden="true" onclick="location.reload();"></span>
+            <span class="glyphicon glyphicon-list-alt hover" aria-hidden="true" onclick="saveHistory()"></span>
         </h4>
 
         <label class="fzInput" id="nextRunId" hidden="true"><%=get("nextRunId")%></label>
@@ -250,13 +253,13 @@
 
         <br>
         <label class="fzLabel">RunID:</label> 
-        <label class="fzLabel" id="RunIdClick" style="color: blue;"><%=get("runID")%></label> 
+        <label class="fzLabel hover" id="RunIdClick" style="color: blue;"><%=get("runID")%></label> 
 
         <br>
-        <label class="fzLabel" id="mapAll" style="color: blue;">Map</label> 
-        <label class="fzLabel" id="Vehicle" style="color: blue;" onclick="Vklik();">Vehicle</label>
-        <label class="fzLabel" id="reRun" style="color: blue;">Re-Routing</label>
-        <label class="fzLabel" id="test" style="color: blue;" onclick="fnExcelReport()">Convert Excel</label>
+        <label class="fzLabel hover" id="mapAll" style="color: blue;">Map</label> 
+        <label class="fzLabel hover" id="Vehicle" style="color: blue;" onclick="Vklik();">Vehicle</label>
+        <label class="fzLabel hover" id="reRun" style="color: blue;">Re-Routing</label>
+        <label class="fzLabel hover" id="test" style="color: blue;" onclick="fnExcelReport()">Convert Excel</label>
 
         <input id="clickMe" class="btn fzButton" type="button" value="Edit Route Manually" onclick="openEditRoutePage();" />
         
@@ -297,8 +300,8 @@
                     style="background-color: #ffe6e6"
                     <%}%> >
                     <td class="fzCell"><%=j.no%></td>
-                    <td class="vCodeClick" style="color: blue;"><%=j.vehicleCode%></td>
-                    <td class="custIDClick" style="color: blue;"><%=j.custID%></td>
+                    <td class="vCodeClick hover" style="color: blue;"><%=j.vehicleCode%></td>
+                    <td class="custIDClick hover" style="color: blue;"><%=j.custID%></td>
                     <td class="fzCell"><%=j.arrive%></td>
                     <td class="fzCell"><%=j.depart%></td>                    
                     <td class="fzCell"><%=j.DONum%></td>
@@ -319,7 +322,7 @@
                         <%if (j.send != null && (j.send.equalsIgnoreCase("OK") || j.send.equalsIgnoreCase("DELL"))) {%>
                         onclick="sendSAP('<%=j.vehicleCode%>','<%=j.send%>')" style="color: green;"
                         <%}%> ><%=j.send%></td>-->
-                    <td class="editCust" onclick="klik(<%=j.custID%>)" style="color: blue;"><%=j.edit%></td>
+                    <td class="editCust hover" onclick="klik(<%=j.custID%>)" style="color: blue;"><%=j.edit%></td>
                 </tr>
 
                 <%} // for ProgressRecord %>

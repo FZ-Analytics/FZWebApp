@@ -11,6 +11,11 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <style>
+            .hover:hover {
+               cursor: pointer; 
+            }
+        </style>
     </head>
     <body>
         <div style="width: 100%; height: 700px;">
@@ -32,8 +37,8 @@
                 <%=get("errMsg")%>
             </div>
             <h4>Customer Editor 
-                <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span>
-                <span class="glyphicon glyphicon-list-alt" aria-hidden="true" onclick="saveHistory()"></span>
+                <span class="glyphicon glyphicon-refresh hover" aria-hidden="true" onclick="location.reload();"></span>
+                <span class="glyphicon glyphicon-list-alt hover" aria-hidden="true" onclick="saveHistory()"></span>
             </h4>
 
             <input type="hidden" value="<%=str%>" id="urls"/>
@@ -66,8 +71,8 @@
             <label class="fzLabel" id="channel"><%=get("channel")%></label> 
 
             <br>
-            <label class="fzLabel" id="re_Run" style="color: blue;">Routing</label>
-            <label class="fzLabel" id="Vvehicle" style="color: blue;" onclick="Vklik();">Vehicle</label>
+            <label class="fzLabel hover" id="re_Run" style="color: blue;">Routing</label>
+            <label class="fzLabel hover" id="Vvehicle" style="color: blue;" onclick="Vklik();">Vehicle</label>
             <%--<input id="clickMe" class="btn fzButton" type="button" value="Manual Route" onclick="openManualRoutePage();" />--%>
 
             <br><br>
@@ -105,10 +110,10 @@
                         <td class="fzCell" ><%=j.deliv_end%></td>
                         <td class="fzCell" ><%=j.vehicle_type_list%></td>
                         <td class="fzCell" ><%=j.isInc%></td>
-                        <td class="fzCell" onclick="klik('<%=j.customer_id%>')" >
+                        <td class="fzCell hover" onclick="klik('<%=j.customer_id%>')" >
                             <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                         </td>
-                        <td class="fzCell" onclick="exclude('<%=j.customer_id%>','<%=j.do_number%>')">
+                        <td class="fzCell hover" onclick="exclude('<%=j.customer_id%>','<%=j.do_number%>')">
                             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                         </td>
                     </tr>

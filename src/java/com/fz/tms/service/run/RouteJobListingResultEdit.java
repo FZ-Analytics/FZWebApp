@@ -251,7 +251,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                             ldBreak.street = "";
                             ldBreak.weight = "";
                             ldBreak.volume = "";
-                            ldBreak.rdd = "0";
+                            ldBreak.rdd = null;
                             ldBreak.transportCost = 0;
                             ldBreak.dist = "0";
 

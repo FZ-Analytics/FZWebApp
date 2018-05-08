@@ -16,6 +16,10 @@
     <body>
         <%@include file="../appGlobal/bodyTop.jsp"%>
         <style>
+            .hover:hover {
+               cursor: pointer; 
+            }
+
             .lds-ellipsis {
                 display: inline-block;
                 position: relative;
@@ -104,7 +108,7 @@
         </script>
         <img src="../img/ffbtoplogo.png">
         <br>
-        <h4>Summary <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h4>
+        <h4>Summary <span class="glyphicon glyphicon-refresh hover" aria-hidden="true" onclick="location.reload();"></span></h4>
         
         <div id="loader" style="text-align: center;">
             <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>

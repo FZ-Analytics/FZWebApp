@@ -7,6 +7,11 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Runs Progress</title>
+        <style>
+            .hover:hover {
+               cursor: pointer; 
+            }
+        </style>
     </head>
     <body>
         <%@include file="../appGlobal/bodyTop.jsp"%>
@@ -23,7 +28,7 @@
                 */
             });
         </script>
-        <h3>Runs <span class="glyphicon glyphicon-refresh" aria-hidden="true" onclick="location.reload();"></span></h3>
+        <h3>Runs <span class="glyphicon glyphicon-refresh hover" aria-hidden="true" onclick="location.reload();"></span></h3>
         
         <input class="fzInput" id="runId" 
                name="runId" value="<%=get("runId")%>" hidden="true"/>
