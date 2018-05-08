@@ -171,19 +171,19 @@
                     <tr style="background-color:orange">
                         <th width="100px" class="fzCol center">No.</th>
                         <th width="100px" class="fzCol center">Truck</th>
-                        <th width="100px" class="fzCol center">CustID</th>
+                        <th width="100px" class="fzCol center">Cust. ID</th>
                         <th width="100px" class="fzCol center">Arrv</th>
                         <th width="100px" class="fzCol center">Depart</th>
                         <th width="100px" class="fzCol center">DO Count</th>
-                        <th width="100px" class="fzCol center">Srvc Time</th>
+                        <th width="100px" class="fzCol center">Serv. Time</th>
                         <th width="100px" class="fzCol center">Name</th>
-                        <th width="100px" class="fzCol center">Priority</th>
-                        <th width="100px" class="fzCol center">Dist Chl</th>
+                        <th width="100px" class="fzCol center">Prty</th>
+                        <th width="100px" class="fzCol center">Dist. Chl</th>
                         <th width="100px" class="fzCol center">Street</th>
                         <th width="100px" class="fzCol center">Weight</th>
                         <th width="100px" class="fzCol center">Volume</th>
                         <th width="100px" class="fzCol center">RDD</th>
-                        <th width="100px" class="fzCol center">Trans. Cost</th>
+                        <th width="100px" class="fzCol center">Cost</th>
                         <th width="100px" class="fzCol center">Dist</th>
                         <th width="100px" class="fzCol center">Access Feas.</th>
                         <th width="100px" class="fzCol center">Cust. Feas.</th>
