@@ -325,7 +325,7 @@
                         <%if (j.send != null && (j.send.equalsIgnoreCase("OK") || j.send.equalsIgnoreCase("DELL"))) {%>
                         onclick="sendSAP('<%=j.vehicleCode%>','<%=j.send%>')" style="color: green;"
                         <%}%> ><%=j.send%></td>-->
-                    <td class="editCust hover" onclick="klik(<%=j.custID%>)" style="color: blue;"><%=j.edit%></td>
+                    <td class="editCust hover center" onclick="klik(<%=j.custID%>)" style="color: blue;"><%=j.edit%></td>
                 </tr>
 
                 <%} // for ProgressRecord %>
