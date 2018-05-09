@@ -48,8 +48,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
 
     boolean hasBreak = false;
 
-    double speedTruck, trafficFactor;
-
+//    double speedTruck, trafficFactor;
     @Override
     public void run(HttpServletRequest request, HttpServletResponse response, PageContext pc) throws Exception {
         oriRunId = FZUtil.getHttpParam(request, "OriRunID");
@@ -62,9 +61,9 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         String tableArr = FZUtil.getHttpParam(request, "tableArr");
 
         //String[] tableArrSplit = tableArr(oriRunId).split("split");
-        ArrayList<Double> alParam = getParam();
-        speedTruck = alParam.get(0);
-        trafficFactor = alParam.get(1);
+//        ArrayList<Double> alParam = getParam();
+//        speedTruck = alParam.get(0);
+//        trafficFactor = alParam.get(1);
 //        for (int i = 0; i < tableArrSplit.length; i++) {
 //            String str = tableArrSplit[i];
 //            String data = str;
@@ -226,6 +225,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                         ld.rdd = rs.getString("Request_Delivery_Date");
                         ld.transportCost = rs.getInt("TransportCost");
                         ld.dist = "" + Math.round((rs.getDouble("Dist") / 1000) * 10) / 10.0;
+                        ld.isOkay = isOkay(ld.doNum, runId);
 
                         alDelivery.add(ld);
 
@@ -796,6 +796,89 @@ public class RouteJobListingResultEdit implements BusinessLogic {
         return moreThan;
     }
 
+    public boolean isOkay(String doNum, String runId) throws Exception {
+        boolean isOkay = true;
+        String errorStatus = "";
+        String[] doNumSplit = doNum.split(";");
+        for (int i = 0; i < doNumSplit.length; i++) {
+            try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+                try (Statement stm = con.createStatement()) {
+                    String sql = "";
+                    sql = "SELECT\n"
+                            + "	prj.DO_Number do,\n"
+                            + "	table1.sp,\n"
+                            + "	table1.ss,\n"
+                            + "	table1.rs\n"
+                            + "FROM\n"
+                            + "	[BOSNET1].[dbo].[TMS_PreRouteJob] prj\n"
+                            + "FULL JOIN(\n"
+                            + "	SELECT\n"
+                            + "		sp.DO_Number sp,\n"
+                            + "		ss.Delivery_Number ss,\n"
+                            + "		rs.Delivery_Number rs\n"
+                            + "	FROM\n"
+                            + "		[BOSNET1].[dbo].[TMS_ShipmentPlan] sp\n"
+                            + "	LEFT JOIN(\n"
+                            + "		SELECT\n"
+                            + "			ss.Delivery_Number\n"
+                            + "		FROM \n"
+                            + "			[BOSNET1].[dbo].[TMS_Status_Shipment] ss\n"
+                            + "		WHERE\n"
+                            + "			ss.Delivery_Number = '"+doNumSplit[i]+"'\n"
+                            + "	) ss ON ss.Delivery_Number = sp.DO_Number\n"
+                            + "	LEFT JOIN(\n"
+                            + "		SELECT\n"
+                            + "			rs.Delivery_Number\n"
+                            + "		FROM \n"
+                            + "			[BOSNET1].[dbo].[TMS_Result_Shipment] rs\n"
+                            + "		WHERE\n"
+                            + "			rs.Delivery_Number = '"+doNumSplit[i]+"'\n"
+                            + "	) rs ON rs.Delivery_Number = sp.DO_Number\n"
+                            + "	WHERE\n"
+                            + "		sp.DO_Number = '"+doNumSplit[i]+"'\n"
+                            + "		AND (sp.Already_Shipment <> 'Y'\n"
+                            + "		AND sp.Batch <> 'NULL'\n"
+                            + "		AND sp.NotUsed_Flag is NULL\n"
+                            + "		AND sp.Incoterm = 'FCO'\n"
+                            + "		AND(\n"
+                            + "			sp.Order_Type = 'ZDCO' OR sp.Order_Type = 'ZDTO'\n"
+                            + "		)\n"
+                            + "		AND sp.create_date >= DATEADD (DAY, - 7, GETDATE()))\n"
+                            + ") table1 ON table1.sp = prj.DO_Number\n"
+                            + "WHERE \n"
+                            + "	prj.DO_Number = '"+doNumSplit[i]+"'\n"
+                            + "	AND prj.runID = '20180508_175214187'\n"
+                            + "	AND prj.Is_Edit = 'edit'";
+                    try (ResultSet rs = stm.executeQuery(sql)) {
+                        while (rs.next()) {
+                            if (rs.getString("sp") == null) {
+                                errorStatus = "sp";
+                                isOkay = false;
+                                System.out.println(doNumSplit[i] + " " + isOkay);
+                                break;
+                            }
+                            if (rs.getString("ss") != null) {
+                                errorStatus = "ss";
+                                isOkay = false;
+                                System.out.println(doNumSplit[i] + " " + isOkay);
+                                break;
+                            }
+                            if (rs.getString("rs") != null) {
+                                errorStatus = "rs";
+                                isOkay = false;
+                                System.out.println(doNumSplit[i] + " " + isOkay);
+                                break;
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                throw new Exception(e.getMessage());
+            }
+        }
+        return isOkay;
+    }
+
     public int getBreakTime(String day) throws Exception {
         int breakTime = 0;
         try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
@@ -1015,23 +1098,23 @@ public class RouteJobListingResultEdit implements BusinessLogic {
 //        return volume;
 //    }
 //
-
-    public ArrayList<Double> getParam() throws Exception {
-        ArrayList<Double> alParam = new ArrayList<>();
-        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
-            try (Statement stm = con.createStatement()) {
-                String sql = "SELECT value FROM BOSNET1.dbo.TMS_Params WHERE param = 'SpeedKmPHour' OR param = 'TrafficFactor'";
-                try (ResultSet rs = stm.executeQuery(sql)) {
-                    while (rs.next()) {
-                        alParam.add(rs.getDouble("value")); // Index 0 = speed, index 1 = traffic factor
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        }
-        return alParam;
-    }
+//
+//    public ArrayList<Double> getParam() throws Exception {
+//        ArrayList<Double> alParam = new ArrayList<>();
+//        try (Connection con = (new Db()).getConnection("jdbc/fztms")) {
+//            try (Statement stm = con.createStatement()) {
+//                String sql = "SELECT value FROM BOSNET1.dbo.TMS_Params WHERE param = 'SpeedKmPHour' OR param = 'TrafficFactor'";
+//                try (ResultSet rs = stm.executeQuery(sql)) {
+//                    while (rs.next()) {
+//                        alParam.add(rs.getDouble("value")); // Index 0 = speed, index 1 = traffic factor
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            throw new Exception(e.getMessage());
+//        }
+//        return alParam;
+//    }
 
     public void insertPreRouteVehicle(ArrayList<PreRouteVehicleLog> arlist, String runId) throws Exception {
         int rowNum = 0;
