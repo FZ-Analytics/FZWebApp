@@ -847,7 +847,7 @@ public class RouteJobListingResultEdit implements BusinessLogic {
                             + ") table1 ON table1.sp = prj.DO_Number\n"
                             + "WHERE \n"
                             + "	prj.DO_Number = '"+doNumSplit[i]+"'\n"
-                            + "	AND prj.runID = '20180508_175214187'\n"
+                            + "	AND prj.runID = '"+runId+"'\n"
                             + "	AND prj.Is_Edit = 'edit'";
                     try (ResultSet rs = stm.executeQuery(sql)) {
                         while (rs.next()) {

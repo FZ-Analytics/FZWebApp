@@ -7,6 +7,7 @@ package com.fz.tms.params.service;
 
 import com.fz.generic.Db;
 import com.fz.tms.params.model.OptionModel;
+import com.fz.tms.params.model.PopUpEditCustBfror;
 import com.fz.tms.params.model.PreRouteJobSubmitCustomer;
 import com.fz.util.FZUtil;
 import java.sql.Connection;
@@ -117,6 +118,34 @@ public class PreRouteJobDB {
             
              con.setAutoCommit(true);
              tr = "OK";
+        }
+        return tr;
+    }
+    
+    public static String submitEditDoIncExc(String runId, String excInc, String custId, String doNum) throws Exception {
+        String tr = "ERROR";
+
+        String sql = "update\n"
+                + "	bosnet1.dbo.TMS_PreRouteJob\n"
+                + " set\n"
+                + "	Is_Exclude = '" + excInc + "',\n"
+                + "	UpdatevDate = cast(FORMAT(getdate(),'yyyy-MM-dd hh-mm') as varchar)\n"
+                + " where\n"
+                + "	RunId = '" + runId + "'\n"
+                + "	and Customer_ID = '" + custId + "'\n"
+                + "	and DO_Number = '" + doNum + "'\n"
+                + "	and Is_Edit = 'edit'";
+        try (
+            Connection con = (new Db()).getConnection("jdbc/fztms");
+            PreparedStatement psHdr = con.prepareStatement(sql
+                    , Statement.RETURN_GENERATED_KEYS);
+            )  {
+            con.setAutoCommit(false);
+
+            psHdr.executeUpdate();
+            
+            con.setAutoCommit(true);
+            tr = "OK";
         }
         return tr;
     }

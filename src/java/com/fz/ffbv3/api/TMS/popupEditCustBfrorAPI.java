@@ -7,6 +7,7 @@ package com.fz.ffbv3.api.TMS;
 
 import static com.fz.ffbv3.api.TMS.PopupEditCustAPI.decodeContent;
 import com.fz.tms.params.model.OptionModel;
+import com.fz.tms.params.model.PopUpEditCustBfror;
 import com.fz.tms.params.model.PreRouteJobSubmitCustomer;
 import com.fz.tms.params.model.history;
 import com.fz.tms.params.service.Other;
@@ -68,10 +69,22 @@ public class popupEditCustBfrorAPI {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String tr = "";
         try{
-            PreRouteJobSubmitCustomer he = gson.fromJson(content.contains("json") ? 
-                    decodeContent(content) : content, PreRouteJobSubmitCustomer.class);
-            tr =  PreRouteJobDB.submitEditDO(he);              
-        }catch(Exception e){
+            PopUpEditCustBfror he = gson.fromJson(content.contains("json") ? decodeContent(content) : content, PopUpEditCustBfror.class);
+            String runId = he.runId;
+            String excInc = he.excInc;
+            String data = he.data;
+            String[] dataSplit = data.split(";");
+            
+            for(int i = 0; i < dataSplit.length; i++) {
+                String[] doAndCustId = dataSplit[i].split(",");
+                String custId = doAndCustId[0];
+                String doNum = doAndCustId[1];
+                tr =  PreRouteJobDB.submitEditDoIncExc(runId, excInc, custId, doNum);
+                if(tr.equals("ERROR")) {
+                    break;
+                }
+            }             
+        } catch(Exception e){
             System.out.println(e.getMessage());
             tr = "";
         }

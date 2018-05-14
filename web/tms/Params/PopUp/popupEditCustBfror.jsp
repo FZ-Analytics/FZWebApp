@@ -15,6 +15,14 @@
             .hover:hover {
                cursor: pointer; 
             }
+            .center {
+                text-align: center;
+            }
+            #exclude {
+                float: right;
+                font-size: 13px;
+                margin-bottom: 5px;
+            }
         </style>
     </head>
     <body>
@@ -76,45 +84,50 @@
             <%--<input id="clickMe" class="btn fzButton" type="button" value="Manual Route" onclick="openManualRoutePage();" />--%>
 
             <br><br>
-            <table cellpadding="0" cellspacing="0" border="0" class="datatable table table-striped table-bordered">
+            <input id="exclude" class="btn fzButton" type="button" value="Exclude Selected" onclick="exlcudeViaCheckBox();" />
+            <table cellpadding="0" cellspacing="0" border="0" id="table" class="datatable table table-striped table-bordered">
                 <thead>
                     <tr style="background-color:orange">
-                        <th width="100px" class="fzCol">customer id</th>
-                        <th width="100px" class="fzCol">do number</th>
-                        <th width="100px" class="fzCol">long</th>
-                        <th width="100px" class="fzCol">lat</th>
-                        <th width="100px" class="fzCol">customer priority</th>
-                        <th width="100px" class="fzCol">Channel</th>
-                        <th width="100px" class="fzCol">RDD</th>
-                        <th width="100px" class="fzCol">service time</th>
-                        <th width="100px" class="fzCol">deliv start</th>
-                        <th width="100px" class="fzCol">deliv end</th>
-                        <th width="100px" class="fzCol">vehicle type list</th>
-                        <th width="100px" class="fzCol">inc</th>
-                        <th width="100px" class="fzCol">Edit</th>
-                        <th width="100px" class="fzCol">remove</th>
+                        <th width="100px" class="fzCol center">Cust. ID</th>
+                        <th width="100px" class="fzCol center">DO Number</th>
+                        <th width="100px" class="fzCol center">Long</th>
+                        <th width="100px" class="fzCol center">Lat</th>
+                        <th width="100px" class="fzCol center">Priority</th>
+                        <th width="100px" class="fzCol center">Channel</th>
+                        <th width="100px" class="fzCol center">RDD</th>
+                        <th width="100px" class="fzCol center">Serv. Time</th>
+                        <th width="100px" class="fzCol center">Store Open</th>
+                        <th width="100px" class="fzCol center">Store Close</th>
+                        <th width="100px" class="fzCol center">Vehicle Type List</th>
+                        <th width="100px" class="fzCol center">Inc/Exc</th>
+                        <th width="100px" class="fzCol center">Edit</th>
+<!--                        <th width="100px" class="fzCol">remove</th>-->
+                        <th width="100px" class="fzCol">Remove</th>
                     </tr>
                 </thead>
                 <tbody>
                     <%for (Customer j : (List<Customer>) getList("CustList")) {%> 
                     <tr >
-                        <td class="fzCell" ><%=j.customer_id%></td>
-                        <td class="fzCell" ><%=j.do_number%></td>
-                        <td class="fzCell" ><%=j.lng%></td>
-                        <td class="fzCell" ><%=j.lat%></td>
-                        <td class="fzCell" ><%=j.customer_priority%></td>
-                        <td class="fzCell" ><%=j.channel%></td>
-                        <td class="fzCell" ><%=j.rdd%></td>
-                        <td class="fzCell" ><%=j.service_time%></td>
-                        <td class="fzCell" ><%=j.deliv_start%></td>
-                        <td class="fzCell" ><%=j.deliv_end%></td>
-                        <td class="fzCell" ><%=j.vehicle_type_list%></td>
-                        <td class="fzCell" ><%=j.isInc%></td>
-                        <td class="fzCell hover" onclick="klik('<%=j.customer_id%>')" >
+                        <td class="fzCell center custId" ><%=j.customer_id%></td>
+                        <td class="fzCell center doNum" ><%=j.do_number%></td>
+                        <td class="fzCell center" ><%=j.lng%></td>
+                        <td class="fzCell center" ><%=j.lat%></td>
+                        <td class="fzCell center" ><%=j.customer_priority%></td>
+                        <td class="fzCell center" ><%=j.channel%></td>
+                        <td class="fzCell center" ><%=j.rdd%></td>
+                        <td class="fzCell center" ><%=j.service_time%></td>
+                        <td class="fzCell center" ><%=j.deliv_start%></td>
+                        <td class="fzCell center" ><%=j.deliv_end%></td>
+                        <td class="fzCell center" ><%=j.vehicle_type_list%></td>
+                        <td class="fzCell center" ><%=j.isInc%></td>
+                        <td class="fzCell hover center" onclick="klik('<%=j.customer_id%>')" >
                             <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
                         </td>
-                        <td class="fzCell hover" onclick="exclude('<%=j.customer_id%>','<%=j.do_number%>')">
+<!--                        <td class="fzCell hover" onclick="exclude('<%=j.customer_id%>','<%=j.do_number%>')">
                             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                        </td>-->
+                        <td class="fzCell center" >
+                            <input type="checkbox" name="remove" value="remove" id="remove">
                         </td>
                     </tr>
 
@@ -127,6 +140,9 @@
             <script src="../appGlobal/datatables.js"></script>
             <script >
                 $(document).ready(function () {
+                    $('input[type=checkbox]').each(function() { 
+                        this.checked = false; 
+                    }); 
                     $('.datatable').dataTable({
                         "sPaginationType": "bs_normal"
                     });
@@ -155,6 +171,26 @@
                     });
                 });
 
+                function exlcudeViaCheckBox() {
+                    var found = false;
+                    var doNumber = "";
+                    $('#table').find('tr').each(function () {
+                        var row = $(this);
+                        if (row.find('input[type="checkbox"]').is(':checked') ) {
+                            found = true;
+                            doNumber = doNumber.concat(row.find(".custId").html(), ",", row.find(".doNum").html(), ";");
+                        } else {
+                            
+                        }
+                    });
+                    if(!found) {
+                        alert("No data")
+                    } else {
+                        console.log(doNumber);
+                        exclude($("#runId").text(), doNumber);
+                    }
+                }
+
                 function klik(kode) {
                     window.open('popupEditCust.jsp?runId=' + $('#runId').text() + '&custId=' + kode, null,
                             'scrollbars=1,resizable=1,height=500,width=750');
@@ -175,10 +211,9 @@
                     }
                 }
 
-                function exclude(custId, kode) {
+                function exclude(custId, doAndCustId) {
                     var $apiAddress = '../../../api/popupEditCustBfror/excludeDO';
-                    var jsonForServer = '{\"RunId\": \"' + $("#runId").text() + '\",\"Customer_ID\":\"' + 
-                            custId + '\",\"DO_Number\":\"' + kode  + '\",\"ExcInc\":\"exc\"}';
+                    var jsonForServer = '{\"runId\": \"' + custId + '\",\"data\":\"' + doAndCustId  + '\",\"excInc\":\"exc\"}';
                     var data = [];
 
                     $.post($apiAddress, {json: jsonForServer}).done(function (data) {
@@ -189,7 +224,6 @@
                             alert( 'submit error' ); 
                         }
                     });
-
                 }
                 function saveHistory() {
                     var $apiAddress = '../../../api/popupEditCustBfror/savehistory';
